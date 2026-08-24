@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+import 'package:aesthetic_way/core/theme/app_colors.dart';
+import 'package:aesthetic_way/core/theme/app_typography.dart';
+import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
+
+/// Screen 5: Luxury Forgot Password Screen
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _identifierController = TextEditingController(text: '501234567');
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _identifierController.dispose();
+    super.dispose();
+  }
+
+  void _onSendResetCode() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+
+    final input = _identifierController.text.trim();
+    final formattedContact = input.contains('@') ? input : (input.startsWith('+971') ? input : '+971 $input');
+
+    Navigator.push(
+      context,
+      LuxuryPageRoute(
+        page: OtpScreen(
+          purpose: OtpPurpose.passwordReset,
+          targetContact: formattedContact,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = LocaleService();
+    final isDark = AppColors.isDark(context);
+
+    return ListenableBuilder(
+      listenable: loc,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg(context),
+          appBar: AppBar(
+            backgroundColor: AppColors.bg(context),
+            title: Text(
+              loc.tr('forgot_title'),
+              style: AppTypography.screenTitle.copyWith(
+                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              ),
+            ),
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                size: 18,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Lock Reset Icon
+                    Center(
+                      child: Container(
+                        width: 76,
+                        height: 76,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          border: Border.all(
+                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.35 : 0.5),
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.lock_reset_rounded,
+                            size: 36,
+                            color: AppColors.accentChampagne,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Header Info
+                    Center(
+                      child: Text(
+                        loc.tr('forgot_sub'),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.mutedText(context),
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Input Card
+                    LuxuryCard(
+                      padding: const EdgeInsets.all(16),
+                      child: TextFormField(
+                        controller: _identifierController,
+                        style: TextStyle(
+                          color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: loc.tr('identifier_label'),
+                          hintText: loc.tr('identifier_hint'),
+                          labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                          prefixIcon: Icon(Icons.contact_mail_outlined, color: AppColors.mutedText(context), size: 19),
+                          filled: true,
+                          fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                              width: 1.4,
+                            ),
+                          ),
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return loc.tr('val_identifier_required');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Send Reset Code Button
+                    SilverButton(
+                      label: loc.tr('send_reset_code'),
+                      icon: Icons.send_rounded,
+                      isFullWidth: true,
+                      height: 48,
+                      isLoading: _isLoading,
+                      onPressed: _onSendResetCode,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Back to Login Link
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 14,
+                          color: AppColors.mutedText(context),
+                        ),
+                        label: Text(
+                          loc.tr('back_to_login'),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.mutedText(context),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

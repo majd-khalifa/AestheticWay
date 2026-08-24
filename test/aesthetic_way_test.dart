@@ -1,0 +1,397 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:aesthetic_way/core/theme/app_theme.dart';
+import 'package:aesthetic_way/core/widgets/tier_badge.dart';
+import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
+import 'package:aesthetic_way/core/widgets/license_badge.dart';
+import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
+import 'package:aesthetic_way/core/theme/theme_service.dart';
+import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_success_screen.dart';
+import 'package:aesthetic_way/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/register_screen.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/main.dart';
+
+void main() {
+  group('AESTHETIC WAY - Core Design System & Business Logic Tests', () {
+    test('Subscription Tier Ads Priority', () {
+      final mockData = MockDataService();
+      final topAds = mockData.topCarouselAds;
+
+      // Ensure VIP Platinum clinics appear first before Featured
+      expect(topAds.isNotEmpty, isTrue);
+      expect(topAds.first.subscriptionTier, equals(SubscriptionTier.vipPlatinum));
+      expect(topAds.any((c) => c.subscriptionTier == SubscriptionTier.basic), isFalse);
+    });
+
+    test('Practitioner Classification and Licensing Authorities', () {
+      final mockData = MockDataService();
+      final practitioners = mockData.practitioners;
+
+      // Verify all 3 required practitioner types exist
+      expect(practitioners.any((p) => p.type == PractitionerType.doctor), isTrue);
+      expect(practitioners.any((p) => p.type == PractitionerType.nurse), isTrue);
+      expect(practitioners.any((p) => p.type == PractitionerType.licensedProfessional), isTrue);
+    });
+
+    test('ThemeService manages Dark, Light, and System modes', () {
+      final themeService = ThemeService();
+      expect(themeService.themeMode, equals(ThemeMode.dark));
+
+      themeService.setThemeMode(ThemeMode.light);
+      expect(themeService.isLightMode, isTrue);
+      expect(themeService.isDarkMode, isFalse);
+
+      themeService.setThemeMode(ThemeMode.dark);
+      expect(themeService.isDarkMode, isTrue);
+      expect(themeService.isLightMode, isFalse);
+
+      themeService.setThemeMode(ThemeMode.system);
+      expect(themeService.themeMode, equals(ThemeMode.system));
+
+      // Reset to default dark mode
+      themeService.setThemeMode(ThemeMode.dark);
+    });
+
+    testWidgets('TierBadge renders VIP and Featured properly', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                TierBadge(tier: SubscriptionTier.vipPlatinum),
+                TierBadge(tier: SubscriptionTier.featured),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('👑 شريك ماسي VIP'), findsOneWidget);
+      expect(find.text('✨ إعلان مميز'), findsOneWidget);
+    });
+
+    testWidgets('PractitionerBadge renders distinct roles', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                PractitionerBadge(type: PractitionerType.doctor),
+                PractitionerBadge(type: PractitionerType.nurse),
+                PractitionerBadge(type: PractitionerType.licensedProfessional),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('طبيب'), findsOneWidget);
+      expect(find.text('ممرض مرخص'), findsOneWidget);
+      expect(find.text('أخصائي مرخص'), findsOneWidget);
+    });
+
+    testWidgets('LicenseBadge renders compliant verified text without regulator names', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LicenseBadge(licenseNumber: 'DHA-FL-009824'),
+          ),
+        ),
+      );
+
+      expect(find.text('ترخيص معتمد: DHA-FL-009824'), findsOneWidget);
+    });
+
+    testWidgets('AppointmentRequestScreen renders cleanly in Dark and Light modes without raw keys', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final mockData = MockDataService();
+      final clinic = mockData.clinics.first;
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+
+      // Test in Dark Theme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: AppointmentRequestScreen(clinic: clinic),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Assert that raw translation keys DO NOT appear on screen
+      expect(find.text('time_morning'), findsNothing);
+      expect(find.text('time_afternoon'), findsNothing);
+      expect(find.text('time_evening'), findsNothing);
+      expect(find.text('contact_info_title'), findsNothing);
+      expect(find.text('phone_uae'), findsNothing);
+      expect(find.text('notes_opt'), findsNothing);
+
+      // Assert that translated Arabic strings DO appear
+      expect(find.text('طلب موعد استشارة'), findsOneWidget);
+      expect(find.text('صباحاً (9 ص - 1 م)'), findsOneWidget);
+      expect(find.text('ظهراً (1 م - 5 م)'), findsOneWidget);
+      expect(find.text('مساءً (5 م - 9 م)'), findsOneWidget);
+      expect(find.text('بيانات التواصل / المريض'), findsOneWidget);
+      expect(find.text('رقم الهاتف (الإمارات)'), findsOneWidget);
+      expect(find.text('ملاحظات إضافية (اختياري)'), findsOneWidget);
+
+      // Test in Light Theme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+          home: AppointmentRequestScreen(clinic: clinic),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('طلب موعد استشارة'), findsOneWidget);
+      expect(find.text('بيانات التواصل / المريض'), findsOneWidget);
+    });
+
+    testWidgets('Strict Success Screen Copy Compliance', (WidgetTester tester) async {
+      final mockData = MockDataService();
+      final clinic = mockData.clinics.first;
+      final request = AppointmentRequestModel(
+        id: '1',
+        referenceCode: '#REQ-98241',
+        clinicId: clinic.id,
+        clinicNameAr: clinic.nameAr,
+        branchNameAr: clinic.areaAr,
+        serviceNameAr: 'حقن البوتوكس',
+        preferredDate: DateTime(2026, 8, 25),
+        preferredTimeWindow: PreferredTimeWindow.evening,
+        patientFullName: 'مريم أحمد',
+        patientPhone: '+971 50 123 4567',
+        consentAccepted: true,
+        status: AppointmentLeadStatus.sent,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AppointmentSuccessScreen(
+            request: request,
+            clinic: clinic,
+          ),
+        ),
+      );
+
+      // Verify STRICT MANDATORY text
+      expect(find.text('تم إرسال طلبك وستتواصل العيادة معك'), findsOneWidget);
+      expect(find.text('تم إرسال طلبك بنجاح!'), findsOneWidget);
+      expect(find.textContaining('سيقوم فريق الاستقبال في العيادة بالتواصل معك'), findsOneWidget);
+
+      // Verify NEVER use booking confirmed
+      expect(find.text('تم تأكيد الحجز'), findsNothing);
+      expect(find.text('حجز مؤكد'), findsNothing);
+      expect(find.text('دفع'), findsNothing);
+      expect(find.text('سلة'), findsNothing);
+    });
+
+    // ==========================================
+    // PHASE 2: ONBOARDING & AUTHENTICATION TESTS
+    // ==========================================
+    testWidgets('OnboardingScreen renders 3 luxury slides and controls in Dark/Light', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: OnboardingScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Check Slide 1 content
+      expect(find.text('اكتشف نخبة العيادات'), findsOneWidget);
+      expect(find.text('تخطي'), findsOneWidget);
+      expect(find.text('التالي'), findsOneWidget);
+      expect(find.text('المتابعة كزائر'), findsOneWidget);
+
+      // Tap Next to go to Slide 2
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('قارن العروض الحصرية'), findsOneWidget);
+
+      // Tap Next to go to Slide 3
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('تواصل بثقة وسرية'), findsOneWidget);
+      expect(find.text('ابدأ الآن'), findsOneWidget);
+    });
+
+    testWidgets('LoginScreen renders fields, links and handles guest bypass', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const LoginScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('تسجيل الدخول'), findsWidgets);
+      expect(find.text('رقم الهاتف أو البريد الإلكتروني'), findsOneWidget);
+      expect(find.text('كلمة المرور'), findsOneWidget);
+      expect(find.text('نسيت كلمة المرور؟'), findsOneWidget);
+      expect(find.text('إنشاء حساب جديد'), findsOneWidget);
+      expect(find.text('المتابعة كزائر'), findsOneWidget);
+    });
+
+    testWidgets('RegisterScreen renders all input fields and terms checkbox', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const RegisterScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('إنشاء حساب جديد'), findsWidgets);
+      expect(find.text('الاسم الكامل'), findsOneWidget);
+      expect(find.text('رقم الهاتف (الإمارات)'), findsOneWidget);
+      expect(find.text('البريد الإلكتروني'), findsOneWidget);
+      expect(find.text('كلمة المرور'), findsOneWidget);
+      expect(find.text('تأكيد كلمة المرور'), findsOneWidget);
+      expect(find.text('تسجيل الدخول'), findsOneWidget);
+    });
+
+    testWidgets('OtpScreen renders 4 digit boxes, countdown, and demo note', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: OtpScreen(
+            purpose: OtpPurpose.registration,
+            targetContact: '+971 50 123 4567',
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('رمز التحقق (OTP)'), findsOneWidget);
+      expect(find.text('+971 50 123 4567'), findsOneWidget);
+      expect(find.text('تأكيد الرمز والمتابعة'), findsOneWidget);
+      expect(find.textContaining('1234'), findsOneWidget);
+    });
+
+    testWidgets('ForgotPasswordScreen and ResetPasswordScreen render cleanly', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: ForgotPasswordScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('استعادة كلمة المرور'), findsOneWidget);
+      expect(find.text('إرسال رمز الاستعادة'), findsOneWidget);
+      expect(find.text('العودة لتسجيل الدخول'), findsOneWidget);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: ResetPasswordScreen(),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('تعيين كلمة المرور الجديدة'), findsOneWidget);
+      expect(find.text('كلمة المرور الجديدة'), findsOneWidget);
+      expect(find.text('تأكيد كلمة المرور الجديدة'), findsOneWidget);
+      expect(find.text('حفظ كلمة المرور والدخول'), findsOneWidget);
+    });
+
+    testWidgets('App Launches and renders main navigation tabs and official logo', (WidgetTester tester) async {
+      await tester.pumpWidget(const AestheticWayApp(homeScreen: MainNavScreen()));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byType(AppBrandLogo), findsWidgets);
+      expect(find.text('الرئيسية'), findsOneWidget);
+      expect(find.text('العيادات'), findsWidgets);
+      expect(find.text('طلباتي'), findsOneWidget);
+      expect(find.text('حسابي'), findsOneWidget);
+    });
+
+    test('LocaleService toggles Arabic and English correctly', () {
+      final loc = LocaleService();
+      loc.setLanguage(AppLanguage.arabic);
+      expect(loc.isArabic, isTrue);
+      expect(loc.locale.languageCode, equals('ar'));
+      expect(loc.textDirection, equals(TextDirection.rtl));
+      expect(loc.tr('nav_home'), equals('الرئيسية'));
+
+      loc.toggleLanguage();
+      expect(loc.isArabic, isFalse);
+      expect(loc.locale.languageCode, equals('en'));
+      expect(loc.textDirection, equals(TextDirection.ltr));
+      expect(loc.tr('nav_home'), equals('Home'));
+
+      // Reset back to Arabic
+      loc.setLanguage(AppLanguage.arabic);
+    });
+
+    testWidgets('SplashScreen auto-transitions smoothly to Onboarding/Home', (WidgetTester tester) async {
+      await tester.pumpWidget(const AestheticWayApp());
+      expect(find.byType(AppBrandLogo), findsOneWidget);
+
+      // Advance time past splash duration (1600ms) + fade transition (400ms)
+      await tester.pump(const Duration(milliseconds: 1700));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Onboarding or Main navigation should now be active
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+    });
+  });
+}
