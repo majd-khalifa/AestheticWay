@@ -119,6 +119,74 @@ class LocaleService extends ChangeNotifier {
     'val_terms_required': {'ar': 'يرجى الموافقة على شروط الاستخدام والخصوصية', 'en': 'Please agree to Terms of Use & Privacy Policy'},
     'val_otp_invalid': {'ar': 'رمز التحقق غير صحيح، يرجى إدخال 1234', 'en': 'Invalid code. Please enter 1234 for demo'},
 
+    // ==========================================
+    // CLINIC PORTAL (ROLE العيادة)
+    // ==========================================
+    'clinic_portal_title': {'ar': 'لوحة تحكم الشريك والعيادة', 'en': 'Clinic Partner Portal'},
+    'clinic_login_btn': {'ar': '🏢 دخول الشركاء والعيادات', 'en': '🏢 Clinic Partner Login'},
+    'clinic_demo_login': {'ar': '👑 دخول تجريبي: عيادة كايا للجلدية', 'en': '👑 Demo Clinic: Kaya Skin Clinic'},
+    'clinic_nav_dashboard': {'ar': 'الرئيسية', 'en': 'Dashboard'},
+    'clinic_nav_leads': {'ar': 'الطلبات', 'en': 'Leads'},
+    'clinic_nav_offers': {'ar': 'العروض', 'en': 'Offers'},
+    'clinic_nav_profile': {'ar': 'الملف', 'en': 'Profile'},
+
+    'clinic_new_leads_count': {'ar': 'طلبات جديدة', 'en': 'New Leads'},
+    'clinic_today_leads': {'ar': 'طلبات اليوم', 'en': 'Today\'s Leads'},
+    'clinic_total_leads': {'ar': 'إجمالي الطلبات', 'en': 'Total Leads'},
+    'clinic_active_offers_count': {'ar': 'عروض نشطة', 'en': 'Active Offers'},
+    'clinic_sub_tier_label': {'ar': 'باقة الاشتراك الحالية', 'en': 'Subscription Tier'},
+    'clinic_quick_actions': {'ar': 'إجراءات سريعة', 'en': 'Quick Actions'},
+    'clinic_btn_view_new_leads': {'ar': 'عرض الطلبات الجديدة', 'en': 'View New Leads'},
+    'clinic_btn_add_offer': {'ar': 'إضافة عرض جديد', 'en': 'Add New Offer'},
+    'clinic_btn_edit_profile': {'ar': 'تعديل بيانات العيادة', 'en': 'Edit Profile'},
+    'clinic_recent_leads': {'ar': 'أحدث طلبات الاستشارة الواردة', 'en': 'Recent Consultation Leads'},
+
+    'clinic_lead_status_new': {'ar': 'جديد', 'en': 'New'},
+    'clinic_lead_status_contacted': {'ar': 'تم التواصل', 'en': 'Contacted'},
+    'clinic_lead_status_closed': {'ar': 'مكتمل / مغلق', 'en': 'Closed'},
+    'clinic_lead_source': {'ar': 'المصدر: تطبيق AESTHETIC WAY', 'en': 'Source: AESTHETIC WAY App'},
+    'clinic_lead_call': {'ar': 'اتصال بالمريض', 'en': 'Call Patient'},
+    'clinic_lead_whatsapp': {'ar': 'محادثة واتساب', 'en': 'WhatsApp Patient'},
+    'clinic_change_status': {'ar': 'تغيير حالة الطلب', 'en': 'Change Status'},
+    'clinic_internal_notes': {'ar': 'ملاحظات العيادة الداخلية', 'en': 'Internal Clinic Notes'},
+    'clinic_internal_notes_hint': {'ar': 'اكتب ملاحظات داخلية لمتابعة هذا الطلب (مثل: تم الاتصال وتحديد موعد خارجي)...', 'en': 'Write internal tracking notes for this lead...'},
+    'clinic_save_notes': {'ar': 'حفظ الملاحظات', 'en': 'Save Notes'},
+    'clinic_notes_saved': {'ar': 'تم حفظ الملاحظات بنجاح', 'en': 'Notes saved successfully'},
+    'clinic_status_updated': {'ar': 'تم تحديث حالة الطلب بنجاح', 'en': 'Lead status updated successfully'},
+    'clinic_no_leads': {'ar': 'لا توجد طلبات استشارة واردة في هذا القسم', 'en': 'No incoming consultation leads in this section'},
+    'clinic_no_offers': {'ar': 'لا توجد عروض مضافة حالياً', 'en': 'No treatment offers added yet'},
+
+    'clinic_add_offer_title': {'ar': 'إضافة باقة / عرض تجميلي', 'en': 'Add Treatment Offer'},
+    'clinic_edit_offer_title': {'ar': 'تعديل تفاصيل العرض', 'en': 'Edit Offer Details'},
+    'clinic_offer_title_field': {'ar': 'عنوان العرض / الباقة', 'en': 'Offer Title'},
+    'clinic_offer_desc_field': {'ar': 'وصف مختصر للشروط والمزايا', 'en': 'Short Description & Terms'},
+    'clinic_offer_original_price': {'ar': 'السعر الأصلي (د.إ)', 'en': 'Original Price (AED)'},
+    'clinic_offer_discount_price': {'ar': 'سعر العرض المخفض (د.إ)', 'en': 'Offer Price (AED)'},
+    'clinic_offer_validity': {'ar': 'تاريخ انتهاء العرض', 'en': 'Expiry Date Text'},
+    'clinic_offer_active_toggle': {'ar': 'حالة العرض (مفعّل ونشط للعامة)', 'en': 'Offer Status (Active to Public)'},
+    'clinic_offer_save': {'ar': 'حفظ ونشر العرض', 'en': 'Save & Publish Offer'},
+    'clinic_offer_saved_success': {'ar': 'تم حفظ العرض بنجاح في المنصة', 'en': 'Offer saved successfully'},
+
+    'clinic_team_title': {'ar': 'الكادر الطبي والممارسون المعتمدون', 'en': 'Medical Staff & Practitioners'},
+    'clinic_add_practitioner': {'ar': 'إضافة ممارس طبي جديد', 'en': 'Add Practitioner'},
+    'clinic_practitioner_name': {'ar': 'اسم الطبيب / الممارس', 'en': 'Practitioner Name'},
+    'clinic_practitioner_specialty': {'ar': 'التخصص الطبي الدقيق', 'en': 'Specialty'},
+    'clinic_practitioner_saved': {'ar': 'تمت إضافة الممارس بنجاح', 'en': 'Practitioner added successfully'},
+
+    'clinic_services_title': {'ar': 'العلاجات والخدمات المقدمة', 'en': 'Services & Treatments'},
+    'clinic_add_service': {'ar': 'إضافة خدمة علاجية', 'en': 'Add Service'},
+    'clinic_service_name': {'ar': 'اسم الخدمة / الإجراء', 'en': 'Service / Procedure Name'},
+    'clinic_service_category': {'ar': 'تصنيف الخدمة', 'en': 'Service Category'},
+    'clinic_service_price': {'ar': 'السعر المبدئي (د.إ)', 'en': 'Starting Price (AED)'},
+    'clinic_service_saved': {'ar': 'تمت إضافة الخدمة بنجاح', 'en': 'Service added successfully'},
+
+    'clinic_maps_config': {'ar': 'موقع العيادة وربط Google Maps', 'en': 'Google Maps & Location Linking'},
+    'clinic_logout': {'ar': 'تسجيل الخروج من لوحة العيادة', 'en': 'Sign Out of Clinic Portal'},
+    'clinic_disclaimer': {
+      'ar': 'إشعار المنصة: منصة Aesthetic Way هي أداة ربط وتوليد طلبات تواصل (Leads) فقط، ولا تتضمن دفعات مالية للمرضى أو تأكيد حجز نهائي داخل التطبيق.',
+      'en': 'Platform Notice: Aesthetic Way is a discovery and lead-generation connection platform only, and does not handle patient payments or final booking confirmations.'
+    },
+
     // Navigation
     'nav_home': {'ar': 'الرئيسية', 'en': 'Home'},
     'nav_clinics': {'ar': 'العيادات', 'en': 'Clinics'},

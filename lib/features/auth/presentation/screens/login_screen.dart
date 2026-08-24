@@ -10,8 +10,9 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/register_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_main_nav_screen.dart';
 
-/// Screen 2: Luxury Login Screen for Patient Authentication
+/// Screen 2: Luxury Login Screen for Patient Authentication + Clinic Partner Portal Entry
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -71,6 +72,18 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
+        transitionDuration: const Duration(milliseconds: 400),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+
+  void _onClinicPortalLogin() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const ClinicMainNavScreen(),
         transitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -287,7 +300,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
 
                       // Continue as Guest Option
                       Center(
@@ -306,6 +319,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontSize: 12.5,
                             ),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Divider(height: 24),
+
+                      // Clinic Portal Partner Access Button
+                      OutlinedButton.icon(
+                        onPressed: _onClinicPortalLogin,
+                        icon: const Icon(Icons.business_rounded, color: AppColors.accentChampagne, size: 18),
+                        label: Text(
+                          loc.tr('clinic_demo_login'),
+                          style: const TextStyle(
+                            color: AppColors.accentChampagne,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(
+                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.6),
+                            width: 1.0,
+                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                     ],

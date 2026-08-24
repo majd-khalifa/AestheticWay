@@ -105,12 +105,12 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: LicenseBadge(licenseNumber: 'DHA-FL-009824'),
+            body: LicenseBadge(licenseNumber: 'LIC-FL-009824'),
           ),
         ),
       );
 
-      expect(find.text('ترخيص معتمد: DHA-FL-009824'), findsOneWidget);
+      expect(find.text('ترخيص معتمد: LIC-FL-009824'), findsOneWidget);
     });
 
     testWidgets('AppointmentRequestScreen renders cleanly in Dark and Light modes without raw keys', (WidgetTester tester) async {
