@@ -7,6 +7,9 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/utils/contact_launcher.dart';
+import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
+import 'package:aesthetic_way/features/referral/presentation/screens/referral_screen.dart';
 
 /// Screen 25: Patient Profile with Dynamic Theme & Language Switchers and Compliant Privacy Copy
 class ProfileScreen extends StatelessWidget {
@@ -261,12 +264,9 @@ class ProfileScreen extends StatelessWidget {
                             icon: Icons.login_rounded,
                             isFullWidth: true,
                             onPressed: () {
-                              GuestAuthGuard.requireAuth(
+                              Navigator.push(
                                 context,
-                                reasonTitle: loc.tr('login_btn'),
-                                reasonSubtitle: loc.isArabic
-                                    ? 'أدخل بياناتك لتسجيل الدخول ومتابعة طلباتك'
-                                    : 'Enter your details to login and track requests',
+                                LuxuryPageRoute(page: const LoginScreen()),
                               );
                             },
                           ),
@@ -274,6 +274,22 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // Referral & Rewards Tile
+                    _ProfileMenuTile(
+                      icon: Icons.card_giftcard_rounded,
+                      title: loc.tr('referral_nav_title'),
+                      subtitle: loc.isArabic
+                          ? 'ادعُ أصدقاءك واكسب كود خصم 15% على الإجراءات'
+                          : 'Invite friends & earn 15% discount codes',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          LuxuryPageRoute(page: const ReferralScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
 
                     // Theme Switcher Tile
                     _ThemeSwitchTile(loc: loc),
@@ -287,8 +303,8 @@ class ProfileScreen extends StatelessWidget {
                       icon: Icons.security_outlined,
                       title: loc.tr('privacy_terms'),
                       subtitle: loc.isArabic
-                          ? 'منصة Aesthetic Way — رقم الترخيص: [LICENSE_PLACEHOLDER]'
-                          : 'Aesthetic Way Platform — License: [LICENSE_PLACEHOLDER]',
+                          ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
+                          : 'Aesthetic and medical discovery platform in the UAE',
                       onTap: () => _showPrivacyTermsSheet(context, loc),
                     ),
                     const SizedBox(height: 10),
@@ -296,8 +312,8 @@ class ProfileScreen extends StatelessWidget {
                       icon: Icons.headset_mic_outlined,
                       title: loc.tr('support_help'),
                       subtitle: loc.isArabic
-                          ? 'تواصل مع فريق الدعم والكونسيرج الموحد'
-                          : 'Contact Aesthetic Way concierge support',
+                          ? 'تواصل مع فريق خدمة العملاء والدعم'
+                          : 'Contact Aesthetic Way customer support',
                       onTap: () => _showSupportSheet(context, loc),
                     ),
                   ],
@@ -339,18 +355,25 @@ class ProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppColors.accentChampagne.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
                                 ),
-                                child: Text(
-                                  loc.isArabic ? '👑 مستخدم موثق' : '👑 Verified Member',
-                                  style: AppTypography.badge.copyWith(
-                                    color: AppColors.accentChampagne,
-                                    fontSize: 10,
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.verified_outlined, size: 12, color: AppColors.accentChampagne),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      loc.isArabic ? 'مستخدم موثق' : 'Verified Member',
+                                      style: AppTypography.badge.copyWith(
+                                        color: AppColors.accentChampagne,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -386,6 +409,22 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
+                  // Referral & Rewards Tile
+                  _ProfileMenuTile(
+                    icon: Icons.card_giftcard_rounded,
+                    title: loc.tr('referral_nav_title'),
+                    subtitle: loc.isArabic
+                        ? 'ادعُ أصدقاءك واكسب كود خصم 15% على الإجراءات'
+                        : 'Invite friends & earn 15% discount codes',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        LuxuryPageRoute(page: const ReferralScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
                   // Theme Switcher Tile
                   _ThemeSwitchTile(loc: loc),
                   const SizedBox(height: 10),
@@ -398,8 +437,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.security_outlined,
                     title: loc.tr('privacy_terms'),
                     subtitle: loc.isArabic
-                        ? 'منصة Aesthetic Way — رقم الترخيص: [LICENSE_PLACEHOLDER]'
-                        : 'Aesthetic Way Platform — License: [LICENSE_PLACEHOLDER]',
+                        ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
+                        : 'Aesthetic and medical discovery platform in the UAE',
                     onTap: () => _showPrivacyTermsSheet(context, loc),
                   ),
                   const SizedBox(height: 10),
@@ -407,8 +446,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.headset_mic_outlined,
                     title: loc.tr('support_help'),
                     subtitle: loc.isArabic
-                        ? 'تواصل مع فريق الدعم والكونسيرج الموحد'
-                        : 'Contact Aesthetic Way concierge support',
+                        ? 'تواصل مع فريق خدمة العملاء والدعم'
+                        : 'Contact Aesthetic Way customer support',
                     onTap: () => _showSupportSheet(context, loc),
                   ),
                   const SizedBox(height: 20),
@@ -486,19 +525,22 @@ class _ThemeSwitchTile extends StatelessWidget {
               Row(
                 children: [
                   _ThemePill(
-                    label: loc.isArabic ? '🌙 داكن' : '🌙 Dark',
+                    icon: Icons.dark_mode_outlined,
+                    label: loc.isArabic ? 'داكن' : 'Dark',
                     isSelected: currentMode == ThemeMode.dark,
                     onTap: () => themeService.setThemeMode(ThemeMode.dark),
                   ),
                   const SizedBox(width: 8),
                   _ThemePill(
-                    label: loc.isArabic ? '☀️ فاتح فاخر' : '☀️ Light',
+                    icon: Icons.light_mode_outlined,
+                    label: loc.isArabic ? 'فاتح فاخر' : 'Light',
                     isSelected: currentMode == ThemeMode.light,
                     onTap: () => themeService.setThemeMode(ThemeMode.light),
                   ),
                   const SizedBox(width: 8),
                   _ThemePill(
-                    label: loc.isArabic ? '📱 تلقائي' : '📱 System',
+                    icon: Icons.phone_android_rounded,
+                    label: loc.isArabic ? 'تلقائي' : 'System',
                     isSelected: currentMode == ThemeMode.system,
                     onTap: () => themeService.setThemeMode(ThemeMode.system),
                   ),
@@ -513,11 +555,13 @@ class _ThemeSwitchTile extends StatelessWidget {
 }
 
 class _ThemePill extends StatelessWidget {
+  final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _ThemePill({
+    required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -526,6 +570,9 @@ class _ThemePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
+
+    final activeTextColor = isDark ? AppColors.backgroundDeep : Colors.white;
+    final inactiveTextColor = isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary;
 
     return Expanded(
       child: GestureDetector(
@@ -546,17 +593,24 @@ class _ThemePill extends StatelessWidget {
               width: isSelected ? 1.0 : 0.7,
             ),
           ),
-          child: Center(
-            child: Text(
-              label,
-              style: AppTypography.caption.copyWith(
-                color: isSelected
-                    ? (isDark ? AppColors.backgroundDeep : Colors.white)
-                    : (isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary),
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 11.5,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 13,
+                color: isSelected ? activeTextColor : inactiveTextColor,
               ),
-            ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: AppTypography.caption.copyWith(
+                  color: isSelected ? activeTextColor : inactiveTextColor,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 11.5,
+                ),
+              ),
+            ],
           ),
         ),
       ),

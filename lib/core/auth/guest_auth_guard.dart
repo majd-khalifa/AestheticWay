@@ -3,7 +3,9 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../widgets/luxury_card.dart';
 import '../widgets/silver_button.dart';
+import '../widgets/luxury_animations.dart';
 import '../localization/app_locale.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
 
 /// User Authentication State Handler
 class AuthState extends ChangeNotifier {
@@ -377,7 +379,30 @@ class _AuthPromptSheetState extends State<_AuthPromptSheet> {
               onPressed: _onConfirmLogin,
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+              Navigator.of(context).push(
+                LuxuryPageRoute(page: const LoginScreen()),
+              );
+            },
+            icon: const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.accentChampagne),
+            label: Text(
+              loc.tr('open_full_login'),
+              style: const TextStyle(
+                color: AppColors.accentChampagne,
+                fontWeight: FontWeight.w700,
+                fontSize: 12.5,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              side: BorderSide(color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.6), width: 0.85),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(

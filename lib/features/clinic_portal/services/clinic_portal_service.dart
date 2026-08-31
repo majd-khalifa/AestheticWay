@@ -5,6 +5,8 @@ import 'package:aesthetic_way/features/appointment_lead/models/appointment_reque
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
+import 'package:aesthetic_way/features/products/models/product_model.dart';
+import 'package:aesthetic_way/features/articles/models/article_model.dart';
 
 /// Clinic Portal Service managing State & Mock Data for the Logged-in Clinic Partner
 class ClinicPortalService extends ChangeNotifier {
@@ -20,18 +22,24 @@ class ClinicPortalService extends ChangeNotifier {
   final List<OfferModel> _clinicOffers = [];
   final List<PractitionerModel> _clinicPractitioners = [];
   final List<TreatmentModel> _clinicTreatments = [];
+  final List<ProductModel> _clinicProducts = [];
+  final List<ArticleModel> _clinicArticles = [];
 
   ClinicModel get activeClinic => _activeClinic;
   List<AppointmentRequestModel> get clinicLeads => List.unmodifiable(_clinicLeads);
   List<OfferModel> get clinicOffers => List.unmodifiable(_clinicOffers);
   List<PractitionerModel> get clinicPractitioners => List.unmodifiable(_clinicPractitioners);
   List<TreatmentModel> get clinicTreatments => List.unmodifiable(_clinicTreatments);
+  List<ProductModel> get clinicProducts => List.unmodifiable(_clinicProducts);
+  List<ArticleModel> get clinicArticles => List.unmodifiable(_clinicArticles);
 
   int get newLeadsCount => _clinicLeads.where((l) => l.status == AppointmentLeadStatus.sent).length;
   int get contactedLeadsCount => _clinicLeads.where((l) => l.status == AppointmentLeadStatus.contacted).length;
   int get closedLeadsCount => _clinicLeads.where((l) => l.status == AppointmentLeadStatus.closed).length;
   int get totalLeadsCount => _clinicLeads.length;
   int get activeOffersCount => _clinicOffers.length;
+  int get activeProductsCount => _clinicProducts.length;
+  int get activeArticlesCount => _clinicArticles.length;
 
   String getInternalNotes(String leadId) => _internalNotes[leadId] ?? '';
 
@@ -204,6 +212,20 @@ class ClinicPortalService extends ChangeNotifier {
     if (_clinicTreatments.isEmpty && mock.treatments.isNotEmpty) {
       _clinicTreatments.addAll(mock.treatments.take(4));
     }
+
+    // Populate products
+    _clinicProducts.clear();
+    _clinicProducts.addAll(mock.getProductsForClinic(_activeClinic.id));
+    if (_clinicProducts.isEmpty && mock.products.isNotEmpty) {
+      _clinicProducts.addAll(mock.products.take(2));
+    }
+
+    // Populate articles
+    _clinicArticles.clear();
+    _clinicArticles.addAll(mock.getArticlesForClinic(_activeClinic.id));
+    if (_clinicArticles.isEmpty && mock.articles.isNotEmpty) {
+      _clinicArticles.addAll(mock.articles.take(2));
+    }
   }
 
   /// Update the status of a consultation lead
@@ -265,6 +287,56 @@ class ClinicPortalService extends ChangeNotifier {
   /// Add a new treatment / service
   void addTreatment(TreatmentModel treatment) {
     _clinicTreatments.add(treatment);
+    notifyListeners();
+  }
+
+  /// Add a new product
+  void addProduct(ProductModel product) {
+    _clinicProducts.insert(0, product);
+    MockDataService().addProduct(product);
+    notifyListeners();
+  }
+
+  /// Toggle product availability
+  void toggleProductAvailability(String productId) {
+    final idx = _clinicProducts.indexWhere((p) => p.id == productId);
+    if (idx != -1) {
+      final p = _clinicProducts[idx];
+      _clinicProducts[idx] = p.copyWith(isAvailable: !p.isAvailable);
+      MockDataService().toggleProductAvailability(productId);
+      notifyListeners();
+    }
+  }
+
+  /// Delete a product
+  void deleteProduct(String productId) {
+    _clinicProducts.removeWhere((p) => p.id == productId);
+    MockDataService().deleteProduct(productId);
+    notifyListeners();
+  }
+
+  /// Add a new article written by a doctor
+  void addArticle(ArticleModel article) {
+    _clinicArticles.insert(0, article);
+    MockDataService().addArticle(article);
+    notifyListeners();
+  }
+
+  /// Toggle article publish status
+  void toggleArticlePublish(String articleId) {
+    final idx = _clinicArticles.indexWhere((a) => a.id == articleId);
+    if (idx != -1) {
+      final a = _clinicArticles[idx];
+      _clinicArticles[idx] = a.copyWith(isPublished: !a.isPublished);
+      MockDataService().toggleArticlePublish(articleId);
+      notifyListeners();
+    }
+  }
+
+  /// Delete an article
+  void deleteArticle(String articleId) {
+    _clinicArticles.removeWhere((a) => a.id == articleId);
+    MockDataService().deleteArticle(articleId);
     notifyListeners();
   }
 

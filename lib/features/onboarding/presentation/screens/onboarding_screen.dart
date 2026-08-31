@@ -61,19 +61,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final slides = [
       _OnboardingSlideData(
         icon: Icons.domain_rounded,
-        badgeText: loc.isArabic ? 'عيادات نخبوية ومعتمدة' : 'Verified Elite Clinics',
+        imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+        badgeText: loc.isArabic ? 'عيادات معتمدة في الإمارات' : 'Certified UAE Clinics',
         title: loc.tr('onboarding_title_1'),
         description: loc.tr('onboarding_desc_1'),
       ),
       _OnboardingSlideData(
-        icon: Icons.auto_awesome_rounded,
-        badgeText: loc.isArabic ? 'عروض وباقات حصرية' : 'Exclusive Treatment Offers',
+        icon: Icons.medical_services_rounded,
+        imageUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
+        badgeText: loc.isArabic ? 'أطباء وخبراء معتمدون' : 'Licensed Doctors & Experts',
         title: loc.tr('onboarding_title_2'),
         description: loc.tr('onboarding_desc_2'),
       ),
       _OnboardingSlideData(
-        icon: Icons.verified_user_rounded,
-        badgeText: loc.isArabic ? 'خصوصية وربط مباشر' : 'Direct Lead Connection',
+        icon: Icons.spa_rounded,
+        imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
+        badgeText: loc.isArabic ? 'ربط وتواصل مباشر' : 'Direct Lead Connection',
         title: loc.tr('onboarding_title_3'),
         description: loc.tr('onboarding_desc_3'),
       ),
@@ -126,40 +129,88 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Luxury Icon Badge Container
+                            // Luxury Real Image Presentation Card
                             Container(
-                              width: 140,
-                              height: 140,
+                              width: 240,
+                              height: 175,
                               decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isDark
-                                    ? AppColors.cardSurfaceHover
-                                    : AppColors.lightCardSurface,
+                                borderRadius: BorderRadius.circular(22),
                                 border: Border.all(
                                   color: AppColors.accentChampagne.withValues(
-                                    alpha: isDark ? 0.35 : 0.55,
+                                    alpha: isDark ? 0.35 : 0.50,
                                   ),
-                                  width: 1.5,
+                                  width: 1.2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.accentChampagne.withValues(
-                                      alpha: isDark ? 0.15 : 0.18,
+                                      alpha: isDark ? 0.12 : 0.15,
                                     ),
-                                    blurRadius: 28,
-                                    spreadRadius: 2,
+                                    blurRadius: 24,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: Center(
-                                child: Icon(
-                                  item.icon,
-                                  size: 64,
-                                  color: AppColors.accentChampagne,
-                                ),
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(21),
+                                      child: Image.network(
+                                        item.imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, _, _) => Container(
+                                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurface,
+                                          child: Icon(
+                                            item.icon,
+                                            size: 54,
+                                            color: AppColors.accentChampagne,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Subtle bottom vignette gradient
+                                  Positioned.fill(
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(21),
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.transparent,
+                                            (isDark ? Colors.black : const Color(0xFF070B16)).withValues(alpha: 0.45),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Floating Category Icon Badge
+                                  Positioned(
+                                    bottom: 10,
+                                    right: loc.isArabic ? 10 : null,
+                                    left: loc.isArabic ? null : 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(7),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? AppColors.cardSurface.withValues(alpha: 0.88)
+                                            : Colors.white.withValues(alpha: 0.92),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.accentChampagne.withValues(alpha: 0.6),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Icon(item.icon, size: 16, color: AppColors.accentChampagne),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 28),
+                            const SizedBox(height: 24),
 
                             // Micro Tag
                             Container(
@@ -188,13 +239,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 14),
 
                             // Slide Title
                             Text(
                               item.title,
                               style: AppTypography.heroTitle.copyWith(
-                                fontSize: 22,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w800,
                                 color: isDark
                                     ? AppColors.silverPrimary
@@ -202,7 +253,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
 
                             // Slide Description
                             Text(
@@ -210,7 +261,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               style: AppTypography.bodyMedium.copyWith(
                                 color: AppColors.mutedText(context),
                                 height: 1.6,
-                                fontSize: 13.5,
+                                fontSize: 13,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -289,12 +340,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _OnboardingSlideData {
   final IconData icon;
+  final String imageUrl;
   final String badgeText;
   final String title;
   final String description;
 
   const _OnboardingSlideData({
     required this.icon,
+    required this.imageUrl,
     required this.badgeText,
     required this.title,
     required this.description,

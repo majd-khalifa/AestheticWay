@@ -7,6 +7,7 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
+import 'package:aesthetic_way/features/referral/services/referral_service.dart';
 
 /// Screen 3: Luxury Registration Screen with Full Name, Phone, Email, Password & Terms
 class RegisterScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _referralCodeController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -36,6 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -66,6 +69,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final phone = _phoneController.text.trim();
     final formattedPhone = phone.startsWith('+971') ? phone : '+971 $phone';
+    final referralCode = _referralCodeController.text.trim();
+
+    if (referralCode.isNotEmpty) {
+      ReferralService().registerInvite(referralCode: referralCode);
+    }
 
     Navigator.push(
       context,
@@ -350,6 +358,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               }
                               return null;
                             },
+                          ),
+                          const SizedBox(height: 12),
+
+                          // 6. Referral Code (Optional)
+                          TextFormField(
+                            controller: _referralCodeController,
+                            style: TextStyle(
+                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: loc.tr('referral_code_optional'),
+                              hintText: loc.tr('referral_code_hint'),
+                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                              prefixIcon: Icon(Icons.card_giftcard_outlined, color: AppColors.accentChampagne, size: 19),
+                              filled: true,
+                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.accentChampagne,
+                                  width: 1.4,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

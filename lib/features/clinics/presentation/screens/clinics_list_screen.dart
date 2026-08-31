@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/distance_chip.dart';
-import 'package:aesthetic_way/core/widgets/license_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -261,13 +259,13 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                         ),
                         const SizedBox(width: 6),
                         _QuickCityChip(
-                          label: '📍 ${loc.isArabic ? "دبي" : "Dubai"}',
+                          label: loc.isArabic ? "دبي" : "Dubai",
                           isSelected: _filterOptions.selectedCity == 'دبي' || _filterOptions.selectedCity == 'Dubai',
                           onTap: () => setState(() => _filterOptions.selectedCity = 'دبي'),
                         ),
                         const SizedBox(width: 6),
                         _QuickCityChip(
-                          label: '📍 ${loc.isArabic ? "أبوظبي" : "Abu Dhabi"}',
+                          label: loc.isArabic ? "أبوظبي" : "Abu Dhabi",
                           isSelected: _filterOptions.selectedCity == 'أبوظبي' || _filterOptions.selectedCity == 'Abu Dhabi',
                           onTap: () => setState(() => _filterOptions.selectedCity = 'أبوظبي'),
                         ),
@@ -399,8 +397,6 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                                                       overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ),
-                                                  if (clinic.subscriptionTier != SubscriptionTier.basic)
-                                                    TierBadge(tier: clinic.subscriptionTier, isCompact: true),
                                                 ],
                                               ),
                                               const SizedBox(height: 3),
@@ -426,9 +422,6 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                                                   DistanceChip(
                                                     distanceKm: clinic.distanceKm,
                                                     areaName: loc.isArabic ? clinic.areaAr : clinic.areaEn,
-                                                  ),
-                                                  const LicenseBadge(
-                                                    isCompact: true,
                                                   ),
                                                 ],
                                               ),

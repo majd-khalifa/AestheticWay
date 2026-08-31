@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 
-/// Clean Clinic Rating Chip displaying Google source (e.g. ★ 4.9 (Google / 120))
+/// Clean Clinic Rating Chip displaying Google source (e.g. 4.9 (Google / 120))
 class RatingChip extends StatelessWidget {
   final double rating;
   final int? reviewCount;

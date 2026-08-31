@@ -8,6 +8,7 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_lead_detail_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_verify_code_screen.dart';
 
 /// Clinic Tab 1: Luxury Clinic Dashboard Screen with Key Metrics, Shortcuts & Recent Leads
 class ClinicDashboardScreen extends StatelessWidget {
@@ -174,6 +175,22 @@ class ClinicDashboardScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              _ShortcutButton(
+                label: loc.tr('clinic_verify_code_title'),
+                icon: Icons.qr_code_scanner_rounded,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    LuxuryPageRoute(
+                      page: ClinicVerifyCodeScreen(
+                        clinicId: clinic.id,
+                        clinicName: loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
 

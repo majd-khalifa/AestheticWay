@@ -22,7 +22,7 @@ class PractitionerBadge extends StatelessWidget {
     Color border;
     Color textColor;
     String label;
-    String icon;
+    IconData icon;
 
     switch (type) {
       case PractitionerType.doctor:
@@ -30,21 +30,21 @@ class PractitionerBadge extends StatelessWidget {
         border = AppColors.medicalBlue.withValues(alpha: 0.6);
         textColor = const Color(0xFFBFDBFE);
         label = loc.tr('role_doctor');
-        icon = '👨‍⚕️';
+        icon = Icons.medical_services_outlined;
         break;
       case PractitionerType.nurse:
         bg = const Color(0xFF042F2E).withValues(alpha: 0.6);
         border = AppColors.nurseTeal.withValues(alpha: 0.6);
         textColor = const Color(0xFF99F6E4);
         label = loc.tr('role_nurse');
-        icon = '👩‍⚕️';
+        icon = Icons.health_and_safety_outlined;
         break;
       case PractitionerType.licensedProfessional:
         bg = const Color(0xFF1E293B).withValues(alpha: 0.6);
         border = AppColors.silverBorder.withValues(alpha: 0.4);
         textColor = AppColors.silverPrimary;
         label = loc.tr('role_specialist');
-        icon = '🔬';
+        icon = Icons.spa_outlined;
         break;
     }
 
@@ -59,7 +59,7 @@ class PractitionerBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showIcon) ...[
-            Text(icon, style: const TextStyle(fontSize: 10)),
+            Icon(icon, size: 11, color: textColor),
             const SizedBox(width: 4),
           ],
           Text(

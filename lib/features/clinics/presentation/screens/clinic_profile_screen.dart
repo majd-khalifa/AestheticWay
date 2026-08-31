@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/distance_chip.dart';
-import 'package:aesthetic_way/core/widgets/license_badge.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
@@ -259,9 +257,6 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                 ],
                               ),
                             ),
-                            if (clinic.subscriptionTier !=
-                                SubscriptionTier.basic)
-                              TierBadge(tier: clinic.subscriptionTier),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -278,10 +273,6 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                               areaName: loc.isArabic
                                   ? clinic.areaAr
                                   : clinic.areaEn,
-                            ),
-                            LicenseBadge(
-                              authority: clinic.licenseAuthority,
-                              licenseNumber: clinic.licenseNumber,
                             ),
                           ],
                         ),
@@ -869,12 +860,6 @@ class _StaffTab extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              // Licensing details
-              LicenseBadge(
-                authority: p.licenseAuthority,
-                licenseNumber: p.licenseNumber,
-              ),
               const SizedBox(height: 8),
               Text(
                 loc.isArabic ? p.aboutAr : (p.aboutEn ?? p.aboutAr),
@@ -1265,19 +1250,26 @@ class _ReviewItem extends StatelessWidget {
               if (verifiedVisit)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 1.5,
+                    horizontal: 6,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.successGreen.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  child: Text(
-                    '✓ ${loc.tr("verified_visit")}',
-                    style: AppTypography.badge.copyWith(
-                      color: const Color(0xFF34D399),
-                      fontSize: 9.5,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.check_circle_outline, size: 10, color: Color(0xFF34D399)),
+                      const SizedBox(width: 3),
+                      Text(
+                        loc.tr("verified_visit"),
+                        style: AppTypography.badge.copyWith(
+                          color: const Color(0xFF34D399),
+                          fontSize: 9.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],

@@ -71,19 +71,19 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                         ),
                         const SizedBox(width: 8),
                         _FilterChip(
-                          label: '🟡 ${loc.tr("status_sent")}',
+                          label: loc.tr("status_sent"),
                           isSelected: _selectedFilterIndex == 1,
                           onTap: () => setState(() => _selectedFilterIndex = 1),
                         ),
                         const SizedBox(width: 8),
                         _FilterChip(
-                          label: '🔵 ${loc.tr("status_contacted")}',
+                          label: loc.tr("status_contacted"),
                           isSelected: _selectedFilterIndex == 2,
                           onTap: () => setState(() => _selectedFilterIndex = 2),
                         ),
                         const SizedBox(width: 8),
                         _FilterChip(
-                          label: '⚪ ${loc.tr("status_closed")}',
+                          label: loc.tr("status_closed"),
                           isSelected: _selectedFilterIndex == 3,
                           onTap: () => setState(() => _selectedFilterIndex = 3),
                         ),

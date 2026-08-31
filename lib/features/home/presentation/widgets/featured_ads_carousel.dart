@@ -2,10 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/distance_chip.dart';
-import 'package:aesthetic_way/core/widgets/license_badge.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
@@ -373,12 +371,7 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                               ),
                             ),
                           ),
-                          // Top Badges: Tier on right, Rating on left
-                          Positioned(
-                            top: 10,
-                            right: 10,
-                            child: TierBadge(tier: clinic.subscriptionTier),
-                          ),
+                          // Top Rating Badge on left/right according to RTL
                           Positioned(
                             top: 10,
                             left: 10,
@@ -415,12 +408,6 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                     DistanceChip(
                                       distanceKm: clinic.distanceKm,
                                       areaName: loc.isArabic ? clinic.areaAr : clinic.areaEn,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    const Flexible(
-                                      child: LicenseBadge(
-                                        isCompact: true,
-                                      ),
                                     ),
                                   ],
                                 ),

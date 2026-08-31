@@ -7,7 +7,8 @@ import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_offers_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_profile_screen.dart';
 
-/// Clinic Partner Navigation Shell with 4 Tabs: Dashboard, Leads, Offers, Profile
+/// Clinic Partner Navigation Shell with Floating Luxury Pill Navigation Bar
+/// Visual Tab Order (LTR): [ Dashboard | Leads | Offers | Profile ]
 class ClinicMainNavScreen extends StatefulWidget {
   final int initialIndex;
 
@@ -56,73 +57,198 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
             index: _currentIndex,
             children: screens,
           ),
-          bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.backgroundBase : AppColors.lightCardSurface,
-              border: Border(
-                top: BorderSide(
+          bottomNavigationBar: SafeArea(
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF080D1A).withValues(alpha: 0.96)
+                    : Colors.white.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(34),
+                border: Border.all(
                   color: AppColors.border(context),
-                  width: 0.8,
+                  width: 0.85,
+                ),
+                boxShadow: isDark
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          blurRadius: 28,
+                          offset: const Offset(0, 10),
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: AppColors.silverPrimary.withValues(alpha: 0.04),
+                          blurRadius: 1,
+                          spreadRadius: 0.5,
+                          offset: const Offset(0, -0.5),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: const Color(0xFF0F172A).withValues(alpha: 0.08),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                          spreadRadius: 1,
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 2,
+                          spreadRadius: 0.5,
+                          offset: const Offset(0, -0.5),
+                        ),
+                      ],
+              ),
+              // Enforce strictly visual Left-to-Right: [ Home | Leads | Offers | Profile ]
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _ClinicFloatingNavItem(
+                      index: 0,
+                      selectedIndex: _currentIndex,
+                      icon: Icons.dashboard_outlined,
+                      activeIcon: Icons.dashboard_rounded,
+                      label: loc.tr('clinic_nav_dashboard'),
+                      onTap: () => _onTabSelected(0),
+                    ),
+                    _ClinicFloatingNavItem(
+                      index: 1,
+                      selectedIndex: _currentIndex,
+                      icon: Icons.mark_email_unread_outlined,
+                      activeIcon: Icons.mark_email_read_rounded,
+                      label: loc.tr('clinic_nav_leads'),
+                      badgeCount: newLeadsCount,
+                      onTap: () => _onTabSelected(1),
+                    ),
+                    _ClinicFloatingNavItem(
+                      index: 2,
+                      selectedIndex: _currentIndex,
+                      icon: Icons.local_offer_outlined,
+                      activeIcon: Icons.local_offer_rounded,
+                      label: loc.tr('clinic_nav_offers'),
+                      onTap: () => _onTabSelected(2),
+                    ),
+                    _ClinicFloatingNavItem(
+                      index: 3,
+                      selectedIndex: _currentIndex,
+                      icon: Icons.storefront_outlined,
+                      activeIcon: Icons.storefront_rounded,
+                      label: loc.tr('clinic_nav_profile'),
+                      onTap: () => _onTabSelected(3),
+                    ),
+                  ],
                 ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _onTabSelected,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: AppColors.accentChampagne,
-              unselectedItemColor: AppColors.mutedText(context),
-              selectedFontSize: 11.5,
-              unselectedFontSize: 11,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
-              items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.dashboard_outlined, size: 22),
-                  activeIcon: const Icon(Icons.dashboard_rounded, size: 22),
-                  label: loc.tr('clinic_nav_dashboard'),
-                ),
-                BottomNavigationBarItem(
-                  icon: Badge(
-                    isLabelVisible: newLeadsCount > 0,
-                    label: Text('$newLeadsCount', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                    backgroundColor: AppColors.accentChampagne,
-                    textColor: AppColors.backgroundDeep,
-                    child: const Icon(Icons.mark_email_unread_outlined, size: 22),
-                  ),
-                  activeIcon: Badge(
-                    isLabelVisible: newLeadsCount > 0,
-                    label: Text('$newLeadsCount', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                    backgroundColor: AppColors.accentChampagne,
-                    textColor: AppColors.backgroundDeep,
-                    child: const Icon(Icons.mark_email_read_rounded, size: 22),
-                  ),
-                  label: loc.tr('clinic_nav_leads'),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.local_offer_outlined, size: 22),
-                  activeIcon: const Icon(Icons.local_offer_rounded, size: 22),
-                  label: loc.tr('clinic_nav_offers'),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.storefront_outlined, size: 22),
-                  activeIcon: const Icon(Icons.storefront_rounded, size: 22),
-                  label: loc.tr('clinic_nav_profile'),
-                ),
-              ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _ClinicFloatingNavItem extends StatelessWidget {
+  final int index;
+  final int selectedIndex;
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final int badgeCount;
+  final VoidCallback onTap;
+
+  const _ClinicFloatingNavItem({
+    required this.index,
+    required this.selectedIndex,
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    this.badgeCount = 0,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = index == selectedIndex;
+    final isDark = AppColors.isDark(context);
+
+    Widget iconWidget = Icon(
+      isSelected ? activeIcon : icon,
+      size: 20,
+      color: isSelected
+          ? AppColors.accentChampagne
+          : (isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary),
+    );
+
+    if (badgeCount > 0) {
+      iconWidget = Badge(
+        label: Text(
+          '$badgeCount',
+          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.accentChampagne,
+        textColor: AppColors.backgroundDeep,
+        child: iconWidget,
+      );
+    }
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            border: isSelected
+                ? Border.all(
+                    color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.65),
+                    width: 0.85,
+                  )
+                : null,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.2),
+                      blurRadius: 10,
+                      spreadRadius: 0.5,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedScale(
+                scale: isSelected ? 1.10 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: iconWidget,
+              ),
+              const SizedBox(height: 3),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                  color: isSelected
+                      ? AppColors.accentChampagne
+                      : (isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                child: Text(label),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

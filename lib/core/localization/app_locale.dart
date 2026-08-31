@@ -46,20 +46,20 @@ class LocaleService extends ChangeNotifier {
     // ==========================================
     // ONBOARDING FLOW
     // ==========================================
-    'onboarding_title_1': {'ar': 'اكتشف نخبة العيادات', 'en': 'Discover Elite Clinics'},
+    'onboarding_title_1': {'ar': 'عيادات التجميل والجلدية', 'en': 'Aesthetic & Dermatology Clinics'},
     'onboarding_desc_1': {
-      'ar': 'اكتشف أفضل عيادات التجميل والجلدية في الإمارات مع استعراض شامل للأطباء والخدمات المعتمدة.',
-      'en': 'Discover top aesthetic and dermatology clinics in the UAE with comprehensive certified doctors and services.'
+      'ar': 'عيادات التجميل والجلدية في الإمارات أصبحت بين يديك بالإضافة لكثير من الأطباء وخبراء البشرة',
+      'en': 'Aesthetic and dermatology clinics in the UAE are now at your fingertips, along with many doctors and skin experts'
     },
-    'onboarding_title_2': {'ar': 'قارن العروض الحصرية', 'en': 'Compare Exclusive Offers'},
+    'onboarding_title_2': {'ar': 'استعراض العروض والباقات', 'en': 'Explore Offers & Packages'},
     'onboarding_desc_2': {
-      'ar': 'تصفح باقات وعروض التجميل المميزة واختر ما يناسبك بسهولة وشفافية تامة.',
-      'en': 'Browse exclusive aesthetic packages and choose what suits you with complete clarity.'
+      'ar': 'تصفح باقات وعروض التجميل المتاحة في العيادات مع تفاصيل واضحة للأسعار والخدمات.',
+      'en': 'Browse available aesthetic treatment packages with transparent pricing and service details.'
     },
-    'onboarding_title_3': {'ar': 'تواصل بثقة وسرية', 'en': 'Connect with Confidence'},
+    'onboarding_title_3': {'ar': 'طلب تواصل واستشارة', 'en': 'Direct Lead Request'},
     'onboarding_desc_3': {
-      'ar': 'أرسل طلب استشارة مجاني ودع فريق العيادة المختص يتواصل معك مباشرة لتنسيق كافة التفاصيل.',
-      'en': 'Send a free consultation lead and let the clinic concierge contact you directly to coordinate all details.'
+      'ar': 'أرسل طلب استشارة بكل سهولة لتقوم العيادة المختارة بالتواصل معك مباشرة ومتابعة طلبك.',
+      'en': 'Send a consultation lead easily for the clinic team to contact you directly.'
     },
     'onboarding_skip': {'ar': 'تخطي', 'en': 'Skip'},
     'onboarding_next': {'ar': 'التالي', 'en': 'Next'},
@@ -95,7 +95,7 @@ class LocaleService extends ChangeNotifier {
     'resend_code': {'ar': 'إعادة إرسال الرمز', 'en': 'Resend Code'},
     'resend_in': {'ar': 'إعادة الإرسال خلال', 'en': 'Resend in'},
     'verify_and_continue': {'ar': 'تأكيد الرمز والمتابعة', 'en': 'Verify & Continue'},
-    'otp_demo_note': {'ar': '💡 للتجربة السريعة: رمز التحقق هو 1234', 'en': '💡 Demo note: Test OTP code is 1234'},
+    'otp_demo_note': {'ar': 'للتجربة السريعة: رمز التحقق هو 1234', 'en': 'Demo note: Test OTP code is 1234'},
 
     'forgot_title': {'ar': 'استعادة كلمة المرور', 'en': 'Forgot Password'},
     'forgot_sub': {'ar': 'أدخل رقم هاتفك أو بريدك المسجل لإرسال رمز التحقق والاستعادة', 'en': 'Enter your registered phone or email to receive a recovery code'},
@@ -123,8 +123,8 @@ class LocaleService extends ChangeNotifier {
     // CLINIC PORTAL (ROLE العيادة)
     // ==========================================
     'clinic_portal_title': {'ar': 'لوحة تحكم الشريك والعيادة', 'en': 'Clinic Partner Portal'},
-    'clinic_login_btn': {'ar': '🏢 دخول الشركاء والعيادات', 'en': '🏢 Clinic Partner Login'},
-    'clinic_demo_login': {'ar': '👑 دخول تجريبي: عيادة كايا للجلدية', 'en': '👑 Demo Clinic: Kaya Skin Clinic'},
+    'clinic_login_btn': {'ar': 'دخول الشركاء والعيادات', 'en': 'Clinic Partner Login'},
+    'clinic_demo_login': {'ar': 'دخول تجريبي: عيادة كايا للجلدية', 'en': 'Demo Clinic: Kaya Skin Clinic'},
     'clinic_nav_dashboard': {'ar': 'الرئيسية', 'en': 'Dashboard'},
     'clinic_nav_leads': {'ar': 'الطلبات', 'en': 'Leads'},
     'clinic_nav_offers': {'ar': 'العروض', 'en': 'Offers'},
@@ -169,16 +169,26 @@ class LocaleService extends ChangeNotifier {
 
     'clinic_team_title': {'ar': 'الكادر الطبي والممارسون المعتمدون', 'en': 'Medical Staff & Practitioners'},
     'clinic_add_practitioner': {'ar': 'إضافة ممارس طبي جديد', 'en': 'Add Practitioner'},
-    'clinic_practitioner_name': {'ar': 'اسم الطبيب / الممارس', 'en': 'Practitioner Name'},
-    'clinic_practitioner_specialty': {'ar': 'التخصص الطبي الدقيق', 'en': 'Specialty'},
+    'clinic_practitioner_name': {'ar': 'اسم الطبيب / الممارس (إلزامي)', 'en': 'Practitioner Name (Required)'},
+    'clinic_practitioner_specialty': {'ar': 'التخصص الطبي الدقيق (إلزامي)', 'en': 'Specialty (Required)'},
+    'clinic_doctor_years_exp': {'ar': 'سنوات الخبرة (اختياري)', 'en': 'Years of Experience (Optional)'},
+    'clinic_doctor_languages': {'ar': 'اللغات (مثال: العربية، الإنجليزية)', 'en': 'Languages (e.g. Arabic, English)'},
+    'clinic_doctor_bio': {'ar': 'نبذة تعريفية موجزة', 'en': 'Short Professional Bio'},
+    'clinic_doctor_license_ref': {'ar': 'الرمز المرجعي للاعتماد بالمنصة', 'en': 'Platform License Reference'},
+    'clinic_doctor_avatar_opt': {'ar': 'رابط الصورة الشخصية (اختياري)', 'en': 'Photo URL (Optional)'},
     'clinic_practitioner_saved': {'ar': 'تمت إضافة الممارس بنجاح', 'en': 'Practitioner added successfully'},
 
     'clinic_services_title': {'ar': 'العلاجات والخدمات المقدمة', 'en': 'Services & Treatments'},
     'clinic_add_service': {'ar': 'إضافة خدمة علاجية', 'en': 'Add Service'},
-    'clinic_service_name': {'ar': 'اسم الخدمة / الإجراء', 'en': 'Service / Procedure Name'},
+    'clinic_service_name': {'ar': 'اسم الخدمة / الإجراء (إلزامي)', 'en': 'Service / Procedure Name (Required)'},
     'clinic_service_category': {'ar': 'تصنيف الخدمة', 'en': 'Service Category'},
-    'clinic_service_price': {'ar': 'السعر المبدئي (د.إ)', 'en': 'Starting Price (AED)'},
+    'clinic_service_price': {'ar': 'السعر التقديري (د.إ)', 'en': 'Estimated Price (AED)'},
+    'clinic_service_duration': {'ar': 'المدة التقريبية (بالدقائق)', 'en': 'Duration (Minutes)'},
+    'clinic_service_description': {'ar': 'وصف مختصر للخدمة والشروط', 'en': 'Short Description & Terms'},
+    'clinic_service_target_area': {'ar': 'المنطقة المستهدفة (مثال: الوجه)', 'en': 'Target Area (e.g. Face)'},
+    'clinic_service_recovery': {'ar': 'فترة التعافي (مثال: بدون فترة توقف)', 'en': 'Downtime (e.g. Zero Downtime)'},
     'clinic_service_saved': {'ar': 'تمت إضافة الخدمة بنجاح', 'en': 'Service added successfully'},
+    'clinic_validation_required': {'ar': 'يرجى ملء الحقول المطلوبة بشكل صحيح', 'en': 'Please fill required fields properly'},
 
     'clinic_maps_config': {'ar': 'موقع العيادة وربط Google Maps', 'en': 'Google Maps & Location Linking'},
     'clinic_logout': {'ar': 'تسجيل الخروج من لوحة العيادة', 'en': 'Sign Out of Clinic Portal'},
@@ -186,6 +196,66 @@ class LocaleService extends ChangeNotifier {
       'ar': 'إشعار المنصة: منصة Aesthetic Way هي أداة ربط وتوليد طلبات تواصل (Leads) فقط، ولا تتضمن دفعات مالية للمرضى أو تأكيد حجز نهائي داخل التطبيق.',
       'en': 'Platform Notice: Aesthetic Way is a discovery and lead-generation connection platform only, and does not handle patient payments or final booking confirmations.'
     },
+
+    'open_full_login': {'ar': 'فتح صفحة الدخول الكاملة', 'en': 'Open Full Login Screen'},
+    'admin_lead_monitoring_banner': {
+      'ar': 'للمراقبة فقط — إدارة التواصل تتم من حساب العيادة',
+      'en': 'Supervision Mode: Communication is managed by the clinic'
+    },
+    'admin_lead_inspect_title': {'ar': 'تفاصيل الطلب (إشراف ومراقبة)', 'en': 'Inquiry Details (Supervision View)'},
+
+    // ==========================================
+    // SUPER ADMIN PORTAL (إدارة المنصة)
+    // ==========================================
+    'admin_portal_title': {'ar': 'لوحة الإدارة الرئيسية (Super Admin)', 'en': 'Super Admin Dashboard'},
+    'admin_demo_login': {'ar': 'دخول تجريبي: مدير المنصة (Super Admin)', 'en': 'Super Admin Demo Login'},
+    'admin_nav_dashboard': {'ar': 'الرئيسية', 'en': 'Dashboard'},
+    'admin_nav_clinics': {'ar': 'العيادات', 'en': 'Clinics'},
+    'admin_nav_leads': {'ar': 'الطلبات', 'en': 'Leads'},
+    'admin_nav_offers': {'ar': 'العروض', 'en': 'Offers'},
+    'admin_nav_analytics': {'ar': 'الإحصائيات', 'en': 'Analytics'},
+    'admin_nav_settings': {'ar': 'الإعدادات', 'en': 'Settings'},
+
+    'admin_total_app_opens': {'ar': 'مرات فتح التطبيق', 'en': 'App Opens'},
+    'admin_active_users': {'ar': 'المستخدمون النشطون', 'en': 'Active Users'},
+    'admin_total_leads': {'ar': 'إجمالي طلبات الاستشارة', 'en': 'Total Leads'},
+    'admin_today_leads': {'ar': 'طلبات اليوم', 'en': 'Today\'s Leads'},
+    'admin_active_clinics': {'ar': 'العيادات الشريكة', 'en': 'Partner Clinics'},
+    'admin_whatsapp_taps': {'ar': 'تواصل عبر واتساب', 'en': 'WhatsApp Taps'},
+    'admin_call_taps': {'ar': 'تواصل عبر الاتصال', 'en': 'Call Taps'},
+    'admin_recent_activity': {'ar': 'سجل النشاط المباشر في المنصة', 'en': 'Live Platform Activity'},
+    'admin_all_clinics': {'ar': 'جميع العيادات المسجلة', 'en': 'All Registered Clinics'},
+    'admin_clinic_status_active': {'ar': 'نشطة ومفعلة', 'en': 'Active'},
+    'admin_clinic_status_suspended': {'ar': 'موقوفة مؤقتاً', 'en': 'Suspended'},
+    'admin_toggle_clinic_status': {'ar': 'تغيير حالة تفعيل العيادة', 'en': 'Toggle Clinic Status'},
+    'admin_clinic_details': {'ar': 'ملف وإحصائيات العيادة', 'en': 'Clinic Profile & Metrics'},
+    'admin_views_count': {'ar': 'مرات الظهور والمشاهدات', 'en': 'App Views & Impressions'},
+    'admin_leads_overview': {'ar': 'سجل طلبات الاستشارة العام (Leads Registry)', 'en': 'Global Leads Registry'},
+    'admin_filter_by_clinic': {'ar': 'تصفية حسب العيادة', 'en': 'Filter by Clinic'},
+    'admin_filter_all_clinics': {'ar': 'جميع العيادات (الكل)', 'en': 'All Clinics'},
+    'admin_lead_monitoring_note': {
+      'ar': 'وضع المراقبة والإشراف: تتيح اللوحة الإشراف على حجم تدفق الطلبات عبر العيادات دون التدخل في الجداول.',
+      'en': 'Supervision Mode: Monitor lead generation volume across clinics without booking intervention.'
+    },
+    'admin_offers_moderation': {'ar': 'إشراف ومراجعة العروض التجميلية', 'en': 'Offers Moderation'},
+    'admin_offer_active': {'ar': 'منشور ونشط للعامة', 'en': 'Published & Active'},
+    'admin_offer_suspended': {'ar': 'موقوف من الإدارة', 'en': 'Suspended by Admin'},
+    'admin_suspend_offer_btn': {'ar': 'إيقاف نشر العرض', 'en': 'Suspend Offer'},
+    'admin_activate_offer_btn': {'ar': 'إعادة تفعيل ونشر العرض', 'en': 'Activate Offer'},
+    'admin_analytics_title': {'ar': 'التحليلات ومعدلات تفاعل المرضى مع العيادات', 'en': 'Clinic Engagement Analytics'},
+    'admin_analytics_sub': {
+      'ar': 'إحصائيات تفاعل العملاء عبر الاتصال، الواتساب، وطلبات الاستشارة لكل عيادة',
+      'en': 'Detailed breakdown of patient engagement via Calls, WhatsApp and Leads per clinic'
+    },
+    'admin_table_clinic': {'ar': 'العيادة', 'en': 'Clinic'},
+    'admin_table_views': {'ar': 'المشاهدات', 'en': 'Views'},
+    'admin_table_leads': {'ar': 'الطلبات', 'en': 'Leads'},
+    'admin_table_whatsapp': {'ar': 'واتساب', 'en': 'WhatsApp'},
+    'admin_table_calls': {'ar': 'اتصال', 'en': 'Calls'},
+    'admin_table_conversion': {'ar': 'معدل التفاعل', 'en': 'Engagement'},
+    'admin_settings_title': {'ar': 'إعدادات المنصة والنظام', 'en': 'Platform Settings'},
+    'admin_logout': {'ar': 'تسجيل الخروج من لوحة الإدارة', 'en': 'Sign Out of Admin Portal'},
+    'admin_license_info': {'ar': 'الترخيص والبيانات القانونية', 'en': 'Licensing & Legal Information'},
 
     // Navigation
     'nav_home': {'ar': 'الرئيسية', 'en': 'Home'},
@@ -202,8 +272,8 @@ class LocaleService extends ChangeNotifier {
     'filter_button': {'ar': 'فلترة', 'en': 'Filter'},
 
     // Badges & Labels
-    'vip_partner': {'ar': '👑 شريك ماسي VIP', 'en': '👑 VIP Partner'},
-    'featured_badge': {'ar': '✨ إعلان مميز', 'en': '✨ Featured'},
+    'vip_partner': {'ar': 'شريك ماسي VIP', 'en': 'VIP Partner'},
+    'featured_badge': {'ar': 'إعلان مميز', 'en': 'Featured'},
     'role_doctor': {'ar': 'طبيب', 'en': 'Doctor'},
     'role_nurse': {'ar': 'ممرض مرخص', 'en': 'Licensed Nurse'},
     'role_specialist': {'ar': 'أخصائي مرخص', 'en': 'Licensed Specialist'},
@@ -227,10 +297,10 @@ class LocaleService extends ChangeNotifier {
     'valid_until': {'ar': 'صلاحية العرض', 'en': 'Validity'},
 
     // Featured Ads & Home Sections
-    'featured_partners': {'ar': 'نخبة الشركاء والعيادات المميزة', 'en': 'Featured & VIP Elite Clinics'},
+    'featured_partners': {'ar': 'العيادات المختارة', 'en': 'Featured Clinics'},
     'categories_title': {'ar': 'التصنيفات والخدمات', 'en': 'Categories & Services'},
-    'nearby_title': {'ar': 'عيادات موثوقة في منطقتك', 'en': 'Verified Clinics Nearby'},
-    'active_offers': {'ar': 'الباقات والعروض الحصرية', 'en': 'Exclusive Offers & Packages'},
+    'nearby_title': {'ar': 'العيادات القريبة منك', 'en': 'Clinics near you'},
+    'active_offers': {'ar': 'الباقات والعروض التجميلية', 'en': 'Aesthetic Packages & Offers'},
     'view_map': {'ar': 'الخريطة', 'en': 'Map'},
     'map_view': {'ar': 'عرض الخريطة', 'en': 'Map View'},
     'directions': {'ar': 'الاتجاهات', 'en': 'Directions'},
@@ -248,6 +318,88 @@ class LocaleService extends ChangeNotifier {
     'cat_products': {'ar': 'المنتجات', 'en': 'Products'},
     'cat_articles': {'ar': 'المقالات', 'en': 'Articles'},
     'cat_clinics': {'ar': 'العيادات', 'en': 'Clinics'},
+
+    // Category Screen Titles
+    'category_doctors_title': {'ar': 'الأطباء والاستشاريون', 'en': 'Doctors & Consultants'},
+    'category_skin_experts_title': {'ar': 'خبيرات البشرة والتمريض التجميلي', 'en': 'Skin Experts & Aesthetic Therapists'},
+    'category_plastic_surgery_title': {'ar': 'الجراحة التجميلية', 'en': 'Plastic & Aesthetic Surgery'},
+    'category_treatments_title': {'ar': 'العلاجات والإجراءات الطبية', 'en': 'Treatments & Procedures'},
+    'category_offers_title': {'ar': 'العروض والباقات التجميلية', 'en': 'Aesthetic Offers & Packages'},
+    'category_products_title': {'ar': 'المنتجات والمستحضرات الطبية', 'en': 'Medical Products & Skincare'},
+    'category_articles_title': {'ar': 'المقالات ودليل التوعية الطبية', 'en': 'Medical Aesthetic Articles'},
+    'category_clinics_title': {'ar': 'العيادات والمراكز المعتمدة', 'en': 'Verified Clinics & Centers'},
+
+    // Products Module
+    'product_inquiry_btn': {'ar': 'طلب اهتمام / استفسار عن المنتج', 'en': 'Product Inquiry / Request'},
+    'product_inquiry_desc': {
+      'ar': 'سيتم إرسال اهتمامك إلى العيادة الموفرة للتواصل معك بخصوص تفاصيل وتوفر المنتج.',
+      'en': 'Your inquiry will be sent to the clinic to contact you regarding product details and availability.'
+    },
+    'product_inquiry_sent': {
+      'ar': 'تم إرسال اهتمامك بالمنتج وستتواصل العيادة معك',
+      'en': 'Your product inquiry has been sent and the clinic will contact you'
+    },
+    'product_available': {'ar': 'متوفر في العيادة', 'en': 'Available at Clinic'},
+    'product_out_of_stock': {'ar': 'غير متوفر حالياً', 'en': 'Out of Stock'},
+    'product_provided_by': {'ar': 'موفر من قبل عيادة', 'en': 'Provided by Clinic'},
+    'product_category_all': {'ar': 'جميع المنتجات', 'en': 'All Products'},
+    'product_category_skincare': {'ar': 'عناية بالبشرة', 'en': 'Skincare'},
+    'product_category_devices': {'ar': 'أجهزة منزلية', 'en': 'Home Devices'},
+    'product_category_cosmeceuticals': {'ar': 'مستحضرات علاجية', 'en': 'Cosmeceuticals'},
+    'product_category_sunscreens': {'ar': 'واقيات شمس ومكملات', 'en': 'Sun Care & Supplements'},
+    'product_empty': {'ar': 'لا توجد منتجات مطابقة حالياً', 'en': 'No products found'},
+    'clinic_manage_products': {'ar': 'إدارة منتجات العيادة', 'en': 'Manage Clinic Products'},
+    'clinic_add_product': {'ar': 'إضافة منتج جديد', 'en': 'Add New Product'},
+    'clinic_product_saved': {'ar': 'تم حفظ المنتج بنجاح', 'en': 'Product saved successfully'},
+    'clinic_product_name': {'ar': 'اسم المنتج', 'en': 'Product Name'},
+    'clinic_product_category': {'ar': 'تصنيف المنتج', 'en': 'Product Category'},
+    'clinic_product_price': {'ar': 'السعر (د.إ)', 'en': 'Price (AED)'},
+    'clinic_product_orig_price': {'ar': 'السعر قبل الخصم (اختياري)', 'en': 'Original Price (Optional)'},
+    'clinic_product_description': {'ar': 'وصف المنتج ومكوناته', 'en': 'Description & Key Ingredients'},
+    'clinic_product_image': {'ar': 'رابط صورة المنتج (اختياري)', 'en': 'Product Image URL (Optional)'},
+    'clinic_product_toggle_avail': {'ar': 'تبديل حالة التوفر', 'en': 'Toggle Availability'},
+    'admin_products_moderation': {'ar': 'إشراف ومراقبة المنتجات المعروضة', 'en': 'Products Moderation'},
+    'admin_suspend_product_btn': {'ar': 'إيقاف نشر المنتج', 'en': 'Suspend Product'},
+    'admin_activate_product_btn': {'ar': 'تفعيل ونشر المنتج', 'en': 'Activate Product'},
+
+    // Articles Module
+    'article_author_by': {'ar': 'بقلم الطبيب', 'en': 'Written by'},
+    'article_read_time': {'ar': 'مدة القراءة: 3 دقائق', 'en': '3 min read'},
+    'article_consult_author_btn': {'ar': 'طلب استشارة مع الكاتب / العيادة', 'en': 'Request Consultation with Author'},
+    'article_published_date': {'ar': 'تاريخ النشر', 'en': 'Published Date'},
+    'article_category_all': {'ar': 'جميع المقالات', 'en': 'All Articles'},
+    'article_category_glow': {'ar': 'نضارة وتجديد البشرة', 'en': 'Skin Glow & Renewal'},
+    'article_category_injectables': {'ar': 'الفيلر والبوتوكس', 'en': 'Fillers & Botox'},
+    'article_category_laser': {'ar': 'علاجات الليزر', 'en': 'Laser Treatments'},
+    'article_category_surgery': {'ar': 'الجراحة التجميلية', 'en': 'Plastic Surgery'},
+    'article_empty': {'ar': 'لا توجد مقالات منشورة حالياً', 'en': 'No articles found'},
+    'clinic_manage_articles': {'ar': 'إدارة مقالات وأدلة العيادة', 'en': 'Manage Clinic Articles'},
+    'clinic_add_article': {'ar': 'كتابة ونشر مقال جديد', 'en': 'Write & Publish Article'},
+    'clinic_article_saved': {'ar': 'تم حفظ المقال بنجاح', 'en': 'Article saved successfully'},
+    'clinic_article_title': {'ar': 'عنوان المقال', 'en': 'Article Title'},
+    'clinic_article_doctor_author': {'ar': 'الطبيب الكاتب (من طاقم العيادة)', 'en': 'Author Doctor (Clinic Staff)'},
+    'clinic_article_summary': {'ar': 'ملخص المقال', 'en': 'Article Summary'},
+    'clinic_article_content': {'ar': 'محتوى المقال الكامل', 'en': 'Full Article Content'},
+    'clinic_article_category': {'ar': 'تصنيف المقال', 'en': 'Article Category'},
+    'clinic_article_cover': {'ar': 'رابط صورة الغلاف (اختياري)', 'en': 'Cover Image URL (Optional)'},
+    'admin_articles_moderation': {'ar': 'إشراف ومراقبة المقالات المنشورة', 'en': 'Articles Moderation'},
+    'admin_suspend_article_btn': {'ar': 'إيقاف نشر المقال', 'en': 'Suspend Article'},
+    'admin_activate_article_btn': {'ar': 'إعادة نشر وتفعيل المقال', 'en': 'Activate Article'},
+
+    // Practitioners & Treatments Search & Filters
+    'practitioners_search_hint': {'ar': 'ابحث باسم الطبيب، التخصص، أو العيادة...', 'en': 'Search doctor name, specialty, or clinic...'},
+    'treatments_search_hint': {'ar': 'ابحث عن علاج، إجراء، أو منطقة مستهدفة...', 'en': 'Search treatment, procedure, or target area...'},
+    'filter_all_roles': {'ar': 'الكل', 'en': 'All'},
+    'filter_doctors': {'ar': 'الأطباء والاستشاريون', 'en': 'Doctors'},
+    'filter_skin_experts': {'ar': 'خبيرات البشرة', 'en': 'Skin Experts'},
+    'treatment_category_all': {'ar': 'جميع العلاجات', 'en': 'All Treatments'},
+    'treatment_category_injectables': {'ar': 'علاجات الحقن', 'en': 'Injectables'},
+    'treatment_category_skincare': {'ar': 'عناية بالبشرة', 'en': 'Skincare'},
+    'treatment_category_laser': {'ar': 'ليزر وبشرة', 'en': 'Laser & Skin'},
+    'treatment_category_surgery': {'ar': 'جراحة تجميلية', 'en': 'Plastic Surgery'},
+    'treatment_category_body': {'ar': 'نحت وتنسيق القوام', 'en': 'Body Contouring'},
+    'request_this_treatment': {'ar': 'طلب استشارة لهذا العلاج', 'en': 'Request Consultation for this Treatment'},
+    'request_with_practitioner_btn': {'ar': 'طلب استشارة مع الممارس', 'en': 'Request Consultation with Practitioner'},
 
     // Clinic Profile Tabs & Details
     'tab_about': {'ar': 'نبذة والموقع', 'en': 'About & Map'},
@@ -336,9 +488,9 @@ class LocaleService extends ChangeNotifier {
     'status_closed': {'ar': 'مكتمل / مغلق', 'en': 'Closed'},
     'no_requests': {'ar': 'لا توجد طلبات مواعيد مسجلة حالياً', 'en': 'No appointment leads yet'},
     'no_requests_sub': {'ar': 'تصفح العيادات وأرسل طلب استشارة لتظهر هنا', 'en': 'Explore clinics and request a lead to track it here'},
-    'status_sent_label': {'ar': '🟡 بانتظار تواصل العيادة', 'en': '🟡 Awaiting Clinic Response'},
-    'status_contacted_label': {'ar': '🔵 تم التواصل من العيادة', 'en': '🔵 Contacted by Clinic'},
-    'status_closed_label': {'ar': '⚪ طلب مكتمل / منتهي', 'en': '⚪ Closed / Completed'},
+    'status_sent_label': {'ar': 'بانتظار تواصل العيادة', 'en': 'Awaiting Clinic Response'},
+    'status_contacted_label': {'ar': 'تم التواصل من العيادة', 'en': 'Contacted by Clinic'},
+    'status_closed_label': {'ar': 'طلب مكتمل / منتهي', 'en': 'Closed / Completed'},
 
     // Profile & Settings
     'profile_title': {'ar': 'حسابي وإعداداتي', 'en': 'My Profile & Settings'},
@@ -349,8 +501,8 @@ class LocaleService extends ChangeNotifier {
     'theme_light': {'ar': 'الوضع الفاتح (Light)', 'en': 'Light Mode'},
     'theme_system': {'ar': 'تلقائي (حسب النظام)', 'en': 'System Mode'},
     'my_favs': {'ar': 'العيادات المفضلة', 'en': 'Favorite Clinics'},
-    'privacy_terms': {'ar': 'الخصوصية والترخيص القانوني', 'en': 'Privacy & Legal Licensing'},
-    'support_help': {'ar': 'الدعم والكونسيرج', 'en': 'Support & Concierge'},
+    'privacy_terms': {'ar': 'الخصوصية والشروط القانونية', 'en': 'Privacy & Legal Terms'},
+    'support_help': {'ar': 'الدعم وخدمة العملاء', 'en': 'Customer Support'},
     'guest_status': {'ar': 'زائر (تصفح فقط)', 'en': 'Guest User (Browse Mode)'},
     'logged_in_status': {'ar': 'مستخدم موثق', 'en': 'Verified Member'},
     'login_prompt': {'ar': 'سجّل رقمك لحفظ المفضلة ومتابعة الطلبات', 'en': 'Login to save favorites and track leads'},
@@ -358,20 +510,79 @@ class LocaleService extends ChangeNotifier {
     'logout_btn': {'ar': 'تسجيل الخروج', 'en': 'Sign Out'},
 
     // Compliance & Privacy Modal Text
-    'privacy_sheet_title': {'ar': 'الخصوصية والترخيص القانوني', 'en': 'Privacy & Legal Licensing'},
+    'privacy_sheet_title': {'ar': 'الخصوصية والشروط القانونية', 'en': 'Privacy & Legal Terms'},
     'privacy_sheet_text': {
-      'ar': 'منصة Aesthetic Way — رقم الترخيص: [LICENSE_PLACEHOLDER].\n\nتعتبر منصة Aesthetic Way أداة رقمية وتطبيقاً للربط والتسهيل بين المرضى والعملاء وبين العيادات والمراكز الطبية المعتمدة في دولة الإمارات العربية المتحدة. تتم كافة الاستشارات والتشخيصات والإجراءات الطبية والتواصل المباشر عبر الكوادر الطبية والعيادات المرخصة حصراً، وتلتزم المنصة بحماية وسرية بيانات المستخدمين.',
-      'en': 'Aesthetic Way Platform — License: [LICENSE_PLACEHOLDER].\n\nAesthetic Way is a premier discovery and connection platform facilitating seamless appointment leads between patients and certified aesthetic medical clinics in the UAE. All medical consultations, assessments, and procedures are handled directly by the licensed clinic or medical practitioner. User privacy and data protection are strictly upheld.'
+      'ar': 'منصة Aesthetic Way — دليل واكتشاف العيادات الطبية والتجميلية في دولة الإمارات العربية المتحدة.\n\nتعتبر منصة Aesthetic Way أداة رقمية وتطبيقاً للربط والتسهيل بين العملاء وبين العيادات والمراكز الطبية المعتمدة في الدولة. تتم كافة الاستشارات والتشخيصات والإجراءات الطبية والتواصل المباشر عبر الكوادر الطبية والعيادات المرخصة حصراً، وتلتزم المنصة بحماية وسرية بيانات المستخدمين.',
+      'en': 'Aesthetic Way Platform — Discovery and connection platform for certified aesthetic clinics in the UAE.\n\nAesthetic Way facilitates seamless lead connection between users and certified aesthetic medical clinics in the UAE. All medical consultations, assessments, and procedures are handled directly by the licensed clinic or medical practitioner. User privacy and data protection are strictly upheld.'
     },
 
-    // Concierge & Support Sheet Text
-    'concierge_title': {'ar': 'خدمة العملاء والكونسيرج', 'en': 'Concierge & Client Support'},
-    'concierge_desc': {'ar': 'يسعد فريق كونسيرج Aesthetic Way بمساعدتك في اختيار أفضل العيادات والإجابة عن استفساراتك اليومية.', 'en': 'Our Aesthetic Way Concierge is delighted to assist you in discovering top clinics and answering your inquiries.'},
+    // Customer Support Sheet Text
+    'concierge_title': {'ar': 'الدعم وخدمة العملاء', 'en': 'Customer Support'},
+    'concierge_desc': {
+      'ar': 'يسعد فريق خدمة عملاء Aesthetic Way بمساعدتك والإجابة عن استفساراتك حول استخدام المنصة والعيادات.',
+      'en': 'Our Aesthetic Way Customer Support team is delighted to assist you with inquiries regarding clinics and platform features.'
+    },
     'whatsapp_concierge': {'ar': 'محادثة فورية عبر الواتساب', 'en': 'Live Chat on WhatsApp'},
-    'call_concierge': {'ar': 'الاتصال بالرقم المجاني الموحد', 'en': 'Call Free Support Line'},
+    'call_concierge': {'ar': 'الاتصال بخدمة العملاء', 'en': 'Call Customer Support'},
     'contact_options_title': {'ar': 'خيارات التواصل المباشر مع العيادة', 'en': 'Direct Contact Options'},
     'reception_call': {'ar': 'اتصال فوري بالاستقبال', 'en': 'Call Reception'},
     'location_directions': {'ar': 'الاتجاهات عبر خرائط Google', 'en': 'Directions on Google Maps'},
-    'license_verified': {'ar': 'ترخيص معتمد: [LICENSE_PLACEHOLDER]', 'en': 'Verified License: [LICENSE_PLACEHOLDER]'},
+
+    // ==========================================
+    // REFERRAL & REWARDS SYSTEM (نظام الدعوات والمكافآت)
+    // ==========================================
+    'referral_nav_title': {'ar': 'برنامج المكافآت والدعوات', 'en': 'Referrals & Rewards'},
+    'referral_title': {'ar': 'برنامج الدعوات والمكافآت', 'en': 'Referral & Rewards'},
+    'referral_sub': {
+      'ar': 'ادعُ أصدقاءك واجمع النقاط للحصول على كود خصم 15% على الإجراءات التجميلية في العيادات الشريكة.',
+      'en': 'Invite friends, earn points, and redeem 15% discount codes on aesthetic treatments at partner clinics.'
+    },
+    'your_referral_code': {'ar': 'كود الدعوة الخاص بك', 'en': 'Your Referral Code'},
+    'copy_code': {'ar': 'نسخ الكود', 'en': 'Copy Code'},
+    'code_copied': {'ar': 'تم نسخ كود الدعوة بنجاح', 'en': 'Referral code copied successfully'},
+    'share_invite': {'ar': 'مشاركة رابط الدعوة', 'en': 'Share Invite'},
+    'invites_count': {'ar': 'الدعوات الناجحة', 'en': 'Successful Invites'},
+    'current_points': {'ar': 'النقاط الحالية', 'en': 'Current Points'},
+    'pts_suffix': {'ar': 'نقطة', 'en': 'pts'},
+    'collect_discount_btn': {'ar': 'استبدال 500 نقطة بكود خصم 15%', 'en': 'Redeem 500 pts for 15% Code'},
+    'collect_demo_btn': {'ar': 'توليد كود تجريبي (Demo)', 'en': 'Generate Demo Code'},
+    'referral_milestones_title': {'ar': 'مستويات النقاط والمكافآت', 'en': 'Points & Milestones'},
+    'referral_rule_note': {
+      'ar': 'الشروط: يُطبق كود الخصم (15%) في العيادة مباشرة على السعر الأصلي للإجراءات خارج باقات العروض. المنصة لا تدفع ولا تحصّل مبالغ الخصم.',
+      'en': 'Terms: The 15% discount is applied directly at the clinic on original treatment prices outside offers. The platform does not process payments.'
+    },
+    'discount_codes_title': {'ar': 'أكواد الخصم المُجمّعة (15%)', 'en': 'Issued 15% Discount Codes'},
+    'no_discount_codes': {'ar': 'لا توجد أكواد خصم نشطة حالياً. اجمع 500 نقطة لتوليد كود خصم 15%.', 'en': 'No active discount codes. Earn 500 points to collect a 15% code.'},
+    'code_status_available': {'ar': 'صالح للاستخدام في العيادة', 'en': 'Available for Clinic Use'},
+    'code_status_used': {'ar': 'تم استخدامه في العيادة', 'en': 'Redeemed in Clinic'},
+    'code_status_expired': {'ar': 'منتهي الصلاحية', 'en': 'Expired'},
+    'code_generated_success': {'ar': 'تم توليد كود الخصم بنجاح! احتفظ بالكود لإبرازه للعيادة.', 'en': 'Discount code generated successfully! Present it at the clinic.'},
+
+    // Clinic Portal Verification
+    'clinic_verify_code_title': {'ar': 'التحقق من كود الخصم (15%)', 'en': 'Verify 15% Discount Code'},
+    'clinic_verify_code_sub': {'ar': 'فحص صلاحية أكواد الخصم الترويجية الخاصة ببرنامج المكافآت', 'en': 'Validate patient 15% referral discount codes'},
+    'clinic_enter_code_hint': {'ar': 'أدخل كود الخصم (مثال: AW-15-7892)', 'en': 'Enter code (e.g. AW-15-7892)'},
+    'clinic_verify_btn': {'ar': 'فحص صلاحية الكود', 'en': 'Validate Code'},
+    'clinic_code_valid': {'ar': 'الكود صالح ومفعل — خصم 15% على الإجراءات خارج العروض', 'en': 'Code Valid — 15% off original non-offer treatment prices'},
+    'clinic_code_used': {'ar': 'تم استخدام هذا الكود مسبقاً', 'en': 'Code already redeemed'},
+    'clinic_code_invalid': {'ar': 'رمز الكود غير صحيح أو منتهي', 'en': 'Invalid or expired code'},
+    'clinic_mark_used_btn': {'ar': 'تسجيل استخدام الكود (تطبيق الخصم)', 'en': 'Mark Code as Redeemed'},
+    'clinic_code_redeemed_success': {'ar': 'تم تسجيل استخدام الكود وتطبيق الخصم بنجاح', 'en': 'Code marked as redeemed successfully'},
+    'referral_code_optional': {'ar': 'كود الدعوة (اختياري)', 'en': 'Referral Code (Optional)'},
+    'referral_code_hint': {'ar': 'أدخل كود صديقك للحصول على نقاط ترحيبية', 'en': 'Enter referral code for welcome points'},
+
+    // Admin Portal Referral Overview
+    'admin_total_referrals': {'ar': 'إجمالي الدعوات المسجلة', 'en': 'Total Referrals'},
+    'admin_issued_coupons': {'ar': 'أكواد الخصم المُصدرة (15%)', 'en': 'Issued 15% Codes'},
+    'admin_redeemed_coupons': {'ar': 'الأكواد المستخدمة بالعيادات', 'en': 'Redeemed In-Clinic'},
+
+    // Before / After Showcase
+    'before_after_title': {'ar': 'نتائج الإجراء (قبل وبعد)', 'en': 'Before & After Results'},
+    'before_after_sub': {'ar': 'نماذج ونتائج سريرية تجريبية للإجراء الطبي', 'en': 'Sample clinical aesthetic treatment outcomes'},
+    'before_label': {'ar': 'قبل', 'en': 'Before'},
+    'after_label': {'ar': 'بعد', 'en': 'After'},
+    'original_price_label': {'ar': 'السعر الأصلي', 'en': 'Original Price'},
+    'offer_price_label': {'ar': 'سعر العرض', 'en': 'Offer Price'},
+    'savings_badge': {'ar': 'توفير', 'en': 'Save'},
   };
 }

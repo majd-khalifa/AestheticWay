@@ -158,14 +158,21 @@ class _OfferCard extends StatelessWidget {
                         color: Colors.black.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        loc.isArabic
-                            ? '⏱️ ${offer.daysRemaining} أيام متبقية'
-                            : '⏱️ ${offer.daysRemaining} days left',
-                        style: AppTypography.caption.copyWith(
-                          color: Colors.white,
-                          fontSize: 9.5,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.schedule, size: 10, color: Colors.white),
+                          const SizedBox(width: 3),
+                          Text(
+                            loc.isArabic
+                                ? '${offer.daysRemaining} أيام متبقية'
+                                : '${offer.daysRemaining} days left',
+                            style: AppTypography.caption.copyWith(
+                              color: Colors.white,
+                              fontSize: 9.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -77,8 +77,8 @@ void main() {
         ),
       );
 
-      expect(find.text('👑 شريك ماسي VIP'), findsOneWidget);
-      expect(find.text('✨ إعلان مميز'), findsOneWidget);
+      expect(find.text('شريك ماسي VIP'), findsOneWidget);
+      expect(find.text('إعلان مميز'), findsOneWidget);
     });
 
     testWidgets('PractitionerBadge renders distinct roles', (WidgetTester tester) async {
@@ -225,7 +225,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Check Slide 1 content
-      expect(find.text('اكتشف نخبة العيادات'), findsOneWidget);
+      expect(find.text('عيادات التجميل والجلدية'), findsOneWidget);
       expect(find.text('تخطي'), findsOneWidget);
       expect(find.text('التالي'), findsOneWidget);
       expect(find.text('المتابعة كزائر'), findsOneWidget);
@@ -234,13 +234,13 @@ void main() {
       await tester.tap(find.text('التالي'));
       await tester.pumpAndSettle();
 
-      expect(find.text('قارن العروض الحصرية'), findsOneWidget);
+      expect(find.text('استعراض العروض والباقات'), findsOneWidget);
 
       // Tap Next to go to Slide 3
       await tester.tap(find.text('التالي'));
       await tester.pumpAndSettle();
 
-      expect(find.text('تواصل بثقة وسرية'), findsOneWidget);
+      expect(find.text('طلب تواصل واستشارة'), findsOneWidget);
       expect(find.text('ابدأ الآن'), findsOneWidget);
     });
 

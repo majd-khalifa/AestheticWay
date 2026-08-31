@@ -11,6 +11,7 @@ import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/register_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_main_nav_screen.dart';
+import 'package:aesthetic_way/features/admin/presentation/screens/admin_main_nav_screen.dart';
 
 /// Screen 2: Luxury Login Screen for Patient Authentication + Clinic Partner Portal Entry
 class LoginScreen extends StatefulWidget {
@@ -57,33 +58,53 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = false;
     });
 
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
-        transitionDuration: const Duration(milliseconds: 400),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(true);
+    } else {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
+    }
   }
 
   void _continueAsGuest() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
-        transitionDuration: const Duration(milliseconds: 400),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(false);
+    } else {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
+    }
   }
 
   void _onClinicPortalLogin() {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => const ClinicMainNavScreen(),
+        transitionDuration: const Duration(milliseconds: 400),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+
+  void _onAdminPortalLogin() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const AdminMainNavScreen(),
         transitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -112,6 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (Navigator.of(context).canPop())
+                        Align(
+                          alignment: loc.isArabic ? Alignment.topRight : Alignment.topLeft,
+                          child: IconButton(
+                            icon: Icon(Icons.close_rounded, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ),
                       // Official Logo
                       const Center(
                         child: AppBrandLogo.header(height: 38),
@@ -330,6 +359,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: const Icon(Icons.business_rounded, color: AppColors.accentChampagne, size: 18),
                         label: Text(
                           loc.tr('clinic_demo_login'),
+                          style: const TextStyle(
+                            color: AppColors.accentChampagne,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(
+                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.6),
+                            width: 1.0,
+                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Super Admin Portal Access Button
+                      OutlinedButton.icon(
+                        onPressed: _onAdminPortalLogin,
+                        icon: const Icon(Icons.admin_panel_settings_rounded, color: AppColors.accentChampagne, size: 18),
+                        label: Text(
+                          loc.tr('admin_demo_login'),
                           style: const TextStyle(
                             color: AppColors.accentChampagne,
                             fontWeight: FontWeight.w700,

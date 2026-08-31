@@ -30,37 +30,37 @@ class CategoryGrid extends StatelessWidget {
     CategoryItem(
       id: 'treatments',
       translationKey: 'cat_treatments',
-      icon: Icons.spa_outlined,
+      icon: Icons.auto_fix_high_rounded,
     ),
     CategoryItem(
       id: 'doctors',
       translationKey: 'cat_doctors',
-      icon: Icons.medical_information_outlined,
+      icon: Icons.medical_services_outlined,
     ),
     CategoryItem(
       id: 'skin_experts',
       translationKey: 'cat_skin_experts',
-      icon: Icons.face_retouching_natural_outlined,
+      icon: Icons.face_retouching_natural_rounded,
     ),
     CategoryItem(
       id: 'surgery',
       translationKey: 'cat_surgery',
-      icon: Icons.healing_outlined,
+      icon: Icons.healing_rounded,
     ),
     CategoryItem(
       id: 'products',
       translationKey: 'cat_products',
-      icon: Icons.inventory_2_outlined,
+      icon: Icons.shopping_bag_outlined,
     ),
     CategoryItem(
       id: 'articles',
       translationKey: 'cat_articles',
-      icon: Icons.article_outlined,
+      icon: Icons.menu_book_rounded,
     ),
     CategoryItem(
       id: 'clinics',
       translationKey: 'cat_clinics',
-      icon: Icons.domain_outlined,
+      icon: Icons.apartment_rounded,
     ),
   ];
 

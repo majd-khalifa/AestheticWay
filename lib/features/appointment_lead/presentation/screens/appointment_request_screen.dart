@@ -20,11 +20,17 @@ import 'package:aesthetic_way/features/appointment_lead/presentation/screens/app
 class AppointmentRequestScreen extends StatefulWidget {
   final ClinicModel clinic;
   final PractitionerModel? preselectedPractitioner;
+  final String? preselectedServiceName;
+  final String? selectedOfferTitle;
+  final String? selectedOfferId;
 
   const AppointmentRequestScreen({
     super.key,
     required this.clinic,
     this.preselectedPractitioner,
+    this.preselectedServiceName,
+    this.selectedOfferTitle,
+    this.selectedOfferId,
   });
 
   @override
@@ -64,10 +70,17 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     final availableTreatments = mockData.treatments
         .where((t) => widget.clinic.treatmentIds.contains(t.id))
         .toList();
-    if (availableTreatments.isNotEmpty) {
-      _selectedTreatment = availableTreatments.first.nameAr;
+
+    final validOptions = {
+      'استشارة تجميلية وجلدية عامة',
+      ...availableTreatments.map((t) => t.nameAr),
+    }.toList();
+
+    if (widget.preselectedServiceName != null &&
+        validOptions.contains(widget.preselectedServiceName)) {
+      _selectedTreatment = widget.preselectedServiceName;
     } else {
-      _selectedTreatment = 'استشارة تجميلية وجلدية عامة';
+      _selectedTreatment = validOptions.first;
     }
   }
 
@@ -140,17 +153,20 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       _isSubmitting = true;
     });
 
-    // Simulate short network request
     await Future.delayed(const Duration(milliseconds: 500));
 
     final randomCode = '#REQ-${10000 + Random().nextInt(89999)}';
+    final actualServiceName = widget.selectedOfferTitle != null
+        ? '${widget.selectedOfferTitle} (${_selectedTreatment ?? "استشارة"})'
+        : (_selectedTreatment ?? 'استشارة طبية');
+
     final request = AppointmentRequestModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       referenceCode: randomCode,
       clinicId: widget.clinic.id,
       clinicNameAr: widget.clinic.nameAr,
       branchNameAr: _selectedBranch?.nameAr ?? widget.clinic.areaAr,
-      serviceNameAr: _selectedTreatment ?? 'استشارة طبية',
+      serviceNameAr: actualServiceName,
       practitionerId: _selectedPractitioner?.id,
       practitionerNameAr: _selectedPractitioner?.nameAr,
       practitionerType: _selectedPractitioner?.type,
@@ -184,63 +200,85 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mockData = MockDataService();
     final loc = LocaleService();
+    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
-    final practitioners = mockData.getPractitionersForClinic(widget.clinic.id);
+
     final availableTreatments = mockData.treatments
         .where((t) => widget.clinic.treatmentIds.contains(t.id))
         .toList();
 
-    return ListenableBuilder(
-      listenable: loc,
-      builder: (context, _) {
-        return Scaffold(
+    final practitioners = mockData.practitioners
+        .where((p) => widget.clinic.practitionerIds.contains(p.id))
+        .toList();
+
+    // 1. Resilient Service / Treatment options (strictly unique)
+    final defaultTreatment = loc.isArabic ? 'استشارة تجميلية وجلدية عامة' : 'General Aesthetic & Derma Consultation';
+    final Set<String> distinctTreatments = {defaultTreatment};
+    for (final t in availableTreatments) {
+      final name = loc.isArabic ? t.nameAr : t.nameEn;
+      if (name.trim().isNotEmpty) {
+        distinctTreatments.add(name);
+      }
+    }
+    final treatmentList = distinctTreatments.toList();
+
+    if (_selectedTreatment == null || !distinctTreatments.contains(_selectedTreatment)) {
+      _selectedTreatment = defaultTreatment;
+    }
+
+    // 2. Resilient Branch options
+    final branches = widget.clinic.branches.toSet().toList();
+    if (_selectedBranch != null && !branches.contains(_selectedBranch)) {
+      _selectedBranch = branches.isNotEmpty ? branches.first : null;
+    }
+
+    // 3. Resilient Practitioner options
+    final practitionerList = practitioners.toSet().toList();
+    if (_selectedPractitioner != null && !practitionerList.contains(_selectedPractitioner)) {
+      _selectedPractitioner = null;
+    }
+
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        backgroundColor: AppColors.bg(context),
+        appBar: AppBar(
           backgroundColor: AppColors.bg(context),
-          appBar: AppBar(
-            backgroundColor: AppColors.bg(context),
-            title: Text(
-              loc.tr('lead_form_title'),
-              style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-              ),
-            ),
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                size: 18,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-              ),
-              onPressed: () => Navigator.pop(context),
+          elevation: 0,
+          title: Text(
+            loc.tr('request_consultation'),
+            style: AppTypography.screenTitle.copyWith(
+              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
             ),
           ),
-          body: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              children: [
-                // Clinic Summary Card
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              size: 18,
+              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            children: [
+              // Offer Summary Card (If opened from an offer)
+              if (widget.selectedOfferTitle != null && widget.selectedOfferTitle!.isNotEmpty) ...[
                 LuxuryCard(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   child: Row(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          widget.clinic.coverImageUrl,
-                          width: 52,
-                          height: 52,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            width: 52,
-                            height: 52,
-                            color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                            child: Icon(
-                              Icons.local_hospital_outlined,
-                              color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
-                            ),
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                          shape: BoxShape.circle,
                         ),
+                        child: const Icon(Icons.local_offer_outlined, color: AppColors.accentChampagne, size: 20),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -248,17 +286,21 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              loc.isArabic ? widget.clinic.nameAr : widget.clinic.nameEn,
-                              style: AppTypography.cardTitle.copyWith(
-                                fontSize: 14.5,
+                              loc.isArabic ? 'باقة العرض المختارة' : 'Selected Offer Package',
+                              style: const TextStyle(
+                                color: AppColors.accentChampagne,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             Text(
-                              '${widget.clinic.city} • ${loc.isArabic ? widget.clinic.areaAr : widget.clinic.areaEn}',
-                              style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                              widget.selectedOfferTitle!,
+                              style: AppTypography.cardTitle.copyWith(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              ),
                             ),
                           ],
                         ),
@@ -266,52 +308,62 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
+              ],
 
-                // Branch Selector
-                if (widget.clinic.branches.isNotEmpty) ...[
-                  Text(
-                    loc.tr('select_branch'),
-                    style: AppTypography.cardTitle.copyWith(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  LuxuryCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<ClinicBranch>(
-                        value: _selectedBranch,
-                        isExpanded: true,
-                        dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                        iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                        items: widget.clinic.branches.map((b) {
-                          return DropdownMenuItem(
-                            value: b,
-                            child: Text(
-                              loc.isArabic ? '${b.nameAr} (${b.areaAr})' : '${b.nameEn} (${b.areaEn})',
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedBranch = val;
-                          });
-                        },
+              // Clinic Summary Card
+              LuxuryCard(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        widget.clinic.coverImageUrl,
+                        width: 52,
+                        height: 52,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Container(
+                          width: 52,
+                          height: 52,
+                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          child: Icon(
+                            Icons.local_hospital_outlined,
+                            color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loc.isArabic ? widget.clinic.nameAr : widget.clinic.nameEn,
+                            style: AppTypography.cardTitle.copyWith(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${widget.clinic.city} • ${loc.isArabic ? widget.clinic.areaAr : widget.clinic.areaEn}',
+                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
 
-                // Service / Treatment Selection
+              // Branch Selector
+              if (branches.isNotEmpty) ...[
                 Text(
-                  loc.tr('select_service'),
+                  loc.tr('select_branch'),
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
@@ -322,104 +374,133 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                 LuxuryCard(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedTreatment,
+                    child: DropdownButton<ClinicBranch>(
+                      value: _selectedBranch,
                       isExpanded: true,
                       dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
                       iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      items: [
-                        DropdownMenuItem(
-                          value: 'استشارة تجميلية وجلدية عامة',
+                      items: branches.map((b) {
+                        return DropdownMenuItem(
+                          value: b,
                           child: Text(
-                            loc.isArabic ? 'استشارة تجميلية وجلدية عامة' : 'General Aesthetic & Derma Consultation',
+                            loc.isArabic ? '${b.nameAr} (${b.areaAr})' : '${b.nameEn} (${b.areaEn})',
                             style: AppTypography.bodyMedium.copyWith(
                               color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                             ),
                           ),
-                        ),
-                        ...availableTreatments.map((t) {
-                          return DropdownMenuItem(
-                            value: t.nameAr,
-                            child: Text(
-                              loc.isArabic ? t.nameAr : t.nameEn,
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
+                        );
+                      }).toList(),
                       onChanged: (val) {
                         setState(() {
-                          _selectedTreatment = val;
+                          _selectedBranch = val;
                         });
                       },
                     ),
                   ),
                 ),
                 const SizedBox(height: 14),
+              ],
 
-                // Preferred Practitioner (Optional)
-                if (practitioners.isNotEmpty) ...[
-                  Text(
-                    loc.tr('select_practitioner'),
-                    style: AppTypography.cardTitle.copyWith(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  LuxuryCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<PractitionerModel?>(
-                        value: _selectedPractitioner,
-                        isExpanded: true,
-                        dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                        iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                        hint: Text(
-                          loc.tr('any_practitioner'),
-                          style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
+              // Service / Treatment Selection
+              Text(
+                loc.tr('select_service'),
+                style: AppTypography.cardTitle.copyWith(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              LuxuryCard(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedTreatment,
+                    isExpanded: true,
+                    dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                    iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    items: treatmentList.map((tName) {
+                      return DropdownMenuItem<String>(
+                        value: tName,
+                        child: Text(
+                          tName,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                          ),
                         ),
-                        items: [
-                          DropdownMenuItem<PractitionerModel?>(
-                            value: null,
-                            child: Text(
-                              loc.tr('any_practitioner'),
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedTreatment = val;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Preferred Practitioner (Optional)
+              if (practitionerList.isNotEmpty) ...[
+                Text(
+                  loc.tr('select_practitioner'),
+                  style: AppTypography.cardTitle.copyWith(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                LuxuryCard(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<PractitionerModel?>(
+                      value: _selectedPractitioner,
+                      isExpanded: true,
+                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                      iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      hint: Text(
+                        loc.tr('any_practitioner'),
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
+                      ),
+                      items: [
+                        DropdownMenuItem<PractitionerModel?>(
+                          value: null,
+                          child: Text(
+                            loc.tr('any_practitioner'),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                             ),
                           ),
-                          ...practitioners.map((p) {
-                            return DropdownMenuItem<PractitionerModel?>(
-                              value: p,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    loc.isArabic ? p.nameAr : p.nameEn,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                                    ),
+                        ),
+                        ...practitionerList.map((p) {
+                          return DropdownMenuItem<PractitionerModel?>(
+                            value: p,
+                            child: Row(
+                              children: [
+                                Text(
+                                  loc.isArabic ? p.nameAr : p.nameEn,
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                                   ),
-                                  const SizedBox(width: 8),
-                                  PractitionerBadge(type: p.type, showIcon: false),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedPractitioner = val;
-                          });
-                        },
-                      ),
+                                ),
+                                const SizedBox(width: 8),
+                                PractitionerBadge(type: p.type, showIcon: false),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedPractitioner = val;
+                        });
+                      },
                     ),
                   ),
-                  const SizedBox(height: 14),
-                ],
+                ),
+                const SizedBox(height: 14),
+              ],
 
                 // Preferred Date & Time Window
                 Text(
@@ -691,8 +772,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
               ],
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
   }
 }

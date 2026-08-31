@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/distance_chip.dart';
-import 'package:aesthetic_way/core/widgets/license_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
@@ -196,8 +194,6 @@ class _NearbyClinicCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (clinic.subscriptionTier != SubscriptionTier.basic)
-                            TierBadge(tier: clinic.subscriptionTier, isCompact: true),
                         ],
                       ),
                       const SizedBox(height: 3),
@@ -224,9 +220,6 @@ class _NearbyClinicCard extends StatelessWidget {
                           DistanceChip(
                             distanceKm: clinic.distanceKm,
                             areaName: loc.isArabic ? clinic.areaAr : clinic.areaEn,
-                          ),
-                          const LicenseBadge(
-                            isCompact: true,
                           ),
                         ],
                       ),

@@ -11,6 +11,11 @@ import 'package:aesthetic_way/features/clinics/presentation/screens/clinics_list
 import 'package:aesthetic_way/features/clinics/presentation/widgets/contact_options_sheet.dart';
 import 'package:aesthetic_way/features/clinics/presentation/widgets/filter_bottom_sheet.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
+import 'package:aesthetic_way/features/offers/presentation/screens/offers_screen.dart';
+import 'package:aesthetic_way/features/treatments/presentation/screens/treatments_screen.dart';
+import 'package:aesthetic_way/features/practitioners/presentation/screens/practitioners_screen.dart';
+import 'package:aesthetic_way/features/products/presentation/screens/products_screen.dart';
+import 'package:aesthetic_way/features/articles/presentation/screens/articles_screen.dart';
 import '../widgets/home_header.dart';
 import '../widgets/featured_ads_carousel.dart';
 import '../widgets/category_grid.dart';
@@ -90,79 +95,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleCategoryTap(CategoryItem category) {
-    if (category.id == 'articles') {
-      _showArticlesDialog();
-      return;
-    }
-
-    String? categoryFilter;
-    if (category.id != 'clinics') {
-      categoryFilter = category.id;
-    }
-
-    if (widget.onNavigateToClinics != null) {
-      widget.onNavigateToClinics!(categoryFilter);
-    } else {
-      Navigator.push(
-        context,
-        LuxuryPageRoute(
-          page: ClinicsListScreen(
-            initialCategory: categoryFilter,
-            initialCity: _selectedCity,
-          ),
-        ),
-      );
-    }
-  }
-
-  void _showArticlesDialog() {
-    final loc = LocaleService();
-    final isDark = AppColors.isDark(context);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Row(
-          children: [
-            const Icon(Icons.article_outlined, color: AppColors.accentChampagne, size: 22),
-            const SizedBox(width: 8),
-            Text(
-              loc.tr('cat_articles'),
-              style: AppTypography.cardTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                fontWeight: FontWeight.bold,
+    switch (category.id) {
+      case 'offers':
+        Navigator.push(context, LuxuryPageRoute(page: const OffersScreen()));
+        break;
+      case 'treatments':
+        Navigator.push(context, LuxuryPageRoute(page: const TreatmentsScreen()));
+        break;
+      case 'doctors':
+        Navigator.push(context, LuxuryPageRoute(page: const PractitionersScreen(initialRoleFilter: 'doctors')));
+        break;
+      case 'skin_experts':
+        Navigator.push(context, LuxuryPageRoute(page: const PractitionersScreen(initialRoleFilter: 'skin_experts')));
+        break;
+      case 'surgery':
+        Navigator.push(context, LuxuryPageRoute(page: const TreatmentsScreen(initialCategory: 'Plastic Surgery')));
+        break;
+      case 'products':
+        Navigator.push(context, LuxuryPageRoute(page: const ProductsScreen()));
+        break;
+      case 'articles':
+        Navigator.push(context, LuxuryPageRoute(page: const ArticlesScreen()));
+        break;
+      case 'clinics':
+      default:
+        if (widget.onNavigateToClinics != null) {
+          widget.onNavigateToClinics!(null);
+        } else {
+          Navigator.push(
+            context,
+            LuxuryPageRoute(
+              page: ClinicsListScreen(
+                initialCity: _selectedCity,
               ),
             ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              loc.isArabic
-                  ? 'دليل العناية الطبية والتجميلية في الإمارات:\n\n• أحدث تقنيات النضارة وتجديد البشرة\n• الفروقات الطبية بين البوتوكس والفيلر\n• بروتوكولات العناية بالبشرة بعد جلسات الليزر'
-                  : 'UAE Aesthetic & Medical Care Guides:\n\n• Latest skin rejuvenation breakthroughs\n• Medical differences between Botox and Fillers\n• Post-laser skincare and hydration protocols',
-              style: AppTypography.bodyMedium.copyWith(
-                color: isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary,
-                height: 1.6,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              loc.isArabic ? 'إغلاق' : 'Close',
-              style: const TextStyle(color: AppColors.accentChampagne, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
+          );
+        }
+        break;
+    }
   }
 
   void _openFilterSheet() {

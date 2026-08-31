@@ -27,17 +27,6 @@ extension PractitionerTypeExtension on PractitionerType {
         return 'Licensed Professional';
     }
   }
-
-  String get iconEmoji {
-    switch (this) {
-      case PractitionerType.doctor:
-        return '👨‍⚕️';
-      case PractitionerType.nurse:
-        return '👩‍⚕️';
-      case PractitionerType.licensedProfessional:
-        return '🔬';
-    }
-  }
 }
 
 /// Healthcare professional entity

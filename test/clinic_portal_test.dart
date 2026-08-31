@@ -9,10 +9,15 @@ import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_offers_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_profile_screen.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 
 void main() {
+  setUp(() {
+    LocaleService().setLanguage(AppLanguage.arabic);
+  });
+
   group('Clinic Portal Unit Tests - Service & State', () {
     test('ClinicPortalService initializes with active clinic, leads, offers and practitioners', () {
       final service = ClinicPortalService();
