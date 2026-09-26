@@ -6,6 +6,10 @@ import 'package:aesthetic_way/features/offers/presentation/screens/offers_screen
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/data/leads_repository.dart';
 
 void main() {
   setUp(() {
@@ -68,7 +72,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: const OffersScreen(),
+          home: OffersScreen(
+            initialOffers: MockDataService().offers,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -116,5 +122,150 @@ void main() {
       // Mandatory success message must be present
       expect(find.text('تم إرسال طلبك وستتواصل العيادة معك'), findsOneWidget);
     });
+
+    testWidgets('Practitioner dropdown safely renders, opens without assertion error, and supports null preference even with duplicate rawPractitioners', (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1800));
+
+      final clinicWithDuplicatePractitioners = ClinicModel(
+        id: testClinic.id,
+        nameAr: testClinic.nameAr,
+        nameEn: testClinic.nameEn,
+        descriptionAr: testClinic.descriptionAr,
+        descriptionEn: testClinic.descriptionEn,
+        coverImageUrl: testClinic.coverImageUrl,
+        galleryImages: testClinic.galleryImages,
+        logoUrl: testClinic.logoUrl,
+        rating: testClinic.rating,
+        reviewCount: testClinic.reviewCount,
+        subscriptionTier: testClinic.subscriptionTier,
+        city: testClinic.city,
+        areaAr: testClinic.areaAr,
+        addressAr: testClinic.addressAr,
+        branches: testClinic.branches,
+        rawPractitioners: [
+          {
+            'id': 'p-1',
+            'name_ar': 'د. سارة المنصوري',
+            'name_en': 'Dr. Sara Al Mansoori',
+            'type': 'doctor',
+          },
+          // Duplicate with identical id to test deduplication safety
+          {
+            'id': 'p-1',
+            'name_ar': 'د. سارة المنصوري (مكرر)',
+            'name_en': 'Dr. Sara Al Mansoori (Duplicate)',
+            'type': 'doctor',
+          },
+          {
+            'id': 'p-2',
+            'name_ar': 'د. أحمد خليل',
+            'name_en': 'Dr. Ahmed Khalil',
+            'type': 'doctor',
+          },
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: AppointmentRequestScreen(
+            clinic: clinicWithDuplicatePractitioners,
+            // Preselected practitioner with non-existent id
+            preselectedPractitioner: const PractitionerModel(
+              id: 'non-existent-p-99',
+              nameAr: 'غير موجود',
+              nameEn: 'Non Existent',
+              type: PractitionerType.doctor,
+              specialtyAr: 'جلدية',
+              specialtyEn: 'Derma',
+              classificationAr: 'استشاري',
+              licenseAuthority: 'DHA',
+              licenseNumber: '123',
+              avatarUrl: '',
+              yearsOfExperience: 5,
+              rating: 5.0,
+              reviewCount: 10,
+              languages: ['ar'],
+              clinicId: 'c1',
+              clinicNameAr: 'ع1',
+              procedures: [],
+              aboutAr: '',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Ensure form renders without any DropdownButton assertion crash
+      expect(find.byType(AppointmentRequestScreen), findsOneWidget);
+
+      // Verify the practitioner dropdown is present and can be tapped without assertion
+      final practitionerDropdown = find.byWidgetPredicate((widget) {
+        return widget is DropdownButton<String?> && widget.value == null;
+      });
+      expect(practitionerDropdown, findsOneWidget);
+
+      // Open the dropdown menu
+      await tester.tap(practitionerDropdown);
+      await tester.pumpAndSettle();
+
+      // Both unique practitioners and 'any_practitioner' option must be rendered in dropdown overlay
+      expect(find.text('د. سارة المنصوري').last, findsOneWidget);
+      expect(find.text('د. أحمد خليل').last, findsOneWidget);
+
+      // Tap on Dr. Ahmed Khalil
+      await tester.tap(find.text('د. أحمد خليل').last);
+      await tester.pumpAndSettle();
+
+      // Ensure selection updated cleanly without error
+      final updatedDropdown = find.byWidgetPredicate((widget) {
+        return widget is DropdownButton<String?> && widget.value == 'p-2';
+      });
+      expect(updatedDropdown, findsOneWidget);
+    });
+
+    testWidgets('AppointmentRequestScreen displays exact Arabic message on 429 duplicate submission', (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1800));
+
+      final mockRepo = _Mock429LeadsRepository();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: AppointmentRequestScreen(
+            clinic: testClinic,
+            leadsRepository: mockRepo,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Enter name and phone
+      await tester.enterText(find.byType(TextFormField).first, 'مريض تجريبي');
+      await tester.enterText(find.byType(TextFormField).at(1), '501234567');
+
+      // Check consent
+      final checkbox = find.byType(Checkbox);
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+
+      // Tap submit
+      final submitBtn = find.text(LocaleService().tr('submit_lead_btn'));
+      await tester.tap(submitBtn);
+      await tester.pumpAndSettle();
+
+      // Expect exact user-requested 429 duplicate message
+      expect(find.text('تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'), findsOneWidget);
+    });
   });
+}
+
+class _Mock429LeadsRepository extends LeadsRepository {
+  @override
+  Future<LeadSubmitResult> createLead(Map<String, dynamic> payload) async {
+    throw ApiException(
+      message: 'A request for this service at this clinic was already submitted recently.',
+      statusCode: 429,
+    );
+  }
 }

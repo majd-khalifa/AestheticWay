@@ -5,8 +5,11 @@ import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 import 'package:aesthetic_way/features/referral/services/referral_service.dart';
 
 /// Screen 3: Luxury Registration Screen with Full Name, Phone, Email, Password & Terms
@@ -31,6 +34,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _agreedToTerms = false;
   bool _isLoading = false;
 
+  Map<String, String> _serverFieldErrors = {};
+  String? _serverErrorMessage;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -47,45 +53,95 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (!_agreedToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.tr('val_terms_required')),
-          backgroundColor: AppColors.errorRed,
-        ),
+      showAppSnackBar(
+        context,
+        loc.tr('val_terms_required'),
+        type: AppSnackBarType.error,
       );
       return;
     }
 
     setState(() {
       _isLoading = true;
+      _serverFieldErrors = {};
+      _serverErrorMessage = null;
     });
 
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
-
+    final fullName = _nameController.text.trim();
     final phone = _phoneController.text.trim();
-    final formattedPhone = phone.startsWith('+971') ? phone : '+971 $phone';
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
     final referralCode = _referralCodeController.text.trim();
 
-    if (referralCode.isNotEmpty) {
-      ReferralService().registerInvite(referralCode: referralCode);
-    }
+    try {
+      final response = await AuthRepository().register(
+        fullName: fullName,
+        phone: phone,
+        password: password,
+        email: email.isNotEmpty ? email : null,
+        referralCode: referralCode.isNotEmpty ? referralCode : null,
+      );
 
-    Navigator.push(
-      context,
-      LuxuryPageRoute(
-        page: OtpScreen(
-          purpose: OtpPurpose.registration,
-          targetContact: formattedPhone,
-          userName: _nameController.text.trim(),
-          userEmail: _emailController.text.trim(),
+      if (referralCode.isNotEmpty && referralCode.toLowerCase() != 'string') {
+        ReferralService().registerInvite(referralCode: referralCode);
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      showAppSnackBar(
+        context,
+        response.message.isNotEmpty
+            ? response.message
+            : (loc.isArabic ? 'تم إنشاء الحساب، يرجى تأكيد رمز التحقق' : 'Account created, please verify OTP'),
+        type: AppSnackBarType.success,
+      );
+
+      final normalizedPhone = AuthRepository.normalizePhone(phone);
+
+      Navigator.push(
+        context,
+        LuxuryPageRoute(
+          page: OtpScreen(
+            purpose: OtpPurpose.registration,
+            targetContact: normalizedPhone,
+            userName: fullName,
+            userEmail: email,
+          ),
         ),
-      ),
-    );
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _serverErrorMessage = e.message;
+        if (e.fieldErrors != null) {
+          _serverFieldErrors = e.fieldErrors!.map(
+            (key, val) => MapEntry(key, val.join(' - ')),
+          );
+        } else {
+          _serverFieldErrors.clear();
+        }
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _serverErrorMessage = e.toString();
+      });
+      showAppSnackBar(
+        context,
+        e.toString(),
+        type: AppSnackBarType.error,
+      );
+    }
   }
 
   @override
@@ -155,6 +211,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fontSize: 13.5,
                               fontWeight: FontWeight.w500,
                             ),
+                            onChanged: (_) {
+                              if (_serverFieldErrors.containsKey('full_name')) {
+                                setState(() => _serverFieldErrors.remove('full_name'));
+                              }
+                            },
                             decoration: InputDecoration(
                               labelText: loc.tr('full_name'),
                               hintText: loc.tr('name_hint'),
@@ -164,12 +225,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                borderSide: BorderSide(
+                                  color: _serverFieldErrors.containsKey('full_name')
+                                      ? AppColors.errorRed
+                                      : AppColors.border(context),
+                                  width: 0.8,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                  color: _serverFieldErrors.containsKey('full_name')
+                                      ? AppColors.errorRed
+                                      : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
                                   width: 1.4,
                                 ),
                               ),
@@ -181,213 +249,426 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 12),
-
-                          // 2. Phone Number (+971)
-                          TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
+                          if (_serverFieldErrors.containsKey('full_name'))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                              child: Text(
+                                _serverFieldErrors['full_name']!,
+                                style: const TextStyle(color: AppColors.errorRed, fontSize: 11.5),
+                              ),
                             ),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('phone_uae'),
-                              hintText: loc.tr('phone_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixText: '+971  ',
-                              prefixStyle: TextStyle(
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                fontWeight: FontWeight.bold,
+                          const SizedBox(height: 14),
+
+                          // 2. UAE Phone Number with fixed +971 prefix on the left
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: TextFormField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  textDirection: TextDirection.ltr,
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.5,
+                                  ),
+                                  onChanged: (_) {
+                                    if (_serverFieldErrors.containsKey('phone')) {
+                                      setState(() => _serverFieldErrors.remove('phone'));
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: loc.tr('phone_uae'),
+                                    hintText: '50 123 4567',
+                                    hintStyle: TextStyle(
+                                      color: AppColors.mutedText(context).withValues(alpha: 0.5),
+                                      fontSize: 13,
+                                      letterSpacing: 0.5,
+                                    ),
+                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                                    prefixIcon: Container(
+                                      margin: const EdgeInsets.only(right: 10),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          right: BorderSide(
+                                            color: AppColors.border(context),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.phone_outlined,
+                                            color: AppColors.accentChampagne,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '+971',
+                                            style: TextStyle(
+                                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 13.5,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('phone')
+                                            ? AppColors.errorRed
+                                            : AppColors.border(context),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('phone')
+                                            ? AppColors.errorRed
+                                            : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
+                                        width: 1.4,
+                                      ),
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.errorRed, width: 1.0),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.errorRed, width: 1.4),
+                                    ),
+                                  ),
+                                  validator: (val) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      return loc.tr('val_phone_required');
+                                    }
+                                    final digits = val.replaceAll(RegExp(r'\D'), '');
+                                    if (digits.length < 8) {
+                                      return loc.isArabic
+                                          ? 'يرجى إدخال رقم هاتف محلي صالح (مثال: 501234567)'
+                                          : 'Please enter a valid local number (e.g. 501234567)';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              if (_serverFieldErrors.containsKey('phone'))
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  child: Text(
+                                    _serverFieldErrors['phone']!,
+                                    style: const TextStyle(
+                                      color: AppColors.errorRed,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 3. Email Address (LTR)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: TextFormField(
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textDirection: TextDirection.ltr,
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  onChanged: (_) {
+                                    if (_serverFieldErrors.containsKey('email')) {
+                                      setState(() => _serverFieldErrors.remove('email'));
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: loc.tr('email_address'),
+                                    hintText: 'name@example.com',
+                                    hintStyle: TextStyle(
+                                      color: AppColors.mutedText(context).withValues(alpha: 0.5),
+                                      fontSize: 13,
+                                    ),
+                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                                    prefixIcon: Icon(Icons.email_outlined, color: AppColors.mutedText(context), size: 19),
+                                    filled: true,
+                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('email')
+                                            ? AppColors.errorRed
+                                            : AppColors.border(context),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('email')
+                                            ? AppColors.errorRed
+                                            : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
+                                        width: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                  validator: (val) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      return null; // email optional in backend
+                                    }
+                                    if (!val.contains('@') || !val.contains('.')) {
+                                      return loc.tr('val_email_invalid');
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              if (_serverFieldErrors.containsKey('email'))
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  child: Text(
+                                    _serverFieldErrors['email']!,
+                                    style: const TextStyle(
+                                      color: AppColors.errorRed,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 4. Password (Min 8 chars, LTR)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: _obscurePassword,
+                                  textDirection: TextDirection.ltr,
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  onChanged: (_) {
+                                    if (_serverFieldErrors.containsKey('password')) {
+                                      setState(() => _serverFieldErrors.remove('password'));
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: loc.tr('password_label'),
+                                    hintText: '••••••••',
+                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                                    prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                        color: AppColors.mutedText(context),
+                                        size: 18,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('password')
+                                            ? AppColors.errorRed
+                                            : AppColors.border(context),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('password')
+                                            ? AppColors.errorRed
+                                            : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
+                                        width: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                  validator: (val) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      return loc.isArabic ? 'كلمة المرور مطلوبة' : 'Password is required';
+                                    }
+                                    if (val.length < 8) {
+                                      return loc.tr('val_password_short');
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              if (_serverFieldErrors.containsKey('password'))
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  child: Text(
+                                    _serverFieldErrors['password']!,
+                                    style: const TextStyle(
+                                      color: AppColors.errorRed,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 5. Confirm Password (LTR)
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: TextFormField(
+                              controller: _confirmPasswordController,
+                              obscureText: _obscureConfirmPassword,
+                              textDirection: TextDirection.ltr,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                                 fontSize: 13.5,
+                                fontWeight: FontWeight.w500,
                               ),
-                              prefixIcon: Icon(Icons.phone_outlined, color: AppColors.mutedText(context), size: 19),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                                  width: 1.4,
+                              decoration: InputDecoration(
+                                labelText: loc.tr('confirm_password_label'),
+                                hintText: '••••••••',
+                                labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                                prefixIcon: Icon(Icons.lock_reset_rounded, color: AppColors.mutedText(context), size: 19),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                    color: AppColors.mutedText(context),
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                                    });
+                                  },
+                                ),
+                                filled: true,
+                                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                    width: 1.4,
+                                  ),
                                 ),
                               ),
+                              validator: (val) {
+                                if (val == null || val.isEmpty) {
+                                  return loc.isArabic ? 'يرجى تأكيد كلمة المرور' : 'Please confirm password';
+                                }
+                                if (val != _passwordController.text) {
+                                  return loc.tr('val_password_mismatch');
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (val) {
-                              if (val == null || val.trim().length < 8) {
-                                return loc.tr('val_phone_required');
-                              }
-                              return null;
-                            },
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
 
-                          // 3. Email Address
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('email_address'),
-                              hintText: loc.tr('email_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.email_outlined, color: AppColors.mutedText(context), size: 19),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                                  width: 1.4,
+                          // 6. Referral Code (Optional, LTR)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: TextFormField(
+                                  controller: _referralCodeController,
+                                  textDirection: TextDirection.ltr,
+                                  textAlign: TextAlign.left,
+                                  textCapitalization: TextCapitalization.characters,
+                                  style: TextStyle(
+                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.8,
+                                  ),
+                                  onChanged: (_) {
+                                    if (_serverFieldErrors.containsKey('referral_code')) {
+                                      setState(() => _serverFieldErrors.remove('referral_code'));
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: loc.tr('referral_code_optional'),
+                                    hintText: 'e.g. VIP2026',
+                                    hintStyle: TextStyle(
+                                      color: AppColors.mutedText(context).withValues(alpha: 0.5),
+                                      fontSize: 13,
+                                    ),
+                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                                    prefixIcon: const Icon(Icons.card_giftcard_outlined, color: AppColors.accentChampagne, size: 19),
+                                    filled: true,
+                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('referral_code')
+                                            ? AppColors.errorRed
+                                            : AppColors.border(context),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _serverFieldErrors.containsKey('referral_code')
+                                            ? AppColors.errorRed
+                                            : AppColors.accentChampagne,
+                                        width: 1.4,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty || !val.contains('@')) {
-                                return loc.tr('val_email_invalid');
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-
-                          // 4. Password
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('password_label'),
-                              hintText: loc.tr('password_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                  color: AppColors.mutedText(context),
-                                  size: 18,
+                              if (_serverFieldErrors.containsKey('referral_code'))
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  child: Text(
+                                    _serverFieldErrors['referral_code']!,
+                                    style: const TextStyle(
+                                      color: AppColors.errorRed,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              ),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                                  width: 1.4,
-                                ),
-                              ),
-                            ),
-                            validator: (val) {
-                              if (val == null || val.trim().length < 6) {
-                                return loc.tr('val_password_short');
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-
-                          // 5. Confirm Password
-                          TextFormField(
-                            controller: _confirmPasswordController,
-                            obscureText: _obscureConfirmPassword,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('confirm_password_label'),
-                              hintText: loc.tr('password_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.lock_reset_rounded, color: AppColors.mutedText(context), size: 19),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                  color: AppColors.mutedText(context),
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                                  });
-                                },
-                              ),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                                  width: 1.4,
-                                ),
-                              ),
-                            ),
-                            validator: (val) {
-                              if (val != _passwordController.text) {
-                                return loc.tr('val_password_mismatch');
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-
-                          // 6. Referral Code (Optional)
-                          TextFormField(
-                            controller: _referralCodeController,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('referral_code_optional'),
-                              hintText: loc.tr('referral_code_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.card_giftcard_outlined, color: AppColors.accentChampagne, size: 19),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: AppColors.accentChampagne,
-                                  width: 1.4,
-                                ),
-                              ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
@@ -443,6 +724,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       isLoading: _isLoading,
                       onPressed: _onRegister,
                     ),
+
+                    // Server Error Alert Banner
+                    if (_serverErrorMessage != null) ...[
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.errorRed.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.errorRed.withValues(alpha: 0.45),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.errorRed,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _serverErrorMessage!,
+                                style: const TextStyle(
+                                  color: AppColors.errorRed,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
 
                     // Already Have Account Link

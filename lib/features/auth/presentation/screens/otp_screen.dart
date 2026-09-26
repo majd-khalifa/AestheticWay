@@ -5,18 +5,33 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_main_nav_screen.dart';
+import 'package:aesthetic_way/features/admin/presentation/screens/admin_main_nav_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
 enum OtpPurpose {
   registration,
   login,
-  passwordReset,
+  passwordReset;
+
+  String toApiPurpose() {
+    switch (this) {
+      case OtpPurpose.registration:
+        return 'registration';
+      case OtpPurpose.login:
+        return 'login';
+      case OtpPurpose.passwordReset:
+        return 'password_reset';
+    }
+  }
 }
 
-/// Screen 4: Luxury Interactive OTP Verification Screen with Resend Timer & Auto-Focus Boxes
+/// Screen 4: Luxury Interactive OTP Verification Screen with 6-Digit Auto-Focus Boxes
 class OtpScreen extends StatefulWidget {
   final OtpPurpose purpose;
   final String targetContact;
@@ -36,12 +51,14 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  // 6 digits required by Django backend (apps.accounts)
+  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
-  int _resendSeconds = 45;
+  int _resendSeconds = 60;
   Timer? _timer;
   bool _isLoading = false;
+  bool _isResending = false;
 
   @override
   void initState() {
@@ -52,7 +69,7 @@ class _OtpScreenState extends State<OtpScreen> {
   void _startCountdown() {
     _timer?.cancel();
     setState(() {
-      _resendSeconds = 45;
+      _resendSeconds = 60;
     });
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_resendSeconds > 0) {
@@ -83,12 +100,11 @@ class _OtpScreenState extends State<OtpScreen> {
     final loc = LocaleService();
     final code = _otpCode;
 
-    if (code.length < 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.tr('val_otp_invalid')),
-          backgroundColor: AppColors.errorRed,
-        ),
+    if (code.length < 6) {
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'يرجى إدخال كود التحقق المكون من 6 أرقام' : 'Please enter the 6-digit verification code',
+        type: AppSnackBarType.error,
       );
       return;
     }
@@ -97,35 +113,137 @@ class _OtpScreenState extends State<OtpScreen> {
       _isLoading = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      if (widget.purpose == OtpPurpose.passwordReset) {
+        // Verify OTP with backend to store temporary permission in cache
+        await AuthRepository().verifyOtp(
+          phone: widget.targetContact,
+          otpCode: code,
+          purpose: widget.purpose.toApiPurpose(),
+        );
 
-    if (!mounted) return;
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Navigate to ResetPasswordScreen only on successful verification
+        Navigator.push(
+          context,
+          LuxuryPageRoute(
+            page: ResetPasswordScreen(
+              phone: widget.targetContact,
+              otpCode: code,
+            ),
+          ),
+        );
+        return;
+      }
+
+      // 2. Registration & Login Flow:
+      final authResponse = await AuthRepository().verifyOtp(
+        phone: widget.targetContact,
+        otpCode: code,
+        purpose: widget.purpose.toApiPurpose(),
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'تم التحقق بنجاح' : 'Verification successful',
+        type: AppSnackBarType.success,
+      );
+
+        // Role-based routing
+        final role = authResponse?.user.role ?? 'patient';
+        Widget targetScreen;
+        if (role == 'super_admin') {
+          targetScreen = const AdminMainNavScreen();
+        } else if (role == 'clinic_admin' || role == 'clinic_staff') {
+          targetScreen = const ClinicMainNavScreen();
+        } else {
+          targetScreen = const MainNavScreen();
+        }
+
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
+            transitionDuration: const Duration(milliseconds: 400),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+          (route) => false,
+        );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      showAppSnackBar(
+        context,
+        e.toString(),
+        type: AppSnackBarType.error,
+      );
+    }
+  }
+
+  void _onResendOtp() async {
+    final loc = LocaleService();
     setState(() {
-      _isLoading = false;
+      _isResending = true;
     });
 
-    if (widget.purpose == OtpPurpose.passwordReset) {
-      Navigator.pushReplacement(
-        context,
-        LuxuryPageRoute(page: const ResetPasswordScreen()),
-      );
-    } else {
-      // Registration or Login
-      AuthState().login(
-        name: widget.userName ?? 'مجد خليفة',
+    try {
+      await AuthRepository().resendOtp(
         phone: widget.targetContact,
-        email: widget.userEmail ?? 'majd@example.com',
+        purpose: widget.purpose.toApiPurpose(),
       );
 
-      Navigator.of(context).pushAndRemoveUntil(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
-          transitionDuration: const Duration(milliseconds: 400),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        ),
-        (route) => false,
+      if (!mounted) return;
+      setState(() {
+        _isResending = false;
+      });
+
+      _startCountdown();
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'تم إرسال كود جديد إلى هاتفك' : 'A new code has been sent',
+        type: AppSnackBarType.info,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isResending = false;
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isResending = false;
+      });
+      showAppSnackBar(
+        context,
+        e.toString(),
+        type: AppSnackBarType.error,
       );
     }
   }
@@ -159,7 +277,7 @@ class _OtpScreenState extends State<OtpScreen> {
           ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -211,19 +329,19 @@ class _OtpScreenState extends State<OtpScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // 4 Digit Input Boxes Card
+                  // 6 Digit Input Boxes Card
                   LuxuryCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
                     child: Column(
                       children: [
                         Directionality(
                           textDirection: TextDirection.ltr,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(4, (index) {
+                            children: List.generate(6, (index) {
                               return SizedBox(
-                                width: 54,
-                                height: 58,
+                                width: 44,
+                                height: 56,
                                 child: TextFormField(
                                   controller: _controllers[index],
                                   focusNode: _focusNodes[index],
@@ -231,7 +349,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   textAlign: TextAlign.center,
                                   maxLength: 1,
                                   style: TextStyle(
-                                    fontSize: 22,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w800,
                                     color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                                   ),
@@ -239,16 +357,16 @@ class _OtpScreenState extends State<OtpScreen> {
                                     counterText: '',
                                     filled: true,
                                     fillColor: isDark ? AppColors.backgroundDeep : AppColors.lightBackground,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
                                       borderSide: BorderSide(
                                         color: AppColors.border(context),
                                         width: 1.0,
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
                                       borderSide: const BorderSide(
                                         color: AppColors.accentChampagne,
                                         width: 1.6,
@@ -256,10 +374,14 @@ class _OtpScreenState extends State<OtpScreen> {
                                     ),
                                   ),
                                   onChanged: (val) {
-                                    if (val.isNotEmpty && index < 3) {
+                                    if (val.isNotEmpty && index < 5) {
                                       _focusNodes[index + 1].requestFocus();
                                     } else if (val.isEmpty && index > 0) {
                                       _focusNodes[index - 1].requestFocus();
+                                    }
+                                    // Auto-trigger verify when last box is filled
+                                    if (val.isNotEmpty && index == 5 && _otpCode.length == 6) {
+                                      _verifyOtp();
                                     }
                                   },
                                 ),
@@ -267,22 +389,42 @@ class _OtpScreenState extends State<OtpScreen> {
                             }),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 18),
 
-                        // Demo Helper Text
+                        // Developer Helper Notice
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: AppColors.accentChampagne.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            loc.tr('otp_demo_note'),
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.accentChampagne,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                            border: Border.all(
+                              color: AppColors.accentChampagne.withValues(alpha: 0.3),
+                              width: 0.8,
                             ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.terminal_rounded,
+                                size: 16,
+                                color: AppColors.accentChampagne,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  loc.isArabic
+                                      ? 'تلميح: كود التحقق مطبوع في Terminal السيرفر (SMS_PROVIDER=console)'
+                                      : 'Dev Hint: OTP code is printed in the Django server terminal',
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.accentChampagne,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -301,8 +443,14 @@ class _OtpScreenState extends State<OtpScreen> {
                             ),
                           )
                         : TextButton.icon(
-                            onPressed: _startCountdown,
-                            icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.accentChampagne),
+                            onPressed: _isResending ? null : _onResendOtp,
+                            icon: _isResending
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentChampagne),
+                                  )
+                                : const Icon(Icons.refresh_rounded, size: 16, color: AppColors.accentChampagne),
                             label: Text(
                               loc.tr('resend_code'),
                               style: AppTypography.caption.copyWith(

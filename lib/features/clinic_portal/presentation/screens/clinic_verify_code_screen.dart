@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/features/referral/models/referral_model.dart';
 import 'package:aesthetic_way/features/referral/services/referral_service.dart';
 
@@ -26,6 +27,7 @@ class _ClinicVerifyCodeScreenState extends State<ClinicVerifyCodeScreen> {
   final TextEditingController _codeController = TextEditingController();
   ReferralDiscountCode? _searchedCode;
   bool _hasSearched = false;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -33,34 +35,55 @@ class _ClinicVerifyCodeScreenState extends State<ClinicVerifyCodeScreen> {
     super.dispose();
   }
 
-  void _verifyCode() {
+  Future<void> _verifyCode() async {
     final query = _codeController.text.trim();
-    if (query.isEmpty) return;
+    if (query.isEmpty || _isSubmitting) return;
 
-    final code = ReferralService().verifyCode(query);
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final code = await ReferralService().verifyClinicCodeLive(query);
+    if (!mounted) return;
     setState(() {
       _searchedCode = code;
       _hasSearched = true;
+      _isSubmitting = false;
     });
   }
 
-  void _markAsRedeemed(ReferralDiscountCode code) {
+  Future<void> _markAsRedeemed(ReferralDiscountCode code) async {
+    if (_isSubmitting) return;
     final loc = LocaleService();
-    final success = ReferralService().redeemCode(
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final success = await ReferralService().redeemClinicCodeLive(
       code: code.code,
       clinicId: widget.clinicId,
       clinicName: widget.clinicName,
     );
 
-    if (success) {
-      setState(() {
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = false;
+      if (success) {
         _searchedCode = ReferralService().verifyCode(code.code);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.tr('clinic_code_redeemed_success')),
-          backgroundColor: const Color(0xFF10B981),
-        ),
+      }
+    });
+
+    if (success) {
+      showAppSnackBar(
+        context,
+        loc.tr('clinic_code_redeemed_success'),
+        type: AppSnackBarType.success,
+      );
+    } else {
+      showAppSnackBar(
+        context,
+        loc.tr('clinic_code_invalid'),
+        type: AppSnackBarType.error,
       );
     }
   }

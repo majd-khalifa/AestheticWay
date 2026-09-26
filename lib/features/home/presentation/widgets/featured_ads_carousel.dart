@@ -4,6 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/distance_chip.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
@@ -344,17 +345,11 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.network(
-                            clinic.coverImageUrl,
+                          LuxuryImage(
+                            imageUrl: clinic.coverImageUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Container(
-                              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              child: const Icon(
-                                Icons.local_hospital_outlined,
-                                size: 42,
-                                color: AppColors.silverMuted,
-                              ),
-                            ),
+                            placeholderIcon: Icons.local_hospital_outlined,
+                            iconSize: 42,
                           ),
                           // Deep 3-Stop Gradient for Maximum Typography Readability
                           Container(

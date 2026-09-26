@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -5,43 +6,94 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/features/practitioners/data/practitioners_repository.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 import 'package:aesthetic_way/features/practitioners/presentation/screens/practitioner_profile_screen.dart';
 
-/// Screen 3 & 4: Practitioners Directory (Doctors & Skin Experts)
+/// Screen 3 & 4: Practitioners Directory (Doctors & Skin Experts) — Live API (/api/v1/practitioners/)
 class PractitionersScreen extends StatefulWidget {
   final String? initialRoleFilter; // 'all', 'doctors', 'skin_experts'
+  final PractitionersRepository? repository;
 
-  const PractitionersScreen({super.key, this.initialRoleFilter});
+  const PractitionersScreen({
+    super.key,
+    this.initialRoleFilter,
+    this.repository,
+  });
 
   @override
   State<PractitionersScreen> createState() => _PractitionersScreenState();
 }
 
 class _PractitionersScreenState extends State<PractitionersScreen> {
+  late final PractitionersRepository _repository;
   late String _selectedRole;
   String _searchQuery = '';
+  Timer? _debounce;
+
+  List<PractitionerModel> _practitioners = [];
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _repository = widget.repository ?? PractitionersRepository();
     _selectedRole = widget.initialRoleFilter ?? 'all';
+    _loadPractitioners();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadPractitioners() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getPractitioners(
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+      );
+      if (!mounted) return;
+      setState(() {
+        _practitioners = list;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _onSearchChanged(String val) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() {
+        _searchQuery = val.trim();
+      });
+      _loadPractitioners();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
 
     final isSkinExpertsOnly = widget.initialRoleFilter == 'skin_experts';
     final isDoctorsOnly = widget.initialRoleFilter == 'doctors';
 
     String screenTitle = loc.tr('category_doctors_title');
-    if (isSkinExpertsOnly) {
-      screenTitle = loc.tr('category_skin_experts_title');
-    } else if (_selectedRole == 'skin_experts') {
+    if (isSkinExpertsOnly || _selectedRole == 'skin_experts') {
       screenTitle = loc.tr('category_skin_experts_title');
     }
 
@@ -51,7 +103,7 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
       {'id': 'skin_experts', 'label': loc.tr('filter_skin_experts')},
     ];
 
-    final filteredList = mockData.practitioners.where((p) {
+    final filteredList = _practitioners.where((p) {
       if (isSkinExpertsOnly || _selectedRole == 'skin_experts') {
         final isExpert = p.type == PractitionerType.nurse ||
             p.type == PractitionerType.licensedProfessional ||
@@ -69,13 +121,15 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
         return p.nameAr.toLowerCase().contains(q) ||
             p.nameEn.toLowerCase().contains(q) ||
             p.specialtyAr.toLowerCase().contains(q) ||
-            p.clinicNameAr.toLowerCase().contains(q);
+            p.specialtyEn.toLowerCase().contains(q) ||
+            p.clinicNameAr.toLowerCase().contains(q) ||
+            (p.clinicNameEn?.toLowerCase().contains(q) ?? false);
       }
       return true;
     }).toList();
 
     return ListenableBuilder(
-      listenable: Listenable.merge([loc, mockData]),
+      listenable: loc,
       builder: (context, _) {
         return Scaffold(
           backgroundColor: AppColors.bg(context),
@@ -89,9 +143,23 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
               ),
             ),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+              icon: Icon(
+                Icons.arrow_back,
+                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                size: 18,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                  size: 20,
+                ),
+                onPressed: _isLoading ? null : _loadPractitioners,
+              ),
+            ],
           ),
           body: Column(
             children: [
@@ -107,11 +175,7 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                   ),
                   child: TextField(
                     style: TextStyle(color: AppColors.text(context), fontSize: 13.5),
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val.trim();
-                      });
-                    },
+                    onChanged: _onSearchChanged,
                     decoration: InputDecoration(
                       hintText: loc.tr('practitioners_search_hint'),
                       hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
@@ -123,7 +187,7 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                 ),
               ),
 
-              // Role Tabs (If not strictly filtered from category icon)
+              // Role Tabs
               if (!isSkinExpertsOnly && !isDoctorsOnly)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -149,7 +213,6 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                             color: isSelected ? AppColors.accentChampagne : AppColors.border(context),
                             width: 0.8,
                           ),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                           onSelected: (_) {
                             setState(() {
                               _selectedRole = tab['id']!;
@@ -160,103 +223,156 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                     }).toList(),
                   ),
                 ),
-              const SizedBox(height: 6),
 
-              // Practitioners List
+              // Directory List
               Expanded(
-                child: filteredList.isEmpty
-                    ? Center(
-                        child: Text(
-                          loc.isArabic ? 'لا يوجد ممارسون مطابقون' : 'No practitioners found',
-                          style: TextStyle(color: AppColors.mutedText(context)),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                        itemCount: filteredList.length,
-                        itemBuilder: (context, index) {
-                          final practitioner = filteredList[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: LuxuryCard(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  LuxuryPageRoute(page: PractitionerProfileScreen(practitioner: practitioner)),
-                                );
-                              },
-                              padding: const EdgeInsets.all(14),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: Image.network(
-                                      practitioner.avatarUrl,
-                                      width: 65,
-                                      height: 65,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => Container(
-                                        width: 65,
-                                        height: 65,
-                                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                        child: const Icon(Icons.person_rounded, size: 30, color: AppColors.accentChampagne),
-                                      ),
+                child: RefreshIndicator(
+                  color: AppColors.accentChampagne,
+                  onRefresh: _loadPractitioners,
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(color: AppColors.accentChampagne),
+                        )
+                      : _errorMessage != null
+                          ? ListView(
+                              padding: const EdgeInsets.all(24),
+                              children: [
+                                const SizedBox(height: 60),
+                                const Icon(Icons.error_outline_rounded, color: Colors.amber, size: 44),
+                                const SizedBox(height: 12),
+                                Text(
+                                  loc.isArabic ? 'تعذر تحميل قائمة الأطباء والممارسين' : 'Failed to load practitioners',
+                                  style: AppTypography.cardTitle.copyWith(
+                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                Center(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _loadPractitioners,
+                                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                                    label: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.accentChampagne,
+                                      foregroundColor: AppColors.backgroundDeep,
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
+                                ),
+                              ],
+                            )
+                          : filteredList.isEmpty
+                              ? ListView(
+                                  children: [
+                                    const SizedBox(height: 100),
+                                    Center(
+                                      child: Text(
+                                        loc.isArabic ? 'لا يوجد أطباء أو خبراء مطابقون' : 'No matching practitioners found',
+                                        style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ListView.builder(
+                                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                  itemCount: filteredList.length,
+                                  itemBuilder: (context, index) {
+                                    final p = filteredList[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: LuxuryCard(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            LuxuryPageRoute(
+                                              page: PractitionerProfileScreen(
+                                                practitioner: p,
+                                                practitionersRepository: _repository,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        padding: const EdgeInsets.all(14),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            PractitionerBadge(type: practitioner.type),
-                                            const Spacer(),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.star_rounded, size: 14, color: AppColors.accentChampagne),
-                                                const SizedBox(width: 3),
-                                                Text(
-                                                  '${practitioner.rating}',
-                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(14),
+                                              child: Image.network(
+                                                p.avatarUrl,
+                                                width: 68,
+                                                height: 68,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, _, _) => Container(
+                                                  width: 68,
+                                                  height: 68,
+                                                  color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                                  child: const Icon(Icons.person_rounded, color: AppColors.accentChampagne, size: 30),
                                                 ),
-                                              ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      PractitionerBadge(type: p.type),
+                                                      Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.mutedText(context)),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    loc.isArabic ? p.nameAr : p.nameEn,
+                                                    style: AppTypography.cardTitle.copyWith(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w800,
+                                                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 3),
+                                                  Text(
+                                                    loc.isArabic ? p.specialtyAr : p.specialtyEn,
+                                                    style: AppTypography.caption.copyWith(
+                                                      color: AppColors.accentChampagne,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 11.5,
+                                                    ),
+                                                  ),
+                                                  if (p.clinicNameAr.isNotEmpty || (p.clinicNameEn?.isNotEmpty ?? false)) ...[
+                                                    const SizedBox(height: 6),
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.apartment_rounded, size: 13, color: AppColors.mutedText(context)),
+                                                        const SizedBox(width: 4),
+                                                        Expanded(
+                                                          child: Text(
+                                                            loc.isArabic
+                                                                ? (p.clinicNameAr.isNotEmpty ? p.clinicNameAr : (p.clinicNameEn ?? ''))
+                                                                : (p.clinicNameEn ?? p.clinicNameAr),
+                                                            style: AppTypography.caption.copyWith(
+                                                              color: AppColors.mutedText(context),
+                                                              fontSize: 11,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          loc.isArabic ? practitioner.nameAr : practitioner.nameEn,
-                                          style: TextStyle(
-                                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          loc.isArabic ? practitioner.specialtyAr : practitioner.specialtyEn,
-                                          style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          loc.isArabic ? practitioner.clinicNameAr : (practitioner.clinicNameEn ?? practitioner.clinicNameAr),
-                                          style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.accentChampagne),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                ),
               ),
             ],
           ),

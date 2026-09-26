@@ -6,6 +6,7 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
+import 'package:aesthetic_way/features/admin/models/admin_lead_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_lead_detail_screen.dart';
 
@@ -31,10 +32,10 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
     return ListenableBuilder(
       listenable: Listenable.merge([loc, adminService]),
       builder: (context, _) {
-        AppointmentLeadStatus? statusFilter;
-        if (_selectedStatusIndex == 1) statusFilter = AppointmentLeadStatus.sent;
-        if (_selectedStatusIndex == 2) statusFilter = AppointmentLeadStatus.contacted;
-        if (_selectedStatusIndex == 3) statusFilter = AppointmentLeadStatus.closed;
+        String? statusFilter;
+        if (_selectedStatusIndex == 1) statusFilter = 'new';
+        if (_selectedStatusIndex == 2) statusFilter = 'contacted';
+        if (_selectedStatusIndex == 3) statusFilter = 'closed';
 
         var leads = adminService.getFilteredLeads(
           clinicId: _selectedClinicId,
@@ -217,32 +218,42 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
 
               // Leads Stream
               Expanded(
-                child: leads.isEmpty
-                    ? Center(
-                        child: Text(
-                          loc.tr('clinic_no_leads'),
-                          style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                        itemCount: leads.length,
-                        itemBuilder: (context, index) {
-                          final lead = leads[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _AdminLeadRegistryCard(
-                              lead: lead,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  LuxuryPageRoute(page: AdminLeadDetailScreen(lead: lead)),
-                                );
-                              },
+                child: RefreshIndicator(
+                  onRefresh: () => adminService.loadLeads(),
+                  color: AppColors.accentChampagne,
+                  backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                  child: leads.isEmpty
+                      ? ListView(
+                          children: [
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                            Center(
+                              child: Text(
+                                loc.tr('clinic_no_leads'),
+                                style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
+                              ),
                             ),
-                          );
-                        },
-                      ),
+                          ],
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                          itemCount: leads.length,
+                          itemBuilder: (context, index) {
+                            final lead = leads[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _AdminLeadRegistryCard(
+                                lead: lead,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    LuxuryPageRoute(page: AdminLeadDetailScreen(lead: lead)),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                ),
               ),
             ],
           ),
@@ -253,7 +264,7 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
 }
 
 class _AdminLeadRegistryCard extends StatelessWidget {
-  final AppointmentRequestModel lead;
+  final AdminLeadModel lead;
   final VoidCallback onTap;
 
   const _AdminLeadRegistryCard({required this.lead, required this.onTap});
@@ -265,7 +276,7 @@ class _AdminLeadRegistryCard extends StatelessWidget {
 
     Color statusColor;
     String statusText;
-    switch (lead.status) {
+    switch (lead.leadStatus) {
       case AppointmentLeadStatus.sent:
         statusColor = const Color(0xFFF59E0B);
         statusText = loc.tr('clinic_lead_status_new');

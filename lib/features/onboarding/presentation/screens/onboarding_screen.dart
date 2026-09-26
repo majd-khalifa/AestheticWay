@@ -6,7 +6,6 @@ import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/onboarding/services/onboarding_service.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
-import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 
 /// Luxury 3-Step Onboarding Screen with Client Logo, Page Indicator & Smooth Transitions
 class OnboardingScreen extends StatefulWidget {
@@ -26,14 +25,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _finishOnboarding({bool toLogin = true}) {
+  void _finishOnboarding() {
     OnboardingService().completeOnboarding();
     if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            toLogin ? const LoginScreen() : const MainNavScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
         transitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -49,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeOutCubic,
       );
     } else {
-      _finishOnboarding(toLogin: true);
+      _finishOnboarding();
     }
   }
 
@@ -98,7 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       const AppBrandLogo.header(height: 28),
                       TextButton(
-                        onPressed: () => _finishOnboarding(toLogin: false),
+                        onPressed: _finishOnboarding,
                         child: Text(
                           loc.tr('onboarding_skip'),
                           style: AppTypography.bodyMedium.copyWith(
@@ -311,20 +309,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         isFullWidth: true,
                         height: 48,
                         onPressed: _onNext,
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Guest Bypass Option
-                      TextButton(
-                        onPressed: () => _finishOnboarding(toLogin: false),
-                        child: Text(
-                          loc.tr('continue_as_guest'),
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.mutedText(context),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12.5,
-                          ),
-                        ),
                       ),
                     ],
                   ),

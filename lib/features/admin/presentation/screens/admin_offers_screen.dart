@@ -134,86 +134,98 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
           o.clinicNameAr.toLowerCase().contains(q)).toList();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: offers.length,
-      itemBuilder: (context, index) {
-        final offer = offers[index];
-        final isSuspended = adminService.isOfferSuspended(offer.id);
+    return RefreshIndicator(
+      onRefresh: () => adminService.loadOffers(),
+      color: AppColors.accentChampagne,
+      backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        itemCount: offers.length,
+        itemBuilder: (context, index) {
+          final offer = offers[index];
+          final isSuspended = adminService.isOfferSuspended(offer.id);
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: LuxuryCard(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    offer.imageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: LuxuryCard(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      offer.imageUrl,
                       width: 60,
                       height: 60,
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Icon(Icons.local_offer_outlined, color: AppColors.accentChampagne),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 60,
+                        height: 60,
+                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        child: const Icon(Icons.local_offer_outlined, color: AppColors.accentChampagne),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loc.isArabic ? offer.titleAr : offer.titleEn,
-                        style: TextStyle(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.isArabic ? offer.titleAr : offer.titleEn,
+                          style: TextStyle(
+                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 3),
+                        Text(
+                          loc.isArabic ? offer.clinicNameAr : (offer.clinicNameEn ?? offer.clinicNameAr),
+                          style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${offer.offerPrice.toInt()} ${loc.tr("currency_aed")} (خصم ${offer.discountPercentage}%)',
+                          style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      Switch(
+                        value: !isSuspended,
+                        activeThumbColor: const Color(0xFF10B981),
+                        inactiveThumbColor: Colors.redAccent,
+                        inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.3),
+                        onChanged: (_) async {
+                          final success = await adminService.toggleOfferModeration(offer.id);
+                          if (!success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(adminService.errorMessage ?? 'Error updating offer')),
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 3),
                       Text(
-                        loc.isArabic ? offer.clinicNameAr : (offer.clinicNameEn ?? offer.clinicNameAr),
-                        style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${offer.offerPrice.toInt()} ${loc.tr("currency_aed")} (خصم ${offer.discountPercentage}%)',
-                        style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                        !isSuspended ? (loc.isArabic ? 'نشط' : 'Active') : (loc.isArabic ? 'موقوف' : 'Suspended'),
+                        style: TextStyle(
+                          color: !isSuspended ? const Color(0xFF10B981) : Colors.redAccent,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    Switch(
-                      value: !isSuspended,
-                      activeThumbColor: const Color(0xFF10B981),
-                      inactiveThumbColor: Colors.redAccent,
-                      inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.3),
-                      onChanged: (_) => adminService.toggleOfferModeration(offer.id),
-                    ),
-                    Text(
-                      !isSuspended ? (loc.isArabic ? 'نشط' : 'Active') : (loc.isArabic ? 'موقوف' : 'Suspended'),
-                      style: TextStyle(
-                        color: !isSuspended ? const Color(0xFF10B981) : Colors.redAccent,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -227,85 +239,97 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
           p.clinicNameAr.toLowerCase().contains(q)).toList();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
+    return RefreshIndicator(
+      onRefresh: () => adminService.loadProducts(),
+      color: AppColors.accentChampagne,
+      backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: LuxuryCard(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    product.imageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: LuxuryCard(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      product.imageUrl,
                       width: 60,
                       height: 60,
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Icon(Icons.shopping_bag_outlined, color: AppColors.accentChampagne),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 60,
+                        height: 60,
+                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        child: const Icon(Icons.shopping_bag_outlined, color: AppColors.accentChampagne),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loc.isArabic ? product.nameAr : product.nameEn,
-                        style: TextStyle(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.isArabic ? product.nameAr : product.nameEn,
+                          style: TextStyle(
+                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 3),
+                        Text(
+                          loc.isArabic ? product.clinicNameAr : (product.clinicNameEn ?? product.clinicNameAr),
+                          style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${product.price.toInt()} ${loc.tr("currency_aed")} • ${loc.isArabic ? product.categoryAr : product.categoryEn}',
+                          style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      Switch(
+                        value: product.isPublishedByAdmin,
+                        activeThumbColor: const Color(0xFF10B981),
+                        inactiveThumbColor: Colors.redAccent,
+                        inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.3),
+                        onChanged: (_) async {
+                          final success = await adminService.toggleProductModeration(product.id);
+                          if (!success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(adminService.errorMessage ?? 'Error updating product')),
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 3),
                       Text(
-                        loc.isArabic ? product.clinicNameAr : (product.clinicNameEn ?? product.clinicNameAr),
-                        style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        '${product.price.toInt()} ${loc.tr("currency_aed")} • ${loc.isArabic ? product.categoryAr : product.categoryEn}',
-                        style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                        product.isPublishedByAdmin ? (loc.isArabic ? 'منشور' : 'Published') : (loc.isArabic ? 'موقوف' : 'Suspended'),
+                        style: TextStyle(
+                          color: product.isPublishedByAdmin ? const Color(0xFF10B981) : Colors.redAccent,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    Switch(
-                      value: product.isPublishedByAdmin,
-                      activeThumbColor: const Color(0xFF10B981),
-                      inactiveThumbColor: Colors.redAccent,
-                      inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.3),
-                      onChanged: (_) => adminService.toggleProductModeration(product.id),
-                    ),
-                    Text(
-                      product.isPublishedByAdmin ? (loc.isArabic ? 'منشور' : 'Published') : (loc.isArabic ? 'موقوف' : 'Suspended'),
-                      style: TextStyle(
-                        color: product.isPublishedByAdmin ? const Color(0xFF10B981) : Colors.redAccent,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -320,85 +344,97 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
           a.authorDoctorNameAr.toLowerCase().contains(q)).toList();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: articles.length,
-      itemBuilder: (context, index) {
-        final article = articles[index];
+    return RefreshIndicator(
+      onRefresh: () => adminService.loadArticles(),
+      color: AppColors.accentChampagne,
+      backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        itemCount: articles.length,
+        itemBuilder: (context, index) {
+          final article = articles[index];
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: LuxuryCard(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    article.coverImageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: LuxuryCard(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      article.coverImageUrl,
                       width: 60,
                       height: 60,
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Icon(Icons.article_outlined, color: AppColors.accentChampagne),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 60,
+                        height: 60,
+                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        child: const Icon(Icons.article_outlined, color: AppColors.accentChampagne),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loc.isArabic ? article.titleAr : article.titleEn,
-                        style: TextStyle(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.isArabic ? article.titleAr : article.titleEn,
+                          style: TextStyle(
+                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 3),
+                        Text(
+                          '${loc.tr("article_author_by")}: ${loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn}',
+                          style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          loc.isArabic ? article.clinicNameAr : (article.clinicNameEn ?? article.clinicNameAr),
+                          style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      Switch(
+                        value: article.isApprovedByAdmin,
+                        activeThumbColor: const Color(0xFF10B981),
+                        inactiveThumbColor: Colors.redAccent,
+                        inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.3),
+                        onChanged: (_) async {
+                          final success = await adminService.toggleArticleModeration(article.id);
+                          if (!success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(adminService.errorMessage ?? 'Error updating article')),
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 3),
                       Text(
-                        '${loc.tr("article_author_by")}: ${loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn}',
-                        style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        loc.isArabic ? article.clinicNameAr : (article.clinicNameEn ?? article.clinicNameAr),
-                        style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                        article.isApprovedByAdmin ? (loc.isArabic ? 'معتمد' : 'Approved') : (loc.isArabic ? 'موقوف' : 'Suspended'),
+                        style: TextStyle(
+                          color: article.isApprovedByAdmin ? const Color(0xFF10B981) : Colors.redAccent,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    Switch(
-                      value: article.isApprovedByAdmin,
-                      activeThumbColor: const Color(0xFF10B981),
-                      inactiveThumbColor: Colors.redAccent,
-                      inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.3),
-                      onChanged: (_) => adminService.toggleArticleModeration(article.id),
-                    ),
-                    Text(
-                      article.isApprovedByAdmin ? (loc.isArabic ? 'معتمد' : 'Approved') : (loc.isArabic ? 'موقوف' : 'Suspended'),
-                      style: TextStyle(
-                        color: article.isApprovedByAdmin ? const Color(0xFF10B981) : Colors.redAccent,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

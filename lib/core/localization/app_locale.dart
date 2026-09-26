@@ -114,10 +114,10 @@ class LocaleService extends ChangeNotifier {
     'val_name_required': {'ar': 'يرجى إدخال الاسم الكامل', 'en': 'Please enter your full name'},
     'val_phone_required': {'ar': 'يرجى إدخال رقم هاتف إماراتي صالح', 'en': 'Please enter a valid UAE phone number'},
     'val_email_invalid': {'ar': 'يرجى إدخال بريد إلكتروني صالح', 'en': 'Please enter a valid email address'},
-    'val_password_short': {'ar': 'كلمة المرور يجب أن لا تقل عن 6 خانات', 'en': 'Password must be at least 6 characters'},
+    'val_password_short': {'ar': 'كلمة المرور يجب ألا تقل عن 8 أحرف', 'en': 'Password must be at least 8 characters'},
     'val_password_mismatch': {'ar': 'كلمات المرور غير متطابقة', 'en': 'Passwords do not match'},
     'val_terms_required': {'ar': 'يرجى الموافقة على شروط الاستخدام والخصوصية', 'en': 'Please agree to Terms of Use & Privacy Policy'},
-    'val_otp_invalid': {'ar': 'رمز التحقق غير صحيح، يرجى إدخال 1234', 'en': 'Invalid code. Please enter 1234 for demo'},
+    'val_otp_invalid': {'ar': 'رمز التحقق غير صحيح، يرجى التأكد وإعادة المحاولة', 'en': 'Invalid verification code, please check and try again'},
 
     // ==========================================
     // CLINIC PORTAL (ROLE العيادة)
@@ -198,11 +198,6 @@ class LocaleService extends ChangeNotifier {
     },
 
     'open_full_login': {'ar': 'فتح صفحة الدخول الكاملة', 'en': 'Open Full Login Screen'},
-    'admin_lead_monitoring_banner': {
-      'ar': 'للمراقبة فقط — إدارة التواصل تتم من حساب العيادة',
-      'en': 'Supervision Mode: Communication is managed by the clinic'
-    },
-    'admin_lead_inspect_title': {'ar': 'تفاصيل الطلب (إشراف ومراقبة)', 'en': 'Inquiry Details (Supervision View)'},
 
     // ==========================================
     // SUPER ADMIN PORTAL (إدارة المنصة)
@@ -237,6 +232,11 @@ class LocaleService extends ChangeNotifier {
       'ar': 'وضع المراقبة والإشراف: تتيح اللوحة الإشراف على حجم تدفق الطلبات عبر العيادات دون التدخل في الجداول.',
       'en': 'Supervision Mode: Monitor lead generation volume across clinics without booking intervention.'
     },
+    'admin_lead_monitoring_banner': {
+      'ar': 'للمراقبة فقط — إدارة التواصل تتم من حساب العيادة',
+      'en': 'Monitoring only — clinic account handles patient contact',
+    },
+    'admin_lead_inspect_title': {'ar': 'تفاصيل طلب الاستشارة (إشراف)', 'en': 'Lead Supervision Detail'},
     'admin_offers_moderation': {'ar': 'إشراف ومراجعة العروض التجميلية', 'en': 'Offers Moderation'},
     'admin_offer_active': {'ar': 'منشور ونشط للعامة', 'en': 'Published & Active'},
     'admin_offer_suspended': {'ar': 'موقوف من الإدارة', 'en': 'Suspended by Admin'},
@@ -256,6 +256,23 @@ class LocaleService extends ChangeNotifier {
     'admin_settings_title': {'ar': 'إعدادات المنصة والنظام', 'en': 'Platform Settings'},
     'admin_logout': {'ar': 'تسجيل الخروج من لوحة الإدارة', 'en': 'Sign Out of Admin Portal'},
     'admin_license_info': {'ar': 'الترخيص والبيانات القانونية', 'en': 'Licensing & Legal Information'},
+    'admin_total_events': {'ar': 'إجمالي الأحداث المسجلة', 'en': 'Tracked Platform Events'},
+    'admin_registered_patients': {'ar': 'المرضى المسجلين', 'en': 'Registered Patients'},
+    'admin_contacted_leads': {'ar': 'طلبات تم التواصل معها', 'en': 'Contacted Leads'},
+    'admin_completed_leads': {'ar': 'طلبات مغلقة ومكتملة', 'en': 'Closed Leads'},
+    'admin_active_offers_kpi': {'ar': 'العروض النشطة', 'en': 'Active Offers'},
+    'admin_closure_rate': {'ar': 'معدل الإغلاق', 'en': 'Closure Rate'},
+    'admin_maps_taps': {'ar': 'نقرات الخرائط', 'en': 'Maps Taps'},
+    'admin_lead_submissions': {'ar': 'طلبات الاستشارة', 'en': 'Leads Submitted'},
+    'admin_clinic_views': {'ar': 'مشاهدات العيادات', 'en': 'Clinic Views'},
+    'admin_clinic_branches': {'ar': 'الفروع', 'en': 'Branches'},
+    'admin_clinic_practitioners': {'ar': 'الكادر الطبي', 'en': 'Practitioners'},
+    'admin_clinic_offers': {'ar': 'العروض', 'en': 'Offers'},
+    'admin_clinic_treatments': {'ar': 'العلاجات', 'en': 'Treatments'},
+    'admin_clinic_products': {'ar': 'المنتجات', 'en': 'Products'},
+    'admin_clinic_articles': {'ar': 'المقالات', 'en': 'Articles'},
+    'admin_redeemed_codes': {'ar': 'أكواد مستخدمة', 'en': 'Redeemed Codes'},
+    'admin_events_count': {'ar': 'إجمالي التفاعلات', 'en': 'Total Events'},
 
     // Navigation
     'nav_home': {'ar': 'الرئيسية', 'en': 'Home'},
@@ -534,8 +551,8 @@ class LocaleService extends ChangeNotifier {
     'referral_nav_title': {'ar': 'برنامج المكافآت والدعوات', 'en': 'Referrals & Rewards'},
     'referral_title': {'ar': 'برنامج الدعوات والمكافآت', 'en': 'Referral & Rewards'},
     'referral_sub': {
-      'ar': 'ادعُ أصدقاءك واجمع النقاط للحصول على كود خصم 15% على الإجراءات التجميلية في العيادات الشريكة.',
-      'en': 'Invite friends, earn points, and redeem 15% discount codes on aesthetic treatments at partner clinics.'
+      'ar': 'ادعُ أصدقاءك لتحميل التطبيق واجمع النقاط بدون انتهاء صلاحية لتصرفها متى تشاء للحصول على كود خصم 15% بالعيادات.',
+      'en': 'Invite friends to download the app and earn non-expiring points to spend whenever you wish for a 15% clinic discount code.'
     },
     'your_referral_code': {'ar': 'كود الدعوة الخاص بك', 'en': 'Your Referral Code'},
     'copy_code': {'ar': 'نسخ الكود', 'en': 'Copy Code'},
@@ -543,16 +560,20 @@ class LocaleService extends ChangeNotifier {
     'share_invite': {'ar': 'مشاركة رابط الدعوة', 'en': 'Share Invite'},
     'invites_count': {'ar': 'الدعوات الناجحة', 'en': 'Successful Invites'},
     'current_points': {'ar': 'النقاط الحالية', 'en': 'Current Points'},
+    'next_milestone': {'ar': 'العتبة التالية', 'en': 'Next Milestone'},
+    'all_milestones_completed': {'ar': 'أكملت جميع العتبات', 'en': 'All Milestones Completed'},
+    'progress_to_next_milestone': {'ar': 'التقدم نحو العتبة التالية', 'en': 'Progress to Next Milestone'},
     'pts_suffix': {'ar': 'نقطة', 'en': 'pts'},
+    'invites_suffix': {'ar': 'دعوة', 'en': 'invites'},
     'collect_discount_btn': {'ar': 'استبدال 500 نقطة بكود خصم 15%', 'en': 'Redeem 500 pts for 15% Code'},
     'collect_demo_btn': {'ar': 'توليد كود تجريبي (Demo)', 'en': 'Generate Demo Code'},
     'referral_milestones_title': {'ar': 'مستويات النقاط والمكافآت', 'en': 'Points & Milestones'},
     'referral_rule_note': {
-      'ar': 'الشروط: يُطبق كود الخصم (15%) في العيادة مباشرة على السعر الأصلي للإجراءات خارج باقات العروض. المنصة لا تدفع ولا تحصّل مبالغ الخصم.',
-      'en': 'Terms: The 15% discount is applied directly at the clinic on original treatment prices outside offers. The platform does not process payments.'
+      'ar': 'الشروط: الهدف هو دعوة الأصدقاء لتحميل تطبيق Aesthetic Way. نقاطك لا تنتهي صلاحيتها وتصرفها متى شئت بدون ضغط زمني. يُطبق كود الخصم (15%) في العيادة مباشرة على السعر الأصلي للإجراءات خارج باقات العروض. المنصة لا تدفع ولا تحصّل مبالغ الخصم.',
+      'en': 'Terms: The goal is inviting friends to download the Aesthetic Way app. Your points do not expire and can be spent whenever you wish without time pressure. The 15% discount is applied directly at the clinic on original treatment prices outside offers.'
     },
     'discount_codes_title': {'ar': 'أكواد الخصم المُجمّعة (15%)', 'en': 'Issued 15% Discount Codes'},
-    'no_discount_codes': {'ar': 'لا توجد أكواد خصم نشطة حالياً. اجمع 500 نقطة لتوليد كود خصم 15%.', 'en': 'No active discount codes. Earn 500 points to collect a 15% code.'},
+    'no_discount_codes': {'ar': 'لا توجد أكواد خصم نشطة حالياً. اجمع 500 نقطة بدون انتهاء صلاحية لتوليد كود خصم 15%.', 'en': 'No active discount codes. Earn 500 non-expiring points to collect a 15% code.'},
     'code_status_available': {'ar': 'صالح للاستخدام في العيادة', 'en': 'Available for Clinic Use'},
     'code_status_used': {'ar': 'تم استخدامه في العيادة', 'en': 'Redeemed in Clinic'},
     'code_status_expired': {'ar': 'منتهي الصلاحية', 'en': 'Expired'},
@@ -576,11 +597,7 @@ class LocaleService extends ChangeNotifier {
     'admin_issued_coupons': {'ar': 'أكواد الخصم المُصدرة (15%)', 'en': 'Issued 15% Codes'},
     'admin_redeemed_coupons': {'ar': 'الأكواد المستخدمة بالعيادات', 'en': 'Redeemed In-Clinic'},
 
-    // Before / After Showcase
-    'before_after_title': {'ar': 'نتائج الإجراء (قبل وبعد)', 'en': 'Before & After Results'},
-    'before_after_sub': {'ar': 'نماذج ونتائج سريرية تجريبية للإجراء الطبي', 'en': 'Sample clinical aesthetic treatment outcomes'},
-    'before_label': {'ar': 'قبل', 'en': 'Before'},
-    'after_label': {'ar': 'بعد', 'en': 'After'},
+    // Price Display Labels
     'original_price_label': {'ar': 'السعر الأصلي', 'en': 'Original Price'},
     'offer_price_label': {'ar': 'سعر العرض', 'en': 'Offer Price'},
     'savings_badge': {'ar': 'توفير', 'en': 'Save'},

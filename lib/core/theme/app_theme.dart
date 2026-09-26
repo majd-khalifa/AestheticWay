@@ -127,6 +127,19 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF131B2E),
+        contentTextStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.silverPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.silverBorder.withValues(alpha: 0.3), width: 0.8),
+        ),
+      ),
     );
   }
 
@@ -252,6 +265,19 @@ class AppTheme {
         color: AppColors.lightBorder,
         thickness: 1,
         space: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFFF8FAFC),
+        contentTextStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.lightTextPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.lightBorder, width: 0.9),
+        ),
       ),
     );
   }

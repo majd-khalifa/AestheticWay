@@ -3,12 +3,22 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
 /// Screen 6: Luxury Reset Password Screen
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String? phone;
+  final String? otpCode;
+
+  const ResetPasswordScreen({
+    super.key,
+    this.phone,
+    this.otpCode,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -23,6 +33,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
+  Map<String, String> _serverFieldErrors = {};
+  String? _serverErrorMessage;
+
   @override
   void dispose() {
     _newPasswordController.dispose();
@@ -36,33 +49,85 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     setState(() {
       _isLoading = true;
+      _serverErrorMessage = null;
+      _serverFieldErrors = {};
     });
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    final phone = widget.phone ?? '';
+    final otpCode = widget.otpCode;
 
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
+    if (phone.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _serverErrorMessage = loc.isArabic
+            ? 'بيانات التحقق غير مكتملة، يرجى العودة لطلب رمز جديد'
+            : 'Verification data missing. Please request a new OTP code.';
+      });
+      showAppSnackBar(
+        context,
+        _serverErrorMessage!,
+        type: AppSnackBarType.error,
+      );
+      return;
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(loc.tr('password_reset_success')),
-        backgroundColor: AppColors.accentChampagne,
+    try {
+      await AuthRepository().resetPassword(
+        phone: phone,
+        otpCode: otpCode,
+        newPassword: _newPasswordController.text,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      showAppSnackBar(
+        context,
+        loc.tr('password_reset_success'),
+        type: AppSnackBarType.success,
         duration: const Duration(seconds: 3),
-      ),
-    );
+      );
 
-    Navigator.of(context).pushAndRemoveUntil(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
-        transitionDuration: const Duration(milliseconds: 400),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-      (route) => false,
-    );
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+        (route) => false,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _serverErrorMessage = e.message;
+        if (e.fieldErrors != null) {
+          _serverFieldErrors = e.fieldErrors!.map(
+            (k, v) => MapEntry(k, v.isNotEmpty ? v.first : ''),
+          );
+        }
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _serverErrorMessage = e.toString();
+      });
+      showAppSnackBar(
+        context,
+        e.toString(),
+        type: AppSnackBarType.error,
+      );
+    }
   }
 
   @override
@@ -128,6 +193,61 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                     const SizedBox(height: 24),
 
+                    // Server Error Banner
+                    if (_serverErrorMessage != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.errorRed.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.4)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 20),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _serverErrorMessage!,
+                                style: const TextStyle(
+                                  color: AppColors.errorRed,
+                                  fontSize: 12.5,
+                                  height: 1.4,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Navigation helper if OTP is expired or invalid
+                      if (_serverErrorMessage!.contains('رمز') ||
+                          _serverErrorMessage!.contains('تحقق') ||
+                          _serverErrorMessage!.contains('OTP') ||
+                          _serverErrorMessage!.contains('otp'))
+                        Align(
+                          alignment: loc.isArabic ? Alignment.centerRight : Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back, size: 15, color: AppColors.accentChampagne),
+                            label: Text(
+                              loc.isArabic ? 'العودة لتعديل أو إعادة إرسال رمز التحقق' : 'Return to edit or resend verification code',
+                              style: const TextStyle(
+                                color: AppColors.accentChampagne,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 14),
+                    ],
+
                     // Input Card
                     LuxuryCard(
                       padding: const EdgeInsets.all(16),
@@ -137,6 +257,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           TextFormField(
                             controller: _newPasswordController,
                             obscureText: _obscureNewPassword,
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                               fontSize: 13.5,
@@ -174,8 +296,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ),
                             ),
                             validator: (val) {
-                              if (val == null || val.trim().length < 6) {
+                              if (val == null || val.trim().length < 8) {
                                 return loc.tr('val_password_short');
+                              }
+                              if (_serverFieldErrors.containsKey('new_password')) {
+                                return _serverFieldErrors['new_password'];
                               }
                               return null;
                             },
@@ -186,6 +311,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           TextFormField(
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                               fontSize: 13.5,

@@ -19,6 +19,7 @@ class ClinicBranch {
   final double latitude;
   final double longitude;
   final String? googlePlaceId;
+  final String? googleMapsUrl;
 
   const ClinicBranch({
     required this.id,
@@ -33,7 +34,26 @@ class ClinicBranch {
     required this.latitude,
     required this.longitude,
     this.googlePlaceId,
+    this.googleMapsUrl,
   });
+
+  factory ClinicBranch.fromJson(Map<String, dynamic> json) {
+    return ClinicBranch(
+      id: json['id']?.toString() ?? '',
+      nameAr: json['name_ar'] ?? json['name_en'] ?? '',
+      nameEn: json['name_en'] ?? json['name_ar'] ?? '',
+      areaAr: json['address_ar'] ?? '',
+      areaEn: json['address_en'] ?? '',
+      addressAr: json['address_ar'] ?? '',
+      addressEn: json['address_en'] ?? '',
+      phone: json['phone']?.toString() ?? '',
+      distanceKm: 0.0,
+      latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
+      longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
+      googlePlaceId: json['google_place_id']?.toString(),
+      googleMapsUrl: json['google_maps_url']?.toString(),
+    );
+  }
 }
 
 /// Clinic Entity
@@ -70,6 +90,10 @@ class ClinicModel {
   final List<String> treatmentIds;
   final List<String> featuredOffers;
   final bool isVerified;
+  final String? slug;
+  final String? googleMapsUrl;
+  final List<dynamic>? rawPractitioners;
+  final List<dynamic>? rawTreatments;
 
   const ClinicModel({
     required this.id,
@@ -83,30 +107,118 @@ class ClinicModel {
     required this.rating,
     required this.reviewCount,
     required this.subscriptionTier,
-    required this.licenseAuthority,
-    required this.licenseNumber,
+    this.licenseAuthority = 'DHA',
+    this.licenseNumber = '',
     required this.city,
     required this.areaAr,
-    required this.areaEn,
+    this.areaEn = '',
     required this.addressAr,
-    required this.addressEn,
-    required this.distanceKm,
-    required this.mainPhone,
-    required this.receptionPhone,
-    required this.whatsapp,
+    this.addressEn = '',
+    this.distanceKm = 0.0,
+    this.mainPhone = '',
+    this.receptionPhone = '',
+    this.whatsapp = '',
     this.googlePlaceId,
-    required this.latitude,
-    required this.longitude,
-    required this.workingHoursAr,
+    this.latitude = 0.0,
+    this.longitude = 0.0,
+    this.workingHoursAr = 'من الإثنين إلى السبت: 9:00 ص - 9:00 م',
     this.workingHoursEn = 'Mon - Sat: 9:00 AM - 9:00 PM',
-    required this.branches,
+    this.branches = const [],
     this.practitionerIds = const [],
     this.treatmentIds = const [],
     this.featuredOffers = const [],
     this.isVerified = true,
+    this.slug,
+    this.googleMapsUrl,
+    this.rawPractitioners,
+    this.rawTreatments,
   });
+
+  factory ClinicModel.fromJson(Map<String, dynamic> json) {
+    final bool isFeatured = json['is_featured'] == true;
+    final branchesRaw = json['branches'] as List<dynamic>?;
+    final branchesList = branchesRaw != null
+        ? branchesRaw.map((b) => ClinicBranch.fromJson(b as Map<String, dynamic>)).toList()
+        : <ClinicBranch>[];
+
+    final cover = json['cover_image']?.toString() ?? '';
+    final logo = json['logo']?.toString() ?? '';
+    final rawGallery = json['gallery_images'] as List<dynamic>?;
+    final gallery = rawGallery != null && rawGallery.isNotEmpty
+        ? rawGallery.map((e) => e.toString()).toList()
+        : (cover.isNotEmpty ? [cover] : <String>[]);
+
+    final practitionersRaw = json['practitioners'] as List<dynamic>?;
+    final practitionerIds = practitionersRaw != null
+        ? practitionersRaw
+            .map((p) => (p is Map ? p['id']?.toString() ?? '' : p.toString()))
+            .where((id) => id.isNotEmpty)
+            .toList()
+        : <String>[];
+
+    final treatmentsRaw = json['treatments'] as List<dynamic>?;
+    final treatmentIds = treatmentsRaw != null
+        ? treatmentsRaw
+            .map((t) => (t is Map ? t['id']?.toString() ?? '' : t.toString()))
+            .where((id) => id.isNotEmpty)
+            .toList()
+        : <String>[];
+
+    return ClinicModel(
+      id: json['id']?.toString() ?? '',
+      nameAr: json['name_ar'] ?? json['name_en'] ?? '',
+      nameEn: json['name_en'] ?? json['name_ar'] ?? '',
+      descriptionAr: json['description_ar'] ?? '',
+      descriptionEn: json['description_en'] ?? '',
+      coverImageUrl: cover,
+      galleryImages: gallery,
+      logoUrl: logo,
+      rating: double.tryParse(json['google_rating']?.toString() ?? '') ?? 0.0,
+      reviewCount: json['review_count'] is int ? json['review_count'] as int : 0,
+      subscriptionTier: isFeatured ? SubscriptionTier.vipPlatinum : SubscriptionTier.basic,
+      licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
+      licenseNumber: json['license_number']?.toString() ?? '',
+      city: json['city']?.toString() ?? 'Dubai',
+      areaAr: json['address_ar'] ?? json['city'] ?? '',
+      areaEn: json['address_en'] ?? json['city'] ?? '',
+      addressAr: json['address_ar'] ?? '',
+      addressEn: json['address_en'] ?? '',
+      distanceKm: double.tryParse(json['distance']?.toString() ?? '') ?? 0.0,
+      mainPhone: json['phone']?.toString() ?? '',
+      receptionPhone: json['phone']?.toString() ?? '',
+      whatsapp: json['whatsapp']?.toString() ?? '',
+      googlePlaceId: json['google_place_id']?.toString(),
+      latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
+      longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
+      workingHoursAr: json['working_hours_ar'] ?? 'من الإثنين إلى السبت: 9:00 ص - 9:00 م',
+      workingHoursEn: json['working_hours_en'] ?? 'Mon - Sat: 9:00 AM - 9:00 PM',
+      branches: branchesList,
+      practitionerIds: practitionerIds,
+      treatmentIds: treatmentIds,
+      slug: json['slug']?.toString(),
+      googleMapsUrl: json['google_maps_url']?.toString(),
+      rawPractitioners: practitionersRaw,
+      rawTreatments: treatmentsRaw,
+    );
+  }
 
   bool get isEligibleForTopCarousel =>
       subscriptionTier == SubscriptionTier.vipPlatinum ||
       subscriptionTier == SubscriptionTier.featured;
+
+  String get effectivePhone => receptionPhone.trim().isNotEmpty
+      ? receptionPhone.trim()
+      : mainPhone.trim();
+
+  bool get hasPhone => effectivePhone.isNotEmpty;
+
+  bool get hasWhatsapp {
+    final clean = whatsapp.trim().replaceAll(RegExp(r'[^0-9]'), '');
+    return clean.length >= 7;
+  }
+
+  bool get hasMapLocation =>
+      (googleMapsUrl != null &&
+          googleMapsUrl!.trim().toLowerCase().startsWith('http')) ||
+      (latitude != 0.0 && longitude != 0.0);
 }

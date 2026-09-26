@@ -3,10 +3,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_service.dart';
 import 'core/localization/app_locale.dart';
+import 'core/auth/guest_auth_guard.dart';
+import 'core/auth/token_storage.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await TokenStorage().init();
+  await AuthState().restoreSession();
   runApp(const AestheticWayApp());
 }
 

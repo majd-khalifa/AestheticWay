@@ -5,7 +5,10 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
 /// Screen 5: Luxury Forgot Password Screen
 class ForgotPasswordScreen extends StatefulWidget {
@@ -17,7 +20,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController(text: '501234567');
+  final _identifierController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -27,31 +30,61 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void _onSendResetCode() async {
+    final loc = LocaleService();
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
-
     final input = _identifierController.text.trim();
-    final formattedContact = input.contains('@') ? input : (input.startsWith('+971') ? input : '+971 $input');
+    final normalizedPhone = AuthRepository.normalizePhone(input);
 
-    Navigator.push(
-      context,
-      LuxuryPageRoute(
-        page: OtpScreen(
-          purpose: OtpPurpose.passwordReset,
-          targetContact: formattedContact,
+    try {
+      final response = await AuthRepository().forgotPassword(phone: normalizedPhone);
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      showAppSnackBar(
+        context,
+        response['message']?.toString() ??
+            (loc.isArabic ? 'تم إرسال كود التحقق إلى هاتفك' : 'Verification code sent to your phone'),
+        type: AppSnackBarType.info,
+      );
+
+      Navigator.push(
+        context,
+        LuxuryPageRoute(
+          page: OtpScreen(
+            purpose: OtpPurpose.passwordReset,
+            targetContact: normalizedPhone,
+          ),
         ),
-      ),
-    );
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      showAppSnackBar(
+        context,
+        e.toString(),
+        type: AppSnackBarType.error,
+      );
+    }
   }
 
   @override
@@ -130,6 +163,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       padding: const EdgeInsets.all(16),
                       child: TextFormField(
                         controller: _identifierController,
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                           color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                           fontSize: 13.5,

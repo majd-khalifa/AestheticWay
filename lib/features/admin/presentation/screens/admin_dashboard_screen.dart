@@ -6,6 +6,7 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
+import 'package:aesthetic_way/features/admin/models/admin_lead_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_lead_detail_screen.dart';
 
@@ -35,9 +36,13 @@ class AdminDashboardScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppColors.bg(context),
-          body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            children: [
+          body: RefreshIndicator(
+            onRefresh: () => adminService.loadAllData(refresh: true),
+            color: AppColors.accentChampagne,
+            backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              children: [
             // Top Welcome Card
             LuxuryCard(
               padding: const EdgeInsets.all(16),
@@ -79,15 +84,15 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Key Metrics Grid (3 Rows x 2 Columns)
+            // Key Metrics Grid (3 Rows x 2 Columns strictly from real dashboard API)
             Row(
               children: [
                 Expanded(
                   child: _AdminKpiCard(
-                    title: loc.tr('admin_total_app_opens'),
-                    value: NumberFormat('#,###').format(adminService.totalAppOpens),
-                    subtitle: '${NumberFormat('#,###').format(adminService.activeUsersCount)} ${loc.tr('admin_active_users')}',
-                    icon: Icons.phone_android_rounded,
+                    title: loc.tr('admin_total_events'),
+                    value: NumberFormat('#,###').format(adminService.dashboard.totalAnalyticsEvents),
+                    subtitle: '${NumberFormat('#,###').format(adminService.dashboard.totalPatients)} ${loc.tr('admin_registered_patients')}',
+                    icon: Icons.insights_rounded,
                     isGold: true,
                   ),
                 ),
@@ -95,8 +100,8 @@ class AdminDashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _AdminKpiCard(
                     title: loc.tr('admin_active_clinics'),
-                    value: '${adminService.activeClinicsCount}',
-                    subtitle: '${adminService.clinics.length} ${loc.isArabic ? "مسجلة بالمنصة" : "Registered"}',
+                    value: '${adminService.dashboard.activeClinics}',
+                    subtitle: '${adminService.dashboard.totalClinics} ${loc.isArabic ? "مسجلة بالمنصة" : "Registered"}',
                     icon: Icons.apartment_rounded,
                   ),
                 ),
@@ -108,8 +113,8 @@ class AdminDashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _AdminKpiCard(
                     title: loc.tr('admin_total_leads'),
-                    value: '${adminService.totalLeadsCount}',
-                    subtitle: '${adminService.todayLeadsCount} ${loc.tr('admin_today_leads')}',
+                    value: '${adminService.dashboard.totalLeads}',
+                    subtitle: '${adminService.dashboard.conversionPercentage}% ${loc.tr('admin_closure_rate')}',
                     icon: Icons.mark_email_read_rounded,
                     isGold: true,
                   ),
@@ -117,10 +122,10 @@ class AdminDashboardScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _AdminKpiCard(
-                    title: loc.tr('admin_today_leads'),
-                    value: '${adminService.todayLeadsCount}',
-                    subtitle: loc.isArabic ? 'طلبات استشارة اليوم' : 'Today\'s Inquiries',
-                    icon: Icons.today_rounded,
+                    title: loc.tr('admin_contacted_leads'),
+                    value: '${adminService.dashboard.scheduledLeads}',
+                    subtitle: '${adminService.dashboard.completedLeads} ${loc.tr('admin_completed_leads')}',
+                    icon: Icons.support_agent_rounded,
                   ),
                 ),
               ],
@@ -130,21 +135,21 @@ class AdminDashboardScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: _AdminKpiCard(
-                    title: loc.tr('admin_whatsapp_taps'),
-                    value: '${adminService.totalWhatsappTaps}',
-                    subtitle: loc.isArabic ? 'محادثات فورية مباشرة' : 'Direct Patient Chats',
-                    icon: Icons.chat_bubble_outline_rounded,
-                    iconColor: const Color(0xFF10B981),
+                    title: loc.tr('admin_registered_patients'),
+                    value: NumberFormat('#,###').format(adminService.dashboard.totalPatients),
+                    subtitle: '${adminService.dashboard.totalReferrals} ${loc.isArabic ? "دعوة إحالة" : "Referrals"}',
+                    icon: Icons.people_outline_rounded,
+                    iconColor: const Color(0xFF3B82F6),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _AdminKpiCard(
-                    title: loc.tr('admin_call_taps'),
-                    value: '${adminService.totalCallTaps}',
-                    subtitle: loc.isArabic ? 'مكالمات هاتفية مباشرة' : 'Direct Phone Calls',
-                    icon: Icons.phone_in_talk_rounded,
-                    iconColor: const Color(0xFF3B82F6),
+                    title: loc.tr('admin_active_offers_kpi'),
+                    value: '${adminService.dashboard.totalOffers}',
+                    subtitle: '${adminService.dashboard.featuredClinics} ${loc.isArabic ? "عيادة مميزة / VIP" : "Featured Clinics"}',
+                    icon: Icons.local_offer_outlined,
+                    iconColor: const Color(0xFF10B981),
                   ),
                 ),
               ],
@@ -262,9 +267,10 @@ class AdminDashboardScreen extends StatelessWidget {
             const SizedBox(height: 24),
           ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  },
+);
   }
 }
 
@@ -390,7 +396,7 @@ class _AdminShortcutBtn extends StatelessWidget {
 }
 
 class _AdminLeadStreamTile extends StatelessWidget {
-  final AppointmentRequestModel lead;
+  final AdminLeadModel lead;
   final VoidCallback onTap;
 
   const _AdminLeadStreamTile({required this.lead, required this.onTap});
@@ -402,7 +408,7 @@ class _AdminLeadStreamTile extends StatelessWidget {
 
     Color statusColor;
     String statusText;
-    switch (lead.status) {
+    switch (lead.leadStatus) {
       case AppointmentLeadStatus.sent:
         statusColor = const Color(0xFFF59E0B);
         statusText = loc.tr('clinic_lead_status_new');

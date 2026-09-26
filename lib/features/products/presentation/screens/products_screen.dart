@@ -1,29 +1,99 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/features/products/data/products_repository.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
 import 'package:aesthetic_way/features/products/presentation/screens/product_detail_screen.dart';
 
-/// Screen 6/8: Products & Medical Skincare Directory (Discovery & Inquiry)
+/// Screen 6/8: Products & Medical Skincare Directory (Discovery & Inquiry Only)
 class ProductsScreen extends StatefulWidget {
-  const ProductsScreen({super.key});
+  final ProductsRepository? repository;
+  final String? clinicId;
+
+  const ProductsScreen({
+    super.key,
+    this.repository,
+    this.clinicId,
+  });
 
   @override
   State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
+  late final ProductsRepository _repository;
+  final List<ProductModel> _products = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
   String _selectedCategory = 'all';
   String _searchQuery = '';
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = widget.repository ?? ProductsRepository();
+    _loadProducts();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadProducts({bool showLoading = true}) async {
+    if (showLoading && mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
+
+    try {
+      final items = await _repository.getProducts(
+        clinicId: widget.clinicId,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+      );
+      if (mounted) {
+        setState(() {
+          _products
+            ..clear()
+            ..addAll(items);
+          _isLoading = false;
+          _errorMessage = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString();
+        });
+      }
+    }
+  }
+
+  void _onSearchChanged(String val) {
+    final trimmed = val.trim();
+    if (_searchQuery == trimmed) return;
+    setState(() {
+      _searchQuery = trimmed;
+    });
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      _loadProducts(showLoading: false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
 
     final categories = [
@@ -34,12 +104,39 @@ class _ProductsScreenState extends State<ProductsScreen> {
       {'id': 'sunscreens', 'label': loc.tr('product_category_sunscreens')},
     ];
 
-    final filteredProducts = mockData.products.where((p) {
+    final filteredProducts = _products.where((p) {
       if (_selectedCategory != 'all') {
-        if (_selectedCategory == 'cosmeceuticals' && !p.categoryAr.contains('علاجية') && !p.categoryEn.toLowerCase().contains('cosmeceutical')) return false;
-        if (_selectedCategory == 'skincare' && !p.categoryAr.contains('عناية') && !p.categoryEn.toLowerCase().contains('skincare')) return false;
-        if (_selectedCategory == 'devices' && !p.categoryAr.contains('أجهزة') && !p.categoryEn.toLowerCase().contains('device')) return false;
-        if (_selectedCategory == 'sunscreens' && !p.categoryAr.contains('واقيات') && !p.categoryEn.toLowerCase().contains('sun')) return false;
+        final combinedAr = '${p.categoryAr} ${p.nameAr} ${p.descriptionAr}';
+        final combinedEn = '${p.categoryEn} ${p.nameEn} ${p.descriptionEn}'.toLowerCase();
+        if (_selectedCategory == 'cosmeceuticals' &&
+            !combinedAr.contains('علاجية') &&
+            !combinedAr.contains('سيروم') &&
+            !combinedEn.contains('cosmeceutical') &&
+            !combinedEn.contains('serum')) {
+          return false;
+        }
+        if (_selectedCategory == 'skincare' &&
+            !combinedAr.contains('عناية') &&
+            !combinedAr.contains('بشرة') &&
+            !combinedEn.contains('skincare') &&
+            !combinedEn.contains('skin') &&
+            !combinedEn.contains('cleanser') &&
+            !combinedEn.contains('cream')) {
+          return false;
+        }
+        if (_selectedCategory == 'devices' &&
+            !combinedAr.contains('أجهزة') &&
+            !combinedAr.contains('جهاز') &&
+            !combinedEn.contains('device')) {
+          return false;
+        }
+        if (_selectedCategory == 'sunscreens' &&
+            !combinedAr.contains('واقي') &&
+            !combinedAr.contains('شمس') &&
+            !combinedEn.contains('sun') &&
+            !combinedEn.contains('spf')) {
+          return false;
+        }
       }
 
       if (_searchQuery.isNotEmpty) {
@@ -47,13 +144,15 @@ class _ProductsScreenState extends State<ProductsScreen> {
         return p.nameAr.toLowerCase().contains(q) ||
             p.nameEn.toLowerCase().contains(q) ||
             p.clinicNameAr.toLowerCase().contains(q) ||
-            p.descriptionAr.toLowerCase().contains(q);
+            (p.clinicNameEn?.toLowerCase().contains(q) ?? false) ||
+            p.descriptionAr.toLowerCase().contains(q) ||
+            p.descriptionEn.toLowerCase().contains(q);
       }
       return true;
     }).toList();
 
     return ListenableBuilder(
-      listenable: Listenable.merge([loc, mockData]),
+      listenable: loc,
       builder: (context, _) {
         return Scaffold(
           backgroundColor: AppColors.bg(context),
@@ -67,7 +166,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ),
             ),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+              icon: Icon(
+                Icons.arrow_back,
+                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                size: 18,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -85,13 +188,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   ),
                   child: TextField(
                     style: TextStyle(color: AppColors.text(context), fontSize: 13.5),
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val.trim();
-                      });
-                    },
+                    onChanged: _onSearchChanged,
                     decoration: InputDecoration(
-                      hintText: loc.isArabic ? 'ابحث في المنتجات، السيرومات، الأجهزة...' : 'Search products, serums, devices...',
+                      hintText: loc.isArabic
+                          ? 'ابحث في المنتجات، السيرومات، الأجهزة...'
+                          : 'Search products, serums, devices...',
                       hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
                       prefixIcon: Icon(Icons.search_rounded, color: AppColors.mutedText(context), size: 18),
                       border: InputBorder.none,
@@ -141,38 +242,103 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
               // Products Grid
               Expanded(
-                child: filteredProducts.isEmpty
-                    ? Center(
-                        child: Text(
-                          loc.tr('product_empty'),
-                          style: TextStyle(color: AppColors.mutedText(context)),
-                        ),
-                      )
-                    : GridView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.68,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                        itemCount: filteredProducts.length,
-                        itemBuilder: (context, index) {
-                          final product = filteredProducts[index];
-                          return _ProductCard(
-                            product: product,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                LuxuryPageRoute(page: ProductDetailScreen(product: product)),
-                              );
-                            },
-                          );
-                        },
-                      ),
+                child: RefreshIndicator(
+                  color: AppColors.accentChampagne,
+                  onRefresh: () => _loadProducts(showLoading: false),
+                  child: _buildBody(context, loc, filteredProducts),
+                ),
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    LocaleService loc,
+    List<ProductModel> filteredProducts,
+  ) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.accentChampagne),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.22),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 42),
+                  const SizedBox(height: 12),
+                  Text(
+                    _errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton.icon(
+                    onPressed: _loadProducts,
+                    icon: const Icon(Icons.refresh_rounded, color: AppColors.accentChampagne),
+                    label: Text(
+                      loc.isArabic ? 'إعادة المحاولة' : 'Retry',
+                      style: const TextStyle(
+                        color: AppColors.accentChampagne,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (filteredProducts.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+          Center(
+            child: Text(
+              loc.tr('product_empty'),
+              style: TextStyle(color: AppColors.mutedText(context)),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return GridView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.68,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: filteredProducts.length,
+      itemBuilder: (context, index) {
+        final product = filteredProducts[index];
+        return _ProductCard(
+          product: product,
+          onTap: () {
+            Navigator.push(
+              context,
+              LuxuryPageRoute(page: ProductDetailScreen(product: product)),
+            );
+          },
         );
       },
     );
@@ -189,6 +355,7 @@ class _ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
+    final categoryLabel = loc.isArabic ? product.categoryAr : product.categoryEn;
 
     return LuxuryCard(
       onTap: onTap,
@@ -214,26 +381,27 @@ class _ProductCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 8,
-                  left: loc.isArabic ? 8 : null,
-                  right: loc.isArabic ? null : 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentChampagne,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      loc.isArabic ? product.categoryAr : product.categoryEn,
-                      style: const TextStyle(
-                        color: AppColors.backgroundDeep,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 9,
+                if (categoryLabel.isNotEmpty)
+                  Positioned(
+                    top: 8,
+                    left: loc.isArabic ? 8 : null,
+                    right: loc.isArabic ? null : 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentChampagne,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        categoryLabel,
+                        style: const TextStyle(
+                          color: AppColors.backgroundDeep,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 9,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

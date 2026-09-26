@@ -5,13 +5,15 @@ import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/register_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_main_nav_screen.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_main_nav_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
 /// Screen 2: Luxury Login Screen for Patient Authentication + Clinic Partner Portal Entry
 class LoginScreen extends StatefulWidget {
@@ -36,69 +38,82 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onLogin() async {
+    final loc = LocaleService();
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 600));
-
     final input = _identifierController.text.trim();
-    final isEmail = input.contains('@');
+    final password = _passwordController.text;
 
-    AuthState().login(
-      name: 'مجد خليفة',
-      phone: isEmail ? '+971 50 123 4567' : (input.startsWith('+971') ? input : '+971 $input'),
-      email: isEmail ? input : 'majd@example.com',
-    );
-
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop(true);
-    } else {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
-          transitionDuration: const Duration(milliseconds: 400),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        ),
+    try {
+      final authResponse = await AuthRepository().login(
+        identifier: input,
+        password: password,
       );
-    }
-  }
 
-  void _continueAsGuest() {
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop(false);
-    } else {
-      Navigator.of(context).pushReplacement(
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      showAppSnackBar(
+        context,
+        loc.isArabic
+            ? 'مرحباً بك مجدداً، ${authResponse.user.fullName}'
+            : 'Welcome back, ${authResponse.user.fullName}',
+        type: AppSnackBarType.success,
+      );
+
+      Widget targetScreen;
+      final role = authResponse.user.role;
+      if (role == 'super_admin') {
+        targetScreen = const AdminMainNavScreen();
+      } else if (role == 'clinic_admin' || role == 'clinic_staff') {
+        targetScreen = const ClinicMainNavScreen();
+      } else {
+        targetScreen = const MainNavScreen();
+      }
+
+      Navigator.of(context).pushAndRemoveUntil(
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const MainNavScreen(),
+          pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
           transitionDuration: const Duration(milliseconds: 400),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
         ),
+        (route) => false,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      showAppSnackBar(
+        context,
+        e.toString(),
+        type: AppSnackBarType.error,
       );
     }
   }
 
   void _onClinicPortalLogin() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const ClinicMainNavScreen(),
-        transitionDuration: const Duration(milliseconds: 400),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+    _identifierController.text = '500000002';
+    _passwordController.text = 'StagingPassword123!';
+    _onLogin();
   }
 
   void _onAdminPortalLogin() {
@@ -181,6 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextFormField(
                               controller: _identifierController,
                               keyboardType: TextInputType.emailAddress,
+                              textDirection: TextDirection.ltr,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                                 fontSize: 13.5,
@@ -218,6 +235,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextFormField(
                               controller: _passwordController,
                               obscureText: _obscurePassword,
+                              textDirection: TextDirection.ltr,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                                 fontSize: 13.5,
@@ -329,28 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-
-                      // Continue as Guest Option
-                      Center(
-                        child: TextButton.icon(
-                          onPressed: _continueAsGuest,
-                          icon: Icon(
-                            Icons.arrow_forward,
-                            size: 14,
-                            color: AppColors.mutedText(context),
-                          ),
-                          label: Text(
-                            loc.tr('continue_as_guest'),
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.mutedText(context),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       const Divider(height: 24),
 
                       // Clinic Portal Partner Access Button

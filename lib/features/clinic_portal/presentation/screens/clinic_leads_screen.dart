@@ -23,6 +23,14 @@ class _ClinicLeadsScreenState extends State<ClinicLeadsScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ClinicPortalService().loadPortalData();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final clinicService = ClinicPortalService();
@@ -48,7 +56,9 @@ class _ClinicLeadsScreenState extends State<ClinicLeadsScreen> {
           leads = leads.where((l) =>
               l.patientFullName.toLowerCase().contains(q) ||
               l.patientPhone.contains(q) ||
-              l.serviceNameAr.toLowerCase().contains(q)).toList();
+              l.referenceCode.toLowerCase().contains(q) ||
+              l.serviceNameAr.toLowerCase().contains(q) ||
+              (l.serviceNameEn?.toLowerCase().contains(q) ?? false)).toList();
         }
 
         final filterLabels = [
@@ -142,47 +152,102 @@ class _ClinicLeadsScreenState extends State<ClinicLeadsScreen> {
               ),
               const SizedBox(height: 6),
 
-              // Leads List
+              // Leads List with Pull-to-Refresh
               Expanded(
-                child: leads.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.inbox_outlined,
-                              size: 48,
-                              color: AppColors.mutedText(context).withValues(alpha: 0.6),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              loc.tr('clinic_no_leads'),
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: AppColors.mutedText(context),
-                              ),
-                            ),
-                          ],
+                child: clinicService.isLoading && clinicService.clinicLeads.isEmpty
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accentChampagne,
+                          strokeWidth: 2.5,
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        itemCount: leads.length,
-                        itemBuilder: (context, index) {
-                          final lead = leads[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _ClinicLeadCard(
-                              lead: lead,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  LuxuryPageRoute(page: ClinicLeadDetailScreen(lead: lead)),
-                                );
-                              },
+                    : clinicService.errorMessage != null && clinicService.clinicLeads.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.error_outline_rounded, color: Colors.amber, size: 48),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    loc.isArabic ? 'تعذر تحميل قائمة الطلبات' : 'Failed to load consultation leads',
+                                    style: AppTypography.cardTitle.copyWith(
+                                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    clinicService.errorMessage!,
+                                    style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton.icon(
+                                    onPressed: () => clinicService.loadPortalData(refresh: true),
+                                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                                    label: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.accentChampagne,
+                                      foregroundColor: AppColors.backgroundDeep,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          );
-                        },
-                      ),
+                          )
+                        : RefreshIndicator(
+                            color: AppColors.accentChampagne,
+                            backgroundColor: isDark ? AppColors.cardSurface : Colors.white,
+                            onRefresh: () => clinicService.loadPortalData(refresh: true),
+                            child: leads.isEmpty
+                                ? ListView(
+                                    children: [
+                                      SizedBox(
+                                        height: MediaQuery.of(context).size.height * 0.4,
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.inbox_outlined,
+                                                size: 48,
+                                                color: AppColors.mutedText(context).withValues(alpha: 0.6),
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Text(
+                                                loc.tr('clinic_no_leads'),
+                                                style: AppTypography.bodyMedium.copyWith(
+                                                  color: AppColors.mutedText(context),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : ListView.builder(
+                                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                    itemCount: leads.length,
+                                    itemBuilder: (context, index) {
+                                      final lead = leads[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 10),
+                                        child: _ClinicLeadCard(
+                                          lead: lead,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              LuxuryPageRoute(page: ClinicLeadDetailScreen(lead: lead)),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
               ),
             ],
           ),

@@ -5,19 +5,87 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/widgets/before_after_preview.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
 import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
+import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profile_screen.dart';
 
 /// Treatment / Procedure Detail Screen with full medical description & clinic booking lead
-class TreatmentDetailScreen extends StatelessWidget {
+class TreatmentDetailScreen extends StatefulWidget {
   final TreatmentModel treatment;
 
   const TreatmentDetailScreen({super.key, required this.treatment});
+
+  @override
+  State<TreatmentDetailScreen> createState() => _TreatmentDetailScreenState();
+}
+
+class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
+  final TreatmentsRepository _treatmentsRepository = TreatmentsRepository();
+  final ClinicsRepository _clinicsRepository = ClinicsRepository();
+
+  late TreatmentModel _treatment;
+  List<ClinicModel> _availableClinics = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _treatment = widget.treatment;
+    _loadDetails();
+  }
+
+  Future<void> _loadDetails() async {
+    try {
+      final detail = await _treatmentsRepository.getTreatmentDetail(widget.treatment.id);
+      if (detail != null && mounted) {
+        setState(() {
+          _treatment = detail;
+        });
+      }
+    } catch (_) {}
+
+    try {
+      final clinics = await _clinicsRepository.getClinics();
+      if (!mounted) return;
+      final matched = clinics.where((c) {
+        return c.id == _treatment.clinicId || c.treatmentIds.contains(_treatment.id);
+      }).toList();
+
+      setState(() {
+        if (matched.isNotEmpty) {
+          _availableClinics = matched;
+        } else if (clinics.isNotEmpty) {
+          _availableClinics = [clinics.first];
+        }
+      });
+    } catch (_) {}
+  }
+
+  ClinicModel _resolvePrimaryClinic() {
+    if (_availableClinics.isNotEmpty) {
+      return _availableClinics.first;
+    }
+    return ClinicModel(
+      id: _treatment.clinicId ?? '',
+      nameAr: _treatment.clinicNameAr ?? 'العيادة الطبية',
+      nameEn: _treatment.clinicNameEn ?? 'Medical Clinic',
+      descriptionAr: '',
+      descriptionEn: '',
+      coverImageUrl: '',
+      galleryImages: const [],
+      logoUrl: '',
+      rating: 4.9,
+      reviewCount: 0,
+      subscriptionTier: SubscriptionTier.basic,
+      city: 'دبي',
+      areaAr: 'الإمارات',
+      areaEn: 'UAE',
+      addressAr: 'الإمارات العربية المتحدة',
+    );
+  }
 
   Future<void> _handleBookLead(BuildContext context, ClinicModel clinic) async {
     final auth = await GuestAuthGuard.requireAuth(
@@ -35,7 +103,7 @@ class TreatmentDetailScreen extends StatelessWidget {
         LuxuryPageRoute(
           page: AppointmentRequestScreen(
             clinic: clinic,
-            preselectedServiceName: LocaleService().isArabic ? treatment.nameAr : treatment.nameEn,
+            preselectedServiceName: LocaleService().isArabic ? _treatment.nameAr : _treatment.nameEn,
           ),
         ),
       );
@@ -45,19 +113,16 @@ class TreatmentDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
-
-    // Associated clinics providing this treatment
-    final availableClinics = mockData.clinics.where((c) => c.treatmentIds.contains(treatment.id)).toList();
-    final fallbackClinic = availableClinics.isNotEmpty ? availableClinics.first : mockData.clinics.first;
+    final primaryClinic = _resolvePrimaryClinic();
+    final clinicsToShow = _availableClinics.isNotEmpty ? _availableClinics : [primaryClinic];
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
       appBar: AppBar(
         backgroundColor: AppColors.bg(context),
         title: Text(
-          loc.isArabic ? treatment.nameAr : treatment.nameEn,
+          loc.isArabic ? _treatment.nameAr : _treatment.nameEn,
           style: AppTypography.screenTitle.copyWith(
             color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
             fontSize: 15.5,
@@ -75,7 +140,7 @@ class TreatmentDetailScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: Image.network(
-              treatment.imageUrl,
+              _treatment.imageUrl,
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -103,7 +168,7 @@ class TreatmentDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    loc.isArabic ? treatment.categoryAr : treatment.categoryEn,
+                    loc.isArabic ? _treatment.categoryAr : _treatment.categoryEn,
                     style: const TextStyle(
                       color: AppColors.accentChampagne,
                       fontWeight: FontWeight.w800,
@@ -113,7 +178,7 @@ class TreatmentDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  loc.isArabic ? treatment.nameAr : treatment.nameEn,
+                  loc.isArabic ? _treatment.nameAr : _treatment.nameEn,
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
@@ -122,7 +187,7 @@ class TreatmentDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  (loc.isArabic ? treatment.descriptionAr : treatment.descriptionEn) ?? '',
+                  (loc.isArabic ? _treatment.descriptionAr : _treatment.descriptionEn) ?? '',
                   style: AppTypography.bodyMedium.copyWith(
                     fontSize: 13,
                     color: AppColors.mutedText(context),
@@ -142,33 +207,22 @@ class TreatmentDetailScreen extends StatelessWidget {
                 _SpecRow(
                   icon: Icons.timer_outlined,
                   label: loc.tr('duration_label'),
-                  value: (loc.isArabic ? treatment.durationText : (treatment.durationTextEn ?? treatment.durationText)),
+                  value: (loc.isArabic ? _treatment.durationText : (_treatment.durationTextEn ?? _treatment.durationText)),
                 ),
                 const Divider(height: 20),
                 _SpecRow(
                   icon: Icons.healing_outlined,
                   label: loc.tr('downtime_label'),
-                  value: (loc.isArabic ? treatment.downtimeText : (treatment.downtimeTextEn ?? treatment.downtimeText)),
+                  value: (loc.isArabic ? _treatment.downtimeText : (_treatment.downtimeTextEn ?? _treatment.downtimeText)),
                 ),
                 const Divider(height: 20),
                 _SpecRow(
                   icon: Icons.track_changes_outlined,
                   label: loc.tr('target_area_label'),
-                  value: (loc.isArabic ? treatment.targetAreaAr : (treatment.targetAreaEn ?? treatment.targetAreaAr)),
+                  value: (loc.isArabic ? _treatment.targetAreaAr : (_treatment.targetAreaEn ?? _treatment.targetAreaAr)),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Before & After Clinical Results Showcase
-          BeforeAfterPreview(
-            beforeImageUrl: 'https://images.unsplash.com/photo-1512290900672-1f02e604ec22?auto=format&fit=crop&w=600&q=80',
-            afterImageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80',
-            titleAr: 'نتائج سريرية تجريبية للإجراء',
-            titleEn: 'Sample Clinical Outcomes',
-            subtitleAr: 'بعد جلستين',
-            subtitleEn: 'After 2 sessions',
           ),
           const SizedBox(height: 16),
 
@@ -182,7 +236,7 @@ class TreatmentDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          ...((availableClinics.isNotEmpty ? availableClinics : [fallbackClinic]).map((clinic) {
+          ...(clinicsToShow.map((clinic) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: LuxuryCard(
@@ -248,7 +302,7 @@ class TreatmentDetailScreen extends StatelessWidget {
             icon: Icons.calendar_month_outlined,
             isFullWidth: true,
             height: 48,
-            onPressed: () => _handleBookLead(context, fallbackClinic),
+            onPressed: () => _handleBookLead(context, primaryClinic),
           ),
           const SizedBox(height: 24),
         ],

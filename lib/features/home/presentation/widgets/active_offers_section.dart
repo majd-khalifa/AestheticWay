@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 
@@ -111,12 +112,10 @@ class _OfferCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    offer.imageUrl,
+                  LuxuryImage(
+                    imageUrl: offer.imageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    ),
+                    placeholderIcon: Icons.local_offer_outlined,
                   ),
                   Container(
                     decoration: BoxDecoration(

@@ -1,18 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/data/leads_repository.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_success_screen.dart';
 
 /// Appointment Request Form Screen (Lead Generation ONLY)
@@ -23,6 +25,7 @@ class AppointmentRequestScreen extends StatefulWidget {
   final String? preselectedServiceName;
   final String? selectedOfferTitle;
   final String? selectedOfferId;
+  final LeadsRepository? leadsRepository;
 
   const AppointmentRequestScreen({
     super.key,
@@ -31,6 +34,7 @@ class AppointmentRequestScreen extends StatefulWidget {
     this.preselectedServiceName,
     this.selectedOfferTitle,
     this.selectedOfferId,
+    this.leadsRepository,
   });
 
   @override
@@ -42,45 +46,105 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   final TextEditingController _notesController = TextEditingController();
+  late final LeadsRepository _leadsRepository;
 
-  ClinicBranch? _selectedBranch;
+  String? _selectedBranchId;
   String? _selectedTreatment;
-  PractitionerModel? _selectedPractitioner;
+  String? _selectedPractitionerId;
   DateTime _preferredDate = DateTime.now().add(const Duration(days: 2));
   PreferredTimeWindow _timeWindow = PreferredTimeWindow.evening;
   bool _consentAccepted = false;
   bool _isSubmitting = false;
 
+  final Map<String, String> _treatmentNameToId = {};
+
+  Map<String, ClinicBranch> get _uniqueBranches {
+    final Map<String, ClinicBranch> map = {};
+    for (final b in widget.clinic.branches) {
+      if (b.id.isNotEmpty && !map.containsKey(b.id)) {
+        map[b.id] = b;
+      }
+    }
+    return map;
+  }
+
+  Map<String, PractitionerModel> get _uniquePractitioners {
+    final Map<String, PractitionerModel> map = {};
+    if (widget.clinic.rawPractitioners != null) {
+      for (final raw in widget.clinic.rawPractitioners!) {
+        if (raw is Map<String, dynamic>) {
+          try {
+            final p = PractitionerModel.fromJson(
+              raw,
+              clinicId: widget.clinic.id,
+              clinicNameAr: widget.clinic.nameAr,
+              clinicNameEn: widget.clinic.nameEn,
+            );
+            if (p.id.isNotEmpty && !map.containsKey(p.id)) {
+              map[p.id] = p;
+            }
+          } catch (_) {}
+        }
+      }
+    }
+    return map;
+  }
+
   @override
   void initState() {
     super.initState();
+    _leadsRepository = widget.leadsRepository ?? LeadsRepository();
     final auth = AuthState();
     _nameController = TextEditingController(text: auth.isLoggedIn ? auth.userName : '');
-    _phoneController = TextEditingController(
-      text: auth.isLoggedIn ? auth.userPhone.replaceAll('+971 ', '') : '',
-    );
+    
+    // Clean local phone digits without country code prefix
+    String initialPhone = '';
+    if (auth.isLoggedIn && auth.userPhone.isNotEmpty) {
+      final clean = auth.userPhone.replaceAll(RegExp(r'[^0-9]'), '');
+      if (clean.startsWith('971')) {
+        initialPhone = clean.substring(3);
+      } else if (clean.startsWith('0')) {
+        initialPhone = clean.substring(1);
+      } else {
+        initialPhone = clean;
+      }
+    }
+    _phoneController = TextEditingController(text: initialPhone);
 
     if (widget.clinic.branches.isNotEmpty) {
-      _selectedBranch = widget.clinic.branches.first;
+      _selectedBranchId = widget.clinic.branches.first.id;
     }
 
-    _selectedPractitioner = widget.preselectedPractitioner;
+    _selectedPractitionerId = widget.preselectedPractitioner?.id;
 
-    final mockData = MockDataService();
-    final availableTreatments = mockData.treatments
-        .where((t) => widget.clinic.treatmentIds.contains(t.id))
-        .toList();
+    // Build initial treatment options from clinic.rawTreatments
+    final defaultTreatment = 'استشارة تجميلية وجلدية عامة';
+    final Set<String> validOptions = {defaultTreatment};
 
-    final validOptions = {
-      'استشارة تجميلية وجلدية عامة',
-      ...availableTreatments.map((t) => t.nameAr),
-    }.toList();
+    if (widget.clinic.rawTreatments != null) {
+      for (final raw in widget.clinic.rawTreatments!) {
+        if (raw is Map<String, dynamic>) {
+          final nameAr = (raw['name_ar'] ?? raw['name_en'] ?? '').toString().trim();
+          final nameEn = (raw['name_en'] ?? raw['name_ar'] ?? '').toString().trim();
+          final id = raw['id']?.toString() ?? '';
+          if (nameAr.isNotEmpty) {
+            validOptions.add(nameAr);
+            if (id.isNotEmpty) _treatmentNameToId[nameAr] = id;
+          }
+          if (nameEn.isNotEmpty && nameEn != nameAr) {
+            validOptions.add(nameEn);
+            if (id.isNotEmpty) _treatmentNameToId[nameEn] = id;
+          }
+        }
+      }
+    }
 
     if (widget.preselectedServiceName != null &&
+        widget.preselectedServiceName!.isNotEmpty &&
         validOptions.contains(widget.preselectedServiceName)) {
       _selectedTreatment = widget.preselectedServiceName;
     } else {
-      _selectedTreatment = validOptions.first;
+      _selectedTreatment = defaultTreatment;
     }
   }
 
@@ -136,15 +200,12 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       return;
     }
     if (!_consentAccepted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.isArabic
-                ? 'يرجى الموافقة على مشاركة البيانات مع العيادة لمتابعة الطلب'
-                : 'Please accept consent to share contact details with clinic',
-          ),
-          backgroundColor: AppColors.errorRed,
-        ),
+      showAppSnackBar(
+        context,
+        loc.isArabic
+            ? 'يرجى الموافقة على مشاركة البيانات مع العيادة لمتابعة الطلب'
+            : 'Please accept consent to share contact details with clinic',
+        type: AppSnackBarType.error,
       );
       return;
     }
@@ -153,72 +214,152 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       _isSubmitting = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Format phone into E.164: +9715XXXXXXXX
+    final rawPhone = _phoneController.text.trim();
+    final digitsOnly = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final localDigits = digitsOnly.startsWith('971')
+        ? digitsOnly.substring(3)
+        : (digitsOnly.startsWith('0') ? digitsOnly.substring(1) : digitsOnly);
+    final formattedPhone = '+971$localDigits';
 
-    final randomCode = '#REQ-${10000 + Random().nextInt(89999)}';
-    final actualServiceName = widget.selectedOfferTitle != null
-        ? '${widget.selectedOfferTitle} (${_selectedTreatment ?? "استشارة"})'
-        : (_selectedTreatment ?? 'استشارة طبية');
+    final actualServiceName = widget.selectedOfferTitle != null && widget.selectedOfferTitle!.isNotEmpty
+        ? widget.selectedOfferTitle!
+        : (_selectedTreatment ?? (loc.isArabic ? 'استشارة تجميلية وجلدية عامة' : 'General Aesthetic & Derma Consultation'));
 
-    final request = AppointmentRequestModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      referenceCode: randomCode,
-      clinicId: widget.clinic.id,
-      clinicNameAr: widget.clinic.nameAr,
-      branchNameAr: _selectedBranch?.nameAr ?? widget.clinic.areaAr,
-      serviceNameAr: actualServiceName,
-      practitionerId: _selectedPractitioner?.id,
-      practitionerNameAr: _selectedPractitioner?.nameAr,
-      practitionerType: _selectedPractitioner?.type,
-      preferredDate: _preferredDate,
-      preferredTimeWindow: _timeWindow,
-      patientFullName: _nameController.text.trim(),
-      patientPhone: '+971 ${_phoneController.text.trim()}',
-      notes: _notesController.text.trim(),
-      consentAccepted: true,
-      status: AppointmentLeadStatus.sent,
-      createdAt: DateTime.now(),
-    );
+    final payload = <String, dynamic>{
+      'clinic': widget.clinic.id,
+      'consent_accepted': true,
+      'service_name': actualServiceName,
+      'patient_name': _nameController.text.trim(),
+      'patient_phone': formattedPhone,
+      'preferred_time_window': _timeWindow.name,
+    };
 
-    MockDataService().addAppointmentRequest(request);
+    final isUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
 
-    if (!mounted) return;
-    setState(() {
-      _isSubmitting = false;
-    });
+    final selectedBranch = _selectedBranchId != null ? _uniqueBranches[_selectedBranchId] : null;
+    final selectedPractitioner = _selectedPractitionerId != null ? _uniquePractitioners[_selectedPractitionerId] : null;
 
-    Navigator.pushReplacement(
-      context,
-      LuxuryPageRoute(
-        page: AppointmentSuccessScreen(
-          request: request,
-          clinic: widget.clinic,
+    if (_selectedBranchId != null && isUuid.hasMatch(_selectedBranchId!)) {
+      payload['branch'] = _selectedBranchId;
+    }
+
+    if (widget.selectedOfferId != null && isUuid.hasMatch(widget.selectedOfferId!)) {
+      payload['offer'] = widget.selectedOfferId;
+      payload['lead_type'] = 'offer';
+    } else {
+      final tId = _treatmentNameToId[_selectedTreatment];
+      if (tId != null && isUuid.hasMatch(tId)) {
+        payload['treatment'] = tId;
+      }
+    }
+
+    if (_selectedPractitionerId != null && isUuid.hasMatch(_selectedPractitionerId!)) {
+      payload['practitioner'] = _selectedPractitionerId;
+    }
+
+    if (_notesController.text.trim().isNotEmpty) {
+      payload['notes'] = _notesController.text.trim();
+    }
+
+    try {
+      final result = await _leadsRepository.createLead(payload);
+
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+      });
+
+      final request = AppointmentRequestModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        referenceCode: result.leadReference.isNotEmpty
+            ? result.leadReference
+            : '#REQ-${10000 + Random().nextInt(89999)}',
+        clinicId: widget.clinic.id,
+        clinicNameAr: widget.clinic.nameAr,
+        clinicNameEn: widget.clinic.nameEn,
+        branchId: selectedBranch?.id,
+        branchNameAr: selectedBranch?.nameAr ?? widget.clinic.areaAr,
+        branchNameEn: selectedBranch?.nameEn ?? widget.clinic.areaEn,
+        serviceNameAr: actualServiceName,
+        serviceNameEn: actualServiceName,
+        practitionerId: selectedPractitioner?.id,
+        practitionerNameAr: selectedPractitioner?.nameAr,
+        practitionerNameEn: selectedPractitioner?.nameEn,
+        practitionerType: selectedPractitioner?.type,
+        preferredDate: _preferredDate,
+        preferredTimeWindow: _timeWindow,
+        patientFullName: _nameController.text.trim(),
+        patientPhone: formattedPhone,
+        notes: _notesController.text.trim(),
+        consentAccepted: true,
+        status: AppointmentLeadStatus.sent,
+        createdAt: result.createdAt,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        LuxuryPageRoute(
+          page: AppointmentSuccessScreen(
+            request: request,
+            clinic: widget.clinic,
+          ),
         ),
-      ),
-    );
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+      });
+      final is429 = e.statusCode == 429 ||
+          e.message.contains('already submitted') ||
+          e.message.contains('too many requests') ||
+          e.message.contains('مؤخراً') ||
+          e.message.contains('مؤخرا');
+      final errorMessage = is429
+          ? (loc.isArabic
+              ? 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'
+              : 'A similar request was recently submitted. Please try again shortly.')
+          : e.message;
+      showAppSnackBar(
+        context,
+        errorMessage,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+      });
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى' : 'Failed to send request. Please try again.',
+        type: AppSnackBarType.error,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
 
-    final availableTreatments = mockData.treatments
-        .where((t) => widget.clinic.treatmentIds.contains(t.id))
-        .toList();
-
-    final practitioners = mockData.practitioners
-        .where((p) => widget.clinic.practitionerIds.contains(p.id))
-        .toList();
-
-    // 1. Resilient Service / Treatment options (strictly unique)
+    // 1. Resilient Service / Treatment options derived from clinic.rawTreatments
     final defaultTreatment = loc.isArabic ? 'استشارة تجميلية وجلدية عامة' : 'General Aesthetic & Derma Consultation';
     final Set<String> distinctTreatments = {defaultTreatment};
-    for (final t in availableTreatments) {
-      final name = loc.isArabic ? t.nameAr : t.nameEn;
-      if (name.trim().isNotEmpty) {
-        distinctTreatments.add(name);
+
+    if (widget.clinic.rawTreatments != null) {
+      for (final raw in widget.clinic.rawTreatments!) {
+        if (raw is Map<String, dynamic>) {
+          final name = loc.isArabic
+              ? (raw['name_ar'] ?? raw['name_en'] ?? '').toString().trim()
+              : (raw['name_en'] ?? raw['name_ar'] ?? '').toString().trim();
+          final id = raw['id']?.toString() ?? '';
+          if (name.isNotEmpty) {
+            distinctTreatments.add(name);
+            if (id.isNotEmpty) _treatmentNameToId[name] = id;
+          }
+        }
       }
     }
     final treatmentList = distinctTreatments.toList();
@@ -228,15 +369,18 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     }
 
     // 2. Resilient Branch options
-    final branches = widget.clinic.branches.toSet().toList();
-    if (_selectedBranch != null && !branches.contains(_selectedBranch)) {
-      _selectedBranch = branches.isNotEmpty ? branches.first : null;
+    final branchMap = _uniqueBranches;
+    if (_selectedBranchId != null && !branchMap.containsKey(_selectedBranchId)) {
+      _selectedBranchId = branchMap.isNotEmpty ? branchMap.keys.first : null;
+    }
+    if (_selectedBranchId == null && branchMap.isNotEmpty) {
+      _selectedBranchId = branchMap.keys.first;
     }
 
     // 3. Resilient Practitioner options
-    final practitionerList = practitioners.toSet().toList();
-    if (_selectedPractitioner != null && !practitionerList.contains(_selectedPractitioner)) {
-      _selectedPractitioner = null;
+    final practitionerMap = _uniquePractitioners;
+    if (_selectedPractitionerId != null && !practitionerMap.containsKey(_selectedPractitionerId)) {
+      _selectedPractitionerId = null;
     }
 
     return PopScope(
@@ -318,21 +462,31 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        widget.clinic.coverImageUrl,
-                        width: 52,
-                        height: 52,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
-                          width: 52,
-                          height: 52,
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          child: Icon(
-                            Icons.local_hospital_outlined,
-                            color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
-                          ),
-                        ),
-                      ),
+                      child: (widget.clinic.coverImageUrl.isNotEmpty && widget.clinic.coverImageUrl.startsWith('http'))
+                          ? Image.network(
+                              widget.clinic.coverImageUrl,
+                              width: 52,
+                              height: 52,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Container(
+                                width: 52,
+                                height: 52,
+                                color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                child: Icon(
+                                  Icons.local_hospital_outlined,
+                                  color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              width: 52,
+                              height: 52,
+                              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              child: Icon(
+                                Icons.local_hospital_outlined,
+                                color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -361,7 +515,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
               const SizedBox(height: 16),
 
               // Branch Selector
-              if (branches.isNotEmpty) ...[
+              if (branchMap.isNotEmpty) ...[
                 Text(
                   loc.tr('select_branch'),
                   style: AppTypography.cardTitle.copyWith(
@@ -374,14 +528,14 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                 LuxuryCard(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<ClinicBranch>(
-                      value: _selectedBranch,
+                    child: DropdownButton<String?>(
+                      value: _selectedBranchId,
                       isExpanded: true,
                       dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
                       iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      items: branches.map((b) {
-                        return DropdownMenuItem(
-                          value: b,
+                      items: branchMap.values.map((b) {
+                        return DropdownMenuItem<String?>(
+                          value: b.id,
                           child: Text(
                             loc.isArabic ? '${b.nameAr} (${b.areaAr})' : '${b.nameEn} (${b.areaEn})',
                             style: AppTypography.bodyMedium.copyWith(
@@ -392,7 +546,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                       }).toList(),
                       onChanged: (val) {
                         setState(() {
-                          _selectedBranch = val;
+                          _selectedBranchId = val;
                         });
                       },
                     ),
@@ -441,7 +595,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
               const SizedBox(height: 14),
 
               // Preferred Practitioner (Optional)
-              if (practitionerList.isNotEmpty) ...[
+              if (practitionerMap.isNotEmpty) ...[
                 Text(
                   loc.tr('select_practitioner'),
                   style: AppTypography.cardTitle.copyWith(
@@ -454,8 +608,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                 LuxuryCard(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
                   child: DropdownButtonHideUnderline(
-                    child: DropdownButton<PractitionerModel?>(
-                      value: _selectedPractitioner,
+                    child: DropdownButton<String?>(
+                      value: _selectedPractitionerId,
                       isExpanded: true,
                       dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
                       iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
@@ -464,7 +618,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                         style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
                       ),
                       items: [
-                        DropdownMenuItem<PractitionerModel?>(
+                        DropdownMenuItem<String?>(
                           value: null,
                           child: Text(
                             loc.tr('any_practitioner'),
@@ -473,15 +627,18 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                             ),
                           ),
                         ),
-                        ...practitionerList.map((p) {
-                          return DropdownMenuItem<PractitionerModel?>(
-                            value: p,
+                        ...practitionerMap.values.map((p) {
+                          return DropdownMenuItem<String?>(
+                            value: p.id,
                             child: Row(
                               children: [
-                                Text(
-                                  loc.isArabic ? p.nameAr : p.nameEn,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                Expanded(
+                                  child: Text(
+                                    loc.isArabic ? p.nameAr : p.nameEn,
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -493,7 +650,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                       ],
                       onChanged: (val) {
                         setState(() {
-                          _selectedPractitioner = val;
+                          _selectedPractitionerId = val;
                         });
                       },
                     ),
@@ -647,6 +804,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
+                  textDirection: TextDirection.ltr,
+                  textAlign: TextAlign.start,
                   style: TextStyle(
                     color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                     fontSize: 13.5,
@@ -654,6 +813,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   ),
                   decoration: InputDecoration(
                     labelText: loc.tr('phone_uae'),
+                    hintText: '50 123 4567',
                     labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                     floatingLabelStyle: TextStyle(
                       color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
@@ -681,7 +841,12 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                     ),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().length < 8) return loc.isArabic ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter valid phone';
+                    if (v == null || v.trim().isEmpty) return loc.isArabic ? 'يرجى إدخال رقم الهاتف' : 'Please enter phone number';
+                    final digits = v.replaceAll(RegExp(r'[^0-9]'), '');
+                    final local = digits.startsWith('971') ? digits.substring(3) : (digits.startsWith('0') ? digits.substring(1) : digits);
+                    if (local.length < 8 || local.length > 10) {
+                      return loc.isArabic ? 'يرجى إدخال رقم هاتف إماراتي صحيح (مثال: 501234567)' : 'Please enter valid UAE phone (e.g. 501234567)';
+                    }
                     return null;
                   },
                 ),

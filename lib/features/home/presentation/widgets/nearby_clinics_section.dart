@@ -3,6 +3,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/distance_chip.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
@@ -155,22 +156,14 @@ class _NearbyClinicCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // High-resolution rounded image
-                ClipRRect(
+                LuxuryImage(
+                  imageUrl: clinic.coverImageUrl,
+                  width: 78,
+                  height: 78,
                   borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    width: 78,
-                    height: 78,
-                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    child: Image.network(
-                      clinic.coverImageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Icon(
-                        Icons.local_hospital_outlined,
-                        color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
-                        size: 32,
-                      ),
-                    ),
-                  ),
+                  fit: BoxFit.cover,
+                  placeholderIcon: Icons.local_hospital_outlined,
+                  iconSize: 32,
                 ),
                 const SizedBox(width: 14),
                 // Clinic Info

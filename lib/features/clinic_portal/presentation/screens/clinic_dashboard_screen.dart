@@ -9,9 +9,11 @@ import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_serv
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_lead_detail_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_verify_code_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_practitioners_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_treatments_screen.dart';
 
 /// Clinic Tab 1: Luxury Clinic Dashboard Screen with Key Metrics, Shortcuts & Recent Leads
-class ClinicDashboardScreen extends StatelessWidget {
+class ClinicDashboardScreen extends StatefulWidget {
   final VoidCallback onNavigateToLeads;
   final VoidCallback onNavigateToOffers;
 
@@ -20,6 +22,20 @@ class ClinicDashboardScreen extends StatelessWidget {
     required this.onNavigateToLeads,
     required this.onNavigateToOffers,
   });
+
+  @override
+  State<ClinicDashboardScreen> createState() => _ClinicDashboardScreenState();
+}
+
+class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ClinicPortalService().loadPortalData();
+      ClinicPortalService().loadCatalogData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +48,9 @@ class ClinicDashboardScreen extends StatelessWidget {
       listenable: Listenable.merge([loc, clinicService]),
       builder: (context, _) {
         final recentLeads = clinicService.clinicLeads.take(4).toList();
+        final clinicDisplayName = clinicService.dashboardData?.clinicName.isNotEmpty == true
+            ? clinicService.dashboardData!.clinicName
+            : (loc.isArabic ? clinic.nameAr : clinic.nameEn);
 
         return Scaffold(
           backgroundColor: AppColors.bg(context),
@@ -53,129 +72,233 @@ class ClinicDashboardScreen extends StatelessWidget {
             ),
             automaticallyImplyLeading: false,
           ),
-          body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            children: [
-              // Clinic Partner Header Card
-              LuxuryCard(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        clinic.coverImageUrl,
-                        width: 58,
-                        height: 58,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
-                          width: 58,
-                          height: 58,
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
+          body: clinicService.isLoading && clinicService.clinicLeads.isEmpty && clinicService.dashboardData == null
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.accentChampagne,
+                    strokeWidth: 2.5,
+                  ),
+                )
+              : clinicService.errorMessage != null && clinicService.clinicLeads.isEmpty && clinicService.dashboardData == null
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: Colors.amber, size: 48),
+                            const SizedBox(height: 12),
+                            Text(
+                              loc.isArabic ? 'تعذر تحميل بيانات العيادة' : 'Failed to load clinic data',
+                              style: AppTypography.cardTitle.copyWith(
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              clinicService.errorMessage!,
+                              style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => clinicService.loadPortalData(refresh: true),
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
+                              label: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.accentChampagne,
+                                foregroundColor: AppColors.backgroundDeep,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    )
+                  : RefreshIndicator(
+                      color: AppColors.accentChampagne,
+                      backgroundColor: isDark ? AppColors.cardSurface : Colors.white,
+                      onRefresh: () async {
+                        await Future.wait([
+                          clinicService.loadPortalData(refresh: true),
+                          clinicService.loadCatalogData(refresh: true),
+                        ]);
+                      },
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         children: [
+                          // Clinic Partner Header Card
+                          LuxuryCard(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    clinic.coverImageUrl,
+                                    width: 58,
+                                    height: 58,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Container(
+                                      width: 58,
+                                      height: 58,
+                                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                      child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        clinicDisplayName,
+                                        style: AppTypography.cardTitle.copyWith(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
+                                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      TierBadge(tier: clinic.subscriptionTier),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 4 Metrics Summary Grid
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _MetricCard(
+                                  title: loc.tr('clinic_new_leads_count'),
+                                  value: '${clinicService.newLeadsCount}',
+                                  icon: Icons.mark_email_unread_rounded,
+                                  isHighlighted: true,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _MetricCard(
+                                  title: loc.tr('clinic_lead_status_contacted'),
+                                  value: '${clinicService.contactedLeadsCount}',
+                                  icon: Icons.phone_callback_rounded,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _MetricCard(
+                                  title: loc.tr('clinic_total_leads'),
+                                  value: '${clinicService.totalLeadsCount}',
+                                  icon: Icons.groups_rounded,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _MetricCard(
+                                  title: loc.isArabic ? 'نسبة التحويل' : 'Conversion Rate',
+                                  value: '${clinicService.dashboardData?.conversionRate.toStringAsFixed(1) ?? '0.0'}%',
+                                  icon: Icons.trending_up_rounded,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+
+                          // Catalog & Content KPI Row
                           Text(
-                            loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                            loc.isArabic ? 'إدارة الكتالوج والمحتوى' : 'Catalog & Content Overview',
                             style: AppTypography.cardTitle.copyWith(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _CatalogCountCard(
+                                  title: loc.isArabic ? 'الأطباء' : 'Staff',
+                                  count: '${clinicService.activePractitionersCount}',
+                                  icon: Icons.medical_services_outlined,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      LuxuryPageRoute(page: const ClinicPractitionersScreen()),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _CatalogCountCard(
+                                  title: loc.isArabic ? 'العلاجات' : 'Treatments',
+                                  count: '${clinicService.activeTreatmentsCount}',
+                                  icon: Icons.spa_outlined,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      LuxuryPageRoute(page: const ClinicTreatmentsScreen()),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _CatalogCountCard(
+                                  title: loc.isArabic ? 'باقات العروض' : 'Offer Packages',
+                                  count: '${clinicService.activeOffersCount}',
+                                  icon: Icons.local_offer_outlined,
+                                  onTap: widget.onNavigateToOffers,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 6),
-                          TierBadge(tier: clinic.subscriptionTier),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
+                          const SizedBox(height: 18),
 
-              // 4 Metrics Summary Grid
-              Row(
-                children: [
-                  Expanded(
-                    child: _MetricCard(
-                      title: loc.tr('clinic_new_leads_count'),
-                      value: '${clinicService.newLeadsCount}',
-                      icon: Icons.mark_email_unread_rounded,
-                      isHighlighted: true,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _MetricCard(
-                      title: loc.tr('clinic_today_leads'),
-                      value: '${clinicService.clinicLeads.where((l) => l.createdAt.day == DateTime.now().day).length + 2}',
-                      icon: Icons.today_rounded,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: _MetricCard(
-                      title: loc.tr('clinic_total_leads'),
-                      value: '${clinicService.totalLeadsCount}',
-                      icon: Icons.groups_rounded,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _MetricCard(
-                      title: loc.tr('clinic_active_offers_count'),
-                      value: '${clinicService.activeOffersCount}',
-                      icon: Icons.local_offer_rounded,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-
-              // Quick Actions Row
-              Text(
-                loc.tr('clinic_quick_actions'),
-                style: AppTypography.cardTitle.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ShortcutButton(
-                      label: loc.tr('clinic_btn_view_new_leads'),
-                      icon: Icons.mark_email_unread_outlined,
-                      onTap: onNavigateToLeads,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _ShortcutButton(
-                      label: loc.tr('clinic_btn_add_offer'),
-                      icon: Icons.add_circle_outline_rounded,
-                      onTap: onNavigateToOffers,
-                    ),
-                  ),
-                ],
-              ),
+                          // Quick Actions Row
+                          Text(
+                            loc.tr('clinic_quick_actions'),
+                            style: AppTypography.cardTitle.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _ShortcutButton(
+                                  label: loc.tr('clinic_btn_view_new_leads'),
+                                  icon: Icons.mark_email_unread_outlined,
+                                  onTap: widget.onNavigateToLeads,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _ShortcutButton(
+                                  label: loc.tr('clinic_btn_add_offer'),
+                                  icon: Icons.add_circle_outline_rounded,
+                                  onTap: widget.onNavigateToOffers,
+                                ),
+                              ),
+                            ],
+                          ),
               const SizedBox(height: 8),
               _ShortcutButton(
                 label: loc.tr('clinic_verify_code_title'),
@@ -207,7 +330,7 @@ class ClinicDashboardScreen extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: onNavigateToLeads,
+                    onPressed: widget.onNavigateToLeads,
                     child: Text(
                       loc.isArabic ? 'عرض الكل' : 'View All',
                       style: AppTypography.caption.copyWith(
@@ -277,10 +400,11 @@ class ClinicDashboardScreen extends StatelessWidget {
               const SizedBox(height: 24),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }
 
 class _MetricCard extends StatelessWidget {
@@ -475,3 +599,61 @@ class _LeadSummaryTile extends StatelessWidget {
     );
   }
 }
+
+class _CatalogCountCard extends StatelessWidget {
+  final String title;
+  final String count;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _CatalogCountCard({
+    required this.title,
+    required this.count,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border(context), width: 0.8),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 20, color: AppColors.accentChampagne),
+            const SizedBox(height: 6),
+            Text(
+              count,
+              style: AppTypography.cardTitle.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              style: AppTypography.caption.copyWith(
+                color: AppColors.mutedText(context),
+                fontSize: 10.5,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

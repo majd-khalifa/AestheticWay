@@ -14,11 +14,13 @@ class RatingChip extends StatelessWidget {
     required this.rating,
     this.reviewCount,
     this.isCompact = false,
-    this.showGoogleSource = true,
+    this.showGoogleSource = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (rating <= 0.0) return const SizedBox.shrink();
+
     final isDark = AppColors.isDark(context);
 
     return Container(
@@ -55,17 +57,7 @@ class RatingChip extends StatelessWidget {
               fontSize: isCompact ? 10.5 : 11.5,
             ),
           ),
-          if (showGoogleSource) ...[
-            const SizedBox(width: 3.5),
-            Text(
-              'Google',
-              style: AppTypography.caption.copyWith(
-                color: isDark ? AppColors.silverMuted : const Color(0xFF92400E),
-                fontSize: isCompact ? 8.5 : 9.5,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ] else if (reviewCount != null) ...[
+          if (reviewCount != null && reviewCount! > 0) ...[
             const SizedBox(width: 3),
             Text(
               '($reviewCount)',

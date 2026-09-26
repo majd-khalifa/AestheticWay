@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
@@ -7,12 +6,12 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/admin/models/admin_clinic_model.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
 
 /// Super Admin Modal Sheet for inspecting clinic engagement, metrics, status & maps linking
 class AdminClinicDetailSheet extends StatelessWidget {
-  final ClinicModel clinic;
+  final AdminClinicModel clinic;
 
   const AdminClinicDetailSheet({super.key, required this.clinic});
 
@@ -98,23 +97,23 @@ class AdminClinicDetailSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // 4 Engagement Counters Grid
+                // 4 Clinic Catalog & Leads Counts (strictly from backend AdminClinicModel)
                 Row(
                   children: [
                     Expanded(
                       child: _AdminMetricBox(
-                        label: loc.tr('admin_table_views'),
-                        value: NumberFormat('#,###').format(metric?.appViews ?? 0),
-                        icon: Icons.remove_red_eye_outlined,
+                        label: loc.tr('admin_table_leads'),
+                        value: '${clinic.leadsCount}',
+                        icon: Icons.mark_email_read_outlined,
+                        isGold: true,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _AdminMetricBox(
-                        label: loc.tr('admin_table_leads'),
-                        value: '${metric?.totalLeads ?? 0}',
-                        icon: Icons.mark_email_read_outlined,
-                        isGold: true,
+                        label: loc.tr('admin_clinic_branches'),
+                        value: '${clinic.branchesCount}',
+                        icon: Icons.store_outlined,
                       ),
                     ),
                   ],
@@ -124,19 +123,18 @@ class AdminClinicDetailSheet extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _AdminMetricBox(
-                        label: loc.tr('admin_table_whatsapp'),
-                        value: '${metric?.whatsappTaps ?? 0}',
-                        icon: Icons.chat_bubble_outline_rounded,
-                        iconColor: const Color(0xFF10B981),
+                        label: loc.tr('admin_clinic_practitioners'),
+                        value: '${clinic.practitionersCount}',
+                        icon: Icons.badge_outlined,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _AdminMetricBox(
-                        label: loc.tr('admin_table_calls'),
-                        value: '${metric?.callTaps ?? 0}',
-                        icon: Icons.phone_in_talk_rounded,
-                        iconColor: const Color(0xFF3B82F6),
+                        label: loc.tr('admin_clinic_offers'),
+                        value: '${clinic.offersCount}',
+                        icon: Icons.local_offer_outlined,
+                        iconColor: const Color(0xFF10B981),
                       ),
                     ),
                   ],

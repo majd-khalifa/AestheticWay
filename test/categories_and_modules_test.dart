@@ -160,6 +160,7 @@ void main() {
     final adminService = AdminPortalService();
 
     test('Admin can suspend and activate products and articles without authoring', () {
+      adminService.enableMockMode();
       final products = adminService.allProducts;
       expect(products.isNotEmpty, isTrue);
       final firstProd = products.first;

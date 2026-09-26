@@ -6,15 +6,80 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
+import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profile_screen.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 
 /// Product Detail Screen for Aesthetic & Medical Skincare (Discovery & Lead Inquiry Only)
+/// Strictly NO cart, NO checkout, NO in-app payments.
 class ProductDetailScreen extends StatelessWidget {
   final ProductModel product;
+  final ClinicsRepository? clinicsRepository;
 
-  const ProductDetailScreen({super.key, required this.product});
+  const ProductDetailScreen({
+    super.key,
+    required this.product,
+    this.clinicsRepository,
+  });
+
+  Future<ClinicModel?> _resolveClinic() async {
+    if (product.clinicId.trim().isNotEmpty) {
+      try {
+        final repo = clinicsRepository ?? ClinicsRepository();
+        return await repo.getClinicDetail(product.clinicId);
+      } catch (_) {}
+    }
+
+    if (product.clinicNameAr.isNotEmpty || (product.clinicNameEn?.isNotEmpty ?? false)) {
+      return ClinicModel(
+        id: product.clinicId.isNotEmpty ? product.clinicId : 'clinic-id',
+        nameAr: product.clinicNameAr.isNotEmpty
+            ? product.clinicNameAr
+            : (product.clinicNameEn ?? ''),
+        nameEn: product.clinicNameEn ?? product.clinicNameAr,
+        descriptionAr: '',
+        descriptionEn: '',
+        coverImageUrl: product.imageUrl,
+        galleryImages: const [],
+        logoUrl: product.imageUrl,
+        rating: 4.9,
+        reviewCount: 0,
+        subscriptionTier: SubscriptionTier.basic,
+        licenseAuthority: '',
+        licenseNumber: '',
+        city: 'Dubai',
+        areaAr: 'دبي',
+        areaEn: 'Dubai',
+        addressAr: 'دبي',
+        addressEn: 'Dubai',
+        distanceKm: 0,
+        mainPhone: '+971500000000',
+        receptionPhone: '+971500000000',
+        whatsapp: '+971500000000',
+        latitude: 25.2048,
+        longitude: 55.2708,
+        workingHoursAr: '10:00 ص - 9:00 م',
+        workingHoursEn: '10:00 AM - 9:00 PM',
+        branches: const [],
+        practitionerIds: const [],
+        treatmentIds: const [],
+        featuredOffers: const [],
+      );
+    }
+    return null;
+  }
+
+  Future<void> _handleOpenClinic(BuildContext context) async {
+    final clinic = await _resolveClinic();
+    if (clinic != null && context.mounted) {
+      Navigator.push(
+        context,
+        LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
+      );
+    }
+  }
 
   Future<void> _handleInquiry(BuildContext context) async {
     final loc = LocaleService();
@@ -25,7 +90,21 @@ class ProductDetailScreen extends StatelessWidget {
           ? 'سجّل دخولك برقم الهاتف للاستفسار عن توفر المنتج وتفاصيله'
           : 'Login with phone number to submit your product inquiry',
     );
-    if (!auth) return;
+    if (!auth || !context.mounted) return;
+
+    final clinic = await _resolveClinic();
+    if (clinic != null && context.mounted) {
+      Navigator.push(
+        context,
+        LuxuryPageRoute(
+          page: AppointmentRequestScreen(
+            clinic: clinic,
+            preselectedServiceName: loc.isArabic ? product.nameAr : product.nameEn,
+          ),
+        ),
+      );
+      return;
+    }
 
     if (context.mounted) {
       showDialog(
@@ -53,7 +132,7 @@ class ProductDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                loc.tr('product_inquiry_sent'),
+                'تم إرسال طلبك وستتواصل العيادة معك',
                 style: TextStyle(
                   color: AppColors.isDark(context) ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                   fontSize: 13,
@@ -88,9 +167,9 @@ class ProductDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
-    final clinic = mockData.getClinicById(product.clinicId);
+    final categoryLabel = loc.isArabic ? product.categoryAr : product.categoryEn;
+    final hasClinicInfo = product.clinicNameAr.isNotEmpty || (product.clinicNameEn?.isNotEmpty ?? false);
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
@@ -104,7 +183,11 @@ class ProductDetailScreen extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -138,21 +221,22 @@ class ProductDetailScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        loc.isArabic ? product.categoryAr : product.categoryEn,
-                        style: const TextStyle(
-                          color: AppColors.accentChampagne,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 11,
+                    if (categoryLabel.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          categoryLabel,
+                          style: const TextStyle(
+                            color: AppColors.accentChampagne,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
-                    ),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -221,14 +305,9 @@ class ProductDetailScreen extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Providing Clinic Card
-          if (clinic != null)
+          if (hasClinicInfo)
             LuxuryCard(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
-                );
-              },
+              onTap: () => _handleOpenClinic(context),
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
@@ -244,7 +323,9 @@ class ProductDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                          loc.isArabic
+                              ? product.clinicNameAr
+                              : (product.clinicNameEn ?? product.clinicNameAr),
                           style: TextStyle(
                             color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                             fontWeight: FontWeight.w700,

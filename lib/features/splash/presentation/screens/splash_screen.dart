@@ -4,7 +4,11 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/features/onboarding/services/onboarding_service.dart';
 import 'package:aesthetic_way/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_main_nav_screen.dart';
+import 'package:aesthetic_way/features/admin/presentation/screens/admin_main_nav_screen.dart';
+import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
 
 /// Screen 1: Luxury Splash Screen with Official Brand Logo & Onboarding-Aware Navigation
 class SplashScreen extends StatefulWidget {
@@ -44,7 +48,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _timer?.cancel();
 
     final hasSeenOnboarding = OnboardingService().hasSeenOnboarding;
-    final nextScreen = hasSeenOnboarding ? const MainNavScreen() : const OnboardingScreen();
+    Widget nextScreen;
+
+    if (AuthState().isLoggedIn) {
+      final role = AuthState().userRole;
+      if (role == 'super_admin') {
+        nextScreen = const AdminMainNavScreen();
+      } else if (role == 'clinic_admin' || role == 'clinic_staff') {
+        nextScreen = const ClinicMainNavScreen();
+      } else {
+        nextScreen = const MainNavScreen();
+      }
+    } else if (!hasSeenOnboarding) {
+      nextScreen = const OnboardingScreen();
+    } else {
+      nextScreen = const LoginScreen();
+    }
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

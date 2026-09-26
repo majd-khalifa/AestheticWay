@@ -5,11 +5,12 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
+import 'package:aesthetic_way/features/admin/models/admin_lead_model.dart';
 
 /// Super Admin Lead Detail Screen — READ-ONLY Supervision View
 /// Ensures strict role separation: Super Admin observes volume & quality without executing clinic operations
 class AdminLeadDetailScreen extends StatelessWidget {
-  final AppointmentRequestModel lead;
+  final AdminLeadModel lead;
 
   const AdminLeadDetailScreen({super.key, required this.lead});
 
@@ -20,7 +21,7 @@ class AdminLeadDetailScreen extends StatelessWidget {
 
     Color statusColor;
     String statusText;
-    switch (lead.status) {
+    switch (lead.leadStatus) {
       case AppointmentLeadStatus.sent:
         statusColor = const Color(0xFFF59E0B);
         statusText = loc.tr('clinic_lead_status_new');
@@ -36,15 +37,16 @@ class AdminLeadDetailScreen extends StatelessWidget {
     }
 
     String timeWindowText;
-    switch (lead.preferredTimeWindow) {
-      case PreferredTimeWindow.morning:
-        timeWindowText = loc.tr('time_morning');
-        break;
-      case PreferredTimeWindow.afternoon:
+    switch (lead.preferredTimeWindow.toLowerCase()) {
+      case 'afternoon':
         timeWindowText = loc.tr('time_afternoon');
         break;
-      case PreferredTimeWindow.evening:
+      case 'evening':
         timeWindowText = loc.tr('time_evening');
+        break;
+      case 'morning':
+      default:
+        timeWindowText = loc.tr('time_morning');
         break;
     }
 
@@ -158,7 +160,7 @@ class AdminLeadDetailScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        loc.isArabic ? lead.clinicNameAr : (lead.clinicNameEn ?? lead.clinicNameAr),
+                        loc.isArabic ? lead.clinicNameAr : (lead.clinicNameEn.isNotEmpty ? lead.clinicNameEn : lead.clinicNameAr),
                         style: AppTypography.cardTitle.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -172,7 +174,7 @@ class AdminLeadDetailScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 28),
                   child: Text(
-                    loc.isArabic ? lead.branchNameAr : (lead.branchNameEn ?? lead.branchNameAr),
+                    loc.isArabic ? lead.branchNameAr : (lead.branchNameEn.isNotEmpty ? lead.branchNameEn : lead.branchNameAr),
                     style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11.5),
                   ),
                 ),
@@ -225,12 +227,12 @@ class AdminLeadDetailScreen extends StatelessWidget {
                   label: loc.tr('preferred_time'),
                   value: timeWindowText,
                 ),
-                if (lead.notes != null && lead.notes!.isNotEmpty) ...[
+                if (lead.notes.isNotEmpty) ...[
                   const Divider(height: 20),
                   _ReadOnlyRow(
                     icon: Icons.notes_rounded,
                     label: loc.tr('notes_opt'),
-                    value: lead.notes!,
+                    value: lead.notes,
                   ),
                 ],
               ],

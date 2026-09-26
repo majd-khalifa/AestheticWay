@@ -4,28 +4,74 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/core/widgets/luxury_shimmer.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/utils/contact_launcher.dart';
-import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
-import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/data/leads_repository.dart';
 
 /// Screen 18: My Appointment Requests Screen (Lead status tracking without calendar)
 class MyRequestsScreen extends StatefulWidget {
-  const MyRequestsScreen({super.key});
+  final LeadsRepository? leadsRepository;
+
+  const MyRequestsScreen({
+    super.key,
+    this.leadsRepository,
+  });
 
   @override
   State<MyRequestsScreen> createState() => _MyRequestsScreenState();
 }
 
 class _MyRequestsScreenState extends State<MyRequestsScreen> {
+  late final LeadsRepository _leadsRepository;
   int _selectedFilterIndex = 0; // 0: All, 1: Sent, 2: Contacted, 3: Closed
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<AppointmentRequestModel> _allRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _leadsRepository = widget.leadsRepository ?? LeadsRepository();
+    _fetchRequests();
+  }
+
+  Future<void> _fetchRequests({bool isRefresh = false}) async {
+    if (!isRefresh) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
+
+    try {
+      final requests = await _leadsRepository.getMyLeads();
+      if (!mounted) return;
+      setState(() {
+        _allRequests = requests;
+        _isLoading = false;
+        _errorMessage = null;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.message;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final mockData = MockDataService();
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -44,110 +90,172 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
             ),
             automaticallyImplyLeading: false,
           ),
-          body: ListenableBuilder(
-            listenable: mockData,
-            builder: (context, _) {
-              final allRequests = mockData.appointmentRequests;
-
-              final filteredRequests = allRequests.where((req) {
-                if (_selectedFilterIndex == 1) return req.status == AppointmentLeadStatus.sent;
-                if (_selectedFilterIndex == 2) return req.status == AppointmentLeadStatus.contacted;
-                if (_selectedFilterIndex == 3) return req.status == AppointmentLeadStatus.closed;
-                return true;
-              }).toList();
-
-              return Column(
-                children: [
-                  // Filter Chips Bar
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      children: [
-                        _FilterChip(
-                          label: '${loc.tr("status_all")} (${allRequests.length})',
-                          isSelected: _selectedFilterIndex == 0,
-                          onTap: () => setState(() => _selectedFilterIndex = 0),
-                        ),
-                        const SizedBox(width: 8),
-                        _FilterChip(
-                          label: loc.tr("status_sent"),
-                          isSelected: _selectedFilterIndex == 1,
-                          onTap: () => setState(() => _selectedFilterIndex = 1),
-                        ),
-                        const SizedBox(width: 8),
-                        _FilterChip(
-                          label: loc.tr("status_contacted"),
-                          isSelected: _selectedFilterIndex == 2,
-                          onTap: () => setState(() => _selectedFilterIndex = 2),
-                        ),
-                        const SizedBox(width: 8),
-                        _FilterChip(
-                          label: loc.tr("status_closed"),
-                          isSelected: _selectedFilterIndex == 3,
-                          onTap: () => setState(() => _selectedFilterIndex = 3),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Request Cards List
-                  Expanded(
-                    child: filteredRequests.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surface(context),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: AppColors.border(context)),
-                                  ),
-                                  child: Icon(
-                                    Icons.assignment_outlined,
-                                    size: 38,
-                                    color: AppColors.mutedText(context),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  loc.tr('no_requests'),
-                                  style: AppTypography.cardTitle.copyWith(
-                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  loc.tr('no_requests_sub'),
-                                  style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                            itemCount: filteredRequests.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final req = filteredRequests[index];
-                              final clinic = mockData.getClinicById(req.clinicId);
-                              return StaggeredEntrance(
-                                index: index,
-                                child: _LeadRequestCard(request: req, clinic: clinic, loc: loc),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            },
-          ),
+          body: _buildBody(context, loc, isDark),
         );
       },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, LocaleService loc, bool isDark) {
+    if (_isLoading && _allRequests.isEmpty) {
+      return _buildShimmerSkeleton(context);
+    }
+
+    if (_errorMessage != null && _allRequests.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: AppColors.accentChampagne,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => _fetchRequests(),
+                icon: const Icon(Icons.refresh),
+                label: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                  foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final filteredRequests = _allRequests.where((req) {
+      if (_selectedFilterIndex == 1) return req.status == AppointmentLeadStatus.sent;
+      if (_selectedFilterIndex == 2) return req.status == AppointmentLeadStatus.contacted;
+      if (_selectedFilterIndex == 3) return req.status == AppointmentLeadStatus.closed;
+      return true;
+    }).toList();
+
+    return Column(
+      children: [
+        // Filter Chips Bar
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              _FilterChip(
+                label: '${loc.tr("status_all")} (${_allRequests.length})',
+                isSelected: _selectedFilterIndex == 0,
+                onTap: () => setState(() => _selectedFilterIndex = 0),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: loc.tr("status_sent"),
+                isSelected: _selectedFilterIndex == 1,
+                onTap: () => setState(() => _selectedFilterIndex = 1),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: loc.tr("status_contacted"),
+                isSelected: _selectedFilterIndex == 2,
+                onTap: () => setState(() => _selectedFilterIndex = 2),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: loc.tr("status_closed"),
+                isSelected: _selectedFilterIndex == 3,
+                onTap: () => setState(() => _selectedFilterIndex = 3),
+              ),
+            ],
+          ),
+        ),
+
+        // Request Cards List
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () => _fetchRequests(isRefresh: true),
+            color: AppColors.accentChampagne,
+            child: filteredRequests.isEmpty
+                ? LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface(context),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.border(context)),
+                                ),
+                                child: Icon(
+                                  Icons.assignment_outlined,
+                                  size: 38,
+                                  color: AppColors.mutedText(context),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                loc.tr('no_requests'),
+                                style: AppTypography.cardTitle.copyWith(
+                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                loc.tr('no_requests_sub'),
+                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                    itemCount: filteredRequests.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final req = filteredRequests[index];
+                      return StaggeredEntrance(
+                        index: index,
+                        child: _LeadRequestCard(request: req, loc: loc),
+                      );
+                    },
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerSkeleton(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) => const LuxuryShimmer(
+        width: double.infinity,
+        height: 150,
+        borderRadius: 18,
+      ),
     );
   }
 }
@@ -199,12 +307,10 @@ class _FilterChip extends StatelessWidget {
 
 class _LeadRequestCard extends StatelessWidget {
   final AppointmentRequestModel request;
-  final ClinicModel? clinic;
   final LocaleService loc;
 
   const _LeadRequestCard({
     required this.request,
-    required this.clinic,
     required this.loc,
   });
 
@@ -240,7 +346,7 @@ class _LeadRequestCard extends StatelessWidget {
 
     final clinicName = loc.isArabic
         ? request.clinicNameAr
-        : (request.clinicNameEn ?? (clinic?.nameEn ?? request.clinicNameAr));
+        : (request.clinicNameEn ?? request.clinicNameAr);
     final branchName = loc.isArabic
         ? request.branchNameAr
         : (request.branchNameEn ?? request.branchNameAr);
@@ -253,6 +359,9 @@ class _LeadRequestCard extends StatelessWidget {
     final timeWindowLabel = loc.isArabic
         ? request.preferredTimeWindow.labelAr
         : request.preferredTimeWindow.labelEn;
+
+    final effectivePhone = request.clinicPhone?.trim() ?? '';
+    final effectiveWhatsapp = request.clinicWhatsapp?.trim() ?? '';
 
     return LuxuryCard(
       padding: const EdgeInsets.all(14),
@@ -330,61 +439,59 @@ class _LeadRequestCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          const Divider(),
-          const SizedBox(height: 6),
 
           // Actions
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (clinic != null) ...[
-                TextButton.icon(
-                  onPressed: () {
-                    MapsLauncher.openMapLocation(
-                      latitude: clinic!.latitude,
-                      longitude: clinic!.longitude,
-                      placeId: clinic!.googlePlaceId,
-                      placeName: loc.isArabic ? clinic!.nameAr : clinic!.nameEn,
-                    );
-                  },
-                  icon: Icon(Icons.location_on_outlined, size: 14, color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary),
-                  label: Text(loc.tr('view_map'), style: TextStyle(color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, fontSize: 12)),
-                ),
-                const SizedBox(width: 6),
-                OutlinedButton.icon(
-                  onPressed: () => ContactLauncher.openWhatsApp(phoneNumber: clinic!.whatsapp),
-                  icon: const Icon(Icons.chat_bubble_outline, size: 13, color: Color(0xFF10B981)),
-                  label: Text(loc.tr('whatsapp_btn'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11.5)),
-                  style: OutlinedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    side: const BorderSide(color: Color(0xFF10B981), width: 0.8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                ElevatedButton.icon(
-                  onPressed: () => ContactLauncher.makePhoneCall(clinic!.receptionPhone),
-                  icon: Icon(Icons.phone_outlined, size: 13, color: isDark ? AppColors.backgroundDeep : Colors.white),
-                  label: Text(
-                    loc.tr('contact_btn'),
-                    style: TextStyle(
-                      color: isDark ? AppColors.backgroundDeep : Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.bold,
+          if (effectiveWhatsapp.isNotEmpty || effectivePhone.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            const Divider(),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (effectiveWhatsapp.isNotEmpty) ...[
+                  OutlinedButton.icon(
+                    onPressed: () => ContactLauncher.openWhatsApp(phoneNumber: effectiveWhatsapp),
+                    icon: const Icon(Icons.chat_bubble_outline, size: 13, color: Color(0xFF10B981)),
+                    label: Text(
+                      loc.tr('whatsapp_btn'),
+                      style: const TextStyle(color: Color(0xFF10B981), fontSize: 11.5),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      side: const BorderSide(color: Color(0xFF10B981), width: 0.8),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  const SizedBox(width: 6),
+                ],
+                if (effectivePhone.isNotEmpty) ...[
+                  ElevatedButton.icon(
+                    onPressed: () => ContactLauncher.makePhoneCall(effectivePhone),
+                    icon: Icon(
+                      Icons.phone_outlined,
+                      size: 13,
+                      color: isDark ? AppColors.backgroundDeep : Colors.white,
+                    ),
+                    label: Text(
+                      loc.tr('contact_btn'),
+                      style: TextStyle(
+                        color: isDark ? AppColors.backgroundDeep : Colors.white,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
                   ),
-                ),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );

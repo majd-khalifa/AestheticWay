@@ -6,9 +6,17 @@ abstract class MapsLauncher {
   static Future<bool> openMapLocation({
     required double latitude,
     required double longitude,
+    String? googleMapsUrl,
     String? placeId,
     String? placeName,
   }) async {
+    if (googleMapsUrl != null && googleMapsUrl.trim().toLowerCase().startsWith('http')) {
+      final uri = Uri.parse(googleMapsUrl.trim());
+      if (await canLaunchUrl(uri)) {
+        return await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+
     // Standard Google Maps search URL with coordinates and place ID fallback
     String url;
     if (placeId != null && placeId.isNotEmpty) {
@@ -30,8 +38,16 @@ abstract class MapsLauncher {
   static Future<bool> openDirections({
     required double latitude,
     required double longitude,
+    String? googleMapsUrl,
     String? destinationTitle,
   }) async {
+    if (googleMapsUrl != null && googleMapsUrl.trim().toLowerCase().startsWith('http')) {
+      final uri = Uri.parse(googleMapsUrl.trim());
+      if (await canLaunchUrl(uri)) {
+        return await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+
     final url = 'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude&travelmode=driving';
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {

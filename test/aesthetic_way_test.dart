@@ -19,6 +19,9 @@ import 'package:aesthetic_way/features/auth/presentation/screens/forgot_password
 import 'package:aesthetic_way/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
+import 'package:dio/dio.dart';
 import 'package:aesthetic_way/data/mock_data.dart';
 import 'package:aesthetic_way/main.dart';
 
@@ -228,7 +231,7 @@ void main() {
       expect(find.text('عيادات التجميل والجلدية'), findsOneWidget);
       expect(find.text('تخطي'), findsOneWidget);
       expect(find.text('التالي'), findsOneWidget);
-      expect(find.text('المتابعة كزائر'), findsOneWidget);
+      expect(find.text('المتابعة كزائر'), findsNothing);
 
       // Tap Next to go to Slide 2
       await tester.tap(find.text('التالي'));
@@ -244,7 +247,7 @@ void main() {
       expect(find.text('ابدأ الآن'), findsOneWidget);
     });
 
-    testWidgets('LoginScreen renders fields, links and handles guest bypass', (WidgetTester tester) async {
+    testWidgets('LoginScreen renders fields, links and confirms no guest bypass option', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -267,7 +270,7 @@ void main() {
       expect(find.text('كلمة المرور'), findsOneWidget);
       expect(find.text('نسيت كلمة المرور؟'), findsOneWidget);
       expect(find.text('إنشاء حساب جديد'), findsOneWidget);
-      expect(find.text('المتابعة كزائر'), findsOneWidget);
+      expect(find.text('المتابعة كزائر'), findsNothing);
     });
 
     testWidgets('RegisterScreen renders all input fields and terms checkbox', (WidgetTester tester) async {
@@ -297,7 +300,47 @@ void main() {
       expect(find.text('تسجيل الدخول'), findsOneWidget);
     });
 
-    testWidgets('OtpScreen renders 4 digit boxes, countdown, and demo note', (WidgetTester tester) async {
+    test('AuthRepository.normalizePhone formats UAE numbers properly to E.164', () {
+      expect(AuthRepository.normalizePhone('501234567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('0501234567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('50 123 4567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('050 123 4567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('+971501234567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('+971 50 123 4567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('971501234567'), equals('+971501234567'));
+      expect(AuthRepository.normalizePhone('00971501234567'), equals('+971501234567'));
+    });
+
+    test('ApiException parses backend field errors and provides localized messages', () {
+      final dioException = DioException(
+        requestOptions: RequestOptions(path: '/api/v1/auth/register/'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/v1/auth/register/'),
+          statusCode: 400,
+          data: {
+            'error': {
+              'code': 'VALIDATION_ERROR',
+              'message': 'One or more fields failed validation.',
+              'fields': {
+                'password': ['This password is too common.'],
+                'phone': ['An account with this phone number already exists.'],
+              },
+            },
+          },
+        ),
+      );
+
+      final apiException = ApiException.fromDioError(dioException);
+      expect(apiException.fieldErrors, isNotNull);
+      expect(apiException.fieldErrors!.containsKey('password'), isTrue);
+      expect(apiException.fieldErrors!.containsKey('phone'), isTrue);
+      expect(apiException.message, contains('كلمة المرور'));
+      expect(apiException.message, contains('رقم الهاتف'));
+      expect(apiException.getFieldError('password'), contains('شائعة وسهلة التخمين'));
+      expect(apiException.getFieldError('phone'), contains('مسجل بالفعل'));
+    });
+
+    testWidgets('OtpScreen renders 6 digit boxes, countdown, and dev hint', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -318,7 +361,8 @@ void main() {
       expect(find.text('رمز التحقق (OTP)'), findsOneWidget);
       expect(find.text('+971 50 123 4567'), findsOneWidget);
       expect(find.text('تأكيد الرمز والمتابعة'), findsOneWidget);
-      expect(find.textContaining('1234'), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(6));
+      expect(find.textContaining('Terminal'), findsOneWidget);
     });
 
     testWidgets('ForgotPasswordScreen and ResetPasswordScreen render cleanly', (WidgetTester tester) async {

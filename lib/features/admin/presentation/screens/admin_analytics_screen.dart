@@ -6,8 +6,6 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
-import 'package:aesthetic_way/features/referral/services/referral_service.dart';
-import 'package:aesthetic_way/features/referral/models/referral_model.dart';
 
 /// Super Admin Tab 5: Dedicated Analytics & Patient Engagement Breakdown per Clinic
 class AdminAnalyticsScreen extends StatelessWidget {
@@ -26,9 +24,13 @@ class AdminAnalyticsScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppColors.bg(context),
-          body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            children: [
+          body: RefreshIndicator(
+            onRefresh: () => adminService.loadAnalytics(),
+            color: AppColors.accentChampagne,
+            backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              children: [
             // Top Overview Banner
             LuxuryCard(
               padding: const EdgeInsets.all(16),
@@ -65,23 +67,31 @@ class AdminAnalyticsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Global Attribution Counters Grid
+            // Global Attribution Counters Grid (strictly from backend GET /admin/analytics/)
             Row(
               children: [
                 Expanded(
                   child: _AnalyticsHeaderBox(
-                    label: loc.tr('admin_total_app_opens'),
-                    value: NumberFormat('#,###').format(adminService.totalAppOpens),
-                    icon: Icons.smartphone_rounded,
+                    label: loc.tr('admin_total_events'),
+                    value: NumberFormat('#,###').format(adminService.analytics.totalEvents),
+                    icon: Icons.insights_rounded,
                     isGold: true,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _AnalyticsHeaderBox(
-                    label: loc.tr('admin_active_users'),
-                    value: NumberFormat('#,###').format(adminService.activeUsersCount),
-                    icon: Icons.people_outline_rounded,
+                    label: loc.tr('admin_total_app_opens'),
+                    value: NumberFormat('#,###').format(adminService.analytics.appOpens),
+                    icon: Icons.smartphone_rounded,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _AnalyticsHeaderBox(
+                    label: loc.tr('admin_clinic_views'),
+                    value: NumberFormat('#,###').format(adminService.analytics.clinicViews),
+                    icon: Icons.remove_red_eye_outlined,
                   ),
                 ),
               ],
@@ -91,28 +101,37 @@ class AdminAnalyticsScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: _AnalyticsHeaderBox(
-                    label: loc.tr('admin_table_leads'),
-                    value: '${adminService.totalLeadsCount}',
-                    icon: Icons.mark_email_read_outlined,
-                    isGold: true,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _AnalyticsHeaderBox(
                     label: loc.tr('admin_table_whatsapp'),
-                    value: '${adminService.totalWhatsappTaps}',
+                    value: '${adminService.analytics.whatsappTaps}',
                     icon: Icons.chat_bubble_outline_rounded,
                     iconColor: const Color(0xFF10B981),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Expanded(
                   child: _AnalyticsHeaderBox(
                     label: loc.tr('admin_table_calls'),
-                    value: '${adminService.totalCallTaps}',
+                    value: '${adminService.analytics.callTaps}',
                     icon: Icons.phone_in_talk_rounded,
                     iconColor: const Color(0xFF3B82F6),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _AnalyticsHeaderBox(
+                    label: loc.tr('admin_maps_taps'),
+                    value: '${adminService.analytics.mapsTaps}',
+                    icon: Icons.map_outlined,
+                    iconColor: const Color(0xFFF59E0B),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _AnalyticsHeaderBox(
+                    label: loc.tr('admin_lead_submissions'),
+                    value: '${adminService.analytics.leadSubmissions}',
+                    icon: Icons.mark_email_read_outlined,
+                    isGold: true,
                   ),
                 ),
               ],
@@ -137,6 +156,8 @@ class AdminAnalyticsScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             ...tableData.map((item) {
+              final clinic = adminService.clinics.where((c) => c.id == item.clinicId).firstOrNull;
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: LuxuryCard(
@@ -152,7 +173,9 @@ class AdminAnalyticsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  loc.isArabic ? item.clinicNameAr : item.clinicNameEn,
+                                  clinic != null
+                                      ? (loc.isArabic ? clinic.nameAr : clinic.nameEn)
+                                      : (loc.isArabic ? item.clinicNameAr : item.clinicNameEn),
                                   style: AppTypography.cardTitle.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,
@@ -161,7 +184,7 @@ class AdminAnalyticsScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  item.city,
+                                  clinic?.city ?? item.city,
                                   style: AppTypography.caption.copyWith(
                                     color: AppColors.mutedText(context),
                                     fontSize: 11,
@@ -170,38 +193,32 @@ class AdminAnalyticsScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          TierBadge(tier: item.tier),
+                          TierBadge(tier: clinic?.subscriptionTier ?? item.tier),
                         ],
                       ),
                       const Divider(height: 16),
 
-                      // Metric Columns: Views | Leads | WhatsApp | Calls | Rate
+                      // Metric Columns: Events | Leads | Branches | Offers
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _MetricStatItem(
-                            label: loc.tr('admin_table_views'),
-                            value: NumberFormat('#,###').format(item.appViews),
+                            label: loc.tr('admin_events_count'),
+                            value: NumberFormat('#,###').format(item.eventsCount),
+                            isGold: true,
                           ),
                           _MetricStatItem(
                             label: loc.tr('admin_table_leads'),
-                            value: '${item.totalLeads}',
-                            isGold: true,
+                            value: '${clinic?.leadsCount ?? item.leads}',
                           ),
                           _MetricStatItem(
-                            label: loc.tr('admin_table_whatsapp'),
-                            value: '${item.whatsappTaps}',
+                            label: loc.tr('admin_clinic_branches'),
+                            value: '${clinic?.branchesCount ?? 0}',
+                          ),
+                          _MetricStatItem(
+                            label: loc.tr('admin_clinic_offers'),
+                            value: '${clinic?.offersCount ?? 0}',
                             color: const Color(0xFF10B981),
-                          ),
-                          _MetricStatItem(
-                            label: loc.tr('admin_table_calls'),
-                            value: '${item.callTaps}',
-                            color: const Color(0xFF3B82F6),
-                          ),
-                          _MetricStatItem(
-                            label: loc.tr('admin_table_conversion'),
-                            value: '${item.engagementRate.toStringAsFixed(1)}%',
-                            isGold: true,
                           ),
                         ],
                       ),
@@ -212,7 +229,7 @@ class AdminAnalyticsScreen extends StatelessWidget {
             }),
             const SizedBox(height: 20),
 
-            // Referral & Rewards Platform Supervision
+            // Referral & Rewards Platform Supervision (strictly from backend dashboard)
             LuxuryCard(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -238,26 +255,17 @@ class AdminAnalyticsScreen extends StatelessWidget {
                       Expanded(
                         child: _AnalyticsHeaderBox(
                           label: loc.tr('admin_total_referrals'),
-                          value: '${ReferralService().successfulInvites + 120}',
+                          value: '${adminService.dashboard.totalReferrals}',
                           icon: Icons.person_add_alt_outlined,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: _AnalyticsHeaderBox(
-                          label: loc.tr('admin_issued_coupons'),
-                          value: '${ReferralService().allPlatformCodes.length}',
-                          icon: Icons.confirmation_number_outlined,
-                          isGold: true,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _AnalyticsHeaderBox(
-                          label: loc.tr('admin_redeemed_coupons'),
-                          value: '${ReferralService().allPlatformCodes.where((c) => c.status == ReferralCodeStatus.used).length}',
+                          label: loc.tr('admin_redeemed_codes'),
+                          value: '${adminService.dashboard.totalRedeemedReferralCodes}',
                           icon: Icons.check_circle_outline_rounded,
-                          iconColor: const Color(0xFF10B981),
+                          isGold: true,
                         ),
                       ),
                     ],
@@ -268,9 +276,10 @@ class AdminAnalyticsScreen extends StatelessWidget {
             const SizedBox(height: 24),
           ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  },
+);
   }
 }
 

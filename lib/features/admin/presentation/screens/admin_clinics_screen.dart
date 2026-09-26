@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
@@ -115,120 +114,129 @@ class _AdminClinicsScreenState extends State<AdminClinicsScreen> {
 
               // Clinics List
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                  itemCount: clinics.length,
-                  itemBuilder: (context, index) {
-                    final clinic = clinics[index];
-                    final metric = adminService.getMetricForClinic(clinic.id);
-                    final isActive = metric?.isActive ?? true;
+                child: RefreshIndicator(
+                  onRefresh: () => adminService.loadClinics(),
+                  color: AppColors.accentChampagne,
+                  backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                    itemCount: clinics.length,
+                    itemBuilder: (context, index) {
+                      final clinic = clinics[index];
+                      final metric = adminService.getMetricForClinic(clinic.id);
+                      final isActive = metric?.isActive ?? clinic.isActive;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: LuxuryCard(
-                        padding: const EdgeInsets.all(14),
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (ctx) => AdminClinicDetailSheet(clinic: clinic),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Top Row: Avatar, Name, Tier, Switch
-                            Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    clinic.coverImageUrl,
-                                    width: 48,
-                                    height: 48,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: LuxuryCard(
+                          padding: const EdgeInsets.all(14),
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (ctx) => AdminClinicDetailSheet(clinic: clinic),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Top Row: Avatar, Name, Tier, Switch
+                              Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      clinic.coverImageUrl,
                                       width: 48,
                                       height: 48,
-                                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                      child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => Container(
+                                        width: 48,
+                                        height: 48,
+                                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                        child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                                        style: AppTypography.cardTitle.copyWith(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                                            style: AppTypography.caption.copyWith(
-                                              color: AppColors.mutedText(context),
-                                              fontSize: 11,
-                                            ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                                          style: AppTypography.cardTitle.copyWith(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                                           ),
-                                          const SizedBox(width: 6),
-                                          TierBadge(tier: clinic.subscriptionTier),
-                                        ],
-                                      ),
-                                    ],
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
+                                              style: AppTypography.caption.copyWith(
+                                                color: AppColors.mutedText(context),
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            TierBadge(tier: clinic.subscriptionTier),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Switch.adaptive(
-                                  value: isActive,
-                                  activeThumbColor: AppColors.accentChampagne,
-                                  onChanged: (val) {
-                                    adminService.toggleClinicStatus(clinic.id);
-                                  },
-                                ),
-                              ],
-                            ),
-                            const Divider(height: 16),
+                                  Switch.adaptive(
+                                    value: isActive,
+                                    activeThumbColor: AppColors.accentChampagne,
+                                    onChanged: (val) async {
+                                      final success = await adminService.toggleClinicStatus(clinic.id);
+                                      if (!success && context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(adminService.errorMessage ?? 'Error updating clinic')),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const Divider(height: 16),
 
-                            // Engagement Metrics Pills Row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _PillMetric(
-                                  icon: Icons.remove_red_eye_outlined,
-                                  label: NumberFormat('#,###').format(metric?.appViews ?? 0),
-                                ),
-                                _PillMetric(
-                                  icon: Icons.mark_email_read_outlined,
-                                  label: '${metric?.totalLeads ?? 0} ${loc.tr('admin_table_leads')}',
-                                  isGold: true,
-                                ),
-                                _PillMetric(
-                                  icon: Icons.chat_bubble_outline_rounded,
-                                  label: '${metric?.whatsappTaps ?? 0}',
-                                  iconColor: const Color(0xFF10B981),
-                                ),
-                                _PillMetric(
-                                  icon: Icons.phone_in_talk_rounded,
-                                  label: '${metric?.callTaps ?? 0}',
-                                  iconColor: const Color(0xFF3B82F6),
-                                ),
-                              ],
-                            ),
-                          ],
+                              // Clinic Catalog & Leads Counts (strictly from backend AdminClinicModel)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _PillMetric(
+                                    icon: Icons.mark_email_read_outlined,
+                                    label: '${clinic.leadsCount} ${loc.tr('admin_table_leads')}',
+                                    isGold: true,
+                                  ),
+                                  _PillMetric(
+                                    icon: Icons.store_outlined,
+                                    label: '${clinic.branchesCount} ${loc.tr('admin_clinic_branches')}',
+                                  ),
+                                  _PillMetric(
+                                    icon: Icons.badge_outlined,
+                                    label: '${clinic.practitionersCount} ${loc.tr('admin_clinic_practitioners')}',
+                                  ),
+                                  _PillMetric(
+                                    icon: Icons.local_offer_outlined,
+                                    label: '${clinic.offersCount} ${loc.tr('admin_clinic_offers')}',
+                                    iconColor: const Color(0xFF10B981),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

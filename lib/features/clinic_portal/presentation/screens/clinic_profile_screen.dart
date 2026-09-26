@@ -4,16 +4,21 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/theme/theme_service.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
+import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
 import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
-import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
+import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'clinic_practitioners_screen.dart';
+import 'clinic_treatments_screen.dart';
 
 /// Clinic Tab 4: Clinic Profile, Google Maps Linking, Medical Team & Services Manager
 class ClinicProfileScreen extends StatelessWidget {
@@ -21,13 +26,12 @@ class ClinicProfileScreen extends StatelessWidget {
 
   void _showAddPractitionerDialog(BuildContext context, LocaleService loc) {
     final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController();
-    final specialtyController = TextEditingController();
-    final expController = TextEditingController(text: '8');
-    final langController = TextEditingController(text: loc.isArabic ? 'العربية، الإنجليزية' : 'Arabic, English');
-    final licenseRefController = TextEditingController(text: 'LIC-P-${DateTime.now().millisecondsSinceEpoch % 100000}');
-    final bioController = TextEditingController();
-    final avatarController = TextEditingController();
+    final nameEnController = TextEditingController();
+    final nameArController = TextEditingController();
+    final specialtyEnController = TextEditingController();
+    final specialtyArController = TextEditingController();
+    final bioEnController = TextEditingController();
+    final bioArController = TextEditingController();
     var selectedType = PractitionerType.doctor;
     final isDark = AppColors.isDark(context);
 
@@ -39,7 +43,7 @@ class ClinicProfileScreen extends StatelessWidget {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
             return Container(
-              height: MediaQuery.of(ctx).size.height * 0.85,
+              height: MediaQuery.of(ctx).size.height * 0.88,
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
                 left: 20,
@@ -75,27 +79,6 @@ class ClinicProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-
-                    // Full Name (Required)
-                    TextFormField(
-                      controller: nameController,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                      decoration: InputDecoration(
-                        labelText: loc.tr('clinic_practitioner_name'),
-                        filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.4),
-                        ),
-                      ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
-                    ),
-                    const SizedBox(height: 10),
 
                     // Role / Type Dropdown
                     DropdownButtonFormField<PractitionerType>(
@@ -138,34 +121,66 @@ class ClinicProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
 
-                    // Specialty (Required)
-                    TextFormField(
-                      controller: specialtyController,
+                    // Full Name EN & AR
+                    LtrTextFormField(
+                      controller: nameEnController,
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_practitioner_specialty'),
+                        labelText: loc.isArabic ? 'الاسم بالإنجليزية *' : 'Full Name (English) *',
+                        hintText: 'e.g. Dr. Sarah Al Mansoori',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
-                        focusedBorder: OutlineInputBorder(
+                      ),
+                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: nameArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'الاسم بالعربية *' : 'Full Name (Arabic) *',
+                        hintText: 'مثال: د. سارة المنصوري',
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.4),
+                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
                       ),
                       validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
                     ),
                     const SizedBox(height: 10),
 
-                    // Years of Experience
-                    TextFormField(
-                      controller: expController,
-                      keyboardType: TextInputType.number,
+                    // Specialty EN & AR
+                    LtrTextFormField(
+                      controller: specialtyEnController,
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_doctor_years_exp'),
+                        labelText: loc.isArabic ? 'التخصص بالإنجليزية' : 'Specialty (English)',
+                        hintText: 'e.g. Aesthetic Dermatology',
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: specialtyArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'التخصص بالعربية' : 'Specialty (Arabic)',
+                        hintText: 'مثال: جلدية وتجميل',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -176,47 +191,16 @@ class ClinicProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
 
-                    // Spoken Languages
-                    TextFormField(
-                      controller: langController,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                      decoration: InputDecoration(
-                        labelText: loc.tr('clinic_doctor_languages'),
-                        filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 10),
 
-                    // Internal Platform License Reference
-                    TextFormField(
-                      controller: licenseRefController,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                      decoration: InputDecoration(
-                        labelText: loc.tr('clinic_doctor_license_ref'),
-                        filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Short Professional Bio
-                    TextFormField(
-                      controller: bioController,
+                    // Short Professional Bio EN & AR
+                    LtrTextFormField(
+                      controller: bioEnController,
                       maxLines: 2,
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_doctor_bio'),
-                        hintText: loc.isArabic ? 'نبذة عن الخبرات والشهادات التخصصية...' : 'Brief bio about clinical experience...',
-                        hintStyle: TextStyle(color: AppColors.mutedText(ctx), fontSize: 11.5),
+                        labelText: loc.isArabic ? 'نبذة مهنية بالإنجليزية' : 'Bio (English)',
+                        hintText: 'Brief clinical biography...',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -226,13 +210,15 @@ class ClinicProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // Avatar URL (Optional)
                     TextFormField(
-                      controller: avatarController,
+                      controller: bioArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_doctor_avatar_opt'),
+                        labelText: loc.isArabic ? 'نبذة مهنية بالعربية' : 'Bio (Arabic)',
+                        hintText: 'نبذة عن الخبرات والشهادات التخصصية...',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -249,42 +235,43 @@ class ClinicProfileScreen extends StatelessWidget {
                       icon: Icons.check,
                       isFullWidth: true,
                       height: 44,
-                      onPressed: () {
+                      onPressed: () async {
                         if (!formKey.currentState!.validate()) return;
-                        final parsedYears = int.tryParse(expController.text.trim()) ?? 5;
-                        final langs = langController.text.trim().split(RegExp(r'[,،]')).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
 
-                        final p = PractitionerModel(
-                          id: 'doc-${DateTime.now().millisecondsSinceEpoch}',
-                          nameAr: nameController.text.trim(),
-                          nameEn: nameController.text.trim(),
-                          type: selectedType,
-                          specialtyAr: specialtyController.text.trim(),
-                          specialtyEn: specialtyController.text.trim(),
-                          classificationAr: 'ممارس طبي معتمد',
-                          classificationEn: 'Certified Practitioner',
-                          licenseAuthority: 'Accredited Specialist',
-                          licenseNumber: licenseRefController.text.trim().isNotEmpty ? licenseRefController.text.trim() : 'LIC-P-004812',
-                          avatarUrl: avatarController.text.trim().isNotEmpty
-                              ? avatarController.text.trim()
-                              : 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80',
-                          yearsOfExperience: parsedYears,
-                          rating: 5.0,
-                          reviewCount: 1,
-                          languages: langs.isNotEmpty ? langs : const ['العربية', 'English'],
-                          clinicId: ClinicPortalService().activeClinic.id,
-                          clinicNameAr: ClinicPortalService().activeClinic.nameAr,
-                          clinicNameEn: ClinicPortalService().activeClinic.nameEn,
-                          procedures: const ['استشارة تجميلية متقدمة', 'علاجات النضارة والشد'],
-                          proceduresEn: const ['Aesthetic Consultation', 'Rejuvenation Treatments'],
-                          aboutAr: bioController.text.trim().isNotEmpty ? bioController.text.trim() : 'كادر طبي معتمد ذو كفاءة وخبرة واسعة.',
-                          aboutEn: bioController.text.trim().isNotEmpty ? bioController.text.trim() : 'Certified practitioner with comprehensive clinical experience.',
-                        );
-                        ClinicPortalService().addPractitioner(p);
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(loc.tr('clinic_practitioner_saved')), backgroundColor: AppColors.accentChampagne),
-                        );
+                        final data = <String, dynamic>{
+                          'name_en': nameEnController.text.trim(),
+                          'name_ar': nameArController.text.trim().isNotEmpty
+                              ? nameArController.text.trim()
+                              : nameEnController.text.trim(),
+                          'title_en': 'Certified Practitioner',
+                          'title_ar': 'ممارس طبي معتمد',
+                          'speciality_en': specialtyEnController.text.trim().isNotEmpty
+                              ? specialtyEnController.text.trim()
+                              : 'Aesthetic Practitioner',
+                          'speciality_ar': specialtyArController.text.trim().isNotEmpty
+                              ? specialtyArController.text.trim()
+                              : 'ممارس تجميلي معتمد',
+                          'type': selectedType.value,
+                          'bio_en': bioEnController.text.trim(),
+                          'bio_ar': bioArController.text.trim(),
+                          'status': 'active',
+                        };
+
+                        try {
+                          await ClinicPortalService().createPractitioner(data);
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (context.mounted) {
+                            showAppSnackBar(
+                              context,
+                              loc.tr('clinic_practitioner_saved'),
+                              type: AppSnackBarType.success,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                          }
+                        }
                       },
                     ),
                     const SizedBox(height: 20),
@@ -300,18 +287,15 @@ class ClinicProfileScreen extends StatelessWidget {
 
   void _showAddServiceDialog(BuildContext context, LocaleService loc) {
     final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController();
+    final nameEnController = TextEditingController();
+    final nameArController = TextEditingController();
     final priceController = TextEditingController(text: '750');
-    final durationController = TextEditingController(text: '45');
-    final targetAreaController = TextEditingController(text: loc.isArabic ? 'الوجه والرقبة' : 'Face & Neck');
-    final recoveryController = TextEditingController(text: loc.isArabic ? 'بدون فترة تعافي' : 'Zero Downtime');
-    final descController = TextEditingController();
-    var selectedCategory = loc.isArabic ? 'علاجات البشرة والليزر' : 'Skin & Laser';
-    final isDark = AppColors.isDark(context);
+    final descEnController = TextEditingController();
+    final descArController = TextEditingController();
+    final clinicService = ClinicPortalService();
 
-    final categories = loc.isArabic
-        ? ['علاجات البشرة والليزر', 'حقن وفيلر ونضارة', 'جراحة تجميلية', 'نحت وتنسيق القوام']
-        : ['Skin & Laser', 'Injectables & Fillers', 'Plastic Surgery', 'Body Contouring'];
+    String? chosenCategoryId = clinicService.categories.isNotEmpty ? clinicService.categories.first.id : null;
+    final isDark = AppColors.isDark(context);
 
     showModalBottomSheet(
       context: context,
@@ -321,7 +305,7 @@ class ClinicProfileScreen extends StatelessWidget {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
             return Container(
-              height: MediaQuery.of(ctx).size.height * 0.85,
+              height: MediaQuery.of(ctx).size.height * 0.88,
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
                 left: 20,
@@ -358,33 +342,82 @@ class ClinicProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Service Name (Required)
-                    TextFormField(
-                      controller: nameController,
+                    // Category Selector Dropdown (Live API categories)
+                    if (clinicService.categories.isNotEmpty)
+                      DropdownButtonFormField<String>(
+                        initialValue: chosenCategoryId,
+                        dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                        decoration: InputDecoration(
+                          labelText: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
+                          filled: true,
+                          fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          ),
+                        ),
+                        items: clinicService.categories.map((cat) {
+                          return DropdownMenuItem(
+                            value: cat.id,
+                            child: Text(
+                              loc.isArabic ? cat.nameAr : cat.nameEn,
+                              style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (v) {
+                          if (v != null) {
+                            setModalState(() => chosenCategoryId = v);
+                          }
+                        },
+                        validator: (v) => v == null ? loc.tr('clinic_validation_required') : null,
+                      ),
+                    const SizedBox(height: 10),
+
+                    // Service Name EN & AR
+                    LtrTextFormField(
+                      controller: nameEnController,
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_service_name'),
+                        labelText: loc.isArabic ? 'اسم الإجراء بالإنجليزية *' : 'Treatment Name (English) *',
+                        hintText: 'e.g. HydraFacial Deluxe',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
-                        focusedBorder: OutlineInputBorder(
+                      ),
+                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: nameArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'اسم الإجراء بالعربية *' : 'Treatment Name (Arabic) *',
+                        hintText: 'مثال: هيدرافاشيال ديلوكس',
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.4),
+                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
                       ),
                       validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
                     ),
                     const SizedBox(height: 10),
 
-                    // Category Selector Dropdown
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedCategory,
-                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                    // Price (AED)
+                    LtrTextFormField(
+                      controller: priceController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_service_category'),
+                        labelText: loc.tr('clinic_service_price'),
+                        hintText: '750',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -392,110 +425,18 @@ class ClinicProfileScreen extends StatelessWidget {
                           borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
                       ),
-                      items: categories.map((cat) {
-                        return DropdownMenuItem(
-                          value: cat,
-                          child: Text(cat, style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary)),
-                        );
-                      }).toList(),
-                      onChanged: (v) {
-                        if (v != null) {
-                          setModalState(() {
-                            selectedCategory = v;
-                          });
-                        }
-                      },
+                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
                     ),
                     const SizedBox(height: 10),
 
-                    // Price (AED) & Duration (Minutes) Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: priceController,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('clinic_service_price'),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                              ),
-                            ),
-                            validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            controller: durationController,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('clinic_service_duration'),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Target Area & Recovery Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: targetAreaController,
-                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('clinic_service_target_area'),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            controller: recoveryController,
-                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('clinic_service_recovery'),
-                              filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Short Description (Required)
-                    TextFormField(
-                      controller: descController,
+                    // Description EN & AR
+                    LtrTextFormField(
+                      controller: descEnController,
                       maxLines: 2,
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_service_description'),
-                        hintText: loc.isArabic ? 'وصف للمزايا وشروط الجلسة...' : 'Short description of procedure & benefits...',
-                        hintStyle: TextStyle(color: AppColors.mutedText(ctx), fontSize: 11.5),
+                        labelText: loc.isArabic ? 'الوصف الطبي بالإنجليزية' : 'Description (English)',
+                        hintText: 'e.g. Deep cleansing and skin hydration...',
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -503,7 +444,24 @@ class ClinicProfileScreen extends StatelessWidget {
                           borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
                       ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: descArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
+                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'الوصف الطبي بالعربية' : 'Description (Arabic)',
+                        hintText: 'وصف للمزايا وشروط الجلسة...',
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 20),
 
@@ -513,32 +471,40 @@ class ClinicProfileScreen extends StatelessWidget {
                       icon: Icons.check,
                       isFullWidth: true,
                       height: 44,
-                      onPressed: () {
+                      onPressed: () async {
                         if (!formKey.currentState!.validate()) return;
-                        final durationVal = '${durationController.text.trim()} ${loc.isArabic ? "دقيقة" : "mins"}';
+                        if (chosenCategoryId == null && clinicService.categories.isNotEmpty) {
+                          chosenCategoryId = clinicService.categories.first.id;
+                        }
 
-                        final t = TreatmentModel(
-                          id: 'treat-${DateTime.now().millisecondsSinceEpoch}',
-                          nameAr: nameController.text.trim(),
-                          nameEn: nameController.text.trim(),
-                          categoryAr: selectedCategory,
-                          categoryEn: selectedCategory,
-                          descriptionAr: descController.text.trim(),
-                          descriptionEn: descController.text.trim(),
-                          durationText: durationVal,
-                          durationTextEn: durationVal,
-                          downtimeText: recoveryController.text.trim().isNotEmpty ? recoveryController.text.trim() : 'بدون فترة تعافي',
-                          downtimeTextEn: recoveryController.text.trim().isNotEmpty ? recoveryController.text.trim() : 'Zero Downtime',
-                          targetAreaAr: targetAreaController.text.trim().isNotEmpty ? targetAreaController.text.trim() : 'الوجه والرقبة',
-                          targetAreaEn: targetAreaController.text.trim().isNotEmpty ? targetAreaController.text.trim() : 'Face & Neck',
-                          clinicsCount: 1,
-                          imageUrl: 'https://images.unsplash.com/photo-1512290900672-1f02e604ec22?auto=format&fit=crop&w=800&q=80',
-                        );
-                        ClinicPortalService().addTreatment(t);
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(loc.tr('clinic_service_saved')), backgroundColor: AppColors.accentChampagne),
-                        );
+                        final data = <String, dynamic>{
+                          'category': ?chosenCategoryId,
+                          'name_en': nameEnController.text.trim(),
+                          'name_ar': nameArController.text.trim().isNotEmpty
+                              ? nameArController.text.trim()
+                              : nameEnController.text.trim(),
+                          'description_en': descEnController.text.trim(),
+                          'description_ar': descArController.text.trim(),
+                          'price': double.tryParse(priceController.text.trim()) ?? 750.0,
+                          'status': 'active',
+                          'is_active': true,
+                        };
+
+                        try {
+                          await clinicService.createTreatment(data);
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (context.mounted) {
+                            showAppSnackBar(
+                              context,
+                              loc.tr('clinic_service_saved'),
+                              type: AppSnackBarType.success,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                          }
+                        }
                       },
                     ),
                     const SizedBox(height: 20),
@@ -552,21 +518,33 @@ class ClinicProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showAddProductDialog(BuildContext context, LocaleService loc) {
+  void _showProductFormDialog(
+    BuildContext context,
+    LocaleService loc, {
+    ProductModel? existing,
+  }) {
     final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController();
-    final priceController = TextEditingController();
-    final origPriceController = TextEditingController();
-    final descController = TextEditingController();
-    final imageController = TextEditingController();
-    var selectedCategory = loc.isArabic ? 'عناية بالبشرة' : 'Skincare';
+    final isEditing = existing != null;
+    final nameEnController = TextEditingController(text: existing?.nameEn ?? '');
+    final nameArController = TextEditingController(text: existing?.nameAr ?? '');
+    final priceController = TextEditingController(
+      text: existing != null && existing.price > 0
+          ? existing.price.toStringAsFixed(0)
+          : '',
+    );
+    final descEnController = TextEditingController(text: existing?.descriptionEn ?? '');
+    final descArController = TextEditingController(text: existing?.descriptionAr ?? '');
+    final imageController = TextEditingController(text: existing?.imageUrl ?? '');
+    bool isAvailable = existing?.isAvailable ?? true;
     final isDark = AppColors.isDark(context);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface(context),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
@@ -583,7 +561,9 @@ class ClinicProfileScreen extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     Text(
-                      loc.tr('clinic_add_product'),
+                      isEditing
+                          ? (loc.isArabic ? 'تعديل المنتج' : 'Edit Product')
+                          : loc.tr('clinic_add_product'),
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -592,139 +572,170 @@ class ClinicProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Name
-                    TextFormField(
-                      controller: nameController,
+                    // Name EN (LTR required)
+                    LtrTextFormField(
+                      controller: nameEnController,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: '${loc.tr("clinic_product_name")} *',
+                        labelText: loc.isArabic ? 'اسم المنتج بالإنجليزية *' : 'Product Name (English) *',
+                        hintText: 'e.g. Hyaluronic Acid Serum',
                         prefixIcon: const Icon(Icons.shopping_bag_outlined, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (val) => (val == null || val.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
                     ),
                     const SizedBox(height: 12),
 
-                    // Category Dropdown
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedCategory,
-                      dropdownColor: AppColors.surface(ctx),
+                    // Name AR
+                    TextFormField(
+                      controller: nameArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: loc.tr('clinic_product_category'),
-                        prefixIcon: const Icon(Icons.category_outlined, color: AppColors.accentChampagne, size: 18),
+                        labelText: loc.isArabic ? 'اسم المنتج بالعربية' : 'Product Name (Arabic)',
+                        hintText: 'مثال: سيروم حمض الهيالورونيك',
+                        prefixIcon: const Icon(Icons.shopping_bag_outlined, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      items: [
-                        DropdownMenuItem(value: loc.isArabic ? 'عناية بالبشرة' : 'Skincare', child: Text(loc.tr('product_category_skincare'))),
-                        DropdownMenuItem(value: loc.isArabic ? 'مستحضرات علاجية' : 'Cosmeceuticals', child: Text(loc.tr('product_category_cosmeceuticals'))),
-                        DropdownMenuItem(value: loc.isArabic ? 'أجهزة منزلية' : 'Home Devices', child: Text(loc.tr('product_category_devices'))),
-                        DropdownMenuItem(value: loc.isArabic ? 'واقيات شمس ومكملات' : 'Sun Care & Supplements', child: Text(loc.tr('product_category_sunscreens'))),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) setModalState(() => selectedCategory = val);
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Price (AED)
+                    LtrTextFormField(
+                      controller: priceController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: '${loc.tr("clinic_product_price")} *',
+                        hintText: 'e.g. 250',
+                        prefixIcon: const Icon(Icons.attach_money_rounded, color: AppColors.accentChampagne, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return loc.tr('clinic_validation_required');
+                        }
+                        final parsed = double.tryParse(val.trim());
+                        if (parsed == null || parsed < 0) {
+                          return loc.isArabic ? 'أدخل رقماً صحيحاً' : 'Invalid price';
+                        }
+                        return null;
                       },
                     ),
                     const SizedBox(height: 12),
 
-                    // Price & Original Price
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: priceController,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
-                            decoration: InputDecoration(
-                              labelText: '${loc.tr("clinic_product_price")} *',
-                              prefixIcon: const Icon(Icons.attach_money_rounded, color: AppColors.accentChampagne, size: 18),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty) return loc.tr('clinic_validation_required');
-                              if (double.tryParse(val.trim()) == null) return loc.isArabic ? 'أدخل رقماً صحيحاً' : 'Invalid number';
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextFormField(
-                            controller: origPriceController,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
-                            decoration: InputDecoration(
-                              labelText: loc.tr('clinic_product_orig_price'),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Description
-                    TextFormField(
-                      controller: descController,
+                    // Description EN (LTR)
+                    LtrTextFormField(
+                      controller: descEnController,
                       maxLines: 2,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: '${loc.tr("clinic_product_description")} *',
+                        labelText: loc.isArabic ? 'وصف المنتج بالإنجليزية' : 'Description (English)',
+                        hintText: 'Key ingredients, usage instructions...',
                         prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
                     ),
                     const SizedBox(height: 12),
 
-                    // Image URL
+                    // Description AR
                     TextFormField(
+                      controller: descArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
+                      style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'وصف المنتج بالعربية' : 'Description (Arabic)',
+                        hintText: 'المكونات وطريقة الاستخدام...',
+                        prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.accentChampagne, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Image URL (LTR)
+                    LtrTextFormField(
                       controller: imageController,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.tr('clinic_product_image'),
+                        hintText: 'https://...',
                         prefixIcon: const Icon(Icons.image_outlined, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
+
+                    // Active Switch
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: AppColors.accentChampagne,
+                      title: Text(
+                        loc.isArabic ? 'متوفر للاستفسار' : 'Available for Inquiry',
+                        style: TextStyle(color: AppColors.text(ctx), fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      value: isAvailable,
+                      onChanged: (val) => setModalState(() => isAvailable = val),
+                    ),
+                    const SizedBox(height: 16),
 
                     // Submit Button
                     SilverButton(
-                      label: loc.tr('clinic_add_product'),
+                      label: isEditing
+                          ? (loc.isArabic ? 'حفظ التعديلات' : 'Save Changes')
+                          : loc.tr('clinic_add_product'),
                       icon: Icons.check,
                       isFullWidth: true,
                       height: 44,
-                      onPressed: () {
+                      onPressed: () async {
                         if (!formKey.currentState!.validate()) return;
-                        final clinic = ClinicPortalService().activeClinic;
-                        final price = double.parse(priceController.text.trim());
-                        final origPrice = double.tryParse(origPriceController.text.trim());
+                        final nameEn = nameEnController.text.trim();
+                        final nameAr = nameArController.text.trim().isNotEmpty
+                            ? nameArController.text.trim()
+                            : nameEn;
+                        final descEn = descEnController.text.trim();
+                        final descAr = descArController.text.trim().isNotEmpty
+                            ? descArController.text.trim()
+                            : descEn;
+                        final price = double.tryParse(priceController.text.trim()) ?? 0.0;
+                        final image = imageController.text.trim();
 
-                        final p = ProductModel(
-                          id: 'prod-${DateTime.now().millisecondsSinceEpoch}',
-                          nameAr: nameController.text.trim(),
-                          nameEn: nameController.text.trim(),
-                          clinicId: clinic.id,
-                          clinicNameAr: clinic.nameAr,
-                          clinicNameEn: clinic.nameEn,
-                          descriptionAr: descController.text.trim(),
-                          descriptionEn: descController.text.trim(),
-                          price: price,
-                          originalPrice: origPrice,
-                          imageUrl: imageController.text.trim().isNotEmpty
-                              ? imageController.text.trim()
-                              : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
-                          categoryAr: selectedCategory,
-                          categoryEn: selectedCategory,
-                          isAvailable: true,
-                        );
+                        final payload = <String, dynamic>{
+                          'name_en': nameEn,
+                          'name_ar': nameAr,
+                          'description_en': descEn,
+                          'description_ar': descAr,
+                          'price': price.toStringAsFixed(2),
+                          'is_active': isAvailable,
+                          'status': existing?.status ?? 'active',
+                        };
+                        if (image.isNotEmpty) {
+                          payload['image'] = image;
+                        }
 
-                        ClinicPortalService().addProduct(p);
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(loc.tr('clinic_product_saved')), backgroundColor: AppColors.accentChampagne),
-                        );
+                        try {
+                          if (isEditing) {
+                            await ClinicPortalService().updateProduct(existing.id, payload);
+                          } else {
+                            await ClinicPortalService().createProduct(payload);
+                          }
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (context.mounted) {
+                            showAppSnackBar(
+                              context,
+                              loc.tr('clinic_product_saved'),
+                              type: AppSnackBarType.success,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                          }
+                        }
                       },
                     ),
                     const SizedBox(height: 20),
@@ -738,25 +749,38 @@ class ClinicProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showAddArticleDialog(BuildContext context, LocaleService loc) {
+  void _showArticleFormDialog(
+    BuildContext context,
+    LocaleService loc, {
+    ArticleModel? existing,
+  }) {
     final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController();
-    final summaryController = TextEditingController();
-    final contentController = TextEditingController();
-    final imageController = TextEditingController();
+    final isEditing = existing != null;
+    final titleEnController = TextEditingController(text: existing?.titleEn ?? '');
+    final titleArController = TextEditingController(text: existing?.titleAr ?? '');
+    final contentEnController = TextEditingController(text: existing?.contentEn ?? '');
+    final contentArController = TextEditingController(text: existing?.contentAr ?? '');
+    final imageController = TextEditingController(text: existing?.coverImageUrl ?? '');
+    bool isPublished = existing?.isPublished ?? true;
+
     final clinicService = ClinicPortalService();
-    final doctors = clinicService.clinicPractitioners.where((p) => p.type == PractitionerType.doctor).toList();
-    final defaultDoctor = doctors.isNotEmpty ? doctors.first : (clinicService.clinicPractitioners.isNotEmpty ? clinicService.clinicPractitioners.first : null);
-    
-    PractitionerModel? selectedDoctor = defaultDoctor;
-    var selectedCategory = loc.isArabic ? 'نضارة وتجديد البشرة' : 'Skin Glow & Renewal';
+    final practitioners = clinicService.clinicPractitioners;
+    String? selectedDoctorId = existing?.authorDoctorId.isNotEmpty == true
+        ? existing!.authorDoctorId
+        : (practitioners.isNotEmpty ? practitioners.first.id : null);
+    if (selectedDoctorId != null && !practitioners.any((p) => p.id == selectedDoctorId)) {
+      selectedDoctorId = practitioners.isNotEmpty ? practitioners.first.id : null;
+    }
+
     final isDark = AppColors.isDark(context);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface(context),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
@@ -773,7 +797,9 @@ class ClinicProfileScreen extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     Text(
-                      loc.tr('clinic_add_article'),
+                      isEditing
+                          ? (loc.isArabic ? 'تعديل المقال الطبي' : 'Edit Medical Article')
+                          : loc.tr('clinic_add_article'),
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -782,23 +808,41 @@ class ClinicProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Title
-                    TextFormField(
-                      controller: titleController,
+                    // Title EN (LTR required)
+                    LtrTextFormField(
+                      controller: titleEnController,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: '${loc.tr("clinic_article_title")} *',
+                        labelText: loc.isArabic ? 'عنوان المقال بالإنجليزية *' : 'Article Title (English) *',
+                        hintText: 'e.g. Benefits of Hyaluronic Acid',
                         prefixIcon: const Icon(Icons.article_outlined, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (val) => (val == null || val.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Title AR
+                    TextFormField(
+                      controller: titleArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'عنوان المقال بالعربية' : 'Article Title (Arabic)',
+                        hintText: 'مثال: فوائد حمض الهيالورونيك للبشرة',
+                        prefixIcon: const Icon(Icons.article_outlined, color: AppColors.accentChampagne, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                     const SizedBox(height: 12),
 
                     // Doctor Author Dropdown
-                    if (doctors.isNotEmpty)
-                      DropdownButtonFormField<PractitionerModel>(
-                        initialValue: selectedDoctor,
+                    if (practitioners.isNotEmpty) ...[
+                      DropdownButtonFormField<String?>(
+                        initialValue: selectedDoctorId,
                         dropdownColor: AppColors.surface(ctx),
                         style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                         decoration: InputDecoration(
@@ -806,122 +850,136 @@ class ClinicProfileScreen extends StatelessWidget {
                           prefixIcon: const Icon(Icons.person_rounded, color: AppColors.accentChampagne, size: 18),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        items: doctors.map((doc) {
-                          return DropdownMenuItem(
-                            value: doc,
-                            child: Text(loc.isArabic ? doc.nameAr : doc.nameEn),
-                          );
-                        }).toList(),
+                        items: [
+                          DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text(loc.isArabic ? 'بدون تحديد طبيب (باسم العيادة)' : 'No specific doctor (Clinic)'),
+                          ),
+                          ...practitioners.map((doc) {
+                            return DropdownMenuItem<String?>(
+                              value: doc.id,
+                              child: Text(loc.isArabic ? doc.nameAr : doc.nameEn),
+                            );
+                          }),
+                        ],
                         onChanged: (val) {
-                          if (val != null) setModalState(() => selectedDoctor = val);
+                          setModalState(() => selectedDoctorId = val);
                         },
                       ),
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 12),
+                    ],
 
-                    // Category Dropdown
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedCategory,
-                      dropdownColor: AppColors.surface(ctx),
-                      style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
-                      decoration: InputDecoration(
-                        labelText: loc.tr('clinic_article_category'),
-                        prefixIcon: const Icon(Icons.category_outlined, color: AppColors.accentChampagne, size: 18),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      items: [
-                        DropdownMenuItem(value: loc.isArabic ? 'نضارة وتجديد البشرة' : 'Skin Glow & Renewal', child: Text(loc.tr('article_category_glow'))),
-                        DropdownMenuItem(value: loc.isArabic ? 'الفيلر والبوتوكس' : 'Fillers & Botox', child: Text(loc.tr('article_category_injectables'))),
-                        DropdownMenuItem(value: loc.isArabic ? 'علاجات الليزر' : 'Laser Treatments', child: Text(loc.tr('article_category_laser'))),
-                        DropdownMenuItem(value: loc.isArabic ? 'الجراحة التجميلية' : 'Plastic Surgery', child: Text(loc.tr('article_category_surgery'))),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) setModalState(() => selectedCategory = val);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Summary
-                    TextFormField(
-                      controller: summaryController,
-                      maxLines: 2,
-                      style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
-                      decoration: InputDecoration(
-                        labelText: '${loc.tr("clinic_article_summary")} *',
-                        prefixIcon: const Icon(Icons.short_text_rounded, color: AppColors.accentChampagne, size: 18),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Content
-                    TextFormField(
-                      controller: contentController,
+                    // Content EN (LTR required)
+                    LtrTextFormField(
+                      controller: contentEnController,
                       maxLines: 4,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: '${loc.tr("clinic_article_content")} *',
+                        labelText: loc.isArabic ? 'محتوى المقال بالإنجليزية *' : 'Article Content (English) *',
+                        hintText: 'Write full medical article guidance...',
                         prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (val) => (val == null || val.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (val) => (val == null || val.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
                     ),
                     const SizedBox(height: 12),
 
-                    // Cover Image URL
+                    // Content AR
                     TextFormField(
+                      controller: contentArController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      maxLines: 4,
+                      style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'محتوى المقال بالعربية' : 'Article Content (Arabic)',
+                        hintText: 'اكتب محتوى المقال والنصائح الطبية...',
+                        prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.accentChampagne, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Cover Image URL (LTR)
+                    LtrTextFormField(
                       controller: imageController,
                       style: TextStyle(color: AppColors.text(ctx), fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.tr('clinic_article_cover'),
+                        hintText: 'https://...',
                         prefixIcon: const Icon(Icons.image_outlined, color: AppColors.accentChampagne, size: 18),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
+
+                    // Published Switch
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: AppColors.accentChampagne,
+                      title: Text(
+                        loc.isArabic ? 'نشر المقال فوراً' : 'Publish Immediately',
+                        style: TextStyle(color: AppColors.text(ctx), fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      value: isPublished,
+                      onChanged: (val) => setModalState(() => isPublished = val),
+                    ),
+                    const SizedBox(height: 16),
 
                     // Submit Button
                     SilverButton(
-                      label: loc.tr('clinic_add_article'),
+                      label: isEditing
+                          ? (loc.isArabic ? 'حفظ التعديلات' : 'Save Changes')
+                          : loc.tr('clinic_add_article'),
                       icon: Icons.check,
                       isFullWidth: true,
                       height: 44,
-                      onPressed: () {
+                      onPressed: () async {
                         if (!formKey.currentState!.validate()) return;
-                        final clinic = clinicService.activeClinic;
-                        final doc = selectedDoctor ?? defaultDoctor;
+                        final titleEn = titleEnController.text.trim();
+                        final titleAr = titleArController.text.trim().isNotEmpty
+                            ? titleArController.text.trim()
+                            : titleEn;
+                        final contentEn = contentEnController.text.trim();
+                        final contentAr = contentArController.text.trim().isNotEmpty
+                            ? contentArController.text.trim()
+                            : contentEn;
+                        final coverImage = imageController.text.trim();
 
-                        final art = ArticleModel(
-                          id: 'art-${DateTime.now().millisecondsSinceEpoch}',
-                          titleAr: titleController.text.trim(),
-                          titleEn: titleController.text.trim(),
-                          coverImageUrl: imageController.text.trim().isNotEmpty
-                              ? imageController.text.trim()
-                              : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
-                          summaryAr: summaryController.text.trim(),
-                          summaryEn: summaryController.text.trim(),
-                          contentAr: contentController.text.trim(),
-                          contentEn: contentController.text.trim(),
-                          authorDoctorId: doc?.id ?? 'dr-reem',
-                          authorDoctorNameAr: doc?.nameAr ?? (loc.isArabic ? 'د. ريم الخالد' : 'Dr. Reem Al Khaled'),
-                          authorDoctorNameEn: doc?.nameEn ?? 'Dr. Reem Al Khaled',
-                          authorDoctorSpecialtyAr: doc?.specialtyAr ?? 'استشاري جلدية وتجميل',
-                          authorDoctorSpecialtyEn: doc?.specialtyEn ?? 'Consultant Dermatologist',
-                          authorDoctorAvatar: doc?.avatarUrl ?? 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80',
-                          clinicId: clinic.id,
-                          clinicNameAr: clinic.nameAr,
-                          clinicNameEn: clinic.nameEn,
-                          categoryAr: selectedCategory,
-                          categoryEn: selectedCategory,
-                          publishedAt: DateTime.now(),
-                          isPublished: true,
-                        );
+                        final payload = <String, dynamic>{
+                          'title_en': titleEn,
+                          'title_ar': titleAr,
+                          'content_en': contentEn,
+                          'content_ar': contentAr,
+                          'author_practitioner': selectedDoctorId,
+                          'is_published': isPublished,
+                          'status': existing?.status ?? 'active',
+                        };
+                        if (coverImage.isNotEmpty) {
+                          payload['cover_image'] = coverImage;
+                        }
 
-                        clinicService.addArticle(art);
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(loc.tr('clinic_article_saved')), backgroundColor: AppColors.accentChampagne),
-                        );
+                        try {
+                          if (isEditing) {
+                            await clinicService.updateArticle(existing.id, payload);
+                          } else {
+                            await clinicService.createArticle(payload);
+                          }
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (context.mounted) {
+                            showAppSnackBar(
+                              context,
+                              loc.tr('clinic_article_saved'),
+                              type: AppSnackBarType.success,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                          }
+                        }
                       },
                     ),
                     const SizedBox(height: 20),
@@ -930,6 +988,128 @@ class ClinicProfileScreen extends StatelessWidget {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showEditClinicProfileDialog(BuildContext context, LocaleService loc) {
+    final clinicService = ClinicPortalService();
+    final clinic = clinicService.activeClinic;
+    final formKey = GlobalKey<FormState>();
+    final nameArCtrl = TextEditingController(text: clinic.nameAr);
+    final nameEnCtrl = TextEditingController(text: clinic.nameEn);
+    final descArCtrl = TextEditingController(text: clinic.descriptionAr);
+    final descEnCtrl = TextEditingController(text: clinic.descriptionEn);
+    final phoneCtrl = TextEditingController(text: clinic.mainPhone);
+    final whatsappCtrl = TextEditingController(text: clinic.whatsapp);
+    final addressArCtrl = TextEditingController(text: clinic.addressAr);
+    final mapsUrlCtrl = TextEditingController(text: clinic.googleMapsUrl ?? '');
+    final isDark = AppColors.isDark(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 20,
+          ),
+          child: Form(
+            key: formKey,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Text(
+                  loc.isArabic ? 'تعديل ملف العيادة' : 'Edit Clinic Profile',
+                  style: AppTypography.cardTitle.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: nameArCtrl,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)'),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                ),
+                const SizedBox(height: 10),
+                LtrTextFormField(
+                  controller: nameEnCtrl,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)'),
+                ),
+                const SizedBox(height: 10),
+                LtrTextFormField(
+                  controller: phoneCtrl,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'رقم الهاتف' : 'Phone Number'),
+                ),
+                const SizedBox(height: 10),
+                LtrTextFormField(
+                  controller: whatsappCtrl,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'رقم الواتساب' : 'WhatsApp Number'),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: addressArCtrl,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'العنوان' : 'Address'),
+                ),
+                const SizedBox(height: 10),
+                LtrTextFormField(
+                  controller: mapsUrlCtrl,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'رابط خرائط جوجل' : 'Google Maps URL'),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: descArCtrl,
+                  maxLines: 2,
+                  decoration: InputDecoration(labelText: loc.isArabic ? 'نبذة عن العيادة' : 'Description (Arabic)'),
+                ),
+                const SizedBox(height: 18),
+                SilverButton(
+                  label: loc.isArabic ? 'حفظ التعديلات' : 'Save Changes',
+                  icon: Icons.check_rounded,
+                  isFullWidth: true,
+                  height: 44,
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate()) return;
+                    try {
+                      await clinicService.updateClinicProfile(
+                        nameAr: nameArCtrl.text.trim(),
+                        nameEn: nameEnCtrl.text.trim().isNotEmpty ? nameEnCtrl.text.trim() : nameArCtrl.text.trim(),
+                        descriptionAr: descArCtrl.text.trim(),
+                        descriptionEn: descEnCtrl.text.trim(),
+                        phone: phoneCtrl.text.trim(),
+                        whatsapp: whatsappCtrl.text.trim(),
+                        addressAr: addressArCtrl.text.trim(),
+                        googleMapsUrl: mapsUrlCtrl.text.trim().isNotEmpty ? mapsUrlCtrl.text.trim() : null,
+                      );
+                      if (ctx.mounted) Navigator.pop(ctx);
+                      if (context.mounted) {
+                        showAppSnackBar(
+                          context,
+                          loc.isArabic ? 'تم تحديث ملف العيادة بنجاح' : 'Clinic profile updated successfully',
+                          type: AppSnackBarType.success,
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -1006,6 +1186,11 @@ class ClinicProfileScreen extends StatelessWidget {
                               TierBadge(tier: clinic.subscriptionTier),
                             ],
                           ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.accentChampagne),
+                          tooltip: loc.isArabic ? 'تعديل ملف العيادة' : 'Edit Clinic Profile',
+                          onPressed: () => _showEditClinicProfileDialog(context, loc),
                         ),
                       ],
                     ),
@@ -1086,10 +1271,25 @@ class ClinicProfileScreen extends StatelessWidget {
                             color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne, size: 20),
-                          tooltip: loc.tr('clinic_add_practitioner'),
-                          onPressed: () => _showAddPractitionerDialog(context, loc),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.open_in_new_rounded, color: AppColors.silverPrimary, size: 18),
+                              tooltip: loc.isArabic ? 'إدارة الكادر الطبي' : 'Manage Staff',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  LuxuryPageRoute(page: const ClinicPractitionersScreen()),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne, size: 20),
+                              tooltip: loc.tr('clinic_add_practitioner'),
+                              onPressed: () => _showAddPractitionerDialog(context, loc),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1135,6 +1335,11 @@ class ClinicProfileScreen extends StatelessWidget {
                               ),
                             ),
                             PractitionerBadge(type: p.type, showIcon: false),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.errorRed),
+                              tooltip: loc.isArabic ? 'حذف' : 'Delete',
+                              onPressed: () => clinicService.deletePractitioner(p.id),
+                            ),
                           ],
                         ),
                       );
@@ -1161,10 +1366,25 @@ class ClinicProfileScreen extends StatelessWidget {
                             color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne, size: 20),
-                          tooltip: loc.tr('clinic_add_service'),
-                          onPressed: () => _showAddServiceDialog(context, loc),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.open_in_new_rounded, color: AppColors.silverPrimary, size: 18),
+                              tooltip: loc.isArabic ? 'إدارة الخدمات والعلاجات' : 'Manage Treatments',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  LuxuryPageRoute(page: const ClinicTreatmentsScreen()),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne, size: 20),
+                              tooltip: loc.tr('clinic_add_service'),
+                              onPressed: () => _showAddServiceDialog(context, loc),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1192,6 +1412,11 @@ class ClinicProfileScreen extends StatelessWidget {
                                 color: AppColors.accentChampagne,
                                 fontWeight: FontWeight.bold,
                               ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.errorRed),
+                              tooltip: loc.isArabic ? 'حذف' : 'Delete',
+                              onPressed: () => clinicService.deleteTreatment(t.id),
                             ),
                           ],
                         ),
@@ -1222,7 +1447,7 @@ class ClinicProfileScreen extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne, size: 20),
                           tooltip: loc.tr('clinic_add_product'),
-                          onPressed: () => _showAddProductDialog(context, loc),
+                          onPressed: () => _showProductFormDialog(context, loc),
                         ),
                       ],
                     ),
@@ -1234,6 +1459,10 @@ class ClinicProfileScreen extends StatelessWidget {
                       )
                     else
                       ...clinicService.clinicProducts.map((p) {
+                        final catLabel = loc.isArabic ? p.categoryAr : p.categoryEn;
+                        final priceLine = catLabel.isNotEmpty
+                            ? '${p.price.toInt()} ${loc.tr("currency_aed")} • $catLabel'
+                            : '${p.price.toInt()} ${loc.tr("currency_aed")}';
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Row(
@@ -1269,11 +1498,16 @@ class ClinicProfileScreen extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     Text(
-                                      '${p.price.toInt()} ${loc.tr("currency_aed")} • ${loc.isArabic ? p.categoryAr : p.categoryEn}',
-                                      style: TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.bold),
+                                      priceLine,
+                                      style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 17, color: AppColors.silverSecondary),
+                                tooltip: loc.isArabic ? 'تعديل' : 'Edit',
+                                onPressed: () => _showProductFormDialog(context, loc, existing: p),
                               ),
                               IconButton(
                                 icon: Icon(
@@ -1282,11 +1516,27 @@ class ClinicProfileScreen extends StatelessWidget {
                                   color: p.isAvailable ? const Color(0xFF10B981) : Colors.redAccent,
                                 ),
                                 tooltip: loc.tr('clinic_product_toggle_avail'),
-                                onPressed: () => clinicService.toggleProductAvailability(p.id),
+                                onPressed: () async {
+                                  try {
+                                    await clinicService.toggleProductAvailability(p.id);
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                                    }
+                                  }
+                                },
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
-                                onPressed: () => clinicService.deleteProduct(p.id),
+                                onPressed: () async {
+                                  try {
+                                    await clinicService.deleteProduct(p.id);
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                                    }
+                                  }
+                                },
                               ),
                             ],
                           ),
@@ -1317,7 +1567,7 @@ class ClinicProfileScreen extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne, size: 20),
                           tooltip: loc.tr('clinic_add_article'),
-                          onPressed: () => _showAddArticleDialog(context, loc),
+                          onPressed: () => _showArticleFormDialog(context, loc),
                         ),
                       ],
                     ),
@@ -1329,6 +1579,10 @@ class ClinicProfileScreen extends StatelessWidget {
                       )
                     else
                       ...clinicService.clinicArticles.map((art) {
+                        final authorName = loc.isArabic ? art.authorDoctorNameAr : art.authorDoctorNameEn;
+                        final authorSubtitle = authorName.isNotEmpty
+                            ? '${loc.tr("article_author_by")}: $authorName'
+                            : (loc.isArabic ? clinic.nameAr : clinic.nameEn);
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Row(
@@ -1364,11 +1618,16 @@ class ClinicProfileScreen extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     Text(
-                                      '${loc.tr("article_author_by")}: ${loc.isArabic ? art.authorDoctorNameAr : art.authorDoctorNameEn}',
+                                      authorSubtitle,
                                       style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
                                     ),
                                   ],
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 17, color: AppColors.silverSecondary),
+                                tooltip: loc.isArabic ? 'تعديل' : 'Edit',
+                                onPressed: () => _showArticleFormDialog(context, loc, existing: art),
                               ),
                               IconButton(
                                 icon: Icon(
@@ -1377,11 +1636,27 @@ class ClinicProfileScreen extends StatelessWidget {
                                   color: art.isPublished ? const Color(0xFF10B981) : Colors.redAccent,
                                 ),
                                 tooltip: art.isPublished ? (loc.isArabic ? 'منشور' : 'Published') : (loc.isArabic ? 'مسودة' : 'Draft'),
-                                onPressed: () => clinicService.toggleArticlePublish(art.id),
+                                onPressed: () async {
+                                  try {
+                                    await clinicService.toggleArticlePublish(art.id);
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                                    }
+                                  }
+                                },
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
-                                onPressed: () => clinicService.deleteArticle(art.id),
+                                onPressed: () async {
+                                  try {
+                                    await clinicService.deleteArticle(art.id);
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                                    }
+                                  }
+                                },
                               ),
                             ],
                           ),
@@ -1472,7 +1747,9 @@ class ClinicProfileScreen extends StatelessWidget {
                 icon: Icons.logout_rounded,
                 isFullWidth: true,
                 height: 46,
-                onPressed: () {
+                onPressed: () async {
+                  await AuthRepository().logout();
+                  if (!context.mounted) return;
                   Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => const LoginScreen()),
                     (route) => false,

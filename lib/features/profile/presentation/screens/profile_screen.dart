@@ -4,18 +4,149 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/theme/theme_service.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/core/utils/contact_launcher.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
+import 'package:aesthetic_way/features/auth/data/models/auth_models.dart';
 import 'package:aesthetic_way/features/referral/presentation/screens/referral_screen.dart';
 
-/// Screen 25: Patient Profile with Dynamic Theme & Language Switchers and Compliant Privacy Copy
-class ProfileScreen extends StatelessWidget {
+/// Screen 25: Patient Profile & Settings — Live API (/api/v1/auth/me/)
+class ProfileScreen extends StatefulWidget {
   final VoidCallback onNavigateToRequests;
+  final AuthRepository? authRepository;
 
-  const ProfileScreen({super.key, required this.onNavigateToRequests});
+  const ProfileScreen({
+    super.key,
+    required this.onNavigateToRequests,
+    this.authRepository,
+  });
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late final AuthRepository _authRepo;
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+
+  UserModel? _user;
+  bool _isLoading = true;
+  bool _isSaving = false;
+  bool _isEditing = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepo = widget.authRepository ?? AuthRepository();
+    final auth = AuthState();
+    _nameController = TextEditingController(text: auth.userName);
+    _phoneController = TextEditingController(text: auth.userPhone);
+    _emailController = TextEditingController(text: auth.userEmail);
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final user = await _authRepo.getMe();
+      if (!mounted) return;
+      setState(() {
+        _user = user;
+        _nameController.text = user.fullName;
+        _phoneController.text = user.phone;
+        _emailController.text = user.email ?? '';
+        _isLoading = false;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.message;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = LocaleService().isArabic
+            ? 'تعذر تحميل بيانات الملف الشخصي من الخادم.'
+            : 'Unable to load profile data from server.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final loc = LocaleService();
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final updated = await _authRepo.updateMe(
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _user = updated;
+        _nameController.text = updated.fullName;
+        _phoneController.text = updated.phone;
+        _emailController.text = updated.email ?? '';
+        _isSaving = false;
+        _isEditing = false;
+        _errorMessage = null;
+      });
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'تم تحديث الملف الشخصي بنجاح' : 'Profile updated successfully',
+        type: AppSnackBarType.success,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+      });
+      showAppSnackBar(
+        context,
+        e.message,
+        type: AppSnackBarType.error,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+      });
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'فشل حفظ التعديلات، يرجى المحاولة مرة أخرى' : 'Failed to save changes, please try again',
+        type: AppSnackBarType.error,
+      );
+    }
+  }
 
   void _showPrivacyTermsSheet(BuildContext context, LocaleService loc) {
     final isDark = AppColors.isDark(context);
@@ -152,13 +283,17 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   subtitle: Text(
-                    '+971 50 888 9900 (UAE Concierge)',
+                    '${ContactLauncher.platformSupportPhoneDisplay} (WhatsApp)',
                     style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
                   ),
                   trailing: Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
                   onTap: () {
                     Navigator.pop(ctx);
-                    ContactLauncher.openWhatsApp(phoneNumber: '+971508889900');
+                    ContactLauncher.openPlatformSupportWhatsApp(
+                      message: loc.isArabic
+                          ? 'مرحباً، أود التواصل مع خدمة عملاء منصة AESTHETIC WAY.'
+                          : 'Hello, I would like to contact Aesthetic Way platform support.',
+                    );
                   },
                 ),
                 const SizedBox(height: 8),
@@ -178,13 +313,13 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   subtitle: Text(
-                    '800-AESTHETIC (Toll-Free UAE)',
+                    ContactLauncher.platformSupportPhoneDisplay,
                     style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
                   ),
                   trailing: Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
                   onTap: () {
                     Navigator.pop(ctx);
-                    ContactLauncher.makePhoneCall('+971800237843');
+                    ContactLauncher.callPlatformSupport();
                   },
                 ),
               ],
@@ -195,6 +330,142 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildEditProfileSection(BuildContext context, LocaleService loc, bool isDark) {
+    return LuxuryCard(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.edit_note_rounded, color: AppColors.accentChampagne, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    loc.isArabic ? 'تعديل البيانات الشخصية' : 'Edit Personal Profile',
+                    style: AppTypography.cardTitle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14.5,
+                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    ),
+                  ),
+                ),
+                if (_isEditing)
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, size: 18, color: AppColors.mutedText(context)),
+                    tooltip: loc.isArabic ? 'إغلاق' : 'Close',
+                    onPressed: _isSaving
+                        ? null
+                        : () {
+                            setState(() {
+                              _isEditing = false;
+                              _nameController.text = _user?.fullName ?? AuthState().userName;
+                              _phoneController.text = _user?.phone ?? AuthState().userPhone;
+                              _emailController.text = _user?.email ?? AuthState().userEmail;
+                            });
+                          },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              key: const Key('profile_full_name_field'),
+              controller: _nameController,
+              enabled: !_isSaving,
+              style: TextStyle(
+                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                fontSize: 13.5,
+              ),
+              decoration: InputDecoration(
+                labelText: loc.tr('full_name'),
+                prefixIcon: Icon(Icons.person_outline, size: 19, color: AppColors.mutedText(context)),
+                filled: true,
+                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border(context)),
+                ),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return loc.isArabic ? 'الاسم الكامل مطلوب' : 'Full name is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            LtrTextFormField(
+              key: const Key('profile_phone_field'),
+              controller: _phoneController,
+              enabled: !_isSaving,
+              keyboardType: TextInputType.phone,
+              style: TextStyle(
+                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                fontSize: 13.5,
+              ),
+              decoration: InputDecoration(
+                labelText: loc.tr('phone_uae'),
+                prefixIcon: Icon(Icons.phone_outlined, size: 19, color: AppColors.mutedText(context)),
+                filled: true,
+                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border(context)),
+                ),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return loc.isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            LtrTextFormField(
+              key: const Key('profile_email_field'),
+              controller: _emailController,
+              enabled: !_isSaving,
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(
+                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                fontSize: 13.5,
+              ),
+              decoration: InputDecoration(
+                labelText: loc.tr('email_address'),
+                hintText: 'name@example.com',
+                prefixIcon: Icon(Icons.email_outlined, size: 19, color: AppColors.mutedText(context)),
+                filled: true,
+                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border(context)),
+                ),
+              ),
+              validator: (val) {
+                final trimmed = val?.trim() ?? '';
+                if (trimmed.isNotEmpty && !trimmed.contains('@')) {
+                  return loc.isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            SilverButton(
+              label: _isSaving
+                  ? (loc.isArabic ? 'جاري الحفظ...' : 'Saving...')
+                  : (loc.isArabic ? 'حفظ التعديلات' : 'Save Changes'),
+              icon: Icons.check_circle_outline_rounded,
+              isFullWidth: true,
+              onPressed: _isSaving ? () {} : _saveProfile,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = AuthState();
@@ -202,8 +473,20 @@ class ProfileScreen extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return ListenableBuilder(
-      listenable: loc,
+      listenable: Listenable.merge([loc, auth]),
       builder: (context, _) {
+        final displayName = (_user?.fullName.isNotEmpty == true)
+            ? _user!.fullName
+            : auth.userName;
+        final displayPhone = (_user?.phone.isNotEmpty == true)
+            ? _user!.phone
+            : auth.userPhone;
+        final displayEmail = (_user?.email != null && _user!.email!.isNotEmpty)
+            ? _user!.email!
+            : auth.userEmail;
+        final isVerified = _user?.isVerified ?? auth.isVerified;
+        final hasAuthenticatedUser = auth.isLoggedIn || _user != null;
+
         return Scaffold(
           backgroundColor: AppColors.bg(context),
           appBar: AppBar(
@@ -215,261 +498,362 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             automaticallyImplyLeading: false,
+            actions: [
+              if (hasAuthenticatedUser)
+                IconButton(
+                  tooltip: loc.isArabic ? 'تحديث البيانات' : 'Refresh Profile',
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                  ),
+                  onPressed: _isLoading ? null : _loadProfile,
+                ),
+            ],
           ),
-          body: ListenableBuilder(
-            listenable: auth,
-            builder: (context, _) {
-              if (!auth.isLoggedIn) {
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                  children: [
-                    // Guest Banner Card
-                    LuxuryCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+          body: RefreshIndicator(
+            color: AppColors.accentChampagne,
+            onRefresh: _loadProfile,
+            child: _isLoading && _user == null && !auth.isLoggedIn
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.accentChampagne),
+                  )
+                : !hasAuthenticatedUser
+                    ? ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.border(context)),
+                          if (_errorMessage != null) ...[
+                            LuxuryCard(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error_outline_rounded, color: Colors.redAccent),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: AppTypography.caption.copyWith(color: Colors.redAccent),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: _loadProfile,
+                                    child: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Icon(
-                              Icons.person_outline_rounded,
-                              size: 44,
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            const SizedBox(height: 14),
+                          ],
+                          LuxuryCard(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.border(context)),
+                                  ),
+                                  child: Icon(
+                                    Icons.lock_outline_rounded,
+                                    size: 44,
+                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                Text(
+                                  loc.tr('login_title'),
+                                  style: AppTypography.heroTitle.copyWith(
+                                    fontSize: 18,
+                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  loc.tr('login_prompt'),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.mutedText(context),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 18),
+                                SilverButton(
+                                  label: loc.tr('login_btn'),
+                                  icon: Icons.login_rounded,
+                                  isFullWidth: true,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      LuxuryPageRoute(page: const LoginScreen()),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          Text(
-                            loc.tr('guest_status'),
-                            style: AppTypography.heroTitle.copyWith(
-                              fontSize: 18,
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          const SizedBox(height: 16),
+                          _ThemeSwitchTile(loc: loc),
+                          const SizedBox(height: 10),
+                          _LanguageSwitchTile(loc: loc),
+                          const SizedBox(height: 10),
+                          _ProfileMenuTile(
+                            icon: Icons.security_outlined,
+                            title: loc.tr('privacy_terms'),
+                            subtitle: loc.isArabic
+                                ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
+                                : 'Aesthetic and medical discovery platform in the UAE',
+                            onTap: () => _showPrivacyTermsSheet(context, loc),
+                          ),
+                          const SizedBox(height: 10),
+                          _ProfileMenuTile(
+                            icon: Icons.headset_mic_outlined,
+                            title: loc.tr('support_help'),
+                            subtitle: loc.isArabic
+                                ? 'تواصل مع فريق خدمة العملاء والدعم'
+                                : 'Contact Aesthetic Way customer support',
+                            onTap: () => _showSupportSheet(context, loc),
+                          ),
+                        ],
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                        children: [
+                          if (_isLoading)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 12),
+                              child: LinearProgressIndicator(
+                                color: AppColors.accentChampagne,
+                                minHeight: 2,
+                              ),
+                            ),
+                          if (_errorMessage != null) ...[
+                            LuxuryCard(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 20),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: AppTypography.caption.copyWith(
+                                        color: isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: _loadProfile,
+                                    icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.accentChampagne),
+                                    label: Text(
+                                      loc.isArabic ? 'إعادة المحاولة' : 'Retry',
+                                      style: const TextStyle(color: AppColors.accentChampagne, fontSize: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          // Logged-in User Profile Summary Card
+                          LuxuryCard(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                  child: Text(
+                                    displayName.isNotEmpty ? displayName.characters.first.toUpperCase() : 'U',
+                                    style: AppTypography.heroTitle.copyWith(
+                                      fontSize: 22,
+                                      color: AppColors.accentChampagne,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        displayName,
+                                        style: AppTypography.cardTitle.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                        ),
+                                      ),
+                                      if (displayPhone.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Directionality(
+                                          textDirection: TextDirection.ltr,
+                                          child: Text(
+                                            displayPhone,
+                                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                          ),
+                                        ),
+                                      ],
+                                      if (displayEmail.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Directionality(
+                                          textDirection: TextDirection.ltr,
+                                          child: Text(
+                                            displayEmail,
+                                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.accentChampagne.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              isVerified ? Icons.verified_outlined : Icons.info_outline,
+                                              size: 12,
+                                              color: AppColors.accentChampagne,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              isVerified
+                                                  ? (loc.isArabic ? 'مستخدم موثق' : 'Verified Member')
+                                                  : (loc.isArabic ? 'حساب مسجل' : 'Registered Account'),
+                                              style: AppTypography.badge.copyWith(
+                                                color: AppColors.accentChampagne,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  key: const Key('toggle_edit_profile_btn'),
+                                  tooltip: loc.isArabic ? 'تعديل الملف الشخصي' : 'Edit Profile',
+                                  icon: Icon(
+                                    _isEditing ? Icons.expand_less_rounded : Icons.edit_outlined,
+                                    color: AppColors.accentChampagne,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isEditing = !_isEditing;
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            loc.tr('login_prompt'),
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.mutedText(context),
-                            ),
-                            textAlign: TextAlign.center,
+                          const SizedBox(height: 12),
+
+                          // Live Profile Edit Form (always accessible via edit button or expanded)
+                          if (_isEditing) ...[
+                            _buildEditProfileSection(context, loc, isDark),
+                            const SizedBox(height: 16),
+                          ],
+
+                          // Menu Items
+                          _ProfileMenuTile(
+                            icon: Icons.assignment_outlined,
+                            title: loc.tr('my_requests_title'),
+                            subtitle: loc.isArabic
+                                ? 'متابعة حالة الطلبات والتواصل مع العيادات'
+                                : 'Track lead status and clinic responses',
+                            onTap: widget.onNavigateToRequests,
                           ),
-                          const SizedBox(height: 18),
-                          SilverButton(
-                            label: loc.tr('login_btn'),
-                            icon: Icons.login_rounded,
-                            isFullWidth: true,
-                            onPressed: () {
+                          const SizedBox(height: 10),
+                          _ProfileMenuTile(
+                            icon: Icons.favorite_border_rounded,
+                            title: loc.tr('my_favs'),
+                            subtitle: '${auth.favoriteClinicIds.length} ${loc.isArabic ? "عيادات محفوظة" : "saved clinics"}',
+                            onTap: () {
+                              showAppSnackBar(
+                                context,
+                                loc.isArabic ? 'قائمة المفضلة مفعلة وجاهزة' : 'Favorites list is active',
+                                type: AppSnackBarType.info,
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Referral & Rewards Tile
+                          _ProfileMenuTile(
+                            icon: Icons.card_giftcard_rounded,
+                            title: loc.tr('referral_nav_title'),
+                            subtitle: loc.isArabic
+                                ? 'ادعُ أصدقاءك لتحميل التطبيق واكسب كود خصم 15%'
+                                : 'Invite friends to download the app & earn 15% off',
+                            onTap: () {
                               Navigator.push(
                                 context,
-                                LuxuryPageRoute(page: const LoginScreen()),
+                                LuxuryPageRoute(page: const ReferralScreen()),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Theme Switcher Tile
+                          _ThemeSwitchTile(loc: loc),
+                          const SizedBox(height: 10),
+
+                          // Language Switcher Tile
+                          _LanguageSwitchTile(loc: loc),
+                          const SizedBox(height: 10),
+
+                          _ProfileMenuTile(
+                            icon: Icons.security_outlined,
+                            title: loc.tr('privacy_terms'),
+                            subtitle: loc.isArabic
+                                ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
+                                : 'Aesthetic and medical discovery platform in the UAE',
+                            onTap: () => _showPrivacyTermsSheet(context, loc),
+                          ),
+                          const SizedBox(height: 10),
+                          _ProfileMenuTile(
+                            icon: Icons.headset_mic_outlined,
+                            title: loc.tr('support_help'),
+                            subtitle: loc.isArabic
+                                ? 'تواصل مع فريق خدمة العملاء والدعم'
+                                : 'Contact Aesthetic Way customer support',
+                            onTap: () => _showSupportSheet(context, loc),
+                          ),
+                          const SizedBox(height: 20),
+
+                          SilverButton(
+                            label: loc.tr('logout_btn'),
+                            variant: SilverButtonVariant.secondary,
+                            icon: Icons.logout_rounded,
+                            isFullWidth: true,
+                            onPressed: () async {
+                              await _authRepo.logout();
+                              if (!context.mounted) return;
+                              showAppSnackBar(
+                                context,
+                                loc.isArabic ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully',
+                                type: AppSnackBarType.info,
+                              );
+                              Navigator.of(context).pushAndRemoveUntil(
+                                PageRouteBuilder(
+                                  pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+                                  transitionDuration: const Duration(milliseconds: 400),
+                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                    return FadeTransition(opacity: animation, child: child);
+                                  },
+                                ),
+                                (route) => false,
                               );
                             },
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Referral & Rewards Tile
-                    _ProfileMenuTile(
-                      icon: Icons.card_giftcard_rounded,
-                      title: loc.tr('referral_nav_title'),
-                      subtitle: loc.isArabic
-                          ? 'ادعُ أصدقاءك واكسب كود خصم 15% على الإجراءات'
-                          : 'Invite friends & earn 15% discount codes',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          LuxuryPageRoute(page: const ReferralScreen()),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Theme Switcher Tile
-                    _ThemeSwitchTile(loc: loc),
-                    const SizedBox(height: 10),
-
-                    // App Language Switcher Tile
-                    _LanguageSwitchTile(loc: loc),
-                    const SizedBox(height: 10),
-
-                    _ProfileMenuTile(
-                      icon: Icons.security_outlined,
-                      title: loc.tr('privacy_terms'),
-                      subtitle: loc.isArabic
-                          ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
-                          : 'Aesthetic and medical discovery platform in the UAE',
-                      onTap: () => _showPrivacyTermsSheet(context, loc),
-                    ),
-                    const SizedBox(height: 10),
-                    _ProfileMenuTile(
-                      icon: Icons.headset_mic_outlined,
-                      title: loc.tr('support_help'),
-                      subtitle: loc.isArabic
-                          ? 'تواصل مع فريق خدمة العملاء والدعم'
-                          : 'Contact Aesthetic Way customer support',
-                      onTap: () => _showSupportSheet(context, loc),
-                    ),
-                  ],
-                );
-              }
-
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                children: [
-                  // Logged-in User Profile Card
-                  LuxuryCard(
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          child: Icon(
-                            Icons.person,
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                auth.userName,
-                                style: AppTypography.cardTitle.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                auth.userPhone,
-                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: AppColors.accentChampagne.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.verified_outlined, size: 12, color: AppColors.accentChampagne),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      loc.isArabic ? 'مستخدم موثق' : 'Verified Member',
-                                      style: AppTypography.badge.copyWith(
-                                        color: AppColors.accentChampagne,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Menu Items
-                  _ProfileMenuTile(
-                    icon: Icons.assignment_outlined,
-                    title: loc.tr('my_requests_title'),
-                    subtitle: loc.isArabic
-                        ? 'متابعة حالة الطلبات والتواصل مع العيادات'
-                        : 'Track lead status and clinic responses',
-                    onTap: onNavigateToRequests,
-                  ),
-                  const SizedBox(height: 10),
-                  _ProfileMenuTile(
-                    icon: Icons.favorite_border_rounded,
-                    title: loc.tr('my_favs'),
-                    subtitle: '${auth.favoriteClinicIds.length} ${loc.isArabic ? "عيادات محفوظة" : "saved clinics"}',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(loc.isArabic ? 'قائمة المفضلة مفعلة وجاهزة' : 'Favorites list is active'),
-                          backgroundColor: AppColors.surface(context),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Referral & Rewards Tile
-                  _ProfileMenuTile(
-                    icon: Icons.card_giftcard_rounded,
-                    title: loc.tr('referral_nav_title'),
-                    subtitle: loc.isArabic
-                        ? 'ادعُ أصدقاءك واكسب كود خصم 15% على الإجراءات'
-                        : 'Invite friends & earn 15% discount codes',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        LuxuryPageRoute(page: const ReferralScreen()),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Theme Switcher Tile
-                  _ThemeSwitchTile(loc: loc),
-                  const SizedBox(height: 10),
-
-                  // Language Switcher Tile
-                  _LanguageSwitchTile(loc: loc),
-                  const SizedBox(height: 10),
-
-                  _ProfileMenuTile(
-                    icon: Icons.security_outlined,
-                    title: loc.tr('privacy_terms'),
-                    subtitle: loc.isArabic
-                        ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
-                        : 'Aesthetic and medical discovery platform in the UAE',
-                    onTap: () => _showPrivacyTermsSheet(context, loc),
-                  ),
-                  const SizedBox(height: 10),
-                  _ProfileMenuTile(
-                    icon: Icons.headset_mic_outlined,
-                    title: loc.tr('support_help'),
-                    subtitle: loc.isArabic
-                        ? 'تواصل مع فريق خدمة العملاء والدعم'
-                        : 'Contact Aesthetic Way customer support',
-                    onTap: () => _showSupportSheet(context, loc),
-                  ),
-                  const SizedBox(height: 20),
-
-                  SilverButton(
-                    label: loc.tr('logout_btn'),
-                    variant: SilverButtonVariant.secondary,
-                    icon: Icons.logout_rounded,
-                    isFullWidth: true,
-                    onPressed: () {
-                      auth.logout();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(loc.isArabic ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully'),
-                          backgroundColor: AppColors.surface(context),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
           ),
         );
       },

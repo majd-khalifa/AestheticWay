@@ -5,7 +5,9 @@ import 'package:aesthetic_way/core/theme/theme_service.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
 /// Super Admin Settings Screen with Platform Licensing, Theme & Language Controls, and Sign Out
 class AdminSettingsScreen extends StatelessWidget {
@@ -15,11 +17,19 @@ class AdminSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final themeService = ThemeService();
+    final authState = AuthState();
     final isDark = AppColors.isDark(context);
 
     return ListenableBuilder(
-      listenable: Listenable.merge([loc, themeService]),
+      listenable: Listenable.merge([loc, themeService, authState]),
       builder: (context, _) {
+        final displayName = authState.userName.isNotEmpty
+            ? authState.userName
+            : (loc.isArabic ? 'مدير المنصة العام (Super Admin)' : 'Super Administrator');
+        final displaySub = authState.userEmail.isNotEmpty
+            ? authState.userEmail
+            : (authState.userPhone.isNotEmpty ? authState.userPhone : 'super_admin@aestheticway.ae');
+
         return Scaffold(
           backgroundColor: AppColors.bg(context),
           appBar: AppBar(
@@ -59,7 +69,7 @@ class AdminSettingsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            loc.isArabic ? 'مدير المنصة العام (Super Admin)' : 'Super Administrator',
+                            displayName,
                             style: AppTypography.cardTitle.copyWith(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
@@ -68,7 +78,7 @@ class AdminSettingsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'admin@aestheticway.ae',
+                            displaySub,
                             style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
                           ),
                         ],
@@ -193,7 +203,9 @@ class AdminSettingsScreen extends StatelessWidget {
                 icon: Icons.logout_rounded,
                 isFullWidth: true,
                 height: 46,
-                onPressed: () {
+                onPressed: () async {
+                  await AuthRepository().logout();
+                  if (!context.mounted) return;
                   Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => const LoginScreen()),
                     (route) => false,

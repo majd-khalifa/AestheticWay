@@ -4,7 +4,8 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
+import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
+import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
 import 'package:aesthetic_way/features/treatments/presentation/screens/treatment_detail_screen.dart';
 
 /// Screen 2 & 5: Treatments & Plastic Surgery Directory
@@ -18,19 +19,49 @@ class TreatmentsScreen extends StatefulWidget {
 }
 
 class _TreatmentsScreenState extends State<TreatmentsScreen> {
+  final TreatmentsRepository _repository = TreatmentsRepository();
   late String _selectedCategory;
   String _searchQuery = '';
+  List<TreatmentModel> _treatments = [];
+  List<Map<String, dynamic>> _apiCategories = [];
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = widget.initialCategory ?? 'all';
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final results = await Future.wait([
+        _repository.getTreatments(),
+        _repository.getCategories(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _treatments = results[0] as List<TreatmentModel>;
+        _apiCategories = results[1] as List<Map<String, dynamic>>;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
 
     final isPlasticSurgeryOnly = widget.initialCategory != null &&
@@ -40,7 +71,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
         ? loc.tr('category_plastic_surgery_title')
         : loc.tr('category_treatments_title');
 
-    final categories = [
+    final defaultCategories = [
       {'id': 'all', 'label': loc.tr('treatment_category_all')},
       {'id': 'surgery', 'label': loc.tr('treatment_category_surgery')},
       {'id': 'injectables', 'label': loc.tr('treatment_category_injectables')},
@@ -48,13 +79,24 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
       {'id': 'laser', 'label': loc.tr('treatment_category_laser')},
     ];
 
-    final filteredTreatments = mockData.treatments.where((t) {
-      // Plastic surgery icon filter
+    final categories = _apiCategories.isNotEmpty
+        ? [
+            {'id': 'all', 'label': loc.tr('treatment_category_all')},
+            ..._apiCategories.map((c) => {
+                  'id': c['id']?.toString() ?? '',
+                  'label': (loc.isArabic ? c['name_ar'] : c['name_en'])?.toString() ?? '',
+                }),
+          ]
+        : defaultCategories;
+
+    final filteredTreatments = _treatments.where((t) {
       if (isPlasticSurgeryOnly) {
         final matchesCat = t.categoryAr.contains('جراحة') || t.categoryEn.toLowerCase().contains('surgery');
         if (!matchesCat) return false;
       } else if (_selectedCategory != 'all') {
-        if (_selectedCategory == 'surgery') {
+        if (t.categoryId == _selectedCategory) {
+          // Exact API category UUID match
+        } else if (_selectedCategory == 'surgery') {
           if (!t.categoryAr.contains('جراحة') && !t.categoryEn.toLowerCase().contains('surgery')) return false;
         } else if (_selectedCategory == 'injectables') {
           if (!t.categoryAr.contains('حقن') && !t.categoryEn.toLowerCase().contains('injectables')) return false;
@@ -62,6 +104,8 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
           if (!t.categoryAr.contains('عناية') && !t.categoryEn.toLowerCase().contains('skincare')) return false;
         } else if (_selectedCategory == 'laser') {
           if (!t.categoryAr.contains('ليزر') && !t.categoryEn.toLowerCase().contains('laser')) return false;
+        } else {
+          return false;
         }
       }
 
@@ -76,7 +120,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
     }).toList();
 
     return ListenableBuilder(
-      listenable: Listenable.merge([loc, mockData]),
+      listenable: loc,
       builder: (context, _) {
         return Scaffold(
           backgroundColor: AppColors.bg(context),
@@ -165,91 +209,111 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
 
               // Treatments List
               Expanded(
-                child: filteredTreatments.isEmpty
-                    ? Center(
-                        child: Text(
-                          loc.isArabic ? 'لا توجد علاجات مطابقة' : 'No treatments found',
-                          style: TextStyle(color: AppColors.mutedText(context)),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                        itemCount: filteredTreatments.length,
-                        itemBuilder: (context, index) {
-                          final treatment = filteredTreatments[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: LuxuryCard(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  LuxuryPageRoute(page: TreatmentDetailScreen(treatment: treatment)),
-                                );
-                              },
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      treatment.imageUrl,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => Container(
-                                        width: 80,
-                                        height: 80,
-                                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                        child: const Icon(Icons.medical_services_rounded, color: AppColors.accentChampagne),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            loc.isArabic ? treatment.categoryAr : treatment.categoryEn,
-                                            style: const TextStyle(
-                                              color: AppColors.accentChampagne,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          loc.isArabic ? treatment.nameAr : treatment.nameEn,
-                                          style: TextStyle(
-                                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 13.5,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '${loc.tr("duration_label")}: ${loc.isArabic ? treatment.durationText : treatment.durationTextEn}',
-                                          style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.accentChampagne),
-                                ],
-                              ),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.accentChampagne))
+                    : _error != null
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(_error!, style: TextStyle(color: AppColors.mutedText(context))),
+                                const SizedBox(height: 8),
+                                TextButton(
+                                  onPressed: _loadData,
+                                  child: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
+                          )
+                        : filteredTreatments.isEmpty
+                            ? Center(
+                                child: Text(
+                                  loc.isArabic ? 'لا توجد علاجات مطابقة' : 'No treatments found',
+                                  style: TextStyle(color: AppColors.mutedText(context)),
+                                ),
+                              )
+                            : RefreshIndicator(
+                                color: AppColors.accentChampagne,
+                                onRefresh: _loadData,
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                                  itemCount: filteredTreatments.length,
+                                  itemBuilder: (context, index) {
+                                    final treatment = filteredTreatments[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: LuxuryCard(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            LuxuryPageRoute(page: TreatmentDetailScreen(treatment: treatment)),
+                                          );
+                                        },
+                                        padding: const EdgeInsets.all(12),
+                                        child: Row(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: Image.network(
+                                                treatment.imageUrl,
+                                                width: 80,
+                                                height: 80,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, _, _) => Container(
+                                                  width: 80,
+                                                  height: 80,
+                                                  color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                                  child: const Icon(Icons.medical_services_rounded, color: AppColors.accentChampagne),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
+                                                      borderRadius: BorderRadius.circular(6),
+                                                    ),
+                                                    child: Text(
+                                                      loc.isArabic ? treatment.categoryAr : treatment.categoryEn,
+                                                      style: const TextStyle(
+                                                        color: AppColors.accentChampagne,
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    loc.isArabic ? treatment.nameAr : treatment.nameEn,
+                                                    style: TextStyle(
+                                                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                                      fontWeight: FontWeight.w800,
+                                                      fontSize: 13.5,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '${loc.tr("duration_label")}: ${loc.isArabic ? treatment.durationText : treatment.durationTextEn}',
+                                                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.accentChampagne),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
               ),
             ],
           ),

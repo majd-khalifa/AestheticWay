@@ -7,22 +7,126 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
-import 'package:aesthetic_way/data/mock_data.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
+import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
+import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 import 'package:aesthetic_way/features/practitioners/presentation/screens/practitioner_profile_screen.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 
 /// Article Detail Screen with reading typography, doctor author info & direct consultation lead
 class ArticleDetailScreen extends StatelessWidget {
   final ArticleModel article;
+  final ClinicsRepository? clinicsRepository;
 
-  const ArticleDetailScreen({super.key, required this.article});
+  const ArticleDetailScreen({
+    super.key,
+    required this.article,
+    this.clinicsRepository,
+  });
+
+  PractitionerModel? _resolveAuthorPractitioner() {
+    if (article.authorDoctorNameEn.isNotEmpty || article.authorDoctorNameAr.isNotEmpty) {
+      return PractitionerModel(
+        id: article.authorDoctorId.isNotEmpty ? article.authorDoctorId : 'doc-id',
+        nameAr: article.authorDoctorNameAr.isNotEmpty
+            ? article.authorDoctorNameAr
+            : article.authorDoctorNameEn,
+        nameEn: article.authorDoctorNameEn.isNotEmpty
+            ? article.authorDoctorNameEn
+            : article.authorDoctorNameAr,
+        type: PractitionerType.doctor,
+        specialtyAr: article.authorDoctorSpecialtyAr.isNotEmpty
+            ? article.authorDoctorSpecialtyAr
+            : 'استشاري طب تجميلي',
+        specialtyEn: article.authorDoctorSpecialtyEn.isNotEmpty
+            ? article.authorDoctorSpecialtyEn
+            : 'Aesthetic Specialist',
+        classificationAr: article.authorDoctorSpecialtyAr,
+        classificationEn: article.authorDoctorSpecialtyEn,
+        licenseAuthority: '',
+        licenseNumber: '',
+        avatarUrl: article.authorDoctorAvatar,
+        yearsOfExperience: 10,
+        rating: 4.9,
+        reviewCount: 15,
+        clinicId: article.clinicId,
+        clinicNameAr: article.clinicNameAr,
+        clinicNameEn: article.clinicNameEn,
+        aboutAr: '',
+        languages: const ['العربية', 'English'],
+        procedures: const [],
+      );
+    }
+    return null;
+  }
+
+  Future<ClinicModel> _resolveClinic() async {
+    if (article.clinicId.trim().isNotEmpty) {
+      try {
+        final repo = clinicsRepository ?? ClinicsRepository();
+        return await repo.getClinicDetail(article.clinicId);
+      } catch (_) {}
+    }
+
+    if (article.clinicNameAr.isNotEmpty || (article.clinicNameEn?.isNotEmpty ?? false)) {
+      return ClinicModel(
+        id: article.clinicId.isNotEmpty ? article.clinicId : 'clinic-id',
+        nameAr: article.clinicNameAr.isNotEmpty
+            ? article.clinicNameAr
+            : (article.clinicNameEn ?? ''),
+        nameEn: article.clinicNameEn ?? article.clinicNameAr,
+        descriptionAr: '',
+        descriptionEn: '',
+        coverImageUrl: article.coverImageUrl,
+        galleryImages: const [],
+        logoUrl: article.coverImageUrl,
+        rating: 4.9,
+        reviewCount: 0,
+        subscriptionTier: SubscriptionTier.basic,
+        licenseAuthority: '',
+        licenseNumber: '',
+        city: 'Dubai',
+        areaAr: 'دبي',
+        areaEn: 'Dubai',
+        addressAr: 'دبي',
+        addressEn: 'Dubai',
+        distanceKm: 0,
+        mainPhone: '+971500000000',
+        receptionPhone: '+971500000000',
+        whatsapp: '+971500000000',
+        latitude: 25.2048,
+        longitude: 55.2708,
+        workingHoursAr: '10:00 ص - 9:00 م',
+        workingHoursEn: '10:00 AM - 9:00 PM',
+        branches: const [],
+        practitionerIds: const [],
+        treatmentIds: const [],
+        featuredOffers: const [],
+      );
+    }
+
+    return const ClinicModel(
+      id: 'clinic-id',
+      nameAr: 'العيادة الطبية المعتمدة',
+      nameEn: 'Accredited Medical Clinic',
+      descriptionAr: '',
+      descriptionEn: '',
+      coverImageUrl: '',
+      galleryImages: [],
+      logoUrl: '',
+      rating: 4.9,
+      reviewCount: 0,
+      subscriptionTier: SubscriptionTier.basic,
+      city: 'Dubai',
+      areaAr: 'دبي',
+      areaEn: 'Dubai',
+      addressAr: 'دبي',
+      addressEn: 'Dubai',
+    );
+  }
 
   Future<void> _handleBookLead(BuildContext context) async {
-    final mockData = MockDataService();
-    final clinic = mockData.getClinicById(article.clinicId) ?? mockData.clinics.first;
-    final doctor = mockData.getPractitionerById(article.authorDoctorId);
-
     final auth = await GuestAuthGuard.requireAuth(
       context,
       reasonTitle: LocaleService().tr('article_consult_author_btn'),
@@ -30,7 +134,10 @@ class ArticleDetailScreen extends StatelessWidget {
           ? 'سجّل دخولك برقم الهاتف لحجز استشارة مع الطبيب الكاتب'
           : 'Login with phone number to request a consultation with the author doctor',
     );
-    if (!auth) return;
+    if (!auth || !context.mounted) return;
+
+    final clinic = await _resolveClinic();
+    final doctor = _resolveAuthorPractitioner();
 
     if (context.mounted) {
       Navigator.push(
@@ -48,9 +155,15 @@ class ArticleDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final mockData = MockDataService();
     final isDark = AppColors.isDark(context);
-    final doctor = mockData.getPractitionerById(article.authorDoctorId);
+    final doctor = _resolveAuthorPractitioner();
+    final categoryLabel = loc.isArabic ? article.categoryAr : article.categoryEn;
+    final authorName = loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn;
+    final displayAuthor = authorName.isNotEmpty
+        ? authorName
+        : (loc.isArabic
+            ? (article.clinicNameAr.isNotEmpty ? article.clinicNameAr : 'أستيتك واي')
+            : (article.clinicNameEn ?? 'Aesthetic Way'));
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
@@ -64,7 +177,11 @@ class ArticleDetailScreen extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -93,21 +210,22 @@ class ArticleDetailScreen extends StatelessWidget {
           // Category Badge & Reading Time
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  loc.isArabic ? article.categoryAr : article.categoryEn,
-                  style: const TextStyle(
-                    color: AppColors.accentChampagne,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 11,
+              if (categoryLabel.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    categoryLabel,
+                    style: const TextStyle(
+                      color: AppColors.accentChampagne,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
-              ),
               const Spacer(),
               Row(
                 children: [
@@ -175,21 +293,31 @@ class ArticleDetailScreen extends StatelessWidget {
                             style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn,
-                            style: TextStyle(
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
+                          Expanded(
+                            child: Text(
+                              displayAuthor,
+                              style: TextStyle(
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        loc.isArabic ? article.clinicNameAr : (article.clinicNameEn ?? article.clinicNameAr),
-                        style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
+                      if (article.clinicNameAr.isNotEmpty || (article.clinicNameEn?.isNotEmpty ?? false)) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          loc.isArabic ? article.clinicNameAr : (article.clinicNameEn ?? article.clinicNameAr),
+                          style: const TextStyle(
+                            color: AppColors.accentChampagne,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

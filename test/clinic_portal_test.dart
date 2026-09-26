@@ -12,10 +12,84 @@ import 'package:aesthetic_way/features/appointment_lead/models/appointment_reque
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:aesthetic_way/features/clinic_portal/data/models/clinic_dashboard_model.dart';
 
 void main() {
   setUp(() {
     LocaleService().setLanguage(AppLanguage.arabic);
+    ClinicPortalService().resetTestingState();
+    ClinicPortalService().enableMockMode();
+  });
+
+  group('Clinic Portal Data Models & Serialization Tests', () {
+    test('ClinicDashboardModel parses live backend JSON correctly', () {
+      final json = {
+        'clinic_id': 'b8420e99-444c-423e-a3ed-3aa937bc411e',
+        'clinic_name': 'Aesthetic Way Clinic Downtown',
+        'leads': {
+          'total': 18,
+          'new': 5,
+          'contacted': 8,
+          'closed': 5,
+          'conversion_rate_percentage': 27.7,
+        },
+        'interactions': {
+          'whatsapp_taps': 10,
+          'call_taps': 5,
+          'maps_taps': 4,
+          'profile_views': 42,
+        },
+        'catalog': {
+          'active_practitioners_count': 3,
+          'active_treatments_count': 6,
+          'active_offers_count': 4,
+          'active_products_count': 6,
+          'published_articles_count': 2,
+        },
+      };
+
+      final model = ClinicDashboardModel.fromJson(json);
+
+      expect(model.clinicId, 'b8420e99-444c-423e-a3ed-3aa937bc411e');
+      expect(model.clinicName, 'Aesthetic Way Clinic Downtown');
+      expect(model.totalLeads, 18);
+      expect(model.newLeads, 5);
+      expect(model.contactedLeads, 8);
+      expect(model.closedLeads, 5);
+      expect(model.conversionRate, 27.7);
+      expect(model.whatsappTaps, 10);
+      expect(model.callTaps, 5);
+      expect(model.mapsTaps, 4);
+      expect(model.profileViews, 42);
+      expect(model.activeOffersCount, 4);
+      expect(model.activeProductsCount, 6);
+      expect(model.publishedArticlesCount, 2);
+    });
+
+    test('AppointmentRequestModel parses clinic internal notes list', () {
+      final json = {
+        'id': 'lead-999',
+        'reference_code': '#REQ-999',
+        'status': 'contacted',
+        'patient_name': 'سارة أحمد',
+        'patient_phone': '+971501234567',
+        'service_name': 'فيلر',
+        'created_at': '2026-09-22T10:00:00Z',
+        'internal_notes': [
+          {
+            'id': 'note-1',
+            'note': 'تم الاتصال بالعميل وسيتم تأكيد الموعد غداً',
+            'author_name': 'أحمد العلي',
+            'created_at': '2026-09-22T11:00:00Z',
+          }
+        ]
+      };
+
+      final lead = AppointmentRequestModel.fromJson(json);
+      expect(lead.internalNotes.length, 1);
+      expect(lead.internalNotes.first.note, contains('تم الاتصال بالعميل'));
+      expect(lead.internalNotes.first.authorName, 'أحمد العلي');
+    });
   });
 
   group('Clinic Portal Unit Tests - Service & State', () {
@@ -106,9 +180,9 @@ void main() {
       );
 
       expect(find.text('طلبات جديدة'), findsOneWidget);
-      expect(find.text('طلبات اليوم'), findsOneWidget);
+      expect(find.text('تم التواصل'), findsWidgets);
       expect(find.text('إجمالي الطلبات'), findsOneWidget);
-      expect(find.text('عروض نشطة'), findsOneWidget);
+      expect(find.text('نسبة التحويل'), findsOneWidget);
       expect(find.text('إجراءات سريعة'), findsOneWidget);
       expect(find.text('عرض الطلبات الجديدة'), findsOneWidget);
       expect(find.text('إضافة عرض جديد'), findsOneWidget);

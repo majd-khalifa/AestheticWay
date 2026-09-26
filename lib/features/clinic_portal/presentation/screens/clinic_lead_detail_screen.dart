@@ -4,6 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/utils/contact_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
@@ -22,6 +23,8 @@ class ClinicLeadDetailScreen extends StatefulWidget {
 class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
   late AppointmentLeadStatus _currentStatus;
   late TextEditingController _notesController;
+  bool _isUpdatingStatus = false;
+  bool _isSavingNotes = false;
 
   @override
   void initState() {
@@ -37,29 +40,76 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
     super.dispose();
   }
 
-  void _updateStatus(AppointmentLeadStatus newStatus) {
+  Future<void> _updateStatus(AppointmentLeadStatus newStatus) async {
+    if (_currentStatus == newStatus || _isUpdatingStatus) return;
+
+    final loc = LocaleService();
+    final prevStatus = _currentStatus;
     setState(() {
       _currentStatus = newStatus;
+      _isUpdatingStatus = true;
     });
-    ClinicPortalService().updateLeadStatus(widget.lead.id, newStatus);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocaleService().tr('clinic_status_updated')),
-        backgroundColor: AppColors.accentChampagne,
+
+    try {
+      await ClinicPortalService().updateLeadStatus(widget.lead.id, newStatus);
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        loc.tr('clinic_status_updated'),
+        type: AppSnackBarType.success,
         duration: const Duration(seconds: 2),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _currentStatus = prevStatus;
+      });
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'فشل تحديث الحالة' : 'Failed to update status',
+        type: AppSnackBarType.error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingStatus = false;
+        });
+      }
+    }
   }
 
-  void _saveInternalNotes() {
-    ClinicPortalService().saveInternalNotes(widget.lead.id, _notesController.text.trim());
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocaleService().tr('clinic_notes_saved')),
-        backgroundColor: AppColors.accentChampagne,
+  Future<void> _saveInternalNotes() async {
+    final noteText = _notesController.text.trim();
+    if (noteText.isEmpty || _isSavingNotes) return;
+
+    final loc = LocaleService();
+    setState(() {
+      _isSavingNotes = true;
+    });
+
+    try {
+      await ClinicPortalService().saveInternalNotes(widget.lead.id, noteText);
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        loc.tr('clinic_notes_saved'),
+        type: AppSnackBarType.success,
         duration: const Duration(seconds: 2),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'فشل حفظ الملاحظة' : 'Failed to save note',
+        type: AppSnackBarType.error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingNotes = false;
+        });
+      }
+    }
   }
 
   @override
@@ -270,24 +320,31 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                           label: loc.tr('clinic_lead_status_new'),
                           isSelected: _currentStatus == AppointmentLeadStatus.sent,
                           color: const Color(0xFFF59E0B),
-                          onTap: () => _updateStatus(AppointmentLeadStatus.sent),
+                          onTap: _isUpdatingStatus ? () {} : () => _updateStatus(AppointmentLeadStatus.sent),
                         ),
                         const SizedBox(width: 8),
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_contacted'),
                           isSelected: _currentStatus == AppointmentLeadStatus.contacted,
                           color: const Color(0xFF3B82F6),
-                          onTap: () => _updateStatus(AppointmentLeadStatus.contacted),
+                          onTap: _isUpdatingStatus ? () {} : () => _updateStatus(AppointmentLeadStatus.contacted),
                         ),
                         const SizedBox(width: 8),
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_closed'),
                           isSelected: _currentStatus == AppointmentLeadStatus.closed,
                           color: const Color(0xFF10B981),
-                          onTap: () => _updateStatus(AppointmentLeadStatus.closed),
+                          onTap: _isUpdatingStatus ? () {} : () => _updateStatus(AppointmentLeadStatus.closed),
                         ),
                       ],
                     ),
+                    if (_isUpdatingStatus) ...[
+                      const SizedBox(height: 8),
+                      const LinearProgressIndicator(
+                        color: AppColors.accentChampagne,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -307,6 +364,51 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                         color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                       ),
                     ),
+                    if (widget.lead.internalNotes.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      ...widget.lead.internalNotes.map((n) => Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.border(context), width: 0.6),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  n.authorName,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.accentChampagne,
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat('MM/dd HH:mm').format(n.createdAt),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.mutedText(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              n.note,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                    ],
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: _notesController,
@@ -337,6 +439,7 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                         label: loc.tr('clinic_save_notes'),
                         icon: Icons.save_outlined,
                         height: 38,
+                        isLoading: _isSavingNotes,
                         onPressed: _saveInternalNotes,
                       ),
                     ),
