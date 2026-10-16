@@ -545,7 +545,7 @@ Portal: Mobile App (Clinic Partner Portal)
                     style: TextStyle(color: AppColors.text(context), fontSize: 13),
                     decoration: InputDecoration(
                       labelText: loc.isArabic ? 'اسم المسؤول بالكامل *' : 'Administrator Full Name *',
-                      hintText: 'e.g. Dr. Sarah Al Maktoum',
+                      hintText: loc.isArabic ? 'مثال: د. سارة المنصوري' : 'e.g. Dr. Sarah Al Mansoori',
                       prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.accentChampagne, size: 18),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -584,6 +584,7 @@ Portal: Mobile App (Clinic Partner Portal)
                           style: TextStyle(color: AppColors.text(context), fontSize: 13),
                           decoration: InputDecoration(
                             labelText: loc.isArabic ? 'كلمة المرور المؤقتة *' : 'Temporary Password *',
+                            hintText: '••••••••',
                             prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.accentChampagne, size: 18),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           ),

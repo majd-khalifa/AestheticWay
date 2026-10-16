@@ -102,7 +102,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.cardSurface,
-        hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.silverMuted),
+        hintStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.silverMuted.withValues(alpha: 0.45),
+          fontWeight: FontWeight.w400,
+        ),
         labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.silverPrimary),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
@@ -241,7 +244,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.lightCardSurface,
-        hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextMuted),
+        hintStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.lightTextMuted.withValues(alpha: 0.45),
+          fontWeight: FontWeight.w400,
+        ),
         labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextPrimary),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(

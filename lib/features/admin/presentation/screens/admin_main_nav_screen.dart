@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -9,6 +10,7 @@ import 'package:aesthetic_way/features/admin/presentation/screens/admin_leads_sc
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_offers_screen.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_analytics_screen.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_settings_screen.dart';
+import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 
 /// Super Admin Main Navigation Shell with Floating Luxury Pill Navigation Bar
 /// Visual Tab Order (LTR): [ Dashboard | Clinics | Leads | Offers | Analytics ]
@@ -28,9 +30,15 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdminPortalService().loadAllData();
+    });
   }
 
   void _onTabSelected(int index) {
+    if (_currentIndex != index) {
+      HapticFeedback.selectionClick();
+    }
     setState(() {
       _currentIndex = index;
     });
@@ -66,18 +74,41 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
               children: [
                 const Icon(Icons.admin_panel_settings_rounded, color: AppColors.accentChampagne, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  loc.tr('admin_portal_title'),
-                  style: TextStyle(
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    loc.tr('admin_portal_title'),
+                    style: TextStyle(
+                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
             automaticallyImplyLeading: false,
             actions: [
+              ActionChip(
+                avatar: const Icon(Icons.visibility_outlined, size: 14, color: AppColors.accentChampagne),
+                label: Text(
+                  loc.isArabic ? 'معاينة تطبيق المرضى' : 'Preview Patient App',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  ),
+                ),
+                backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                side: BorderSide(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    LuxuryPageRoute(page: const MainNavScreen()),
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: AppColors.accentChampagne, size: 20),
                 tooltip: loc.tr('admin_nav_settings'),

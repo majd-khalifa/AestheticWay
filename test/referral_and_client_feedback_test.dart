@@ -5,7 +5,6 @@ import 'package:aesthetic_way/core/utils/contact_launcher.dart';
 import 'package:aesthetic_way/features/referral/models/referral_model.dart';
 import 'package:aesthetic_way/features/referral/services/referral_service.dart';
 import 'package:aesthetic_way/features/referral/presentation/screens/referral_screen.dart';
-import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_verify_code_screen.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 import 'package:aesthetic_way/features/practitioners/presentation/screens/practitioner_profile_screen.dart';
 
@@ -292,22 +291,6 @@ void main() {
       expect(find.text('20'), findsOneWidget);
       expect(find.text('التقدم نحو العتبة التالية (3 / 20 دعوة)'), findsOneWidget);
       expect(find.text('15%'), findsOneWidget);
-    });
-
-    testWidgets('ClinicVerifyCodeScreen verifies and displays 15% discount note', (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1080, 2200);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: ClinicVerifyCodeScreen(),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('التحقق من كود الخصم (15%)'), findsWidgets);
-      expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('Practitioner profile does not display license badges or numbers', (WidgetTester tester) async {

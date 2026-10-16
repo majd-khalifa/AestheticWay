@@ -211,6 +211,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: InputDecoration(
                               labelText: loc.tr('full_name'),
                               hintText: loc.tr('name_hint'),
+                              hintStyle: TextStyle(
+                                color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                              ),
                               labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                               prefixIcon: Icon(Icons.badge_outlined, color: AppColors.mutedText(context), size: 19),
                               filled: true,
@@ -381,7 +386,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   },
                                   decoration: InputDecoration(
                                     labelText: loc.tr('password_label'),
-                                    hintText: '••••••••',
+                                    hintText: loc.isArabic ? 'أدخل كلمة المرور (8 أحرف على الأقل)' : 'At least 8 characters',
+                                    hintStyle: TextStyle(
+                                      color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                     labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                                     prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
                                     suffixIcon: IconButton(
@@ -460,6 +470,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               decoration: InputDecoration(
                                 labelText: loc.tr('confirm_password_label'),
                                 hintText: '••••••••',
+                                hintStyle: TextStyle(
+                                  color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w400,
+                                ),
                                 labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                                 prefixIcon: Icon(Icons.lock_reset_rounded, color: AppColors.mutedText(context), size: 19),
                                 suffixIcon: IconButton(

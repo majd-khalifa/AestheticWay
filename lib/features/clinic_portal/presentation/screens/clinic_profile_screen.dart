@@ -24,8 +24,41 @@ import 'clinic_practitioners_screen.dart';
 import 'clinic_treatments_screen.dart';
 
 /// Clinic Tab 4: Clinic Profile, Google Maps Linking, Medical Team & Services Manager
-class ClinicProfileScreen extends StatelessWidget {
+class ClinicProfileScreen extends StatefulWidget {
   const ClinicProfileScreen({super.key});
+
+  @override
+  State<ClinicProfileScreen> createState() => ClinicProfileScreenState();
+}
+
+class ClinicProfileScreenState extends State<ClinicProfileScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _productsSectionKey = GlobalKey();
+  final GlobalKey _articlesSectionKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void scrollToSection(String section) {
+    GlobalKey? targetKey;
+    if (section == 'products') {
+      targetKey = _productsSectionKey;
+    } else if (section == 'articles') {
+      targetKey = _articlesSectionKey;
+    }
+
+    if (targetKey != null && targetKey.currentContext != null) {
+      Scrollable.ensureVisible(
+        targetKey.currentContext!,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+        alignment: 0.1,
+      );
+    }
+  }
 
   void _showAddPractitionerDialog(BuildContext context, LocaleService loc, {PractitionerModel? existing}) {
     final formKey = GlobalKey<FormState>();
@@ -263,7 +296,12 @@ class ClinicProfileScreen extends StatelessWidget {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'نبذة مهنية بالإنجليزية' : 'Bio (English)',
-                        hintText: 'Brief clinical biography...',
+                        hintText: 'e.g. Consultant Dermatologist with 12+ years in facial aesthetics...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -281,7 +319,12 @@ class ClinicProfileScreen extends StatelessWidget {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'نبذة مهنية بالعربية' : 'Bio (Arabic)',
-                        hintText: 'نبذة عن الخبرات والشهادات التخصصية...',
+                        hintText: 'مثال: استشارية أمراض جلدية وتجميل بخبرة تزيد عن 12 عاماً في الحقن التجميلي...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -1476,13 +1519,29 @@ class ClinicProfileScreen extends StatelessWidget {
 
                     TextFormField(
                       controller: nameArCtrl,
-                      decoration: InputDecoration(labelText: loc.isArabic ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)'),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)',
+                        hintText: 'مثال: عيادة جميرا للتجميل والليزر',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
                     ),
                     const SizedBox(height: 10),
                     LtrTextFormField(
                       controller: nameEnCtrl,
-                      decoration: InputDecoration(labelText: loc.isArabic ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)'),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)',
+                        hintText: 'e.g. Jumeirah Aesthetic & Laser Clinic',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     LuxuryPhoneInputField(
@@ -1499,18 +1558,46 @@ class ClinicProfileScreen extends StatelessWidget {
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: addressArCtrl,
-                      decoration: InputDecoration(labelText: loc.isArabic ? 'العنوان' : 'Address'),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'العنوان' : 'Address',
+                        hintText: loc.isArabic
+                            ? 'مثال: جميرا 1، شارع شاطئ جميرا، دبي'
+                            : 'e.g. Jumeirah 1, Jumeirah Beach Road, Dubai',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     LtrTextFormField(
                       controller: mapsUrlCtrl,
-                      decoration: InputDecoration(labelText: loc.isArabic ? 'رابط خرائط جوجل' : 'Google Maps URL'),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'رابط خرائط جوجل' : 'Google Maps URL',
+                        hintText: 'https://maps.google.com/...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: descArCtrl,
                       maxLines: 2,
-                      decoration: InputDecoration(labelText: loc.isArabic ? 'نبذة عن العيادة' : 'Description (Arabic)'),
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'نبذة عن العيادة' : 'Description (Arabic)',
+                        hintText: loc.isArabic
+                            ? 'اكتب نبذة تعريفية تبرز خبرات العيادة وأحدث التقنيات التجميلية المتوفرة...'
+                            : 'Highlight your medical expertise, technologies, and patient care standards...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 18),
                     SilverButton(
@@ -1597,6 +1684,7 @@ class ClinicProfileScreen extends StatelessWidget {
             automaticallyImplyLeading: false,
           ),
           body: ListView(
+            controller: _scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
               // Clinic Overview Card
@@ -1892,6 +1980,7 @@ class ClinicProfileScreen extends StatelessWidget {
 
               // Products Section
               LuxuryCard(
+                key: _productsSectionKey,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2024,6 +2113,7 @@ class ClinicProfileScreen extends StatelessWidget {
 
               // Articles Section
               LuxuryCard(
+                key: _articlesSectionKey,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

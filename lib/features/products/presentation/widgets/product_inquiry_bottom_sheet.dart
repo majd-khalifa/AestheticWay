@@ -376,6 +376,12 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                     style: TextStyle(color: AppColors.text(context), fontSize: 13.5, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       labelText: loc.tr('full_name'),
+                      hintText: loc.isArabic ? 'الاسم الكامل كما تود أن تناديك العيادة' : 'Your full name',
+                      hintStyle: TextStyle(
+                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w400,
+                      ),
                       labelStyle: TextStyle(color: AppColors.subtext(context), fontSize: 12.5),
                       prefixIcon: Icon(Icons.person_outline, color: AppColors.subtext(context), size: 18),
                       filled: true,
@@ -415,7 +421,11 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                       hintText: loc.isArabic
                           ? 'اكتب استفسارك حول توفر المنتج أو طريقة الاستخدام...'
                           : 'Write your question about product availability or usage...',
-                      hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
+                      hintStyle: TextStyle(
+                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                       labelStyle: TextStyle(color: AppColors.subtext(context), fontSize: 12.5),
                       alignLabelWithHint: true,
                       filled: true,

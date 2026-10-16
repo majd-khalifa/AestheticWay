@@ -137,7 +137,12 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'عنوان العرض بالإنجليزية *' : 'Offer Title (English) *',
-                        hintText: 'e.g. Exclusive Glow Package',
+                        hintText: 'e.g. Summer Laser & Glow Package',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -155,7 +160,12 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'عنوان العرض بالعربية *' : 'Offer Title (Arabic) *',
-                        hintText: 'مثال: باقة النضارة الحصرية',
+                        hintText: 'مثال: باقة الليزر والنضارة المتكاملة',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -185,7 +195,12 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                             style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                             decoration: InputDecoration(
                               labelText: loc.tr('clinic_offer_original_price'),
-                              hintText: '1500',
+                              hintText: 'e.g. 1500',
+                              hintStyle: TextStyle(
+                                color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w400,
+                              ),
                               filled: true,
                               fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                               enabledBorder: OutlineInputBorder(
@@ -204,7 +219,12 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                             style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                             decoration: InputDecoration(
                               labelText: loc.tr('clinic_offer_discount_price'),
-                              hintText: '999',
+                              hintText: 'e.g. 990',
+                              hintStyle: TextStyle(
+                                color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w400,
+                              ),
                               filled: true,
                               fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                               enabledBorder: OutlineInputBorder(

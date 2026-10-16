@@ -108,29 +108,5 @@ class ClinicsRepository {
       return [];
     }
   }
-
-  /// Submits a patient review/feedback for a clinic
-  Future<bool> submitClinicReview(
-    String clinicId, {
-    required double rating,
-    required String comment,
-    String? patientName,
-  }) async {
-    final cleanId = clinicId.trim();
-    if (cleanId.isEmpty) return false;
-
-    final payload = <String, dynamic>{
-      'clinic': cleanId,
-      'rating': rating,
-      'comment': comment.trim(),
-      if (patientName != null && patientName.trim().isNotEmpty) 'patient_name': patientName.trim(),
-    };
-
-    final response = await _apiClient.post(
-      ApiConfig.clinicReviewSubmit(cleanId),
-      data: payload,
-    );
-
-    return response.statusCode == 200 || response.statusCode == 201;
-  }
 }
+

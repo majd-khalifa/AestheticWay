@@ -358,21 +358,21 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                           label: loc.tr('clinic_lead_status_new'),
                           isSelected: _currentStatus == AppointmentLeadStatus.sent,
                           color: const Color(0xFFF59E0B),
-                          onTap: _isUpdatingStatus ? () {} : () => _updateStatus(AppointmentLeadStatus.sent),
+                          onTap: _isUpdatingStatus ? null : () => _updateStatus(AppointmentLeadStatus.sent),
                         ),
                         const SizedBox(width: 8),
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_contacted'),
                           isSelected: _currentStatus == AppointmentLeadStatus.contacted,
                           color: const Color(0xFF3B82F6),
-                          onTap: _isUpdatingStatus ? () {} : () => _updateStatus(AppointmentLeadStatus.contacted),
+                          onTap: _isUpdatingStatus ? null : () => _updateStatus(AppointmentLeadStatus.contacted),
                         ),
                         const SizedBox(width: 8),
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_closed'),
                           isSelected: _currentStatus == AppointmentLeadStatus.closed,
                           color: const Color(0xFF10B981),
-                          onTap: _isUpdatingStatus ? () {} : () => _updateStatus(AppointmentLeadStatus.closed),
+                          onTap: _isUpdatingStatus ? null : () => _updateStatus(AppointmentLeadStatus.closed),
                         ),
                       ],
                     ),
@@ -539,13 +539,13 @@ class _StatusSelectChip extends StatelessWidget {
   final String label;
   final bool isSelected;
   final Color color;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _StatusSelectChip({
     required this.label,
     required this.isSelected,
     required this.color,
-    required this.onTap,
+    this.onTap,
   });
 
   @override

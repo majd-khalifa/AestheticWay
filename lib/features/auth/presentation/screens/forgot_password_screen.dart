@@ -8,6 +8,7 @@ import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
 import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
@@ -132,10 +133,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     // Header Info
                     Center(
                       child: Text(
-                        loc.tr('forgot_sub'),
+                        loc.isArabic
+                            ? 'أدخل رقم هاتفك المسجل وسنرسل لك رمز تحقق (OTP) عبر رسالة نصية أو واتساب لإعادة تعيين كلمة المرور.'
+                            : 'Enter your registered phone number to receive a verification code (OTP) via SMS or WhatsApp to reset your password.',
                         style: AppTypography.bodyMedium.copyWith(
                           color: AppColors.mutedText(context),
                           fontSize: 13,
+                          height: 1.4,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -145,40 +149,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     // Input Card
                     LuxuryCard(
                       padding: const EdgeInsets.all(16),
-                      child: TextFormField(
+                      child: LuxuryPhoneInputField(
                         controller: _identifierController,
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: loc.tr('identifier_label'),
-                          hintText: loc.tr('identifier_hint'),
-                          labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                          prefixIcon: Icon(Icons.contact_mail_outlined, color: AppColors.mutedText(context), size: 19),
-                          filled: true,
-                          fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                              width: 1.4,
-                            ),
-                          ),
-                        ),
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return loc.tr('val_identifier_required');
-                          }
-                          return null;
-                        },
+                        isRequired: true,
+                        labelText: loc.isArabic ? 'رقم الهاتف المسجل' : 'Registered Phone Number',
                       ),
                     ),
                     const SizedBox(height: 20),

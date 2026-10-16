@@ -664,6 +664,12 @@ class AdminClinicDetailSheet extends StatelessWidget {
                       controller: nameEnCtrl,
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)',
+                        hintText: 'e.g. Cosmeceutical Elite Clinic',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
@@ -675,6 +681,12 @@ class AdminClinicDetailSheet extends StatelessWidget {
                       textAlign: TextAlign.right,
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)',
+                        hintText: 'مثال: عيادة النخبة للتجميل الطبي',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,

@@ -682,6 +682,12 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   ),
                   decoration: InputDecoration(
                     labelText: loc.tr('full_name'),
+                    hintText: loc.isArabic ? 'الاسم الكامل كما تود أن تناديك العيادة' : 'Your full name',
+                    hintStyle: TextStyle(
+                      color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w400,
+                    ),
                     labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                     floatingLabelStyle: TextStyle(
                       color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
@@ -723,6 +729,14 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   ),
                   decoration: InputDecoration(
                     labelText: loc.tr('notes_opt'),
+                    hintText: loc.isArabic
+                        ? 'اكتب استفسارك أو الإجراء التجميلي المطلوب (اختياري)...'
+                        : 'Describe the treatment or consultation you are looking for (optional)...',
+                    hintStyle: TextStyle(
+                      color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w400,
+                    ),
                     labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                     floatingLabelStyle: TextStyle(
                       color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,

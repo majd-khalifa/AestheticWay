@@ -8,6 +8,7 @@ import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/register_screen.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/forgot_password_screen.dart';
@@ -25,14 +26,17 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isPhoneLogin = true;
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _identifierController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -45,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    final input = _identifierController.text.trim();
+    final input = _isPhoneLogin ? _phoneController.text.trim() : _emailController.text.trim();
     final password = _passwordController.text;
 
     try {
@@ -162,49 +166,173 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
 
+                      // Mode Selector Toggle (Phone vs Email)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.border(context).withValues(alpha: 0.6),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _isPhoneLogin = true),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: _isPhoneLogin
+                                        ? (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(9),
+                                    boxShadow: _isPhoneLogin
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.15),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            )
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.phone_iphone_rounded,
+                                        size: 15,
+                                        color: _isPhoneLogin
+                                            ? (isDark ? AppColors.backgroundDeep : Colors.white)
+                                            : AppColors.mutedText(context),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        loc.isArabic ? 'رقم الهاتف' : 'Phone Number',
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: _isPhoneLogin
+                                              ? (isDark ? AppColors.backgroundDeep : Colors.white)
+                                              : AppColors.mutedText(context),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _isPhoneLogin = false),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: !_isPhoneLogin
+                                        ? (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(9),
+                                    boxShadow: !_isPhoneLogin
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.15),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            )
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.email_outlined,
+                                        size: 15,
+                                        color: !_isPhoneLogin
+                                            ? (isDark ? AppColors.backgroundDeep : Colors.white)
+                                            : AppColors.mutedText(context),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        loc.isArabic ? 'البريد الإلكتروني' : 'Email Address',
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: !_isPhoneLogin
+                                              ? (isDark ? AppColors.backgroundDeep : Colors.white)
+                                              : AppColors.mutedText(context),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       // Input Fields Card
                       LuxuryCard(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Identifier (Phone or Email)
-                            TextFormField(
-                              controller: _identifierController,
-                              keyboardType: TextInputType.emailAddress,
-                              textDirection: TextDirection.ltr,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: loc.tr('identifier_label'),
-                                hintText: loc.tr('identifier_hint'),
-                                labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                prefixIcon: Icon(Icons.person_outline, color: AppColors.mutedText(context), size: 19),
-                                filled: true,
-                                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                            if (_isPhoneLogin)
+                              LuxuryPhoneInputField(
+                                controller: _phoneController,
+                                isRequired: true,
+                                labelText: loc.isArabic ? 'رقم الهاتف' : 'Phone Number',
+                              )
+                            else
+                              TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textDirection: TextDirection.ltr,
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                                    width: 1.4,
+                                decoration: InputDecoration(
+                                  labelText: loc.isArabic ? 'البريد الإلكتروني' : 'Email Address',
+                                  hintText: 'name@example.com',
+                                  hintStyle: TextStyle(
+                                    color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
+                                  prefixIcon: Icon(Icons.email_outlined, color: AppColors.mutedText(context), size: 19),
+                                  filled: true,
+                                  fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                      width: 1.4,
+                                    ),
                                   ),
                                 ),
+                                validator: (val) {
+                                  if (val == null || val.trim().isEmpty) {
+                                    return loc.isArabic ? 'يرجى إدخال البريد الإلكتروني' : 'Email is required';
+                                  }
+                                  if (!val.contains('@') || !val.contains('.')) {
+                                    return loc.isArabic ? 'صيغة بريد غير صحيحة' : 'Invalid email format';
+                                  }
+                                  return null;
+                                },
                               ),
-                              validator: (val) {
-                                if (val == null || val.trim().isEmpty) {
-                                  return loc.tr('val_identifier_required');
-                                }
-                                return null;
-                              },
-                            ),
                             const SizedBox(height: 14),
 
                             // Password Field
@@ -221,6 +349,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 labelText: loc.tr('password_label'),
                                 hintText: loc.tr('password_hint'),
+                                hintStyle: TextStyle(
+                                  color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                ),
                                 labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
                                 prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
                                 suffixIcon: IconButton(

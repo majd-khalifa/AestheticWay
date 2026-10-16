@@ -320,7 +320,7 @@ class LocaleService extends ChangeNotifier {
     'nav_profile': {'ar': 'حسابي', 'en': 'Profile'},
 
     // Header & Search
-    'search_hint': {'ar': 'ابحث عن عيادة، طبيب، علاج (بوتاكس، ليزر)...', 'en': 'Search clinic, doctor, treatment...'},
+    'search_hint': {'ar': 'ابحث عن عيادة، منطقة، أو تخصص...', 'en': 'Search clinic, area, or specialty...'},
     'select_city': {'ar': 'اختر الإمارة', 'en': 'Select Emirate'},
     'city_all': {'ar': 'الكل (الإمارات)', 'en': 'All (UAE)'},
     'city_dubai': {'ar': 'دبي', 'en': 'Dubai'},
@@ -502,12 +502,12 @@ class LocaleService extends ChangeNotifier {
     'contact_info_title': {'ar': 'بيانات التواصل / المريض', 'en': 'Contact Info'},
     'patient_details': {'ar': 'بيانات المريض / العميل', 'en': 'Patient Details'},
     'full_name': {'ar': 'الاسم الكامل', 'en': 'Full Name'},
-    'name_hint': {'ar': 'أدخل اسمك الكامل', 'en': 'Enter your full name'},
+    'name_hint': {'ar': 'مثال: سارة المنصوري', 'en': 'e.g. Sarah Al Mansoori'},
     'phone_uae': {'ar': 'رقم الهاتف (الإمارات)', 'en': 'Phone Number (UAE)'},
     'phone_number': {'ar': 'رقم الهاتف (الإمارات)', 'en': 'Phone Number (UAE)'},
     'phone_hint': {'ar': '50 123 4567', 'en': '50 123 4567'},
     'email_address': {'ar': 'البريد الإلكتروني', 'en': 'Email Address'},
-    'email_hint': {'ar': 'example@email.com', 'en': 'example@email.com'},
+    'email_hint': {'ar': 'name@example.com', 'en': 'name@example.com'},
     'notes_opt': {'ar': 'ملاحظات إضافية (اختياري)', 'en': 'Notes (Optional)'},
     'notes_optional': {'ar': 'ملاحظات إضافية أو استفسار (اختياري)', 'en': 'Additional Notes / Questions (Optional)'},
     'notes_hint': {'ar': 'اكتب أي تفاصيل ترغب بمشاركتها مع العيادة...', 'en': 'Write any details you wish to share...'},

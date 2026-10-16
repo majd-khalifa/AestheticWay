@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
@@ -22,8 +21,6 @@ import 'package:aesthetic_way/features/practitioners/presentation/screens/practi
 import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
 import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
-import 'package:intl/intl.dart';
-import 'package:aesthetic_way/features/clinics/models/review_model.dart';
 
 /// Clinic Profile Screen with Google Maps, Staff Badges, Treatments & Lead CTAs (Fully Bilingual)
 class ClinicProfileScreen extends StatefulWidget {
@@ -74,7 +71,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
           .map((m) => TreatmentModel.fromJson(m))
           .toList();
     }
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _fetchDetails();
   }
 
@@ -179,6 +176,113 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
     );
   }
 
+  Widget _buildGoogleRatingBadge(
+    BuildContext context,
+    ClinicModel clinic,
+    LocaleService loc,
+  ) {
+    final isDark = AppColors.isDark(context);
+    final hasRating = clinic.googleRating > 0.0 || clinic.googleReviewsCount > 0;
+
+    final ratingText = hasRating
+        ? '${clinic.googleRating.toStringAsFixed(1)} ★ (${clinic.googleReviewsCount} ${loc.isArabic ? "تقييم Google" : "Google reviews"})'
+        : (loc.isArabic ? 'جديد على خرائط Google' : 'New on Google Maps');
+
+    final linkIndicatorText =
+        loc.isArabic ? 'اعرض على خرائط Google' : 'View on Google Maps';
+
+    return InkWell(
+      onTap: () {
+        if (clinic.hasMapLocation) {
+          MapsLauncher.openMapLocation(
+            latitude: clinic.latitude,
+            longitude: clinic.longitude,
+            googleMapsUrl: clinic.googleMapsUrl,
+            placeId: clinic.googlePlaceId,
+            placeName: loc.isArabic ? clinic.nameAr : clinic.nameEn,
+          );
+        } else {
+          AppSnackBar.show(
+            context,
+            loc.isArabic
+                ? 'موقع الخريطة غير متوفر لهذه العيادة'
+                : 'Map location is not available for this clinic',
+            type: AppSnackBarType.info,
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isDark
+                ? AppColors.accentChampagne.withValues(alpha: 0.35)
+                : const Color(0xFFCBD5E1),
+            width: 0.8,
+          ),
+        ),
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  hasRating ? Icons.star_rounded : Icons.location_on_outlined,
+                  size: 15,
+                  color: AppColors.accentChampagne,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  ratingText,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              width: 3,
+              height: 3,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.mutedText(context),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  linkIndicatorText,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accentChampagne,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                const Icon(
+                  Icons.open_in_new_rounded,
+                  size: 11,
+                  color: AppColors.accentChampagne,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final clinic = _clinic;
@@ -225,15 +329,11 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                       fit: StackFit.expand,
                       children: [
                         if (validImages.isEmpty)
-                          Container(
-                            color: AppColors.surface(context),
-                            child: Center(
-                              child: Icon(
-                                Icons.local_hospital_outlined,
-                                size: 56,
-                                color: AppColors.subtext(context),
-                              ),
-                            ),
+                          LuxuryImage(
+                            imageUrl: null,
+                            fallbackLogoUrl: clinic.logoUrl,
+                            fit: BoxFit.cover,
+                            placeholderIcon: Icons.local_hospital_outlined,
                           )
                         else
                           PageView.builder(
@@ -312,6 +412,22 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Container(
+                              margin: const EdgeInsetsDirectional.only(end: 12),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.accentChampagne.withValues(alpha: 0.4),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: LuxuryAvatar(
+                                imageUrl: clinic.logoUrl,
+                                fallbackLogoUrl: clinic.logoUrl,
+                                radius: 26,
+                                fallbackIcon: Icons.local_hospital_outlined,
+                              ),
+                            ),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,19 +452,11 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                                  const SizedBox(height: 6),
+                                  // Sleek High-Contrast Google Maps Rating Badge
+                                  _buildGoogleRatingBadge(context, clinic, loc),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            RatingChip(
-                              rating: clinic.rating,
-                              reviewCount: clinic.reviewCount,
                             ),
                           ],
                         ),
@@ -564,11 +672,6 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                           text:
                               '${loc.tr("tab_offers")} (${_offers.length})',
                         ),
-                        Tab(
-                          text: clinic.rating > 0.0
-                              ? '${loc.tr("tab_reviews")} (${clinic.reviewCount})'
-                              : loc.tr("tab_reviews"),
-                        ),
                       ],
                     ),
                   ),
@@ -605,9 +708,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                   offers: _offers,
                   isLoading: _isLoading,
                   loc: loc,
+                  clinicLogoUrl: clinic.logoUrl,
                   onRequestOffer: () => _handleAppointmentRequest(),
                 ),
-                _ReviewsTab(clinic: clinic, loc: loc),
               ],
             ),
           ),
@@ -1231,12 +1334,14 @@ class _OffersTab extends StatelessWidget {
   final List<OfferModel> offers;
   final bool isLoading;
   final LocaleService loc;
+  final String clinicLogoUrl;
   final VoidCallback onRequestOffer;
 
   const _OffersTab({
     required this.offers,
     required this.isLoading,
     required this.loc,
+    required this.clinicLogoUrl,
     required this.onRequestOffer,
   });
 
@@ -1273,6 +1378,19 @@ class _OffersTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (offer.imageUrl.isNotEmpty) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LuxuryImage(
+                    imageUrl: offer.imageUrl,
+                    fallbackLogoUrl: clinicLogoUrl,
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               Text(
                 loc.isArabic ? offer.titleAr : offer.titleEn,
                 style: AppTypography.cardTitle.copyWith(
@@ -1340,404 +1458,6 @@ class _OffersTab extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-// -------------------------------------------------------------
-// TAB 5: Reviews
-// -------------------------------------------------------------
-// TAB 5: Reviews
-// -------------------------------------------------------------
-class _ReviewsTab extends StatefulWidget {
-  final ClinicModel clinic;
-  final LocaleService loc;
-
-  const _ReviewsTab({required this.clinic, required this.loc});
-
-  @override
-  State<_ReviewsTab> createState() => _ReviewsTabState();
-}
-
-class _ReviewsTabState extends State<_ReviewsTab> {
-  final ClinicsRepository _clinicsRepo = ClinicsRepository();
-  bool _isLoading = true;
-  List<ReviewModel> _reviews = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadReviews();
-  }
-
-  Future<void> _loadReviews() async {
-    setState(() => _isLoading = true);
-    final list = await _clinicsRepo.getClinicReviews(widget.clinic.id);
-    if (mounted) {
-      setState(() {
-        _reviews = list;
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _showWriteReviewDialog() async {
-    final auth = await GuestAuthGuard.requireAuth(
-      context,
-      reasonTitle: widget.loc.isArabic ? 'إضافة تقييم للعيادة' : 'Add Clinic Review',
-      reasonSubtitle: widget.loc.isArabic
-          ? 'سجل دخولك لمشاركة تجربتك وتقييم خدمات العيادة'
-          : 'Sign in to share your experience and review clinic services',
-    );
-    if (!auth || !mounted) return;
-
-    final isDark = AppColors.isDark(context);
-    double selectedRating = 5.0;
-    final commentController = TextEditingController();
-    bool isSubmitting = false;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (modalCtx, setModalState) {
-            return Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
-                left: 20,
-                right: 20,
-                top: 16,
-              ),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.backgroundDeep : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border.all(color: AppColors.border(modalCtx)),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.mutedText(modalCtx).withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      widget.loc.isArabic ? 'تقييم العيادة والخدمة' : 'Rate Clinic & Services',
-                      style: AppTypography.cardTitle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.loc.isArabic ? widget.clinic.nameAr : widget.clinic.nameEn,
-                      style: AppTypography.caption.copyWith(color: AppColors.accentChampagne),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Star Selector
-                    Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(5, (index) {
-                          final starVal = (index + 1).toDouble();
-                          final isFilled = selectedRating >= starVal;
-                          return IconButton(
-                            iconSize: 32,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            icon: Icon(
-                              isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
-                              color: isFilled ? AppColors.starGold : AppColors.mutedText(modalCtx),
-                            ),
-                            onPressed: () {
-                              setModalState(() => selectedRating = starVal);
-                            },
-                          );
-                        }),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Comment Input
-                    TextFormField(
-                      controller: commentController,
-                      maxLines: 3,
-                      style: TextStyle(
-                        color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: widget.loc.isArabic ? 'اكتب رأيك أو ملاحظاتك *' : 'Write your review or feedback *',
-                        hintText: widget.loc.isArabic ? 'أخبرنا عن تجربتك في العيادة...' : 'Tell us about your experience...',
-                        filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(modalCtx), width: 0.8),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-
-                    SilverButton(
-                      label: widget.loc.isArabic ? 'إرسال التقييم' : 'Submit Review',
-                      icon: Icons.send_rounded,
-                      isLoading: isSubmitting,
-                      onPressed: () async {
-                        final comment = commentController.text.trim();
-                        if (comment.isEmpty) {
-                          showAppSnackBar(
-                            modalCtx,
-                            widget.loc.isArabic ? 'يرجى كتابة نص التقييم' : 'Please enter a review comment',
-                            type: AppSnackBarType.error,
-                          );
-                          return;
-                        }
-
-                        setModalState(() => isSubmitting = true);
-                        final success = await _clinicsRepo.submitClinicReview(
-                          widget.clinic.id,
-                          rating: selectedRating,
-                          comment: comment,
-                        );
-                        if (!mounted) return;
-                        if (modalCtx.mounted) {
-                          Navigator.pop(modalCtx);
-                        }
-
-                        if (mounted) {
-                          if (success) {
-                            showAppSnackBar(
-                              context,
-                              widget.loc.isArabic ? 'تم إرسال تقييمك بنجاح. شكراً لك!' : 'Review submitted successfully. Thank you!',
-                              type: AppSnackBarType.success,
-                            );
-                            _loadReviews();
-                          } else {
-                            showAppSnackBar(
-                              context,
-                              widget.loc.isArabic ? 'تم استلام تقييمك بنجاح' : 'Your review has been received',
-                              type: AppSnackBarType.success,
-                            );
-                          }
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-    final hasScore = widget.clinic.rating > 0.0 || widget.clinic.reviewCount > 0;
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 80),
-      children: [
-        // Rating Header Card
-        LuxuryCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Text(
-                    hasScore ? widget.clinic.rating.toStringAsFixed(1) : '5.0',
-                    style: AppTypography.heroTitle.copyWith(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: List.generate(5, (index) {
-                            final score = hasScore ? widget.clinic.rating : 5.0;
-                            if (score >= index + 1) {
-                              return const Icon(Icons.star, color: AppColors.starGold, size: 16);
-                            } else if (score >= index + 0.5) {
-                              return const Icon(Icons.star_half, color: AppColors.starGold, size: 16);
-                            } else {
-                              return const Icon(Icons.star_border, color: AppColors.starGold, size: 16);
-                            }
-                          }),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          hasScore
-                              ? '${widget.loc.tr("reviews_summary")} (${widget.clinic.reviewCount} ${widget.loc.isArabic ? "تقييم" : "reviews"})'
-                              : (widget.loc.isArabic ? 'تقييم العيادة الرسمي' : 'Official Clinic Rating'),
-                          style: AppTypography.caption.copyWith(color: AppColors.subtext(context)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: _showWriteReviewDialog,
-                    icon: const Icon(Icons.rate_review_outlined, size: 14, color: AppColors.accentChampagne),
-                    label: Text(
-                      widget.loc.isArabic ? 'أضف تقييم' : 'Write Review',
-                      style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11.5, fontWeight: FontWeight.bold),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.accentChampagne, width: 0.8),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-
-        // Reviews List or Empty State
-        if (_isLoading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 30),
-            child: Center(child: CircularProgressIndicator(color: AppColors.accentChampagne, strokeWidth: 2)),
-          )
-        else if (_reviews.isEmpty)
-          LuxuryCard(
-            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-            child: Center(
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.rate_review_outlined, size: 36, color: AppColors.accentChampagne),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    widget.loc.isArabic ? 'لا توجد تقييمات بعد' : 'No reviews recorded yet',
-                    style: AppTypography.cardTitle.copyWith(
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    widget.loc.isArabic
-                        ? 'كن أول من يشارك تجربته مع هذه العيادة لمساعدة المرضى الآخرين'
-                        : 'Be the first to share your experience and help other patients',
-                    style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _showWriteReviewDialog,
-                    icon: const Icon(Icons.add_comment_outlined, size: 16),
-                    label: Text(widget.loc.isArabic ? 'اكتب أول تقييم' : 'Write First Review'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
-          ..._reviews.map((rev) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: LuxuryCard(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 14,
-                              backgroundColor: AppColors.accentChampagne.withValues(alpha: 0.2),
-                              child: Text(
-                                rev.authorName.isNotEmpty ? rev.authorName[0].toUpperCase() : 'P',
-                                style: const TextStyle(color: AppColors.accentChampagne, fontSize: 12, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              rev.authorName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Icon(Icons.star, color: AppColors.starGold, size: 14),
-                            const SizedBox(width: 3),
-                            Text(
-                              rev.rating.toStringAsFixed(1),
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    if (rev.comment.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        rev.comment,
-                        style: AppTypography.bodyMedium.copyWith(
-                          fontSize: 12.5,
-                          color: isDark ? AppColors.silverLight : AppColors.lightTextPrimary,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 6),
-                    Text(
-                      DateFormat('yyyy/MM/dd').format(rev.createdAt),
-                      style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 10.5),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-      ],
     );
   }
 }

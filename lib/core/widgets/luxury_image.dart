@@ -78,10 +78,13 @@ class LuxuryImage extends StatelessWidget {
     final safeCacheWidth = computeSafeCacheWidth(context, width, height);
 
     Widget buildBrandEmblemFallback() {
-      final emblemSize = (height != null && height!.isFinite
-              ? (height! * 0.42).clamp(24.0, 64.0)
-              : (width != null && width!.isFinite ? (width! * 0.42).clamp(24.0, 64.0) : 42.0))
-          .toDouble();
+      final shortestSide = (width != null && width!.isFinite && height != null && height!.isFinite)
+          ? (width! < height! ? width! : height!)
+          : (height != null && height!.isFinite
+              ? height!
+              : (width != null && width!.isFinite ? width! : 120.0));
+      final emblemPadding = (shortestSide * 0.20).clamp(8.0, 28.0);
+      final emblemBadgeSize = (shortestSide * 0.72).clamp(32.0, 140.0);
 
       return Container(
         width: width,
@@ -96,12 +99,14 @@ class LuxuryImage extends StatelessWidget {
         ),
         child: Center(
           child: Container(
-            padding: const EdgeInsets.all(8),
+            width: emblemBadgeSize,
+            height: emblemBadgeSize,
+            padding: EdgeInsets.all(emblemPadding),
             decoration: BoxDecoration(
               color: const Color(0xFF0D1527),
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.silverPrimary.withValues(alpha: 0.20),
+                color: AppColors.accentChampagne.withValues(alpha: 0.35),
                 width: 0.8,
               ),
               boxShadow: [
@@ -114,13 +119,11 @@ class LuxuryImage extends StatelessWidget {
             ),
             child: Image.asset(
               'assets/images/aesthetic_way_logo.png',
-              width: emblemSize,
-              height: emblemSize,
               fit: BoxFit.contain,
-              cacheWidth: (emblemSize * 2).round().clamp(48, 200),
+              filterQuality: FilterQuality.high,
               errorBuilder: (_, _, _) => Icon(
                 placeholderIcon,
-                size: iconSize ?? emblemSize * 0.8,
+                size: iconSize ?? (emblemBadgeSize * 0.5),
                 color: AppColors.accentChampagne,
               ),
             ),
@@ -130,10 +133,13 @@ class LuxuryImage extends StatelessWidget {
     }
 
     Widget buildClinicLogoFallback(String resolvedLogoUrl) {
-      final logoSize = (height != null && height!.isFinite
-              ? (height! * 0.48).clamp(30.0, 72.0)
-              : (width != null && width!.isFinite ? (width! * 0.48).clamp(30.0, 72.0) : 48.0))
-          .toDouble();
+      final shortestSide = (width != null && width!.isFinite && height != null && height!.isFinite)
+          ? (width! < height! ? width! : height!)
+          : (height != null && height!.isFinite
+              ? height!
+              : (width != null && width!.isFinite ? width! : 120.0));
+      final logoPadding = (shortestSide * 0.16).clamp(8.0, 28.0);
+      final logoBadgeSize = (shortestSide * 0.75).clamp(34.0, 145.0);
 
       return Container(
         width: width,
@@ -148,7 +154,9 @@ class LuxuryImage extends StatelessWidget {
         ),
         child: Center(
           child: Container(
-            padding: const EdgeInsets.all(6),
+            width: logoBadgeSize,
+            height: logoBadgeSize,
+            padding: EdgeInsets.all(logoPadding),
             decoration: BoxDecoration(
               color: const Color(0xFF0D1527),
               shape: BoxShape.circle,
@@ -156,16 +164,19 @@ class LuxuryImage extends StatelessWidget {
                 color: AppColors.accentChampagne.withValues(alpha: 0.35),
                 width: 0.8,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: ClipOval(
-              child: Image.network(
-                resolvedLogoUrl,
-                width: logoSize,
-                height: logoSize,
-                fit: BoxFit.cover,
-                cacheWidth: (logoSize * 2).round().clamp(60, 300),
-                errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
-              ),
+            child: Image.network(
+              resolvedLogoUrl,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
             ),
           ),
         ),
@@ -233,48 +244,51 @@ class LuxuryAvatar extends StatelessWidget {
     final safeCacheWidth = (radius * 2 * dpr).round().clamp(60, 400);
 
     Widget buildBrandEmblemFallback() {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: const Color(0xFF070C1A),
-        child: Container(
-          width: radius * 2,
-          height: radius * 2,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: AppColors.accentChampagne.withValues(alpha: 0.35),
-              width: 0.8,
-            ),
+      final emblemPadding = (radius * 2 * 0.20).clamp(6.0, 20.0);
+      return Container(
+        width: radius * 2,
+        height: radius * 2,
+        decoration: BoxDecoration(
+          color: backgroundColor ?? const Color(0xFF070C1A),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: AppColors.accentChampagne.withValues(alpha: 0.35),
+            width: 0.8,
           ),
-          padding: EdgeInsets.all(radius * 0.28),
-          child: Image.asset(
-            'assets/images/aesthetic_way_logo.png',
-            fit: BoxFit.contain,
-            cacheWidth: safeCacheWidth,
-            errorBuilder: (_, _, _) => Icon(
-              fallbackIcon,
-              size: radius * 1.1,
-              color: AppColors.accentChampagne,
-            ),
+        ),
+        padding: EdgeInsets.all(emblemPadding),
+        child: Image.asset(
+          'assets/images/aesthetic_way_logo.png',
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, _, _) => Icon(
+            fallbackIcon,
+            size: radius * 1.1,
+            color: AppColors.accentChampagne,
           ),
         ),
       );
     }
 
     Widget buildClinicLogoFallback(String resolvedLogo) {
-      return ClipOval(
-        child: Container(
-          width: radius * 2,
-          height: radius * 2,
-          color: const Color(0xFF070C1A),
-          child: Image.network(
-            resolvedLogo,
-            width: radius * 2,
-            height: radius * 2,
-            fit: BoxFit.cover,
-            cacheWidth: safeCacheWidth,
-            errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
+      final logoPadding = (radius * 2 * 0.16).clamp(4.0, 16.0);
+      return Container(
+        width: radius * 2,
+        height: radius * 2,
+        decoration: BoxDecoration(
+          color: backgroundColor ?? const Color(0xFF070C1A),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: AppColors.accentChampagne.withValues(alpha: 0.35),
+            width: 0.8,
           ),
+        ),
+        padding: EdgeInsets.all(logoPadding),
+        child: Image.network(
+          resolvedLogo,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
         ),
       );
     }

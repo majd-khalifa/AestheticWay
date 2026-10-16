@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -31,6 +32,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
   }
 
   void _onTabTapped(int index) {
+    if (_currentIndex != index) {
+      HapticFeedback.selectionClick();
+    }
     setState(() {
       _currentIndex = index;
     });

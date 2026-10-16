@@ -19,9 +19,7 @@ class AdminPortalService extends ChangeNotifier {
     }
     return _instance;
   }
-  AdminPortalService._internal() {
-    loadAllData();
-  }
+  AdminPortalService._internal();
 
   AdminRepository _repository = AdminRepository();
   bool _mockMode = false;
@@ -254,13 +252,13 @@ class AdminPortalService extends ChangeNotifier {
 
     try {
       final results = await Future.wait([
-        _repository.getDashboard().catchError((_) => const AdminDashboardModel()),
-        _repository.getClinics().catchError((_) => <AdminClinicModel>[]),
-        _repository.getLeads().catchError((_) => <AdminLeadModel>[]),
-        _repository.getOffers().catchError((_) => <OfferModel>[]),
-        _repository.getAnalytics().catchError((_) => const AdminAnalyticsModel()),
-        _repository.getProducts().catchError((_) => <ProductModel>[]),
-        _repository.getArticles().catchError((_) => <ArticleModel>[]),
+        _repository.getDashboard(),
+        _repository.getClinics(),
+        _repository.getLeads(),
+        _repository.getOffers(),
+        _repository.getAnalytics(),
+        _repository.getProducts(),
+        _repository.getArticles(),
       ]);
 
       final newDash = results[0] as AdminDashboardModel;
@@ -305,9 +303,7 @@ class AdminPortalService extends ChangeNotifier {
   Future<void> loadProducts({String? status, String? clinicId}) async {
     try {
       final res = await _repository.getProducts(status: status, clinicId: clinicId);
-      if (res.isNotEmpty) {
-        _allProducts = res;
-      }
+      _allProducts = res;
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
@@ -318,9 +314,7 @@ class AdminPortalService extends ChangeNotifier {
   Future<void> loadArticles({String? status, String? clinicId}) async {
     try {
       final res = await _repository.getArticles(status: status, clinicId: clinicId);
-      if (res.isNotEmpty) {
-        _allArticles = res;
-      }
+      _allArticles = res;
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
@@ -345,9 +339,7 @@ class AdminPortalService extends ChangeNotifier {
         tier: tier,
         search: search,
       );
-      if (res.isNotEmpty) {
-        _clinics = res;
-      }
+      _clinics = res;
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
@@ -362,9 +354,7 @@ class AdminPortalService extends ChangeNotifier {
         clinicId: clinicId,
         search: search,
       );
-      if (res.isNotEmpty) {
-        _allLeads = res;
-      }
+      _allLeads = res;
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
@@ -378,9 +368,7 @@ class AdminPortalService extends ChangeNotifier {
         status: status,
         clinicId: clinicId,
       );
-      if (res.isNotEmpty) {
-        _allOffers = res;
-      }
+      _allOffers = res;
       _suspendedOfferIds.clear();
       for (final o in _allOffers) {
         if (!o.isActive) {

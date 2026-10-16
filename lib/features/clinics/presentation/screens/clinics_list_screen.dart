@@ -5,8 +5,10 @@ import 'package:aesthetic_way/core/widgets/rating_chip.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/widgets/luxury_shimmer.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
+import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
+import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
+import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -184,10 +186,8 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
               ),
             ],
           ),
-          body: RefreshIndicator(
+          body: LuxuryRefreshIndicator(
             onRefresh: _loadClinics,
-            color: AppColors.accentChampagne,
-            backgroundColor: AppColors.surface(context),
             child: _buildBody(context, loc, isDark),
           ),
         );
@@ -419,16 +419,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
         // Content Area: Loading / Error / Empty / List
         Expanded(
           child: _isLoading && _clinics == null
-              ? ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                  itemCount: 4,
-                  separatorBuilder: (context, index) => const SizedBox(height: 14),
-                  itemBuilder: (context, index) => const LuxuryShimmer(
-                    width: double.infinity,
-                    height: 130,
-                    borderRadius: 18,
-                  ),
-                )
+              ? const LuxuryListSkeleton(itemCount: 4, cardHeight: 130)
               : _errorMessage != null && _clinics == null
                   ? LuxuryErrorView(
                       message: _errorMessage,
@@ -438,88 +429,35 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                       ? ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.10),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              child: LuxuryCard(
-                                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          hasActiveFilters || _searchQuery.isNotEmpty
-                                              ? Icons.search_off_rounded
-                                              : Icons.local_hospital_outlined,
-                                          size: 36,
-                                          color: AppColors.accentChampagne,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 14),
-                                      Text(
-                                        hasActiveFilters || _searchQuery.isNotEmpty
-                                            ? (loc.isArabic ? 'لا توجد عيادات مطابقة للبحث' : 'No clinics match your search')
-                                            : (loc.isArabic ? 'لا توجد عيادات متاحة حالياً' : 'No clinics available'),
-                                        style: AppTypography.cardTitle.copyWith(
-                                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        hasActiveFilters || _searchQuery.isNotEmpty
-                                            ? (loc.isArabic
-                                                ? 'يرجى تجربة كلمات بحث أو فلاتر أخرى'
-                                                : 'Try adjusting your filters or search keywords')
-                                            : (loc.isArabic
-                                                ? 'سيتم إضافة عيادات ومراكز تجميلية موثقة قريباً'
-                                                : 'Verified medical clinics and aesthetic centers will be listed soon'),
-                                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      if (hasActiveFilters || _searchQuery.isNotEmpty) ...[
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            setState(() {
-                                              _filterOptions.selectedCity = 'الكل';
-                                              _filterOptions.selectedSpecialtyId = null;
-                                              _searchQuery = '';
-                                              _searchController.clear();
-                                            });
-                                            _loadClinics();
-                                          },
-                                          icon: const Icon(Icons.clear_all_rounded, size: 16),
-                                          label: Text(loc.isArabic ? 'إعادة تعيين الفلاتر' : 'Reset Filters'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          ),
-                                        ),
-                                      ] else ...[
-                                        ElevatedButton.icon(
-                                          onPressed: _loadClinics,
-                                          icon: const Icon(Icons.refresh_rounded, size: 16),
-                                          label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+                            LuxuryEmptyState(
+                              icon: hasActiveFilters || _searchQuery.isNotEmpty
+                                  ? Icons.search_off_rounded
+                                  : Icons.local_hospital_outlined,
+                              title: hasActiveFilters || _searchQuery.isNotEmpty
+                                  ? (loc.isArabic ? 'لا توجد عيادات مطابقة للبحث' : 'No clinics match your search')
+                                  : (loc.isArabic ? 'لا توجد عيادات متاحة حالياً' : 'No clinics available'),
+                              subtitle: hasActiveFilters || _searchQuery.isNotEmpty
+                                  ? (loc.isArabic
+                                      ? 'يرجى تجربة كلمات بحث أو فلاتر أخرى'
+                                      : 'Try adjusting your filters or search keywords')
+                                  : (loc.isArabic
+                                      ? 'سيتم إضافة عيادات ومراكز تجميلية موثقة قريباً'
+                                      : 'Verified medical clinics and aesthetic centers will be listed soon'),
+                              actionLabel: hasActiveFilters || _searchQuery.isNotEmpty
+                                  ? (loc.isArabic ? 'إعادة تعيين الفلاتر' : 'Reset Filters')
+                                  : (loc.isArabic ? 'تحديث' : 'Refresh'),
+                              onAction: hasActiveFilters || _searchQuery.isNotEmpty
+                                  ? () {
+                                      setState(() {
+                                        _filterOptions.selectedCity = 'الكل';
+                                        _filterOptions.selectedSpecialtyId = null;
+                                        _searchQuery = '';
+                                        _searchController.clear();
+                                      });
+                                      _loadClinics();
+                                    }
+                                  : _loadClinics,
                             ),
                           ],
                         )
@@ -710,7 +648,10 @@ class _QuickCityChip extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),

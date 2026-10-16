@@ -7,6 +7,9 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:flutter/services.dart';
+import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
+import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/features/articles/data/articles_repository.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
 import 'package:aesthetic_way/features/articles/presentation/screens/article_detail_screen.dart';
@@ -255,7 +258,11 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                       hintText: loc.isArabic
                           ? 'ابحث في المقالات، النصائح، الأطباء...'
                           : 'Search articles, advice, doctors...',
-                      hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
+                      hintStyle: TextStyle(
+                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                       prefixIcon: Icon(Icons.search_rounded, color: AppColors.mutedText(context), size: 18),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 10),
@@ -291,6 +298,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                         ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                         onSelected: (_) {
+                          HapticFeedback.selectionClick();
                           setState(() {
                             _selectedCategory = cat['id']!;
                           });
@@ -304,8 +312,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
 
               // Articles List
               Expanded(
-                child: RefreshIndicator(
-                  color: AppColors.accentChampagne,
+                child: LuxuryRefreshIndicator(
                   onRefresh: () => _loadArticles(showLoading: false),
                   child: _buildBody(context, loc, isDark, filteredArticles),
                 ),
@@ -324,9 +331,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
     List<ArticleModel> filteredArticles,
   ) {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.accentChampagne),
-      );
+      return const LuxuryListSkeleton(itemCount: 4, cardHeight: 120);
     }
 
     if (_errorMessage != null) {
@@ -368,61 +373,20 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
     }
 
     if (filteredArticles.isEmpty) {
-      return RefreshIndicator(
-        color: AppColors.accentChampagne,
+      return LuxuryRefreshIndicator(
         onRefresh: _loadArticles,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: LuxuryCard(
-                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.article_outlined, size: 36, color: AppColors.accentChampagne),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        loc.isArabic ? 'لا توجد مقالات طبية حالياً' : 'No medical articles or guides',
-                        style: AppTypography.cardTitle.copyWith(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        loc.isArabic
-                            ? 'سيتم نشر نصائح تجميلية وأدلة طبية موثقة قريباً'
-                            : 'Verified aesthetic guides and articles will be published soon',
-                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _loadArticles,
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.10),
+            LuxuryEmptyState(
+              icon: Icons.article_outlined,
+              title: loc.isArabic ? 'لا توجد مقالات طبية حالياً' : 'No medical articles or guides',
+              subtitle: loc.isArabic
+                  ? 'سيتم نشر نصائح تجميلية وأدلة طبية موثقة قريباً'
+                  : 'Verified aesthetic guides and articles will be published soon',
+              actionLabel: loc.isArabic ? 'تحديث' : 'Refresh',
+              onAction: _loadArticles,
             ),
           ],
         ),

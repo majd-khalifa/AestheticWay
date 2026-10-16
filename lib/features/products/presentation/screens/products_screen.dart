@@ -6,6 +6,9 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:flutter/services.dart';
+import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
+import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/features/products/data/products_repository.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
 import 'package:aesthetic_way/features/products/presentation/screens/product_detail_screen.dart';
@@ -255,7 +258,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       hintText: loc.isArabic
                           ? 'ابحث في المنتجات، السيرومات، الأجهزة...'
                           : 'Search products, serums, devices...',
-                      hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
+                      hintStyle: TextStyle(
+                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                       prefixIcon: Icon(Icons.search_rounded, color: AppColors.mutedText(context), size: 18),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 10),
@@ -291,6 +298,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                         onSelected: (_) {
+                          HapticFeedback.selectionClick();
                           setState(() {
                             _selectedCategory = cat['id']!;
                           });
@@ -304,8 +312,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
               // Products Grid
               Expanded(
-                child: RefreshIndicator(
-                  color: AppColors.accentChampagne,
+                child: LuxuryRefreshIndicator(
                   onRefresh: () => _loadProducts(showLoading: false),
                   child: _buildBody(context, loc, filteredProducts),
                 ),
@@ -322,12 +329,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
     LocaleService loc,
     List<ProductModel> filteredProducts,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.accentChampagne),
-      );
+      return const LuxuryListSkeleton(itemCount: 4, cardHeight: 130);
     }
 
     if (_errorMessage != null) {
@@ -369,61 +372,20 @@ class _ProductsScreenState extends State<ProductsScreen> {
     }
 
     if (filteredProducts.isEmpty) {
-      return RefreshIndicator(
-        color: AppColors.accentChampagne,
+      return LuxuryRefreshIndicator(
         onRefresh: _loadProducts,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: LuxuryCard(
-                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.shopping_bag_outlined, size: 36, color: AppColors.accentChampagne),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        loc.isArabic ? 'لا توجد منتجات طبية حالياً' : 'No medical skincare products',
-                        style: AppTypography.cardTitle.copyWith(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        loc.isArabic
-                            ? 'سيتم إضافة منتجات علاجية ومستحضرات طبية جديدة قريباً'
-                            : 'New medical skincare products will be added soon',
-                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _loadProducts,
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.10),
+            LuxuryEmptyState(
+              icon: Icons.shopping_bag_outlined,
+              title: loc.isArabic ? 'لا توجد منتجات طبية حالياً' : 'No medical skincare products',
+              subtitle: loc.isArabic
+                  ? 'سيتم إضافة منتجات علاجية ومستحضرات طبية جديدة قريباً'
+                  : 'New medical skincare products will be added soon',
+              actionLabel: loc.isArabic ? 'تحديث' : 'Refresh',
+              onAction: _loadProducts,
             ),
           ],
         ),

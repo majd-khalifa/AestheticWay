@@ -34,6 +34,58 @@ class AdminDashboardScreen extends StatelessWidget {
       builder: (context, _) {
         final recentLeads = adminService.allLeads.take(4).toList();
 
+        if (adminService.isLoading && adminService.clinics.isEmpty && adminService.allLeads.isEmpty) {
+          return Scaffold(
+            backgroundColor: AppColors.bg(context),
+            body: const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.accentChampagne,
+                strokeWidth: 2.5,
+              ),
+            ),
+          );
+        }
+
+        if (adminService.errorMessage != null && adminService.clinics.isEmpty && adminService.allLeads.isEmpty) {
+          return Scaffold(
+            backgroundColor: AppColors.bg(context),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: Colors.amber, size: 48),
+                    const SizedBox(height: 12),
+                    Text(
+                      loc.isArabic ? 'تعذر تحميل بيانات الإدارة' : 'Failed to load admin data',
+                      style: AppTypography.cardTitle.copyWith(
+                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      adminService.errorMessage!,
+                      style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => adminService.loadAllData(refresh: true),
+                      icon: const Icon(Icons.refresh_rounded, size: 16),
+                      label: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accentChampagne,
+                        foregroundColor: AppColors.backgroundDeep,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
         return Scaffold(
           backgroundColor: AppColors.bg(context),
           body: RefreshIndicator(
@@ -43,6 +95,28 @@ class AdminDashboardScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               children: [
+                if (adminService.errorMessage != null) ...[
+                  LuxuryCard(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            adminService.errorMessage!,
+                            style: AppTypography.caption.copyWith(color: Colors.amber),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => adminService.loadAllData(refresh: true),
+                          child: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
             // Top Welcome Card
             LuxuryCard(
               padding: const EdgeInsets.all(16),

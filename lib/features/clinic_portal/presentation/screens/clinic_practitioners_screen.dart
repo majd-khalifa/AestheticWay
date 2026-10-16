@@ -200,6 +200,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'الاسم الكامل بالإنجليزية *' : 'Full Name (English) *',
+                        hintText: 'e.g. Dr. Layla Al Hashemi',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -217,6 +223,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'الاسم الكامل بالعربية *' : 'Full Name (Arabic) *',
+                        hintText: 'مثال: د. ليلى الهاشمي',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -303,6 +315,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'نبذة مهنية بالإنجليزية' : 'Bio (English)',
+                        hintText: 'e.g. Specialist with 10+ years in anti-aging treatments and facial aesthetics...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
@@ -320,6 +338,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'نبذة مهنية بالعربية' : 'Bio (Arabic)',
+                        hintText: 'مثال: أخصائية بخبرة تزيد عن 10 سنوات في علاجات مكافحة الشيخوخة ونضارة الوجه...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
                         filled: true,
                         fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(

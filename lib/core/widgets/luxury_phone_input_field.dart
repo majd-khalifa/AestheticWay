@@ -20,16 +20,17 @@ class CountryDialCode {
 }
 
 const List<CountryDialCode> kSupportedDialCodes = [
+  // 1. All 22 Arab League Countries (UAE +971 is primary default)
   CountryDialCode(
     flag: '🇦🇪',
     dialCode: '+971',
-    nameAr: 'الإمارات',
+    nameAr: 'الإمارات العربية المتحدة',
     nameEn: 'United Arab Emirates',
   ),
   CountryDialCode(
     flag: '🇸🇦',
     dialCode: '+966',
-    nameAr: 'السعودية',
+    nameAr: 'المملكة العربية السعودية',
     nameEn: 'Saudi Arabia',
   ),
   CountryDialCode(
@@ -75,16 +76,236 @@ const List<CountryDialCode> kSupportedDialCodes = [
     nameEn: 'Lebanon',
   ),
   CountryDialCode(
+    flag: '🇸🇾',
+    dialCode: '+963',
+    nameAr: 'سوريا',
+    nameEn: 'Syria',
+  ),
+  CountryDialCode(
+    flag: '🇮🇶',
+    dialCode: '+964',
+    nameAr: 'العراق',
+    nameEn: 'Iraq',
+  ),
+  CountryDialCode(
+    flag: '🇵🇸',
+    dialCode: '+970',
+    nameAr: 'فلسطين',
+    nameEn: 'Palestine',
+  ),
+  CountryDialCode(
+    flag: '🇾🇪',
+    dialCode: '+967',
+    nameAr: 'اليمن',
+    nameEn: 'Yemen',
+  ),
+  CountryDialCode(
+    flag: '🇱🇾',
+    dialCode: '+218',
+    nameAr: 'ليبيا',
+    nameEn: 'Libya',
+  ),
+  CountryDialCode(
+    flag: '🇹🇳',
+    dialCode: '+216',
+    nameAr: 'تونس',
+    nameEn: 'Tunisia',
+  ),
+  CountryDialCode(
+    flag: '🇩🇿',
+    dialCode: '+213',
+    nameAr: 'الجزائر',
+    nameEn: 'Algeria',
+  ),
+  CountryDialCode(
+    flag: '🇲🇦',
+    dialCode: '+212',
+    nameAr: 'المغرب',
+    nameEn: 'Morocco',
+  ),
+  CountryDialCode(
+    flag: '🇸🇩',
+    dialCode: '+249',
+    nameAr: 'السودان',
+    nameEn: 'Sudan',
+  ),
+  CountryDialCode(
+    flag: '🇲🇷',
+    dialCode: '+222',
+    nameAr: 'موريتانيا',
+    nameEn: 'Mauritania',
+  ),
+  CountryDialCode(
+    flag: '🇸🇴',
+    dialCode: '+252',
+    nameAr: 'الصومال',
+    nameEn: 'Somalia',
+  ),
+  CountryDialCode(
+    flag: '🇩🇯',
+    dialCode: '+253',
+    nameAr: 'جيبوتي',
+    nameEn: 'Djibouti',
+  ),
+  CountryDialCode(
+    flag: '🇰🇲',
+    dialCode: '+269',
+    nameAr: 'جزر القمر',
+    nameEn: 'Comoros',
+  ),
+
+  // 2. Major European Countries
+  CountryDialCode(
     flag: '🇬🇧',
     dialCode: '+44',
     nameAr: 'المملكة المتحدة',
     nameEn: 'United Kingdom',
   ),
   CountryDialCode(
+    flag: '🇩🇪',
+    dialCode: '+49',
+    nameAr: 'ألمانيا',
+    nameEn: 'Germany',
+  ),
+  CountryDialCode(
+    flag: '🇫🇷',
+    dialCode: '+33',
+    nameAr: 'فرنسا',
+    nameEn: 'France',
+  ),
+  CountryDialCode(
+    flag: '🇮🇹',
+    dialCode: '+39',
+    nameAr: 'إيطاليا',
+    nameEn: 'Italy',
+  ),
+  CountryDialCode(
+    flag: '🇪🇸',
+    dialCode: '+34',
+    nameAr: 'إسبانيا',
+    nameEn: 'Spain',
+  ),
+  CountryDialCode(
+    flag: '🇨🇭',
+    dialCode: '+41',
+    nameAr: 'سويسرا',
+    nameEn: 'Switzerland',
+  ),
+  CountryDialCode(
+    flag: '🇳🇱',
+    dialCode: '+31',
+    nameAr: 'هولندا',
+    nameEn: 'Netherlands',
+  ),
+  CountryDialCode(
+    flag: '🇹🇷',
+    dialCode: '+90',
+    nameAr: 'تركيا',
+    nameEn: 'Turkey',
+  ),
+  CountryDialCode(
+    flag: '🇸🇪',
+    dialCode: '+46',
+    nameAr: 'السويد',
+    nameEn: 'Sweden',
+  ),
+  CountryDialCode(
+    flag: '🇳🇴',
+    dialCode: '+47',
+    nameAr: 'النرويج',
+    nameEn: 'Norway',
+  ),
+  CountryDialCode(
+    flag: '🇩🇰',
+    dialCode: '+45',
+    nameAr: 'الدنمارك',
+    nameEn: 'Denmark',
+  ),
+  CountryDialCode(
+    flag: '🇫🇮',
+    dialCode: '+358',
+    nameAr: 'فنلندا',
+    nameEn: 'Finland',
+  ),
+  CountryDialCode(
+    flag: '🇦🇹',
+    dialCode: '+43',
+    nameAr: 'النمسا',
+    nameEn: 'Austria',
+  ),
+  CountryDialCode(
+    flag: '🇧🇪',
+    dialCode: '+32',
+    nameAr: 'بلجيكا',
+    nameEn: 'Belgium',
+  ),
+  CountryDialCode(
+    flag: '🇮🇪',
+    dialCode: '+353',
+    nameAr: 'أيرلندا',
+    nameEn: 'Ireland',
+  ),
+  CountryDialCode(
+    flag: '🇵🇹',
+    dialCode: '+351',
+    nameAr: 'البرتغال',
+    nameEn: 'Portugal',
+  ),
+  CountryDialCode(
+    flag: '🇬🇷',
+    dialCode: '+30',
+    nameAr: 'اليونان',
+    nameEn: 'Greece',
+  ),
+  CountryDialCode(
+    flag: '🇵🇱',
+    dialCode: '+48',
+    nameAr: 'بولندا',
+    nameEn: 'Poland',
+  ),
+  CountryDialCode(
+    flag: '🇨🇿',
+    dialCode: '+420',
+    nameAr: 'التشيك',
+    nameEn: 'Czech Republic',
+  ),
+  CountryDialCode(
+    flag: '🇷🇴',
+    dialCode: '+40',
+    nameAr: 'رومانيا',
+    nameEn: 'Romania',
+  ),
+  CountryDialCode(
+    flag: '🇭🇺',
+    dialCode: '+36',
+    nameAr: 'المجر',
+    nameEn: 'Hungary',
+  ),
+  CountryDialCode(
+    flag: '🇨🇾',
+    dialCode: '+357',
+    nameAr: 'قبرص',
+    nameEn: 'Cyprus',
+  ),
+  CountryDialCode(
+    flag: '🇷🇺',
+    dialCode: '+7',
+    nameAr: 'روسيا',
+    nameEn: 'Russia',
+  ),
+
+  // 3. North America
+  CountryDialCode(
     flag: '🇺🇸',
     dialCode: '+1',
     nameAr: 'الولايات المتحدة',
     nameEn: 'United States',
+  ),
+  CountryDialCode(
+    flag: '🇨🇦',
+    dialCode: '+1',
+    nameAr: 'كندا',
+    nameEn: 'Canada',
   ),
 ];
 
@@ -129,13 +350,20 @@ class LuxuryPhoneInputField extends StatefulWidget {
     this.onFieldSubmitted,
   });
 
+  /// Internal helper to sort dial codes by length descending for greedy matching
+  static List<CountryDialCode> get _sortedDialCodes {
+    final list = List<CountryDialCode>.from(kSupportedDialCodes);
+    list.sort((a, b) => b.dialCode.length.compareTo(a.dialCode.length));
+    return list;
+  }
+
   /// Static helper to normalize any phone string and country code into standard E.164
   static String normalizeToE164(String rawInput, {String defaultDialCode = '+971'}) {
     var cleaned = rawInput.replaceAll(RegExp(r'[^\d+]'), '').trim();
     if (cleaned.isEmpty) return '';
 
-    // Check if starts with a known country code
-    for (final country in kSupportedDialCodes) {
+    // Check if starts with a known country code (longest match first)
+    for (final country in _sortedDialCodes) {
       final code = country.dialCode;
       final codeNoPlus = code.replaceFirst('+', '');
       if (cleaned.startsWith(code)) {
@@ -174,7 +402,7 @@ class LuxuryPhoneInputField extends StatefulWidget {
     var cleaned = rawInput.replaceAll(RegExp(r'[^\d+]'), '').trim();
     if (cleaned.isEmpty) return '';
 
-    for (final country in kSupportedDialCodes) {
+    for (final country in _sortedDialCodes) {
       final code = country.dialCode;
       final codeNoPlus = code.replaceFirst('+', '');
       if (cleaned.startsWith(code)) {
@@ -201,7 +429,7 @@ class LuxuryPhoneInputField extends StatefulWidget {
   /// Extracts dial code from raw input if matched, otherwise returns defaultDialCode
   static CountryDialCode extractCountry(String rawInput, {String defaultDialCode = '+971'}) {
     final cleaned = rawInput.replaceAll(RegExp(r'[^\d+]'), '').trim();
-    for (final country in kSupportedDialCodes) {
+    for (final country in _sortedDialCodes) {
       final code = country.dialCode;
       final codeNoPlus = code.replaceFirst('+', '');
       if (cleaned.startsWith(code) || cleaned.startsWith('00$codeNoPlus')) {
@@ -287,112 +515,194 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
 
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
+    final searchCtrl = TextEditingController();
+    String searchQuery = '';
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.65,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.cardSurface : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-            border: Border.all(
-              color: AppColors.accentChampagne.withValues(alpha: 0.3),
-              width: 1.0,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border(ctx),
-                  borderRadius: BorderRadius.circular(2),
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            final q = searchQuery.toLowerCase().trim();
+            final filteredCodes = kSupportedDialCodes.where((c) {
+              if (q.isEmpty) return true;
+              return c.nameAr.toLowerCase().contains(q) ||
+                  c.nameEn.toLowerCase().contains(q) ||
+                  c.dialCode.contains(q);
+            }).toList();
+
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(sheetCtx).size.height * 0.75,
+              ),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.cardSurface : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                border: Border.all(
+                  color: AppColors.accentChampagne.withValues(alpha: 0.3),
+                  width: 1.0,
                 ),
               ),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    const Icon(Icons.public_rounded, color: AppColors.accentChampagne, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      loc.isArabic ? 'اختر رمز الدولة' : 'Select Country Code',
-                      style: AppTypography.cardTitle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 38,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.border(sheetCtx),
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: kSupportedDialCodes.length,
-                  separatorBuilder: (context, index) => Divider(
-                    color: AppColors.border(ctx).withValues(alpha: 0.5),
-                    height: 1,
                   ),
-                  itemBuilder: (_, index) {
-                    final country = kSupportedDialCodes[index];
-                    final isSelected = country.dialCode == _selectedCountry.dialCode;
-                    return ListTile(
-                      dense: true,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      tileColor: isSelected
-                          ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.12)
-                          : null,
-                      leading: Text(
-                        country.flag,
-                        style: const TextStyle(fontSize: 22),
-                      ),
-                      title: Text(
-                        loc.isArabic ? country.nameAr : country.nameEn,
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppColors.accentChampagne
-                              : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                          fontSize: 13.5,
-                        ),
-                      ),
-                      trailing: Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Text(
-                          country.dialCode,
-                          style: TextStyle(
-                            color: isSelected
-                                ? AppColors.accentChampagne
-                                : AppColors.mutedText(ctx),
+                  const SizedBox(height: 14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.public_rounded, color: AppColors.accentChampagne, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          loc.isArabic ? 'اختر رمز الدولة' : 'Select Country Code',
+                          style: AppTypography.cardTitle.copyWith(
+                            fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                           ),
                         ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          _selectedCountry = country;
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Search Input Field
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: searchCtrl,
+                      onChanged: (val) {
+                        setSheetState(() {
+                          searchQuery = val;
                         });
-                        Navigator.pop(ctx);
-                        _syncExternalController(_localController.text);
                       },
-                    );
-                  },
-                ),
+                      style: TextStyle(
+                        color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: loc.isArabic
+                            ? 'ابحث باسم الدولة أو رمز الاتصال...'
+                            : 'Search country name or dial code...',
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(sheetCtx).withValues(alpha: 0.45),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        prefixIcon: const Icon(Icons.search_rounded, size: 18, color: AppColors.accentChampagne),
+                        suffixIcon: searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 16),
+                                onPressed: () {
+                                  searchCtrl.clear();
+                                  setSheetState(() {
+                                    searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: AppColors.border(sheetCtx), width: 0.8),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: AppColors.border(sheetCtx), width: 0.8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: filteredCodes.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Text(
+                                loc.isArabic ? 'لم يتم العثور على نتائج' : 'No countries found',
+                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(sheetCtx)),
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            itemCount: filteredCodes.length,
+                            separatorBuilder: (context, index) => Divider(
+                              color: AppColors.border(sheetCtx).withValues(alpha: 0.5),
+                              height: 1,
+                            ),
+                            itemBuilder: (_, index) {
+                              final country = filteredCodes[index];
+                              final isSelected = country.dialCode == _selectedCountry.dialCode &&
+                                  country.flag == _selectedCountry.flag;
+                              return ListTile(
+                                dense: true,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                tileColor: isSelected
+                                    ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.12)
+                                    : null,
+                                leading: Text(
+                                  country.flag,
+                                  style: const TextStyle(fontSize: 22),
+                                ),
+                                title: Text(
+                                  loc.isArabic ? country.nameAr : country.nameEn,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? AppColors.accentChampagne
+                                        : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
+                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    fontSize: 13.5,
+                                  ),
+                                ),
+                                trailing: Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: Text(
+                                    country.dialCode,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? AppColors.accentChampagne
+                                          : AppColors.mutedText(sheetCtx),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    _selectedCountry = country;
+                                  });
+                                  Navigator.pop(sheetCtx);
+                                  _syncExternalController(_localController.text);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -438,8 +748,9 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
           labelText: effectiveLabel,
           hintText: effectiveHint,
           hintStyle: TextStyle(
-            color: AppColors.mutedText(context).withValues(alpha: 0.5),
+            color: AppColors.mutedText(context).withValues(alpha: 0.45),
             fontSize: 13,
+            fontWeight: FontWeight.w400,
             letterSpacing: 0.5,
           ),
           labelStyle: TextStyle(
@@ -533,10 +844,10 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
             while (digits.startsWith('0')) {
               digits = digits.substring(1);
             }
-            if (digits.length < 8) {
+            if (digits.length < 7) {
               return loc.isArabic
-                  ? 'يرجى إدخال رقم هاتف محلي صالح (مثال: 501234567)'
-                  : 'Please enter a valid local number (e.g. 501234567)';
+                  ? 'يرجى إدخال رقم هاتف محلي صالح'
+                  : 'Please enter a valid local number';
             }
           }
           return null;

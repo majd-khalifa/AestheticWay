@@ -77,19 +77,11 @@ class CategoryGrid extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(5),
+                width: 3,
+                height: 18,
                 decoration: BoxDecoration(
-                  color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.accentChampagne.withValues(alpha: 0.4),
-                    width: 0.7,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.tune_rounded,
-                  size: 15,
                   color: AppColors.accentChampagne,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(width: 8),
@@ -99,7 +91,7 @@ class CategoryGrid extends StatelessWidget {
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                  letterSpacing: 0.2,
+                  letterSpacing: 0.25,
                 ),
               ),
             ],

@@ -5,8 +5,9 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/widgets/luxury_shimmer.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
+import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
+import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
@@ -235,10 +236,8 @@ class _OffersScreenState extends State<OffersScreen> {
                   )
                 : null,
           ),
-          body: RefreshIndicator(
+          body: LuxuryRefreshIndicator(
             onRefresh: _loadOffers,
-            color: AppColors.accentChampagne,
-            backgroundColor: AppColors.surface(context),
             child: Column(
               children: [
                 // Search Header
@@ -262,7 +261,11 @@ class _OffersScreenState extends State<OffersScreen> {
                       onSubmitted: (_) => _loadOffers(),
                       decoration: InputDecoration(
                         hintText: loc.isArabic ? 'ابحث في العروض التجميلية والعيادات...' : 'Search offers & clinics...',
-                        hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
+                        hintStyle: TextStyle(
+                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
                         prefixIcon: Icon(Icons.search_rounded, color: AppColors.mutedText(context), size: 18),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
@@ -284,16 +287,7 @@ class _OffersScreenState extends State<OffersScreen> {
                 // Offers Content Area
                 Expanded(
                   child: _isLoading && _offers == null
-                      ? ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                          itemCount: 3,
-                          separatorBuilder: (context, index) => const SizedBox(height: 16),
-                          itemBuilder: (context, index) => const LuxuryShimmer(
-                            width: double.infinity,
-                            height: 240,
-                            borderRadius: 16,
-                          ),
-                        )
+                      ? const LuxuryListSkeleton(itemCount: 4, cardHeight: 140)
                       : _errorMessage != null && _offers == null
                           ? LuxuryErrorView(
                               message: _errorMessage,
@@ -303,55 +297,15 @@ class _OffersScreenState extends State<OffersScreen> {
                               ? ListView(
                                   physics: const AlwaysScrollableScrollPhysics(),
                                   children: [
-                                    SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                                      child: LuxuryCard(
-                                        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                                        child: Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.all(16),
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const Icon(Icons.local_offer_outlined, size: 36, color: AppColors.accentChampagne),
-                                              ),
-                                              const SizedBox(height: 14),
-                                              Text(
-                                                loc.isArabic ? 'لا توجد باقات عروض حالياً' : 'No offers currently available',
-                                                style: AppTypography.cardTitle.copyWith(
-                                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                loc.isArabic
-                                                    ? 'ترقبوا عروض وخصومات مميزة من أفضل العيادات قريباً'
-                                                    : 'Stay tuned for exclusive offers from premier clinics soon',
-                                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(height: 16),
-                                              ElevatedButton.icon(
-                                                onPressed: _loadOffers,
-                                                icon: const Icon(Icons.refresh_rounded, size: 16),
-                                                label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                                  foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                    SizedBox(height: MediaQuery.of(context).size.height * 0.10),
+                                    LuxuryEmptyState(
+                                      icon: Icons.local_offer_outlined,
+                                      title: loc.isArabic ? 'لا توجد باقات عروض حالياً' : 'No offers currently available',
+                                      subtitle: loc.isArabic
+                                          ? 'ترقبوا عروض وخصومات مميزة من أفضل العيادات قريباً'
+                                          : 'Stay tuned for exclusive offers from premier clinics soon',
+                                      actionLabel: loc.isArabic ? 'تحديث' : 'Refresh',
+                                      onAction: _loadOffers,
                                     ),
                                   ],
                                 )

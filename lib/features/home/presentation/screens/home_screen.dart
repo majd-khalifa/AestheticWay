@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_shimmer.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
+import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
@@ -237,10 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: AppColors.bg(context),
           body: SafeArea(
             bottom: false,
-            child: RefreshIndicator(
+            child: LuxuryRefreshIndicator(
               onRefresh: _loadFeed,
-              color: AppColors.accentChampagne,
-              backgroundColor: AppColors.surface(context),
               child: _buildBody(context, loc),
             ),
           ),
@@ -417,53 +416,14 @@ class _HomeScreenState extends State<HomeScreen> {
         // Empty state when catalog is empty
         if (topAds.isEmpty && offersList.isEmpty && nearbyList.isEmpty)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: LuxuryCard(
-                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.apartment_rounded, size: 38, color: AppColors.accentChampagne),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        loc.isArabic ? 'لا توجد عيادات متاحة حالياً' : 'No clinics available right now',
-                        style: AppTypography.cardTitle.copyWith(
-                          color: AppColors.isDark(context) ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        loc.isArabic
-                            ? 'سيتم إضافة عيادات وأطباء جدد قريباً في هذا النطاق الجغرافي'
-                            : 'New clinics and doctors will be listed soon in this area',
-                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _loadFeed,
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.isDark(context) ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          foregroundColor: AppColors.isDark(context) ? AppColors.backgroundDeep : Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            child: LuxuryEmptyState(
+              icon: Icons.apartment_rounded,
+              title: loc.isArabic ? 'لا توجد عيادات متاحة حالياً' : 'No clinics available right now',
+              subtitle: loc.isArabic
+                  ? 'سيتم إضافة عيادات وأطباء جدد قريباً في هذا النطاق الجغرافي'
+                  : 'New clinics and doctors will be listed soon in this area',
+              actionLabel: loc.isArabic ? 'تحديث' : 'Refresh',
+              onAction: _loadFeed,
             ),
           ),
 

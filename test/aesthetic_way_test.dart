@@ -266,7 +266,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('تسجيل الدخول'), findsWidgets);
-      expect(find.text('رقم الهاتف أو البريد الإلكتروني'), findsOneWidget);
+      expect(find.text('رقم الهاتف'), findsWidgets);
+      expect(find.text('البريد الإلكتروني'), findsWidgets);
       expect(find.text('كلمة المرور'), findsOneWidget);
       expect(find.text('نسيت كلمة المرور؟'), findsOneWidget);
       expect(find.text('إنشاء حساب جديد'), findsOneWidget);

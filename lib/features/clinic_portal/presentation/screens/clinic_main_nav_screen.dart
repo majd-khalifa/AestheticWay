@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
@@ -20,6 +21,7 @@ class ClinicMainNavScreen extends StatefulWidget {
 
 class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
   late int _currentIndex;
+  final GlobalKey<ClinicProfileScreenState> _profileKey = GlobalKey<ClinicProfileScreenState>();
 
   @override
   void initState() {
@@ -28,8 +30,18 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
   }
 
   void _onTabSelected(int index) {
+    if (_currentIndex != index) {
+      HapticFeedback.selectionClick();
+    }
     setState(() {
       _currentIndex = index;
+    });
+  }
+
+  void _navigateToProfileSection(String section) {
+    _onTabSelected(3);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _profileKey.currentState?.scrollToSection(section);
     });
   }
 
@@ -44,10 +56,11 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
         onNavigateToLeads: () => _onTabSelected(1),
         onNavigateToOffers: () => _onTabSelected(2),
         onNavigateToProfile: () => _onTabSelected(3),
+        onNavigateToSection: _navigateToProfileSection,
       ),
       const ClinicLeadsScreen(),
       const ClinicOffersScreen(),
-      const ClinicProfileScreen(),
+      ClinicProfileScreen(key: _profileKey),
     ];
 
     return ListenableBuilder(

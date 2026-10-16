@@ -64,10 +64,11 @@ void main() {
       expect(find.byType(LuxuryImage), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);
       final img = tester.widget<Image>(find.byType(Image));
-      expect(img.image, isA<ResizeImage>());
-      final resize = img.image as ResizeImage;
-      expect(resize.imageProvider, isA<AssetImage>());
-      final assetImage = resize.imageProvider as AssetImage;
+      final provider = img.image is ResizeImage
+          ? (img.image as ResizeImage).imageProvider
+          : img.image;
+      expect(provider, isA<AssetImage>());
+      final assetImage = provider as AssetImage;
       expect(assetImage.assetName, equals('assets/images/aesthetic_way_logo.png'));
     });
 
@@ -111,12 +112,11 @@ void main() {
       final images = tester.widgetList<Image>(find.byType(Image)).toList();
       expect(images.isNotEmpty, isTrue);
       final hasEmblem = images.any((img) {
-        if (img.image is ResizeImage) {
-          final res = img.image as ResizeImage;
-          return res.imageProvider is AssetImage &&
-              (res.imageProvider as AssetImage).assetName == 'assets/images/aesthetic_way_logo.png';
-        }
-        return false;
+        final provider = img.image is ResizeImage
+            ? (img.image as ResizeImage).imageProvider
+            : img.image;
+        return provider is AssetImage &&
+            provider.assetName == 'assets/images/aesthetic_way_logo.png';
       });
       expect(hasEmblem, isTrue);
     });
@@ -137,10 +137,11 @@ void main() {
       expect(find.byType(LuxuryAvatar), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);
       final img = tester.widget<Image>(find.byType(Image));
-      expect(img.image, isA<ResizeImage>());
-      final resize = img.image as ResizeImage;
-      expect(resize.imageProvider, isA<AssetImage>());
-      final assetImage = resize.imageProvider as AssetImage;
+      final provider = img.image is ResizeImage
+          ? (img.image as ResizeImage).imageProvider
+          : img.image;
+      expect(provider, isA<AssetImage>());
+      final assetImage = provider as AssetImage;
       expect(assetImage.assetName, equals('assets/images/aesthetic_way_logo.png'));
     });
   });

@@ -7,8 +7,10 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/my_requests_screen.dart';
 
 /// Appointment Request Success Screen (Strict Frozen Copy & Dual-Theme Luxury Visual Finish)
 class AppointmentSuccessScreen extends StatelessWidget {
@@ -228,45 +230,82 @@ class AppointmentSuccessScreen extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    // Action Buttons: Open Google Maps & Return Home
-                    OutlinedButton.icon(
+                    // Primary CTA: View My Requests
+                    SilverButton(
+                      label: loc.isArabic ? 'متابعة طلباتي' : 'View My Requests',
+                      icon: Icons.assignment_outlined,
+                      isFullWidth: true,
+                      height: 48,
                       onPressed: () {
-                        MapsLauncher.openMapLocation(
-                          latitude: clinic.latitude,
-                          longitude: clinic.longitude,
-                          placeId: clinic.googlePlaceId,
-                          placeName: loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                        Navigator.of(context).pushReplacement(
+                          LuxuryPageRoute(page: const MyRequestsScreen()),
                         );
                       },
-                      icon: Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
-                      ),
-                      label: Text(
-                        loc.tr('open_maps_btn'),
-                        style: AppTypography.button.copyWith(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                          fontSize: 13,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.border(context), width: 0.8),
-                        backgroundColor: AppColors.surface(context),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
                     ),
                     const SizedBox(height: 10),
 
-                    SilverButton(
-                      label: loc.tr('back_home'),
-                      icon: Icons.home_outlined,
-                      isFullWidth: true,
-                      height: 46,
-                      onPressed: () {
-                        Navigator.of(context).popUntil((route) => route.isFirst);
-                      },
+                    // Secondary Actions: Open Google Maps & Return Home
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              MapsLauncher.openMapLocation(
+                                latitude: clinic.latitude,
+                                longitude: clinic.longitude,
+                                placeId: clinic.googlePlaceId,
+                                placeName: loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                              );
+                            },
+                            icon: Icon(
+                              Icons.location_on_outlined,
+                              size: 15,
+                              color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                            ),
+                            label: Text(
+                              loc.tr('open_maps_btn'),
+                              style: AppTypography.button.copyWith(
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                fontSize: 12,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: AppColors.border(context), width: 0.8),
+                              backgroundColor: AppColors.surface(context),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            },
+                            icon: Icon(
+                              Icons.home_outlined,
+                              size: 15,
+                              color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                            ),
+                            label: Text(
+                              loc.tr('back_home'),
+                              style: AppTypography.button.copyWith(
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                fontSize: 12,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: AppColors.border(context), width: 0.8),
+                              backgroundColor: AppColors.surface(context),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                   ],
