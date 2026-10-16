@@ -1,12 +1,12 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 /// Global API Configuration for AESTHETIC WAY
 class ApiConfig {
   static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const String defaultProductionBaseUrl =
+      'https://aestheticway.ae/api/v1/';
+  static const String siteOrigin = 'https://aestheticway.ae';
   static String? _customBaseUrl;
 
-  /// Configure a custom Base URL at runtime if needed (e.g. testing on physical device)
+  /// Configure a custom Base URL at runtime if needed (e.g. local dev override)
   static void setBaseUrl(String url) {
     _customBaseUrl = url.endsWith('/') ? url : '$url/';
   }
@@ -16,12 +16,10 @@ class ApiConfig {
     _customBaseUrl = null;
   }
 
-  /// Platform-adaptive Base URL:
+  /// Production-first Base URL:
   /// 1. Runtime override via [setBaseUrl]
   /// 2. Compile-time --dart-define=API_BASE_URL=...
-  /// 3. Platform defaults:
-  ///    - Android Emulator: http://10.0.2.2:8000/api/v1/
-  ///    - iOS / Desktop / Web: http://127.0.0.1:8000/api/v1/
+  /// 3. Default production endpoint: https://aestheticway.ae/api/v1/
   static String get baseUrl {
     if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
       return _customBaseUrl!.endsWith('/')
@@ -31,13 +29,7 @@ class ApiConfig {
     if (_envBaseUrl.isNotEmpty) {
       return _envBaseUrl.endsWith('/') ? _envBaseUrl : '$_envBaseUrl/';
     }
-    if (kIsWeb) {
-      return 'http://127.0.0.1:8000/api/v1/';
-    }
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api/v1/';
-    }
-    return 'http://127.0.0.1:8000/api/v1/';
+    return defaultProductionBaseUrl;
   }
 
   static const Duration connectTimeout = Duration(seconds: 15);
@@ -54,6 +46,10 @@ class ApiConfig {
   static const String logout = 'auth/logout/';
   static const String me = 'auth/me/';
   static const String authMe = me;
+  static const String authPhoneChangeRequest = 'auth/me/phone/change/request/';
+  static const String authPhoneChangeConfirm = 'auth/me/phone/change/confirm/';
+  static const String authEmailChangeRequest = 'auth/me/email/change/request/';
+  static const String authEmailChangeConfirm = 'auth/me/email/change/confirm/';
 
   // App Endpoints
   static const String supportInfo = 'app/support-info/';
@@ -62,6 +58,9 @@ class ApiConfig {
   // Discovery & Catalog Endpoints (Always with trailing slash!)
   static const String homeFeed = 'home/feed/';
   static const String clinics = 'clinics/';
+  static String clinicDetail(String id) => 'clinics/$id/';
+  static String clinicReviews(String id) => 'clinics/$id/reviews/';
+  static String clinicReviewSubmit(String id) => 'clinics/$id/reviews/submit/';
   static const String practitioners = 'practitioners/';
   static String practitionerDetail(String id) => 'practitioners/$id/';
   static const String treatments = 'treatments/';
@@ -81,7 +80,14 @@ class ApiConfig {
 
   // Clinic Portal Endpoints (Always with trailing slash!)
   static const String clinicDashboard = 'clinic-portal/dashboard/';
+  static const String clinicBadges = 'clinic-portal/badges/';
   static const String clinicProfile = 'clinic-portal/profile/';
+  static const String clinicBranches = 'clinic-portal/branches/';
+  static String clinicBranchDetail(String id) => 'clinic-portal/branches/$id/';
+  static const String clinicSetupChecklist =
+      'clinic-portal/profile/setup-checklist/';
+  static const String clinicSubmitForReview =
+      'clinic-portal/profile/submit-for-review/';
   static const String clinicLeads = 'clinic-portal/leads/';
   static String clinicLeadDetail(String id) => 'clinic-portal/leads/$id/';
   static String clinicLeadNotes(String id) => 'clinic-portal/leads/$id/notes/';
@@ -108,6 +114,14 @@ class ApiConfig {
   static const String referralStatus = 'referral/my-status/';
   static const String referralCollect = 'referral/collect-code/';
 
+  // Media & Binary Upload Endpoints (Always with trailing slash!)
+  static const String mediaUpload = 'media/upload/';
+
+  // Notifications & Device Push Endpoints (Always with trailing slash!)
+  static const String notificationDevices = 'notifications/devices/';
+  static String notificationDeviceDeactivate(String token) =>
+      'notifications/devices/$token/';
+
   // Super Admin Portal Endpoints (Always with trailing slash!)
   static const String adminDashboard = 'admin/dashboard/';
   static const String adminClinics = 'admin/clinics/';
@@ -115,6 +129,8 @@ class ApiConfig {
   static String adminClinicSuspend(String id) => 'admin/clinics/$id/suspend/';
   static String adminClinicActivate(String id) => 'admin/clinics/$id/activate/';
   static String adminClinicVerify(String id) => 'admin/clinics/$id/verify/';
+  static String adminClinicResetPassword(String id) =>
+      'admin/clinics/$id/reset-admin-password/';
   static const String adminLeads = 'admin/leads/';
   static String adminLeadDetail(String id) => 'admin/leads/$id/';
   static const String adminOffers = 'admin/offers/';

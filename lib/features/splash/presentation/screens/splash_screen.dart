@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/features/onboarding/services/onboarding_service.dart';
 import 'package:aesthetic_way/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -89,17 +88,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       onTap: _navigateNext,
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
-        backgroundColor: AppColors.bg(context),
+        backgroundColor: AppBrandLogo.brandNavyCanvas,
         body: Center(
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: ScaleTransition(
               scale: _scaleAnimation,
               child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 36),
+                padding: EdgeInsets.symmetric(horizontal: 24),
                 child: AppBrandLogo.splash(
-                  height: 140,
-                  width: 260,
+                  height: 300,
+                  width: 300,
                 ),
               ),
             ),

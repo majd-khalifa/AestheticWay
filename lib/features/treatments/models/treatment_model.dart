@@ -7,6 +7,7 @@ class TreatmentModel {
   final String? categoryId;
   final String descriptionAr;
   final String? descriptionEn;
+  final int? durationMinutes;
   final String durationText;
   final String? durationTextEn;
   final String downtimeText;
@@ -18,6 +19,7 @@ class TreatmentModel {
   final String? clinicId;
   final String? clinicNameAr;
   final String? clinicNameEn;
+  final String? clinicLogoUrl;
   final double? price;
   final String status;
   final bool isActive;
@@ -32,6 +34,7 @@ class TreatmentModel {
     this.categoryId,
     required this.descriptionAr,
     this.descriptionEn,
+    this.durationMinutes,
     required this.durationText,
     this.durationTextEn,
     required this.downtimeText,
@@ -43,11 +46,21 @@ class TreatmentModel {
     this.clinicId,
     this.clinicNameAr,
     this.clinicNameEn,
+    this.clinicLogoUrl,
     this.price,
     this.status = 'active',
     this.isActive = true,
     this.practitionerIds = const [],
   });
+
+  /// Returns live localized duration string (e.g., "45 mins" / "45 دقيقة") or empty string if not provided by backend.
+  String formattedDuration(bool isArabic) {
+    if (durationMinutes != null && durationMinutes! > 0) {
+      return isArabic ? '$durationMinutes دقيقة' : '$durationMinutes mins';
+    }
+    final raw = isArabic ? durationText.trim() : (durationTextEn ?? durationText).trim();
+    return raw;
+  }
 
   TreatmentModel copyWith({
     String? id,
@@ -58,6 +71,7 @@ class TreatmentModel {
     String? categoryId,
     String? descriptionAr,
     String? descriptionEn,
+    int? durationMinutes,
     String? durationText,
     String? durationTextEn,
     String? downtimeText,
@@ -69,6 +83,7 @@ class TreatmentModel {
     String? clinicId,
     String? clinicNameAr,
     String? clinicNameEn,
+    String? clinicLogoUrl,
     double? price,
     String? status,
     bool? isActive,
@@ -83,6 +98,7 @@ class TreatmentModel {
       categoryId: categoryId ?? this.categoryId,
       descriptionAr: descriptionAr ?? this.descriptionAr,
       descriptionEn: descriptionEn ?? this.descriptionEn,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
       durationText: durationText ?? this.durationText,
       durationTextEn: durationTextEn ?? this.durationTextEn,
       downtimeText: downtimeText ?? this.downtimeText,
@@ -94,6 +110,7 @@ class TreatmentModel {
       clinicId: clinicId ?? this.clinicId,
       clinicNameAr: clinicNameAr ?? this.clinicNameAr,
       clinicNameEn: clinicNameEn ?? this.clinicNameEn,
+      clinicLogoUrl: clinicLogoUrl ?? this.clinicLogoUrl,
       price: price ?? this.price,
       status: status ?? this.status,
       isActive: isActive ?? this.isActive,
@@ -109,6 +126,7 @@ class TreatmentModel {
       'description_en': descriptionEn ?? '',
       'description_ar': descriptionAr,
       if (price != null) 'price': price,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
       'status': status,
       'is_active': isActive,
       'practitioners': practitionerIds,
@@ -131,10 +149,24 @@ class TreatmentModel {
     final parsedClinicId = clinicMap != null ? clinicMap['id']?.toString() : json['clinic_id']?.toString();
     final parsedClinicNameAr = clinicMap != null ? clinicMap['name_ar']?.toString() : json['clinic_name_ar']?.toString();
     final parsedClinicNameEn = clinicMap != null ? clinicMap['name_en']?.toString() : json['clinic_name_en']?.toString();
+    final parsedClinicLogo = clinicMap != null
+        ? (clinicMap['logo']?.toString() ?? clinicMap['logo_url']?.toString())
+        : (json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
 
-    final durationMins = json['duration_minutes'];
-    final defaultDurationAr = durationMins != null ? '$durationMins دقيقة' : '30 - 45 دقيقة';
-    final defaultDurationEn = durationMins != null ? '$durationMins mins' : '30 - 45 mins';
+    final rawDuration = json['duration_minutes'] ?? json['duration'];
+    final int? parsedDurationMins = rawDuration is int
+        ? rawDuration
+        : int.tryParse(rawDuration?.toString() ?? '');
+
+    final rawDurTextAr = (json['duration_text'] ?? json['duration_ar'])?.toString().trim() ?? '';
+    final rawDurTextEn = (json['duration_text_en'] ?? json['duration_en'])?.toString().trim() ?? '';
+
+    final resolvedDurationAr = rawDurTextAr.isNotEmpty
+        ? rawDurTextAr
+        : (parsedDurationMins != null && parsedDurationMins > 0 ? '$parsedDurationMins دقيقة' : '');
+    final resolvedDurationEn = rawDurTextEn.isNotEmpty
+        ? rawDurTextEn
+        : (parsedDurationMins != null && parsedDurationMins > 0 ? '$parsedDurationMins mins' : '');
 
     final practs = json['practitioners'] is List
         ? (json['practitioners'] as List)
@@ -150,19 +182,21 @@ class TreatmentModel {
       categoryAr: catAr.isNotEmpty ? catAr : 'إجراء تجميلي',
       categoryEn: catEn.isNotEmpty ? catEn : 'Aesthetic Procedure',
       categoryId: catId,
-      descriptionAr: json['description_ar'] ?? '',
-      descriptionEn: json['description_en'],
-      durationText: json['duration_text'] ?? defaultDurationAr,
-      durationTextEn: json['duration_text_en'] ?? defaultDurationEn,
-      downtimeText: json['downtime_text'] ?? 'بدون فترة نقاهة',
-      downtimeTextEn: json['downtime_text_en'] ?? 'No downtime',
-      targetAreaAr: json['target_area_ar'] ?? 'الوجه والرقبة',
-      targetAreaEn: json['target_area_en'] ?? 'Face & Neck',
+      descriptionAr: json['description_ar']?.toString() ?? '',
+      descriptionEn: json['description_en']?.toString(),
+      durationMinutes: parsedDurationMins,
+      durationText: resolvedDurationAr,
+      durationTextEn: resolvedDurationEn,
+      downtimeText: (json['downtime_text'] ?? json['downtime_ar'])?.toString().trim() ?? '',
+      downtimeTextEn: (json['downtime_text_en'] ?? json['downtime_en'])?.toString().trim(),
+      targetAreaAr: (json['target_area_ar'] ?? json['target_area'])?.toString().trim() ?? '',
+      targetAreaEn: (json['target_area_en'] ?? json['target_area'])?.toString().trim(),
       clinicsCount: json['clinics_count'] is int ? json['clinics_count'] as int : 1,
-      imageUrl: json['image_url'] ?? '',
+      imageUrl: (json['image_url'] ?? json['image'])?.toString() ?? '',
       clinicId: parsedClinicId,
       clinicNameAr: parsedClinicNameAr,
       clinicNameEn: parsedClinicNameEn,
+      clinicLogoUrl: parsedClinicLogo,
       price: double.tryParse(json['price']?.toString() ?? ''),
       status: json['status']?.toString() ?? 'active',
       isActive: json['is_active'] is bool ? json['is_active'] as bool : true,

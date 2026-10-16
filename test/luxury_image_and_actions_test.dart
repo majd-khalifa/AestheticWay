@@ -26,8 +26,28 @@ void main() {
     });
   });
 
-  group('LuxuryImage and LuxuryAvatar Widget Tests', () {
-    testWidgets('LuxuryImage renders placeholder without crashing when URL is empty string ""', (tester) async {
+  group('computeSafeCacheWidth Tests', () {
+    testWidgets('computes safe cache width clamped within 100 and 1080', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              final w1 = computeSafeCacheWidth(context, 50, 50);
+              final w2 = computeSafeCacheWidth(context, 800, 400);
+              final w3 = computeSafeCacheWidth(context, null, null);
+              expect(w1, inInclusiveRange(100, 1080));
+              expect(w2, inInclusiveRange(100, 1080));
+              expect(w3, inInclusiveRange(100, 1080));
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+    });
+  });
+
+  group('LuxuryImage and LuxuryAvatar Smart Fallback Hierarchy Tests', () {
+    testWidgets('LuxuryImage renders brand emblem asset fallback when imageUrl is empty and no fallbackLogoUrl', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -42,19 +62,24 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LuxuryImage), findsOneWidget);
-      expect(find.byIcon(Icons.local_hospital_outlined), findsOneWidget);
-      expect(find.byType(Image), findsNothing);
+      expect(find.byType(Image), findsOneWidget);
+      final img = tester.widget<Image>(find.byType(Image));
+      expect(img.image, isA<ResizeImage>());
+      final resize = img.image as ResizeImage;
+      expect(resize.imageProvider, isA<AssetImage>());
+      final assetImage = resize.imageProvider as AssetImage;
+      expect(assetImage.assetName, equals('assets/images/aesthetic_way_logo.png'));
     });
 
-    testWidgets('LuxuryImage renders placeholder without crashing when URL is null or invalid', (tester) async {
+    testWidgets('LuxuryImage renders customPlaceholder when provided and imageUrl is empty', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: LuxuryImage(
-              imageUrl: 'file:///',
+              imageUrl: '',
               width: 100,
               height: 100,
-              placeholderIcon: Icons.spa_outlined,
+              customPlaceholder: Icon(Icons.star, key: Key('custom-icon')),
             ),
           ),
         ),
@@ -62,11 +87,41 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LuxuryImage), findsOneWidget);
-      expect(find.byIcon(Icons.spa_outlined), findsOneWidget);
-      expect(find.byType(Image), findsNothing);
+      expect(find.byKey(const Key('custom-icon')), findsOneWidget);
     });
 
-    testWidgets('LuxuryAvatar renders placeholder without crashing when avatar URL is empty or null', (tester) async {
+    testWidgets('LuxuryImage renders clinic logo and gracefully cascades to brand emblem on network failure', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LuxuryImage(
+              imageUrl: '',
+              fallbackLogoUrl: 'https://example.com/clinic_logo.png',
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LuxuryImage), findsOneWidget);
+      // In test environment without HTTP mocking, Image.network fails and triggers errorBuilder cascade
+      // to the official brand emblem fallback.
+      final images = tester.widgetList<Image>(find.byType(Image)).toList();
+      expect(images.isNotEmpty, isTrue);
+      final hasEmblem = images.any((img) {
+        if (img.image is ResizeImage) {
+          final res = img.image as ResizeImage;
+          return res.imageProvider is AssetImage &&
+              (res.imageProvider as AssetImage).assetName == 'assets/images/aesthetic_way_logo.png';
+        }
+        return false;
+      });
+      expect(hasEmblem, isTrue);
+    });
+
+    testWidgets('LuxuryAvatar renders brand emblem without crashing when avatar URL is empty or null', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -80,8 +135,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LuxuryAvatar), findsOneWidget);
-      expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
-      expect(find.byType(Image), findsNothing);
+      expect(find.byType(Image), findsOneWidget);
+      final img = tester.widget<Image>(find.byType(Image));
+      expect(img.image, isA<ResizeImage>());
+      final resize = img.image as ResizeImage;
+      expect(resize.imageProvider, isA<AssetImage>());
+      final assetImage = resize.imageProvider as AssetImage;
+      expect(assetImage.assetName, equals('assets/images/aesthetic_way_logo.png'));
     });
   });
 

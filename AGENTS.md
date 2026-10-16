@@ -25,7 +25,7 @@
 
 ## Professionals
 - Types: Doctor / Nurse / Licensed Professional
-- Show license issuer/number when available (DHA/DOH/MOHAP)
+- Strict Client Rule: NO regulatory license numbers or authority names (DHA/DOH/MOHAP) in UI
 
 ## Subscription ads priority
 1. VIP / 6-12 months: highest Home placement
@@ -38,6 +38,7 @@
 - Luxury medical aesthetic
 - Arabic RTL primary + English LTR
 
-## Source of truth docs
+## Source of truth docs & enforcement skills
+- .agents/skills/strict_project_rules/SKILL.md
 - docs/product/ui-ux-spec.md
-- docs/product/scope.md
+- docs/product/scope.md

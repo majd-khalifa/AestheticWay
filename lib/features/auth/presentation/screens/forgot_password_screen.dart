@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
+import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -122,26 +123,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Lock Reset Icon
-                    Center(
-                      child: Container(
-                        width: 76,
-                        height: 76,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          border: Border.all(
-                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.35 : 0.5),
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.lock_reset_rounded,
-                            size: 36,
-                            color: AppColors.accentChampagne,
-                          ),
-                        ),
-                      ),
+                    // Official Brand Logo (Prominent Auth Sizing)
+                    const Center(
+                      child: AppBrandLogo.auth(),
                     ),
                     const SizedBox(height: 20),
 

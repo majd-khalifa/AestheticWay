@@ -5,6 +5,7 @@ import '../../../core/auth/guest_auth_guard.dart';
 import '../../../core/auth/token_storage.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
+import '../../../core/services/device_token_service.dart';
 import 'models/auth_models.dart';
 
 /// Repository for all Authentication & Identity operations
@@ -217,8 +218,12 @@ class AuthRepository {
     return response.data as Map<String, dynamic>;
   }
 
-  /// Logout and revoke refresh token on backend
+  /// Logout, deactivate push token, and revoke refresh token on backend
   Future<void> logout() async {
+    try {
+      await DeviceTokenService().deactivateCurrentDevice();
+    } catch (_) {}
+
     final refreshToken = await _tokenStorage.getRefreshToken();
     if (refreshToken != null && refreshToken.isNotEmpty) {
       try {
@@ -259,13 +264,14 @@ class AuthRepository {
     String? email,
     String? phone,
   }) async {
-    final cleanEmail = email?.trim();
     final payload = <String, dynamic>{
       'full_name': fullName.trim(),
-      'email': (cleanEmail != null && cleanEmail.isNotEmpty)
-          ? cleanEmail.toLowerCase()
-          : null,
     };
+
+    if (email != null) {
+      final cleanEmail = email.trim();
+      payload['email'] = cleanEmail.isNotEmpty ? cleanEmail.toLowerCase() : null;
+    }
 
     if (phone != null && phone.trim().isNotEmpty) {
       payload['phone'] = normalizePhone(phone.trim());
@@ -283,6 +289,62 @@ class AuthRepository {
       isVerified: user.isVerified,
     );
     return user;
+  }
+
+  /// Request phone change OTP (POST /api/v1/auth/me/phone/change/request/)
+  Future<Map<String, dynamic>> requestPhoneChange(String newPhone) async {
+    final response = await _api.post(
+      ApiConfig.authPhoneChangeRequest,
+      data: {'new_phone': normalizePhone(newPhone)},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Confirm phone change with OTP (POST /api/v1/auth/me/phone/change/confirm/)
+  Future<Map<String, dynamic>> confirmPhoneChange({
+    required String newPhone,
+    required String code,
+  }) async {
+    final response = await _api.post(
+      ApiConfig.authPhoneChangeConfirm,
+      data: {
+        'new_phone': normalizePhone(newPhone),
+        'code': code.trim(),
+      },
+    );
+    // Refresh user profile after confirmation
+    try {
+      await getMe();
+    } catch (_) {}
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Request email change OTP (POST /api/v1/auth/me/email/change/request/)
+  Future<Map<String, dynamic>> requestEmailChange(String newEmail) async {
+    final response = await _api.post(
+      ApiConfig.authEmailChangeRequest,
+      data: {'new_email': newEmail.trim().toLowerCase()},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Confirm email change with OTP (POST /api/v1/auth/me/email/change/confirm/)
+  Future<Map<String, dynamic>> confirmEmailChange({
+    required String newEmail,
+    required String code,
+  }) async {
+    final response = await _api.post(
+      ApiConfig.authEmailChangeConfirm,
+      data: {
+        'new_email': newEmail.trim().toLowerCase(),
+        'code': code.trim(),
+      },
+    );
+    // Refresh user profile after confirmation
+    try {
+      await getMe();
+    } catch (_) {}
+    return response.data as Map<String, dynamic>;
   }
 
   /// Check if user is currently logged in with a valid token

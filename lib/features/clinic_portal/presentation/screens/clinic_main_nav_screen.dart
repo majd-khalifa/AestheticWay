@@ -40,7 +40,11 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
     final isDark = AppColors.isDark(context);
 
     final screens = [
-      ClinicDashboardScreen(onNavigateToLeads: () => _onTabSelected(1), onNavigateToOffers: () => _onTabSelected(2)),
+      ClinicDashboardScreen(
+        onNavigateToLeads: () => _onTabSelected(1),
+        onNavigateToOffers: () => _onTabSelected(2),
+        onNavigateToProfile: () => _onTabSelected(3),
+      ),
       const ClinicLeadsScreen(),
       const ClinicOffersScreen(),
       const ClinicProfileScreen(),

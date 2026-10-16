@@ -199,6 +199,7 @@ class AppointmentRequestModel {
     final practitionerSummary = json['practitioner_summary'] as Map<String, dynamic>?;
     final treatmentSummary = json['treatment_summary'] as Map<String, dynamic>?;
     final offerSummary = json['offer_summary'] as Map<String, dynamic>?;
+    final productSummary = json['product_summary'] as Map<String, dynamic>?;
 
     final clinicId = json['clinic']?.toString() ?? clinicSummary?['id']?.toString() ?? '';
     final clinicNameAr = clinicSummary?['name_ar']?.toString() ?? json['clinic_name_ar']?.toString() ?? 'عيادة تجميلية';
@@ -207,10 +208,13 @@ class AppointmentRequestModel {
     final branchNameAr = branchSummary?['name_ar']?.toString() ?? json['branch_name_ar']?.toString() ?? 'الفرع الرئيسي';
     final branchNameEn = branchSummary?['name_en']?.toString() ?? json['branch_name_en']?.toString() ?? 'Main Branch';
 
-    // Service name
+    // Service / Product / Offer name
     String serviceNameAr = json['service_name']?.toString() ?? '';
     String? serviceNameEn = json['service_name_en']?.toString();
-    if (treatmentSummary != null) {
+    if (productSummary != null) {
+      serviceNameAr = productSummary['name_ar']?.toString() ?? productSummary['name_en']?.toString() ?? serviceNameAr;
+      serviceNameEn = productSummary['name_en']?.toString() ?? productSummary['name_ar']?.toString() ?? serviceNameEn;
+    } else if (treatmentSummary != null) {
       serviceNameAr = treatmentSummary['name_ar']?.toString() ?? serviceNameAr;
       serviceNameEn = treatmentSummary['name_en']?.toString() ?? serviceNameEn;
     } else if (offerSummary != null) {
@@ -218,7 +222,9 @@ class AppointmentRequestModel {
       serviceNameEn = offerSummary['title_en']?.toString() ?? serviceNameEn;
     }
     if (serviceNameAr.isEmpty) {
-      serviceNameAr = 'استشارة تجميلية وجلدية عامة';
+      serviceNameAr = json['lead_type']?.toString() == 'product'
+          ? 'استفسار عن منتج طبي'
+          : 'استشارة تجميلية وجلدية عامة';
     }
 
     // Practitioner summary

@@ -31,7 +31,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const LoginScreen(),
         transitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -59,21 +60,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final slides = [
       _OnboardingSlideData(
         icon: Icons.domain_rounded,
-        imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-        badgeText: loc.isArabic ? 'عيادات معتمدة في الإمارات' : 'Certified UAE Clinics',
+        imagePath: 'assets/images/onboarding/onboarding_1.jpeg',
+        badgeText: loc.isArabic
+            ? 'عيادات معتمدة في الإمارات'
+            : 'Certified UAE Clinics',
         title: loc.tr('onboarding_title_1'),
         description: loc.tr('onboarding_desc_1'),
       ),
       _OnboardingSlideData(
         icon: Icons.medical_services_rounded,
-        imageUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
-        badgeText: loc.isArabic ? 'أطباء وخبراء معتمدون' : 'Licensed Doctors & Experts',
+        imagePath: 'assets/images/onboarding/onboarding_2.webp',
+        badgeText: loc.isArabic
+            ? 'أطباء وخبراء معتمدون'
+            : 'Licensed Doctors & Experts',
         title: loc.tr('onboarding_title_2'),
         description: loc.tr('onboarding_desc_2'),
       ),
       _OnboardingSlideData(
         icon: Icons.spa_rounded,
-        imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
+        imagePath: 'assets/images/onboarding/onboarding_3.jpeg',
         badgeText: loc.isArabic ? 'ربط وتواصل مباشر' : 'Direct Lead Connection',
         title: loc.tr('onboarding_title_3'),
         description: loc.tr('onboarding_desc_3'),
@@ -88,25 +93,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // Top Bar with Official Logo & Skip Button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const AppBrandLogo.header(height: 28),
-                      TextButton(
-                        onPressed: _finishOnboarding,
-                        child: Text(
-                          loc.tr('onboarding_skip'),
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.mutedText(context),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13.5,
-                          ),
-                        ),
-                      ),
-                    ],
+                // Top Bar with Official Logo (Centered, mandatory flow)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Center(
+                    child: AppBrandLogo.header(height: 44, width: 120),
                   ),
                 ),
 
@@ -155,11 +146,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   Positioned.fill(
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(21),
-                                      child: Image.network(
-                                        item.imageUrl,
+                                      child: Image.asset(
+                                        item.imagePath,
                                         fit: BoxFit.cover,
                                         errorBuilder: (_, _, _) => Container(
-                                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurface,
+                                          color: isDark
+                                              ? AppColors.cardSurfaceHover
+                                              : AppColors.lightCardSurface,
                                           child: Icon(
                                             item.icon,
                                             size: 54,
@@ -179,7 +172,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           end: Alignment.bottomCenter,
                                           colors: [
                                             Colors.transparent,
-                                            (isDark ? Colors.black : const Color(0xFF070B16)).withValues(alpha: 0.45),
+                                            (isDark
+                                                    ? Colors.black
+                                                    : const Color(0xFF070B16))
+                                                .withValues(alpha: 0.45),
                                           ],
                                         ),
                                       ),
@@ -194,15 +190,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       padding: const EdgeInsets.all(7),
                                       decoration: BoxDecoration(
                                         color: isDark
-                                            ? AppColors.cardSurface.withValues(alpha: 0.88)
-                                            : Colors.white.withValues(alpha: 0.92),
+                                            ? AppColors.cardSurface.withValues(
+                                                alpha: 0.88,
+                                              )
+                                            : Colors.white.withValues(
+                                                alpha: 0.92,
+                                              ),
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: AppColors.accentChampagne.withValues(alpha: 0.6),
+                                          color: AppColors.accentChampagne
+                                              .withValues(alpha: 0.6),
                                           width: 1.0,
                                         ),
                                       ),
-                                      child: Icon(item.icon, size: 16, color: AppColors.accentChampagne),
+                                      child: Icon(
+                                        item.icon,
+                                        size: 16,
+                                        color: AppColors.accentChampagne,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -289,8 +294,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               color: isSelected
                                   ? AppColors.accentChampagne
                                   : (isDark
-                                      ? AppColors.borderSubtle
-                                      : AppColors.lightBorder),
+                                        ? AppColors.borderSubtle
+                                        : AppColors.lightBorder),
                               borderRadius: BorderRadius.circular(3),
                             ),
                           );
@@ -324,14 +329,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _OnboardingSlideData {
   final IconData icon;
-  final String imageUrl;
+  final String imagePath;
   final String badgeText;
   final String title;
   final String description;
 
   const _OnboardingSlideData({
     required this.icon,
-    required this.imageUrl,
+    required this.imagePath,
     required this.badgeText,
     required this.title,
     required this.description,

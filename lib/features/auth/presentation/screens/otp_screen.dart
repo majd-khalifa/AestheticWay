@@ -203,6 +203,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   void _onResendOtp() async {
+    if (_resendSeconds > 0 || _isResending) return;
     final loc = LocaleService();
     setState(() {
       _isResending = true;

@@ -11,6 +11,8 @@ import 'package:aesthetic_way/features/articles/models/article_model.dart';
 import '../data/clinic_leads_repository.dart';
 import '../data/clinic_catalog_repository.dart';
 import '../data/models/clinic_dashboard_model.dart';
+import '../data/models/clinic_badge_counts_model.dart';
+import '../data/models/clinic_setup_checklist_model.dart';
 
 /// Clinic Portal Service managing State, Leads, and Catalog for the Logged-in Clinic Partner
 class ClinicPortalService extends ChangeNotifier {
@@ -31,6 +33,7 @@ class ClinicPortalService extends ChangeNotifier {
   final List<AppointmentRequestModel> _clinicLeads = [];
   final Map<String, String> _internalNotes = {};
   ClinicDashboardModel? _dashboardData;
+  ClinicBadgeCountsModel? _badgeCounts;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -40,19 +43,77 @@ class ClinicPortalService extends ChangeNotifier {
   final List<CategoryModel> _categories = [];
   final List<ProductModel> _clinicProducts = [];
   final List<ArticleModel> _clinicArticles = [];
+  final List<ClinicBranch> _clinicBranches = [];
+  ClinicSetupChecklistModel? _setupChecklist;
 
   ClinicModel get activeClinic => _activeClinic;
   List<AppointmentRequestModel> get clinicLeads => List.unmodifiable(_clinicLeads);
   ClinicDashboardModel? get dashboardData => _dashboardData;
+  ClinicBadgeCountsModel? get badgeCounts => _badgeCounts;
+  ClinicSetupChecklistModel? get setupChecklist => _setupChecklist;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  static const List<CategoryModel> defaultCategories = [
+    CategoryModel(
+      id: 'cat-injectables',
+      nameEn: 'Injectables & Fillers',
+      nameAr: 'الحقن والفيلر',
+      slug: 'injectables',
+      displayOrder: 1,
+    ),
+    CategoryModel(
+      id: 'cat-skincare',
+      nameEn: 'Skin Care & Facials',
+      nameAr: 'العناية بالبشرة',
+      slug: 'skincare',
+      displayOrder: 2,
+    ),
+    CategoryModel(
+      id: 'cat-laser',
+      nameEn: 'Laser & Hair Removal',
+      nameAr: 'الليزر وإزالة الشعر',
+      slug: 'laser',
+      displayOrder: 3,
+    ),
+    CategoryModel(
+      id: 'cat-plastic-surgery',
+      nameEn: 'Plastic Surgery',
+      nameAr: 'الجراحة التجميلية',
+      slug: 'plastic-surgery',
+      displayOrder: 4,
+    ),
+    CategoryModel(
+      id: 'cat-body-contouring',
+      nameEn: 'Body Contouring',
+      nameAr: 'نحت وقوام الجسم',
+      slug: 'body-contouring',
+      displayOrder: 5,
+    ),
+  ];
 
   List<OfferModel> get clinicOffers => List.unmodifiable(_clinicOffers);
   List<PractitionerModel> get clinicPractitioners => List.unmodifiable(_clinicPractitioners);
   List<TreatmentModel> get clinicTreatments => List.unmodifiable(_clinicTreatments);
-  List<CategoryModel> get categories => List.unmodifiable(_categories);
+  List<CategoryModel> get categories =>
+      _categories.isNotEmpty ? List.unmodifiable(_categories) : defaultCategories;
   List<ProductModel> get clinicProducts => List.unmodifiable(_clinicProducts);
   List<ArticleModel> get clinicArticles => List.unmodifiable(_clinicArticles);
+  List<ClinicBranch> get clinicBranches => List.unmodifiable(_clinicBranches);
+
+  Future<List<CategoryModel>> getOrFetchCategories() async {
+    if (_categories.isNotEmpty) return _categories;
+    try {
+      final cats = await _catalogRepository.getCategories();
+      if (cats.isNotEmpty) {
+        _categories.clear();
+        _categories.addAll(cats);
+        notifyListeners();
+        return _categories;
+      }
+    } catch (_) {}
+    return categories;
+  }
 
   void _initializeDefaultActiveClinic() {
     _activeClinic = const ClinicModel(
@@ -79,6 +140,8 @@ class ClinicPortalService extends ChangeNotifier {
   void enableMockMode({
     List<AppointmentRequestModel>? testLeads,
     ClinicDashboardModel? testDashboard,
+    ClinicModel? testClinic,
+    ClinicSetupChecklistModel? testChecklist,
   }) {
     _mockMode = true;
     if (_clinicLeads.isEmpty && _clinicOffers.isEmpty && _clinicPractitioners.isEmpty) {
@@ -91,6 +154,18 @@ class ClinicPortalService extends ChangeNotifier {
     if (testDashboard != null) {
       _dashboardData = testDashboard;
     }
+    if (testClinic != null) {
+      _activeClinic = testClinic;
+    }
+    if (testChecklist != null) {
+      _setupChecklist = testChecklist;
+    }
+    notifyListeners();
+  }
+
+  @visibleForTesting
+  void setActiveClinicForTesting(ClinicModel clinic) {
+    _activeClinic = clinic;
     notifyListeners();
   }
 
@@ -112,6 +187,8 @@ class ClinicPortalService extends ChangeNotifier {
     _isLoading = false;
     _errorMessage = null;
     _internalNotes.clear();
+    _dashboardData = null;
+    _badgeCounts = null;
     _clinicLeads.clear();
     _clinicOffers.clear();
     _clinicPractitioners.clear();
@@ -119,23 +196,30 @@ class ClinicPortalService extends ChangeNotifier {
     _categories.clear();
     _clinicProducts.clear();
     _clinicArticles.clear();
+    _clinicBranches.clear();
+    _setupChecklist = null;
     _initializeDefaultActiveClinic();
   }
 
   int get newLeadsCount =>
+      _badgeCounts?.unreadRequests ??
       _dashboardData?.newLeads ??
       _clinicLeads.where((l) => l.status == AppointmentLeadStatus.sent).length;
 
   int get contactedLeadsCount =>
+      _badgeCounts?.contactedRequests ??
       _dashboardData?.contactedLeads ??
       _clinicLeads.where((l) => l.status == AppointmentLeadStatus.contacted).length;
 
   int get closedLeadsCount =>
+      _badgeCounts?.closedRequests ??
       _dashboardData?.closedLeads ??
       _clinicLeads.where((l) => l.status == AppointmentLeadStatus.closed).length;
 
   int get totalLeadsCount =>
-      _dashboardData?.totalLeads ?? _clinicLeads.length;
+      _badgeCounts?.totalRequests ??
+      _dashboardData?.totalLeads ??
+      _clinicLeads.length;
 
   int get activeOffersCount =>
       _clinicOffers.where((o) => o.status == 'active' && o.isActive).length;
@@ -199,14 +283,24 @@ class ClinicPortalService extends ChangeNotifier {
       final results = await Future.wait([
         _repository.getLeads(status: status, search: search),
         _repository.getDashboard(),
+        _repository.getBadgeCounts(),
       ]);
 
       _clinicLeads.clear();
       _clinicLeads.addAll(results[0] as List<AppointmentRequestModel>);
       _dashboardData = results[1] as ClinicDashboardModel;
+      _badgeCounts = results[2] as ClinicBadgeCountsModel;
 
       try {
         _activeClinic = await _catalogRepository.getClinicProfile();
+      } catch (_) {}
+
+      try {
+        await loadBranches();
+      } catch (_) {}
+
+      try {
+        await loadSetupChecklist();
       } catch (_) {}
 
       _hasLoadedFromApi = true;
@@ -217,6 +311,15 @@ class ClinicPortalService extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Refresh lightweight clinic unread badge counters without refetching all lead records
+  Future<void> refreshBadgeCounts() async {
+    if (_mockMode) return;
+    try {
+      _badgeCounts = await _repository.getBadgeCounts();
+      notifyListeners();
+    } catch (_) {}
   }
 
   /// Fetch live catalog data (practitioners, treatments, offers, categories, products, articles)
@@ -263,6 +366,7 @@ class ClinicPortalService extends ChangeNotifier {
 
       _hasLoadedCatalogFromApi = true;
       _errorMessage = null;
+      _calculateLocalChecklist();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -829,6 +933,9 @@ class ClinicPortalService extends ChangeNotifier {
           imageUrl: data['image'] as String? ?? p.imageUrl,
           isAvailable: data['is_active'] as bool? ?? p.isAvailable,
           status: data['status'] as String? ?? p.status,
+          brandNameEn: data['brand_name_en'] as String? ?? p.brandNameEn,
+          brandNameAr: data['brand_name_ar'] as String? ?? p.brandNameAr,
+          sponsorCompany: data['sponsor_company'] as String? ?? p.sponsorCompany,
         );
         _clinicProducts[idx] = updated;
         notifyListeners();
@@ -988,6 +1095,8 @@ class ClinicPortalService extends ChangeNotifier {
     String? addressAr,
     String? addressEn,
     String? googleMapsUrl,
+    String? logo,
+    String? coverImage,
   }) async {
     _activeClinic = ClinicModel(
       id: _activeClinic.id,
@@ -995,9 +1104,9 @@ class ClinicPortalService extends ChangeNotifier {
       nameEn: nameEn,
       descriptionAr: descriptionAr,
       descriptionEn: descriptionEn,
-      coverImageUrl: _activeClinic.coverImageUrl,
+      coverImageUrl: coverImage ?? _activeClinic.coverImageUrl,
       galleryImages: _activeClinic.galleryImages,
-      logoUrl: _activeClinic.logoUrl,
+      logoUrl: logo ?? _activeClinic.logoUrl,
       rating: _activeClinic.rating,
       reviewCount: _activeClinic.reviewCount,
       subscriptionTier: _activeClinic.subscriptionTier,
@@ -1038,9 +1147,148 @@ class ClinicPortalService extends ChangeNotifier {
       'address_en': ?addressEn,
       'google_maps_url': ?googleMapsUrl,
     };
+    if (logo != null && logo.isNotEmpty) payload['logo'] = logo;
+    if (coverImage != null && coverImage.isNotEmpty) payload['cover_image'] = coverImage;
 
     final updated = await _catalogRepository.updateClinicProfile(payload);
     _activeClinic = updated;
+    _calculateLocalChecklist();
+    notifyListeners();
+  }
+
+  // -------------------------------------------------------------
+  // CLINIC BRANCHES & ONBOARDING CHECKLIST
+  // -------------------------------------------------------------
+
+  Future<void> loadBranches() async {
+    if (_mockMode) {
+      if (_clinicBranches.isEmpty && _activeClinic.branches.isNotEmpty) {
+        _clinicBranches.addAll(_activeClinic.branches);
+      }
+      return;
+    }
+    try {
+      final res = await _catalogRepository.getBranches();
+      _clinicBranches.clear();
+      _clinicBranches.addAll(res);
+      notifyListeners();
+    } catch (_) {
+      if (_clinicBranches.isEmpty && _activeClinic.branches.isNotEmpty) {
+        _clinicBranches.addAll(_activeClinic.branches);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<ClinicBranch> createBranch(Map<String, dynamic> data) async {
+    final branch = await _catalogRepository.createBranch(data);
+    _clinicBranches.add(branch);
+    _calculateLocalChecklist();
+    notifyListeners();
+    return branch;
+  }
+
+  Future<ClinicBranch> updateBranch(String id, Map<String, dynamic> data) async {
+    final branch = await _catalogRepository.updateBranch(id, data);
+    final idx = _clinicBranches.indexWhere((b) => b.id == id);
+    if (idx != -1) {
+      _clinicBranches[idx] = branch;
+    }
+    notifyListeners();
+    return branch;
+  }
+
+  Future<void> deleteBranch(String id) async {
+    await _catalogRepository.deleteBranch(id);
+    _clinicBranches.removeWhere((b) => b.id == id);
+    _calculateLocalChecklist();
+    notifyListeners();
+  }
+
+  Future<void> loadSetupChecklist() async {
+    if (_mockMode) {
+      _calculateLocalChecklist();
+      return;
+    }
+    try {
+      _setupChecklist = await _catalogRepository.getSetupChecklist();
+      notifyListeners();
+    } catch (_) {
+      _calculateLocalChecklist();
+    }
+  }
+
+  void _calculateLocalChecklist() {
+    final hasBranding = _activeClinic.logoUrl.isNotEmpty || _activeClinic.coverImageUrl.isNotEmpty;
+    final hasDetails = _activeClinic.descriptionAr.isNotEmpty || _activeClinic.descriptionEn.isNotEmpty || _activeClinic.nameEn.isNotEmpty;
+    final hasBranch = _clinicBranches.isNotEmpty || _activeClinic.branches.isNotEmpty || _activeClinic.hasMapLocation;
+    final hasPractitioner = _clinicPractitioners.isNotEmpty;
+    final hasTreatment = _clinicTreatments.isNotEmpty;
+
+    int completed = 0;
+    if (hasBranding) completed++;
+    if (hasDetails) completed++;
+    if (hasBranch) completed++;
+    if (hasPractitioner) completed++;
+    if (hasTreatment) completed++;
+
+    final progress = ((completed / 5) * 100).round();
+
+    _setupChecklist = ClinicSetupChecklistModel(
+      clinicId: _activeClinic.id,
+      setupStatus: _activeClinic.setupStatus,
+      progressPercentage: progress,
+      isReadyForReview: completed == 5,
+      items: [
+        ClinicSetupChecklistItem(
+          key: 'branding',
+          titleEn: 'Clinic Branding (Logo & Cover)',
+          titleAr: 'الهوية البصرية (الشعار وصورة الغلاف)',
+          isCompleted: hasBranding,
+          route: '/clinic/profile',
+        ),
+        ClinicSetupChecklistItem(
+          key: 'details',
+          titleEn: 'Bilingual Bio & Contact Details',
+          titleAr: 'الوصف التعريفي باللغتين ومعلومات الاتصال',
+          isCompleted: hasDetails,
+          route: '/clinic/profile',
+        ),
+        ClinicSetupChecklistItem(
+          key: 'branch',
+          titleEn: 'Main Branch Location & Map',
+          titleAr: 'الفرع الرئيسي وموقع الخريطة',
+          isCompleted: hasBranch,
+          route: '/clinic/branches',
+        ),
+        ClinicSetupChecklistItem(
+          key: 'practitioners',
+          titleEn: 'At least 1 Medical Practitioner',
+          titleAr: 'طبيب أو ممارس مرخص واحد على الأقل',
+          isCompleted: hasPractitioner,
+          route: '/clinic/practitioners',
+        ),
+        ClinicSetupChecklistItem(
+          key: 'treatments',
+          titleEn: 'At least 1 Treatment Service',
+          titleAr: 'خدمة أو علاج تجميلي واحد على الأقل',
+          isCompleted: hasTreatment,
+          route: '/clinic/treatments',
+        ),
+      ],
+    );
+    notifyListeners();
+  }
+
+  Future<void> submitProfileForReview() async {
+    final res = await _catalogRepository.submitProfileForReview();
+    final newStatus = res['setup_status']?.toString() ?? 'submitted';
+    _activeClinic = _activeClinic.copyWith(setupStatus: newStatus);
+    try {
+      _setupChecklist = await _catalogRepository.getSetupChecklist();
+    } catch (_) {
+      _calculateLocalChecklist();
+    }
     notifyListeners();
   }
 }

@@ -164,37 +164,124 @@ class ApiException implements Exception {
   }
 
   static String _fieldDisplayName(String key) {
+    final isArabic = LocaleService().isArabic;
     switch (key.toLowerCase()) {
       case 'phone':
-        return 'رقم الهاتف';
+        return isArabic ? 'رقم الهاتف' : 'Phone Number';
       case 'password':
-        return 'كلمة المرور';
+        return isArabic ? 'كلمة المرور' : 'Password';
       case 'email':
-        return 'البريد الإلكتروني';
+        return isArabic ? 'البريد الإلكتروني' : 'Email';
       case 'full_name':
-        return 'الاسم الكامل';
+        return isArabic ? 'الاسم الكامل' : 'Full Name';
       case 'referral_code':
-        return 'كود الإحالة';
+        return isArabic ? 'كود الإحالة' : 'Referral Code';
       case 'otp_code':
-        return 'رمز التحقق';
+        return isArabic ? 'رمز التحقق' : 'Verification Code';
       case 'clinic':
-        return 'العيادة';
+      case 'clinic_id':
+        return isArabic ? 'العيادة' : 'Clinic';
       case 'branch':
-        return 'الفرع';
+      case 'branch_id':
+        return isArabic ? 'الفرع' : 'Branch';
       case 'practitioner':
-        return 'الممارس / الطبيب';
+      case 'practitioner_id':
+        return isArabic ? 'الممارس / الطبيب' : 'Practitioner';
       case 'treatment':
-        return 'العلاج';
+      case 'treatment_id':
+        return isArabic ? 'العلاج' : 'Treatment';
       case 'offer':
-        return 'العرض';
+      case 'offer_id':
+        return isArabic ? 'العرض' : 'Offer';
       case 'service_name':
-        return 'الخدمة';
+        return isArabic ? 'الخدمة' : 'Service';
       case 'consent_accepted':
-        return 'الموافقة على مشاركة البيانات';
+        return isArabic ? 'الموافقة على مشاركة البيانات' : 'Consent';
       case 'preferred_time_window':
-        return 'الفترة الزمنية المفضلة';
+        return isArabic ? 'الفترة الزمنية المفضلة' : 'Preferred Time Window';
       case 'notes':
-        return 'الملاحظات';
+        return isArabic ? 'الملاحظات' : 'Notes';
+      case 'name_en':
+        return isArabic ? 'الاسم بالإنجليزية' : 'Name (English)';
+      case 'name_ar':
+        return isArabic ? 'الاسم بالعربية' : 'Name (Arabic)';
+      case 'title_en':
+        return isArabic ? 'المسمى الوظيفي بالإنجليزية' : 'Title (English)';
+      case 'title_ar':
+        return isArabic ? 'المسمى الوظيفي بالعربية' : 'Title (Arabic)';
+      case 'speciality_en':
+        return isArabic ? 'التخصص بالإنجليزية' : 'Speciality (English)';
+      case 'speciality_ar':
+        return isArabic ? 'التخصص بالعربية' : 'Speciality (Arabic)';
+      case 'category':
+      case 'category_id':
+        return isArabic ? 'الفئة' : 'Category';
+      case 'price':
+        return isArabic ? 'السعر' : 'Price';
+      case 'original_price':
+        return isArabic ? 'السعر الأصلي' : 'Original Price';
+      case 'offer_price':
+        return isArabic ? 'سعر العرض' : 'Offer Price';
+      case 'discount_percentage':
+        return isArabic ? 'نسبة الخصم' : 'Discount Percentage';
+      case 'starts_at':
+        return isArabic ? 'تاريخ بدء العرض' : 'Start Date';
+      case 'ends_at':
+        return isArabic ? 'تاريخ انتهاء العرض' : 'End Date';
+      case 'avatar':
+        return isArabic ? 'الصورة الشخصية' : 'Avatar';
+      case 'cover_image':
+        return isArabic ? 'صورة الغلاف' : 'Cover Image';
+      case 'logo':
+        return isArabic ? 'شعار العيادة' : 'Clinic Logo';
+      case 'image':
+        return isArabic ? 'الصورة' : 'Image';
+      case 'sponsor_company':
+        return isArabic ? 'الشركة الراعية' : 'Sponsor Company';
+      case 'brand_name_en':
+        return isArabic ? 'اسم العلامة التجارية بالإنجليزية' : 'Brand Name (English)';
+      case 'brand_name_ar':
+        return isArabic ? 'اسم العلامة التجارية بالعربية' : 'Brand Name (Arabic)';
+      case 'admin_user':
+        return isArabic ? 'بيانات المشرف' : 'Admin User';
+      case 'admin_user.full_name':
+        return isArabic ? 'اسم المشرف' : 'Admin Name';
+      case 'admin_user.phone':
+        return isArabic ? 'رقم هاتف المشرف' : 'Admin Phone';
+      case 'admin_user.email':
+        return isArabic ? 'بريد المشرف' : 'Admin Email';
+      case 'admin_user.temporary_password':
+        return isArabic ? 'كلمة المرور المؤقتة للمشرف' : 'Temporary Password';
+      case 'city':
+        return isArabic ? 'المدينة' : 'City';
+      case 'emirate':
+        return isArabic ? 'الإمارة' : 'Emirate';
+      case 'address_en':
+        return isArabic ? 'العنوان بالإنجليزية' : 'Address (English)';
+      case 'address_ar':
+        return isArabic ? 'العنوان بالعربية' : 'Address (Arabic)';
+      case 'description_en':
+        return isArabic ? 'الوصف بالإنجليزية' : 'Description (English)';
+      case 'description_ar':
+        return isArabic ? 'الوصف بالعربية' : 'Description (Arabic)';
+      case 'summary_en':
+        return isArabic ? 'الملخص بالإنجليزية' : 'Summary (English)';
+      case 'summary_ar':
+        return isArabic ? 'الملخص بالعربية' : 'Summary (Arabic)';
+      case 'content_en':
+        return isArabic ? 'المحتوى بالإنجليزية' : 'Content (English)';
+      case 'content_ar':
+        return isArabic ? 'المحتوى بالعربية' : 'Content (Arabic)';
+      case 'whatsapp':
+        return isArabic ? 'رقم الواتساب' : 'WhatsApp Number';
+      case 'website':
+        return isArabic ? 'الموقع الإلكتروني' : 'Website';
+      case 'is_main_branch':
+        return isArabic ? 'الفرع الرئيسي' : 'Main Branch';
+      case 'display_order':
+        return isArabic ? 'ترتيب العرض' : 'Display Order';
+      case 'subscription_tier':
+        return isArabic ? 'باقة الاشتراك' : 'Subscription Tier';
       default:
         return key;
     }
@@ -204,6 +291,44 @@ class ApiException implements Exception {
     final lower = msg.toLowerCase();
     final isArabic = LocaleService().isArabic;
 
+    // Common DRF validation message localizations
+    if (lower.contains('this field is required') || lower.contains('this field may not be null')) {
+      return isArabic ? 'هذا الحقل مطلوب' : 'This field is required.';
+    }
+    if (lower.contains('this field may not be blank')) {
+      return isArabic ? 'هذا الحقل لا يمكن تركه فارغاً' : 'This field may not be blank.';
+    }
+    if (lower.contains('not a file') || lower.contains('submitted data was not a file')) {
+      return isArabic ? 'الملف المرفق غير صالح، يرجى اختيار ملف صورة صحيح' : 'The submitted data was not a valid file.';
+    }
+    if (lower.contains('enter a valid url')) {
+      return isArabic ? 'يرجى إدخال رابط إنترنت صالح' : 'Enter a valid URL.';
+    }
+    if (lower.contains('enter a valid date/time') || lower.contains('enter a valid datetime') || lower.contains('valid date')) {
+      return isArabic ? 'يرجى إدخال تاريخ ووقت صالح' : 'Enter a valid date/time.';
+    }
+    if (lower.contains('cannot be earlier than') || (lower.contains('end date') && lower.contains('start date'))) {
+      return isArabic ? 'تاريخ نهاية العرض لا يمكن أن يكون قبل تاريخ البداية' : 'Offer end date cannot be earlier than start date.';
+    }
+    if (lower.contains('valid integer') || lower.contains('valid number')) {
+      return isArabic ? 'يرجى إدخال رقم صحيح صالح' : 'A valid number is required.';
+    }
+    if (lower.contains('greater than or equal to 0')) {
+      return isArabic ? 'يجب أن تكون القيمة أكبر من أو تساوي 0' : 'Value must be 0 or greater.';
+    }
+    if (lower.contains('no more than') && lower.contains('character')) {
+      return isArabic ? 'تم تجاوز الحد الأقصى المسموح به لعدد الأحرف' : 'Exceeded maximum allowed characters.';
+    }
+    if (lower.contains('at least') && lower.contains('character')) {
+      return isArabic ? 'عدد الأحرف أقل من الحد الأدنى المطلوب' : 'Fewer characters than minimum required.';
+    }
+    if (lower.contains('object does not exist') || lower.contains('invalid pk')) {
+      return isArabic ? 'العنصر المختار غير موجود أو تم حذفه' : 'Selected item does not exist.';
+    }
+    if (lower.contains('expected a list of items')) {
+      return isArabic ? 'صيغة البيانات غير صحيحة' : 'Invalid data format.';
+    }
+
     // If English mode, return friendly wording for 429 duplicate/rate limit
     if (!isArabic) {
       if (lower.contains('already submitted') ||
@@ -211,7 +336,7 @@ class ApiException implements Exception {
           lower.contains('throttled')) {
         return 'A similar request was recently submitted. Please try again shortly.';
       }
-      return msg;
+      return sanitizeRegulatoryCompliance(msg);
     }
 
     // OTP errors (422 / 429)
@@ -305,7 +430,22 @@ class ApiException implements Exception {
       return 'هذا العرض غير متاح حالياً أو انتهت صلاحيته';
     }
 
-    return msg;
+    return sanitizeRegulatoryCompliance(msg);
+  }
+
+  /// Compliance Sanitizer: Enforces product rule that no regulatory body names (DHA, DOH, MOHAP)
+  /// or raw medical license numbers ever leak into patient UI error messages.
+  static String sanitizeRegulatoryCompliance(String text) {
+    if (text.isEmpty) return text;
+    var sanitized = text.replaceAll(
+      RegExp(r'\b(DHA|DOH|MOHAP)[-\s/][A-Z0-9-]+\b', caseSensitive: false),
+      LocaleService().isArabic ? 'الترخيص الطبي' : 'medical license',
+    );
+    sanitized = sanitized.replaceAll(
+      RegExp(r'\b(DHA|DOH|MOHAP)\b', caseSensitive: false),
+      LocaleService().isArabic ? 'الجهة الطبية المختصة' : 'licensing authority',
+    );
+    return sanitized;
   }
 
   @override

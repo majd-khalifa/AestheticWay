@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
-import 'package:aesthetic_way/core/widgets/distance_chip.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -339,17 +339,17 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Top Cinematic Image Area with Minimal Info & Badges
+                    // Top Cinematic Image / Short Video Area (up to 15s muted) with Minimal Info & Badges
                     Expanded(
                       flex: 14,
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          LuxuryImage(
+                          FeaturedAdSlideMedia(
                             imageUrl: clinic.coverImageUrl,
-                            fit: BoxFit.cover,
-                            placeholderIcon: Icons.local_hospital_outlined,
-                            iconSize: 42,
+                            fallbackLogoUrl: clinic.logoUrl,
+                            videoUrl: clinic.hasVideoAd ? clinic.videoUrl : null,
+                            isActive: widget.isActive,
                           ),
                           // Deep 3-Stop Gradient for Maximum Typography Readability
                           Container(
@@ -377,6 +377,49 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                               showGoogleSource: true,
                             ),
                           ),
+                          // Muted Video Badge when clinic slide has a short video ad
+                          if (clinic.hasVideoAd)
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: Container(
+                                key: const Key('featured_ad_video_badge'),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.65),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.accentChampagne.withValues(alpha: 0.5),
+                                    width: 0.7,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.videocam_outlined,
+                                      size: 12,
+                                      color: AppColors.accentChampagne,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.volume_off_rounded,
+                                      size: 11,
+                                      color: Colors.white70,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      loc.isArabic ? 'فيديو 15ث' : '15s Video',
+                                      style: AppTypography.badge.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           // Bottom Meta inside Image
                           Positioned(
                             bottom: 8,
@@ -397,15 +440,31 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    DistanceChip(
-                                      distanceKm: clinic.distanceKm,
-                                      areaName: loc.isArabic ? clinic.areaAr : clinic.areaEn,
-                                    ),
-                                  ],
-                                ),
+                                if ((loc.isArabic ? clinic.areaAr : clinic.areaEn).trim().isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_outlined,
+                                        size: 12,
+                                        color: AppColors.accentChampagne,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          loc.isArabic ? clinic.areaAr : clinic.areaEn,
+                                          style: AppTypography.caption.copyWith(
+                                            color: Colors.white70,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -517,6 +576,157 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Media renderer for VIP / Featured Ad slides:
+/// - If [videoUrl] is null or empty: renders [LuxuryImage] (existing behavior).
+/// - If [videoUrl] is present: initializes muted [VideoPlayerController], loops within 15 seconds,
+///   and gracefully falls back to [LuxuryImage] (cover image or luxury placeholder) if video initialization or playback fails.
+class FeaturedAdSlideMedia extends StatefulWidget {
+  static const Duration maxVideoDuration = Duration(seconds: 15);
+
+  final String? imageUrl;
+  final String? fallbackLogoUrl;
+  final String? videoUrl;
+  final bool isActive;
+
+  const FeaturedAdSlideMedia({
+    super.key,
+    required this.imageUrl,
+    this.fallbackLogoUrl,
+    this.videoUrl,
+    this.isActive = true,
+  });
+
+  @override
+  State<FeaturedAdSlideMedia> createState() => _FeaturedAdSlideMediaState();
+}
+
+class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia> {
+  VideoPlayerController? _controller;
+  bool _isVideoInitialized = false;
+  bool _hasVideoError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initVideoIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant FeaturedAdSlideMedia oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoUrl != widget.videoUrl) {
+      _disposeController();
+      _initVideoIfNeeded();
+    } else if (oldWidget.isActive != widget.isActive &&
+        _isVideoInitialized &&
+        !_hasVideoError &&
+        _controller != null) {
+      if (widget.isActive) {
+        _controller!.play();
+      } else {
+        _controller!.pause();
+      }
+    }
+  }
+
+  Future<void> _initVideoIfNeeded() async {
+    final resolvedVideo = resolveNetworkImageUrl(widget.videoUrl);
+    if (resolvedVideo == null) return;
+
+    try {
+      final controller = VideoPlayerController.networkUrl(
+        Uri.parse(resolvedVideo),
+        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+      );
+      _controller = controller;
+      controller.addListener(_onVideoTick);
+      await controller.initialize();
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+      await controller.setVolume(0.0); // Always muted per spec
+      await controller.setLooping(true);
+      if (widget.isActive) {
+        await controller.play();
+      }
+      setState(() {
+        _isVideoInitialized = true;
+        _hasVideoError = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isVideoInitialized = false;
+          _hasVideoError = true;
+        });
+      }
+    }
+  }
+
+  void _onVideoTick() {
+    final c = _controller;
+    if (c == null || !mounted) return;
+    if (c.value.hasError && !_hasVideoError) {
+      setState(() {
+        _hasVideoError = true;
+        _isVideoInitialized = false;
+      });
+      return;
+    }
+    // Enforce 15-second maximum loop window
+    if (c.value.isInitialized &&
+        c.value.position >= FeaturedAdSlideMedia.maxVideoDuration) {
+      c.seekTo(Duration.zero);
+    }
+  }
+
+  void _disposeController() {
+    final c = _controller;
+    _controller = null;
+    _isVideoInitialized = false;
+    _hasVideoError = false;
+    if (c != null) {
+      c.removeListener(_onVideoTick);
+      c.dispose();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeController();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fallbackImage = LuxuryImage(
+      imageUrl: widget.imageUrl,
+      fallbackLogoUrl: widget.fallbackLogoUrl,
+      fit: BoxFit.cover,
+      placeholderIcon: Icons.local_hospital_outlined,
+      iconSize: 42,
+    );
+
+    if (!_isVideoInitialized || _hasVideoError || _controller == null) {
+      return fallbackImage;
+    }
+
+    final size = _controller!.value.size;
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        clipBehavior: Clip.hardEdge,
+        child: SizedBox(
+          width: size.width > 0 ? size.width : 16,
+          height: size.height > 0 ? size.height : 9,
+          child: VideoPlayer(_controller!),
         ),
       ),
     );

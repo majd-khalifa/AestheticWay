@@ -8,9 +8,9 @@ import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/otp_screen.dart';
 import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
-import 'package:aesthetic_way/features/referral/services/referral_service.dart';
 
 /// Screen 3: Luxury Registration Screen with Full Name, Phone, Email, Password & Terms
 class RegisterScreen extends StatefulWidget {
@@ -27,7 +27,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _referralCodeController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -44,7 +43,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -71,7 +69,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final phone = _phoneController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final referralCode = _referralCodeController.text.trim();
 
     try {
       final response = await AuthRepository().register(
@@ -79,12 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phone: phone,
         password: password,
         email: email.isNotEmpty ? email : null,
-        referralCode: referralCode.isNotEmpty ? referralCode : null,
       );
-
-      if (referralCode.isNotEmpty && referralCode.toLowerCase() != 'string') {
-        ReferralService().registerInvite(referralCode: referralCode);
-      }
 
       if (!mounted) return;
       setState(() {
@@ -179,11 +171,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header Logo
+                    // Header Logo (Prominent Auth Sizing)
                     const Center(
-                      child: AppBrandLogo.header(height: 32),
+                      child: AppBrandLogo.auth(),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Subtitle
                     Center(
@@ -259,111 +251,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           const SizedBox(height: 14),
 
-                          // 2. UAE Phone Number with fixed +971 prefix on the left
+                          // 2. UAE & International Phone with LuxuryPhoneInputField
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: TextFormField(
-                                  controller: _phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  textDirection: TextDirection.ltr,
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.5,
-                                  ),
-                                  onChanged: (_) {
-                                    if (_serverFieldErrors.containsKey('phone')) {
-                                      setState(() => _serverFieldErrors.remove('phone'));
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    labelText: loc.tr('phone_uae'),
-                                    hintText: '50 123 4567',
-                                    hintStyle: TextStyle(
-                                      color: AppColors.mutedText(context).withValues(alpha: 0.5),
-                                      fontSize: 13,
-                                      letterSpacing: 0.5,
-                                    ),
-                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                    prefixIcon: Container(
-                                      margin: const EdgeInsets.only(right: 10),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          right: BorderSide(
-                                            color: AppColors.border(context),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.phone_outlined,
-                                            color: AppColors.accentChampagne,
-                                            size: 18,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '+971',
-                                            style: TextStyle(
-                                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 13.5,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    filled: true,
-                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('phone')
-                                            ? AppColors.errorRed
-                                            : AppColors.border(context),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('phone')
-                                            ? AppColors.errorRed
-                                            : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
-                                        width: 1.4,
-                                      ),
-                                    ),
-                                    errorBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: AppColors.errorRed, width: 1.0),
-                                    ),
-                                    focusedErrorBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: AppColors.errorRed, width: 1.4),
-                                    ),
-                                  ),
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return loc.tr('val_phone_required');
-                                    }
-                                    final digits = val.replaceAll(RegExp(r'\D'), '');
-                                    if (digits.length < 8) {
-                                      return loc.isArabic
-                                          ? 'يرجى إدخال رقم هاتف محلي صالح (مثال: 501234567)'
-                                          : 'Please enter a valid local number (e.g. 501234567)';
-                                    }
-                                    return null;
-                                  },
-                                ),
+                              LuxuryPhoneInputField(
+                                controller: _phoneController,
+                                isRequired: true,
+                                onChanged: (_) {
+                                  if (_serverFieldErrors.containsKey('phone')) {
+                                    setState(() => _serverFieldErrors.remove('phone'));
+                                  }
+                                },
                               ),
                               if (_serverFieldErrors.containsKey('phone'))
                                 Padding(
@@ -599,76 +498,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 return null;
                               },
                             ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          // 6. Referral Code (Optional, LTR)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: TextFormField(
-                                  controller: _referralCodeController,
-                                  textDirection: TextDirection.ltr,
-                                  textAlign: TextAlign.left,
-                                  textCapitalization: TextCapitalization.characters,
-                                  style: TextStyle(
-                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.8,
-                                  ),
-                                  onChanged: (_) {
-                                    if (_serverFieldErrors.containsKey('referral_code')) {
-                                      setState(() => _serverFieldErrors.remove('referral_code'));
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    labelText: loc.tr('referral_code_optional'),
-                                    hintText: 'e.g. VIP2026',
-                                    hintStyle: TextStyle(
-                                      color: AppColors.mutedText(context).withValues(alpha: 0.5),
-                                      fontSize: 13,
-                                    ),
-                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                    prefixIcon: const Icon(Icons.card_giftcard_outlined, color: AppColors.accentChampagne, size: 19),
-                                    filled: true,
-                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('referral_code')
-                                            ? AppColors.errorRed
-                                            : AppColors.border(context),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('referral_code')
-                                            ? AppColors.errorRed
-                                            : AppColors.accentChampagne,
-                                        width: 1.4,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (_serverFieldErrors.containsKey('referral_code'))
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
-                                  child: Text(
-                                    _serverFieldErrors['referral_code']!,
-                                    style: const TextStyle(
-                                      color: AppColors.errorRed,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                            ],
                           ),
                         ],
                       ),

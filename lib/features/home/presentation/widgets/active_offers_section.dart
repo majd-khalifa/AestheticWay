@@ -114,6 +114,7 @@ class _OfferCard extends StatelessWidget {
                 children: [
                   LuxuryImage(
                     imageUrl: offer.imageUrl,
+                    fallbackLogoUrl: offer.clinicLogoUrl,
                     fit: BoxFit.cover,
                     placeholderIcon: Icons.local_offer_outlined,
                   ),

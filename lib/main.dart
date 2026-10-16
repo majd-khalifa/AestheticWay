@@ -9,12 +9,14 @@ import 'features/splash/presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LocaleService().init();
+  await ThemeService().init();
   await TokenStorage().init();
   await AuthState().restoreSession();
   runApp(const AestheticWayApp());
 }
 
-/// AESTHETIC WAY - Root Application Widget with Dynamic Locale and Theme Switching (Dark / Light)
+/// AESTHETIC WAY - Root Application Widget with Dynamic Locale and Theme Switching (Light / Dark)
 class AestheticWayApp extends StatelessWidget {
   final Widget? homeScreen;
 
@@ -34,11 +36,11 @@ class AestheticWayApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeService.themeMode,
-          // Dynamic Language / Locale configuration (Arabic RTL / English LTR)
+          // Dynamic Language / Locale configuration (English LTR default / Arabic RTL)
           locale: localeService.locale,
           supportedLocales: const [
-            Locale('ar', 'AE'),
             Locale('en', 'US'),
+            Locale('ar', 'AE'),
           ],
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,

@@ -4,6 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -189,21 +190,14 @@ class ArticleDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // Cover Image
-          ClipRRect(
+          LuxuryImage(
+            imageUrl: article.coverImageUrl,
+            fallbackLogoUrl: article.clinicLogoUrl,
+            height: 200,
+            width: double.infinity,
             borderRadius: BorderRadius.circular(18),
-            child: Image.network(
-              article.coverImageUrl,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                height: 200,
-                color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                child: const Center(
-                  child: Icon(Icons.article_outlined, color: AppColors.accentChampagne, size: 48),
-                ),
-              ),
-            ),
+            placeholderIcon: Icons.article_outlined,
+            iconSize: 48,
           ),
           const SizedBox(height: 16),
 

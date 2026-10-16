@@ -3,6 +3,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -34,6 +35,7 @@ class PractitionerProfileScreen extends StatefulWidget {
 class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
   late PractitionerModel _practitioner;
   ClinicModel? _clinic;
+  bool _isLoadingPractitioner = false;
   bool _isLoadingClinic = false;
 
   @override
@@ -48,14 +50,22 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
     final clinicsRepo = widget.clinicsRepository ?? ClinicsRepository();
 
     if (_practitioner.id.trim().isNotEmpty) {
+      if (mounted) {
+        setState(() => _isLoadingPractitioner = true);
+      }
       try {
         final fresh = await practRepo.getPractitionerDetail(_practitioner.id);
         if (mounted) {
           setState(() {
             _practitioner = fresh;
+            _isLoadingPractitioner = false;
           });
         }
-      } catch (_) {}
+      } catch (_) {
+        if (mounted) {
+          setState(() => _isLoadingPractitioner = false);
+        }
+      }
     }
 
     if (_practitioner.clinicId.trim().isNotEmpty) {
@@ -169,20 +179,14 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                ClipRRect(
+                LuxuryImage(
+                  imageUrl: _practitioner.avatarUrl,
+                  fallbackLogoUrl: _practitioner.clinicLogoUrl,
+                  width: 76,
+                  height: 76,
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    _practitioner.avatarUrl,
-                    width: 76,
-                    height: 76,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      width: 76,
-                      height: 76,
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Icon(Icons.person_rounded, size: 36, color: AppColors.accentChampagne),
-                    ),
-                  ),
+                  placeholderIcon: Icons.person_rounded,
+                  iconSize: 36,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -202,7 +206,11 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                       const SizedBox(height: 4),
                       Text(
                         loc.isArabic ? _practitioner.specialtyAr : _practitioner.specialtyEn,
-                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 12),
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.subtext(context),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -213,7 +221,7 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
           const SizedBox(height: 14),
 
           // Practicing Clinic Link Card
-          if (clinicName.isNotEmpty)
+          if (clinicName.isNotEmpty || _isLoadingClinic)
             LuxuryCard(
               onTap: () {
                 final target = _clinic ?? _buildFallbackClinic();
@@ -231,35 +239,48 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          clinicName,
-                          style: TextStyle(
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                        if (clinicName.isNotEmpty)
+                          Text(
+                            clinicName,
+                            style: TextStyle(
+                              color: AppColors.text(context),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13.5,
+                            ),
                           ),
-                        ),
                         if (_clinic != null) ...[
                           const SizedBox(height: 2),
                           Text(
                             '${_clinic!.city} • ${loc.isArabic ? _clinic!.areaAr : _clinic!.areaEn}',
-                            style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
+                            style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5),
                           ),
                         ] else if (_isLoadingClinic) ...[
                           const SizedBox(height: 2),
                           Text(
                             loc.isArabic ? 'جاري تحميل بيانات العيادة...' : 'Loading clinic details...',
-                            style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
+                            style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5),
                           ),
                         ],
                       ],
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.mutedText(context)),
+                  Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.subtext(context)),
                 ],
               ),
             ),
           const SizedBox(height: 14),
+
+          if (_isLoadingPractitioner &&
+              _practitioner.aboutAr.isEmpty &&
+              (_practitioner.aboutEn ?? '').isEmpty &&
+              _practitioner.procedures.isEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 28),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.accentChampagne),
+              ),
+            ),
+          ],
 
           // About / Bio Section
           if ((loc.isArabic ? _practitioner.aboutAr : (_practitioner.aboutEn ?? _practitioner.aboutAr)).isNotEmpty) ...[
@@ -273,14 +294,14 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                     style: AppTypography.cardTitle.copyWith(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: AppColors.text(context),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     loc.isArabic ? _practitioner.aboutAr : (_practitioner.aboutEn ?? _practitioner.aboutAr),
                     style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.mutedText(context),
+                      color: AppColors.subtext(context),
                       height: 1.6,
                       fontSize: 13,
                     ),
@@ -303,7 +324,7 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                     style: AppTypography.cardTitle.copyWith(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: AppColors.text(context),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -324,7 +345,7 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                                 proc,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                                  color: AppColors.text(context),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

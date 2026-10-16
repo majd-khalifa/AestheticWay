@@ -14,6 +14,7 @@ class ArticlesRepository {
     String? practitionerId,
     String? search,
     int page = 1,
+    int pageSize = 20,
   }) async {
     final Map<String, dynamic> queryParams = {};
 
@@ -29,8 +30,12 @@ class ArticlesRepository {
       queryParams['search'] = search.trim();
     }
 
-    if (page > 1) {
+    if (page >= 1) {
       queryParams['page'] = page;
+    }
+
+    if (pageSize > 0) {
+      queryParams['page_size'] = pageSize;
     }
 
     final response = await _apiClient.get(

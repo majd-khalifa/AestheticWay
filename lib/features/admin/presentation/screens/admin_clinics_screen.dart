@@ -7,6 +7,7 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_clinic_detail_sheet.dart';
+import 'package:aesthetic_way/features/admin/presentation/screens/admin_create_clinic_dialog.dart';
 
 /// Super Admin Tab 2: Partner Clinics Directory, Tiers & Active/Suspended Controls
 class AdminClinicsScreen extends StatefulWidget {
@@ -47,6 +48,16 @@ class _AdminClinicsScreenState extends State<AdminClinicsScreen> {
 
         return Scaffold(
           backgroundColor: AppColors.bg(context),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => AdminCreateClinicDialog.show(context),
+            backgroundColor: AppColors.accentChampagne,
+            foregroundColor: Colors.black,
+            icon: const Icon(Icons.add_business_rounded, size: 20),
+            label: Text(
+              loc.isArabic ? 'إضافة عيادة' : 'Add Clinic',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            ),
+          ),
           body: Column(
             children: [
               // Search Input

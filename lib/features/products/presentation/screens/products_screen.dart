@@ -4,6 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/products/data/products_repository.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
@@ -26,8 +27,12 @@ class ProductsScreen extends StatefulWidget {
 
 class _ProductsScreenState extends State<ProductsScreen> {
   late final ProductsRepository _repository;
+  final ScrollController _scrollController = ScrollController();
   final List<ProductModel> _products = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
   String? _errorMessage;
 
   String _selectedCategory = 'all';
@@ -38,19 +43,34 @@ class _ProductsScreenState extends State<ProductsScreen> {
   void initState() {
     super.initState();
     _repository = widget.repository ?? ProductsRepository();
+    _scrollController.addListener(_onScroll);
     _loadProducts();
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= 250) {
+      _loadMoreProducts();
+    }
   }
 
   Future<void> _loadProducts({bool showLoading = true}) async {
     if (showLoading && mounted) {
       setState(() {
         _isLoading = true;
+        _isLoadingMore = false;
+        _hasMore = true;
+        _currentPage = 1;
         _errorMessage = null;
       });
     }
@@ -59,6 +79,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
       final items = await _repository.getProducts(
         clinicId: widget.clinicId,
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        page: 1,
+        pageSize: 20,
       );
       if (mounted) {
         setState(() {
@@ -67,6 +89,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ..addAll(items);
           _isLoading = false;
           _errorMessage = null;
+          if (items.length < 20) {
+            _hasMore = false;
+          }
         });
       }
     } catch (e) {
@@ -74,6 +99,40 @@ class _ProductsScreenState extends State<ProductsScreen> {
         setState(() {
           _isLoading = false;
           _errorMessage = e.toString();
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreProducts() async {
+    if (_isLoadingMore || !_hasMore || _isLoading) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final nextPage = _currentPage + 1;
+      final items = await _repository.getProducts(
+        clinicId: widget.clinicId,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        page: nextPage,
+        pageSize: 20,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _currentPage = nextPage;
+        _isLoadingMore = false;
+        if (items.length < 20) {
+          _hasMore = false;
+        }
+        _products.addAll(items);
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
         });
       }
     }
@@ -158,6 +217,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           backgroundColor: AppColors.bg(context),
           appBar: AppBar(
             backgroundColor: AppColors.bg(context),
+            automaticallyImplyLeading: false,
             title: Text(
               loc.tr('category_products_title'),
               style: AppTypography.screenTitle.copyWith(
@@ -165,14 +225,16 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 fontSize: 16,
               ),
             ),
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                size: 18,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
+            leading: Navigator.canPop(context)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      size: 18,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                : null,
           ),
           body: Column(
             children: [
@@ -216,8 +278,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           cat['label']!,
                           style: TextStyle(
                             fontSize: 11.5,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                            color: isSelected ? AppColors.backgroundDeep : AppColors.mutedText(context),
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: isSelected ? AppColors.backgroundDeep : AppColors.text(context),
                           ),
                         ),
                         selected: isSelected,
@@ -260,6 +322,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
     LocaleService loc,
     List<ProductModel> filteredProducts,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.accentChampagne),
@@ -305,42 +369,114 @@ class _ProductsScreenState extends State<ProductsScreen> {
     }
 
     if (filteredProducts.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.25),
-          Center(
-            child: Text(
-              loc.tr('product_empty'),
-              style: TextStyle(color: AppColors.mutedText(context)),
+      return RefreshIndicator(
+        color: AppColors.accentChampagne,
+        onRefresh: _loadProducts,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: LuxuryCard(
+                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentChampagne.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.shopping_bag_outlined, size: 36, color: AppColors.accentChampagne),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        loc.isArabic ? 'لا توجد منتجات طبية حالياً' : 'No medical skincare products',
+                        style: AppTypography.cardTitle.copyWith(
+                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        loc.isArabic
+                            ? 'سيتم إضافة منتجات علاجية ومستحضرات طبية جديدة قريباً'
+                            : 'New medical skincare products will be added soon',
+                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _loadProducts,
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
-    return GridView.builder(
+    return CustomScrollView(
+      controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.68,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: filteredProducts.length,
-      itemBuilder: (context, index) {
-        final product = filteredProducts[index];
-        return _ProductCard(
-          product: product,
-          onTap: () {
-            Navigator.push(
-              context,
-              LuxuryPageRoute(page: ProductDetailScreen(product: product)),
-            );
-          },
-        );
-      },
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.78,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final product = filteredProducts[index];
+                return _ProductCard(
+                  product: product,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: ProductDetailScreen(product: product)),
+                    );
+                  },
+                );
+              },
+              childCount: filteredProducts.length,
+            ),
+          ),
+        ),
+        if (_isLoadingMore)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.accentChampagne,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -367,18 +503,14 @@ class _ProductCard extends StatelessWidget {
           Expanded(
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.network(
-                    product.imageUrl,
+                Positioned.fill(
+                  child: LuxuryImage(
+                    imageUrl: product.imageUrl,
+                    fallbackLogoUrl: product.clinicLogoUrl,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Center(
-                        child: Icon(Icons.shopping_bag_outlined, color: AppColors.accentChampagne, size: 32),
-                      ),
-                    ),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    placeholderIcon: Icons.shopping_bag_outlined,
+                    iconSize: 32,
                   ),
                 ),
                 if (categoryLabel.isNotEmpty)
@@ -423,35 +555,28 @@ class _ProductCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 3),
-                Text(
-                  loc.isArabic ? product.clinicNameAr : (product.clinicNameEn ?? product.clinicNameAr),
-                  style: TextStyle(color: AppColors.mutedText(context), fontSize: 10),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      '${product.price.toInt()} ${loc.tr("currency_aed")}',
-                      style: const TextStyle(
-                        color: AppColors.accentChampagne,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 13,
-                      ),
-                    ),
-                    if (product.originalPrice != null) ...[
-                      const SizedBox(width: 4),
-                      Text(
-                        '${product.originalPrice!.toInt()}',
-                        style: TextStyle(
-                          color: AppColors.mutedText(context),
-                          fontSize: 10,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ],
-                  ],
+                Builder(
+                  builder: (context) {
+                    final brandText = loc.isArabic
+                        ? (product.brandNameAr?.isNotEmpty == true
+                            ? product.brandNameAr!
+                            : (product.brandNameEn?.isNotEmpty == true
+                                ? product.brandNameEn!
+                                : (product.sponsorCompany ?? product.clinicNameAr)))
+                        : (product.brandNameEn?.isNotEmpty == true
+                            ? product.brandNameEn!
+                            : (product.brandNameAr?.isNotEmpty == true
+                                ? product.brandNameAr!
+                                : (product.sponsorCompany ?? (product.clinicNameEn ?? product.clinicNameAr))));
+                    return Text(
+                      brandText.isNotEmpty
+                          ? brandText
+                          : (loc.isArabic ? product.clinicNameAr : (product.clinicNameEn ?? product.clinicNameAr)),
+                      style: TextStyle(color: AppColors.mutedText(context), fontSize: 10),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  },
                 ),
               ],
             ),

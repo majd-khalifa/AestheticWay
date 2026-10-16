@@ -6,6 +6,8 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/ltr_text_field.dart';
 import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/silver_button.dart';
+import '../../../../core/widgets/luxury_image_picker_field.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../offers/models/offer_model.dart';
 import '../../services/clinic_portal_service.dart';
 
@@ -28,6 +30,7 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
 
   void _showAddOfferDialog(BuildContext context, LocaleService loc) {
     final formKey = GlobalKey<FormState>();
+    String? offerImagePath;
     final titleEnController = TextEditingController();
     final titleArController = TextEditingController();
     final originalPriceController = TextEditingController(text: '1500');
@@ -37,6 +40,8 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
 
     DateTime startsAt = DateTime.now();
     DateTime endsAt = DateTime.now().add(const Duration(days: 30));
+    String? modalErrorMessage;
+    bool isSubmitting = false;
 
     final isDark = AppColors.isDark(context);
 
@@ -83,6 +88,47 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                         color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                       ),
                     ),
+                    if (modalErrorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.redAccent.withValues(alpha: 0.6),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                modalErrorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                              onPressed: () {
+                                setModalState(() => modalErrorMessage = null);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 14),
 
                     // Titles EN & AR
@@ -120,6 +166,14 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                       validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
                     ),
                     const SizedBox(height: 10),
+
+                    // Offer Banner Image Picker
+                    LuxuryImagePickerField(
+                      label: loc.isArabic ? 'صورة العرض / البانر الترويجي' : 'Offer Banner Image',
+                      height: 130,
+                      onImageSelected: (path) => offerImagePath = path,
+                    ),
+                    const SizedBox(height: 12),
 
                     // Prices Row
                     Row(
@@ -295,46 +349,74 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                       icon: Icons.check_circle_outline,
                       isFullWidth: true,
                       height: 46,
-                      onPressed: () async {
-                        if (!formKey.currentState!.validate()) return;
-                        final origPrice = double.tryParse(originalPriceController.text) ?? 1500;
-                        final offPrice = double.tryParse(offerPriceController.text) ?? 999;
+                      isLoading: isSubmitting,
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              setModalState(() => modalErrorMessage = null);
+                              if (!formKey.currentState!.validate()) return;
 
-                        final data = <String, dynamic>{
-                          'title_en': titleEnController.text.trim(),
-                          'title_ar': titleArController.text.trim().isNotEmpty
-                              ? titleArController.text.trim()
-                              : titleEnController.text.trim(),
-                          'description_en': termsEnController.text.trim().isNotEmpty
-                              ? termsEnController.text.trim()
-                              : 'Special promotional aesthetic offer.',
-                          'description_ar': termsArController.text.trim().isNotEmpty
-                              ? termsArController.text.trim()
-                              : 'عرض ترويجي تجميلي خاص.',
-                          'original_price': origPrice,
-                          'offer_price': offPrice,
-                          'starts_at': startsAt.toIso8601String(),
-                          'ends_at': endsAt.toIso8601String(),
-                          'status': 'active',
-                          'is_active': true,
-                        };
+                              if (!endsAt.isAfter(startsAt)) {
+                                setModalState(() {
+                                  modalErrorMessage = loc.isArabic
+                                      ? 'تاريخ نهاية العرض لا يمكن أن يكون قبل تاريخ البداية'
+                                      : 'Offer end date cannot be earlier than the start date.';
+                                });
+                                return;
+                              }
 
-                        try {
-                          await ClinicPortalService().createOffer(data);
-                          if (ctx.mounted) Navigator.pop(ctx);
-                          if (context.mounted) {
-                            showAppSnackBar(
-                              context,
-                              loc.tr('clinic_offer_saved_success'),
-                              type: AppSnackBarType.success,
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
-                          }
-                        }
-                      },
+                              final origPrice = double.tryParse(originalPriceController.text) ?? 1500;
+                              final offPrice = double.tryParse(offerPriceController.text) ?? 999;
+
+                              final data = <String, dynamic>{
+                                'title_en': titleEnController.text.trim(),
+                                'title_ar': titleArController.text.trim().isNotEmpty
+                                    ? titleArController.text.trim()
+                                    : titleEnController.text.trim(),
+                                'description_en': termsEnController.text.trim().isNotEmpty
+                                    ? termsEnController.text.trim()
+                                    : 'Special promotional aesthetic offer.',
+                                'description_ar': termsArController.text.trim().isNotEmpty
+                                    ? termsArController.text.trim()
+                                    : 'عرض ترويجي تجميلي خاص.',
+                                'original_price': origPrice,
+                                'offer_price': offPrice,
+                                'starts_at': startsAt.toIso8601String(),
+                                'ends_at': endsAt.toIso8601String(),
+                                'status': 'active',
+                                'is_active': true,
+                              };
+                              if (offerImagePath != null && offerImagePath!.isNotEmpty) {
+                                data['image'] = offerImagePath;
+                              }
+
+                              setModalState(() => isSubmitting = true);
+
+                              try {
+                                await ClinicPortalService().createOffer(data);
+                                if (ctx.mounted) Navigator.pop(ctx);
+                                if (context.mounted) {
+                                  showAppSnackBar(
+                                    context,
+                                    loc.tr('clinic_offer_saved_success'),
+                                    type: AppSnackBarType.success,
+                                  );
+                                }
+                              } catch (e) {
+                                String cleanMsg;
+                                if (e is ApiException) {
+                                  cleanMsg = e.message;
+                                } else {
+                                  cleanMsg = ApiException.sanitizeRegulatoryCompliance(
+                                    e.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', ''),
+                                  );
+                                }
+                                setModalState(() {
+                                  modalErrorMessage = cleanMsg;
+                                  isSubmitting = false;
+                                });
+                              }
+                            },
                     ),
                     const SizedBox(height: 16),
                   ],

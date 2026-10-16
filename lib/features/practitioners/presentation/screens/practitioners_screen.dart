@@ -4,6 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/practitioners/data/practitioners_repository.dart';
@@ -202,8 +203,8 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                             tab['label']!,
                             style: TextStyle(
                               fontSize: 11.5,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                              color: isSelected ? AppColors.backgroundDeep : AppColors.mutedText(context),
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              color: isSelected ? AppColors.backgroundDeep : AppColors.text(context),
                             ),
                           ),
                           selected: isSelected,
@@ -296,20 +297,14 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                                         child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            ClipRRect(
+                                            LuxuryImage(
+                                              imageUrl: p.avatarUrl,
+                                              fallbackLogoUrl: p.clinicLogoUrl,
+                                              width: 68,
+                                              height: 68,
                                               borderRadius: BorderRadius.circular(14),
-                                              child: Image.network(
-                                                p.avatarUrl,
-                                                width: 68,
-                                                height: 68,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (_, _, _) => Container(
-                                                  width: 68,
-                                                  height: 68,
-                                                  color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                                  child: const Icon(Icons.person_rounded, color: AppColors.accentChampagne, size: 30),
-                                                ),
-                                              ),
+                                              placeholderIcon: Icons.person_rounded,
+                                              iconSize: 30,
                                             ),
                                             const SizedBox(width: 14),
                                             Expanded(

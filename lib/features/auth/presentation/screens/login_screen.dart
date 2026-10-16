@@ -25,8 +25,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController(text: '501234567');
-  final _passwordController = TextEditingController(text: '123456');
+  final _identifierController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -67,8 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
         type: AppSnackBarType.success,
       );
 
-      Widget targetScreen;
       final role = authResponse.user.role;
+
+
+      Widget targetScreen;
       if (role == 'super_admin') {
         targetScreen = const AdminMainNavScreen();
       } else if (role == 'clinic_admin' || role == 'clinic_staff') {
@@ -110,24 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _onClinicPortalLogin() {
-    _identifierController.text = '500000002';
-    _passwordController.text = 'StagingPassword123!';
-    _onLogin();
-  }
-
-  void _onAdminPortalLogin() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const AdminMainNavScreen(),
-        transitionDuration: const Duration(milliseconds: 400),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
@@ -148,17 +132,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (Navigator.of(context).canPop())
-                        Align(
-                          alignment: loc.isArabic ? Alignment.topRight : Alignment.topLeft,
-                          child: IconButton(
-                            icon: Icon(Icons.close_rounded, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ),
-                      // Official Logo
+                      // Official Logo (Prominent Auth Sizing)
                       const Center(
-                        child: AppBrandLogo.header(height: 38),
+                        child: AppBrandLogo.auth(),
                       ),
                       const SizedBox(height: 24),
 
@@ -347,53 +323,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(height: 24),
-
-                      // Clinic Portal Partner Access Button
-                      OutlinedButton.icon(
-                        onPressed: _onClinicPortalLogin,
-                        icon: const Icon(Icons.business_rounded, color: AppColors.accentChampagne, size: 18),
-                        label: Text(
-                          loc.tr('clinic_demo_login'),
-                          style: const TextStyle(
-                            color: AppColors.accentChampagne,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12.5,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: BorderSide(
-                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.6),
-                            width: 1.0,
-                          ),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Super Admin Portal Access Button
-                      OutlinedButton.icon(
-                        onPressed: _onAdminPortalLogin,
-                        icon: const Icon(Icons.admin_panel_settings_rounded, color: AppColors.accentChampagne, size: 18),
-                        label: Text(
-                          loc.tr('admin_demo_login'),
-                          style: const TextStyle(
-                            color: AppColors.accentChampagne,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12.5,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: BorderSide(
-                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.6),
-                            width: 1.0,
-                          ),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
                       ),
                     ],
                   ),

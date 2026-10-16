@@ -5,6 +5,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/articles/data/articles_repository.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
@@ -29,8 +30,12 @@ class ArticlesScreen extends StatefulWidget {
 
 class _ArticlesScreenState extends State<ArticlesScreen> {
   late final ArticlesRepository _repository;
+  final ScrollController _scrollController = ScrollController();
   final List<ArticleModel> _articles = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
   String? _errorMessage;
 
   String _selectedCategory = 'all';
@@ -41,19 +46,34 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
   void initState() {
     super.initState();
     _repository = widget.repository ?? ArticlesRepository();
+    _scrollController.addListener(_onScroll);
     _loadArticles();
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= 250) {
+      _loadMoreArticles();
+    }
   }
 
   Future<void> _loadArticles({bool showLoading = true}) async {
     if (showLoading && mounted) {
       setState(() {
         _isLoading = true;
+        _isLoadingMore = false;
+        _hasMore = true;
+        _currentPage = 1;
         _errorMessage = null;
       });
     }
@@ -63,6 +83,8 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
         clinicId: widget.clinicId,
         practitionerId: widget.practitionerId,
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        page: 1,
+        pageSize: 20,
       );
       if (mounted) {
         setState(() {
@@ -71,6 +93,9 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             ..addAll(items);
           _isLoading = false;
           _errorMessage = null;
+          if (items.length < 20) {
+            _hasMore = false;
+          }
         });
       }
     } catch (e) {
@@ -78,6 +103,41 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
         setState(() {
           _isLoading = false;
           _errorMessage = e.toString();
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreArticles() async {
+    if (_isLoadingMore || !_hasMore || _isLoading) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final nextPage = _currentPage + 1;
+      final items = await _repository.getArticles(
+        clinicId: widget.clinicId,
+        practitionerId: widget.practitionerId,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        page: nextPage,
+        pageSize: 20,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _currentPage = nextPage;
+        _isLoadingMore = false;
+        if (items.length < 20) {
+          _hasMore = false;
+        }
+        _articles.addAll(items);
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
         });
       }
     }
@@ -308,25 +368,88 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
     }
 
     if (filteredArticles.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.25),
-          Center(
-            child: Text(
-              loc.tr('article_empty'),
-              style: TextStyle(color: AppColors.mutedText(context)),
+      return RefreshIndicator(
+        color: AppColors.accentChampagne,
+        onRefresh: _loadArticles,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: LuxuryCard(
+                padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentChampagne.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.article_outlined, size: 36, color: AppColors.accentChampagne),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        loc.isArabic ? 'لا توجد مقالات طبية حالياً' : 'No medical articles or guides',
+                        style: AppTypography.cardTitle.copyWith(
+                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        loc.isArabic
+                            ? 'سيتم نشر نصائح تجميلية وأدلة طبية موثقة قريباً'
+                            : 'Verified aesthetic guides and articles will be published soon',
+                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _loadArticles,
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
     return ListView.builder(
+      controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: filteredArticles.length,
+      itemCount: filteredArticles.length + (_isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == filteredArticles.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.accentChampagne,
+                ),
+              ),
+            ),
+          );
+        }
         final article = filteredArticles[index];
         final categoryLabel = loc.isArabic ? article.categoryAr : article.categoryEn;
         final authorName = loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn;
@@ -349,21 +472,14 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
+                LuxuryImage(
+                  imageUrl: article.coverImageUrl,
+                  fallbackLogoUrl: article.clinicLogoUrl,
+                  height: 150,
+                  width: double.infinity,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.network(
-                    article.coverImageUrl,
-                    height: 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      height: 150,
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Center(
-                        child: Icon(Icons.article_outlined, color: AppColors.accentChampagne, size: 36),
-                      ),
-                    ),
-                  ),
+                  placeholderIcon: Icons.article_outlined,
+                  iconSize: 36,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(14),

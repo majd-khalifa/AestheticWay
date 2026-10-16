@@ -7,6 +7,8 @@ import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 import 'package:aesthetic_way/features/profile/presentation/screens/profile_screen.dart';
 
@@ -103,6 +105,7 @@ class FakeProfileApiClient implements ApiClient {
 void main() {
   setUp(() {
     FlutterSecureStorage.setMockInitialValues({});
+    LocaleService().setLanguage(AppLanguage.arabic);
     AuthState().logout();
   });
 
@@ -238,12 +241,19 @@ void main() {
       await tester.tap(find.byKey(const Key('toggle_edit_profile_btn')));
       await tester.pumpAndSettle();
 
-      // Verify phone and email fields use LtrTextFormField
-      expect(find.byType(LtrTextFormField), findsNWidgets(2));
+      // Verify phone and email fields are readOnly
+      final phoneField = tester.widget<LuxuryPhoneInputField>(find.byType(LuxuryPhoneInputField));
+      expect(phoneField.readOnly, isTrue);
 
-      // Edit full_name and email
-      await tester.enterText(find.byKey(const Key('profile_full_name_field')), 'ريم الكعبي المحدثة');
-      await tester.enterText(find.byKey(const Key('profile_email_field')), 'reem.new@uae.ae');
+      final emailField = tester.widget<LtrTextFormField>(find.byType(LtrTextFormField));
+      expect(emailField.readOnly, isTrue);
+      expect(find.byKey(const Key('profile_contact_readonly_note')), findsOneWidget);
+
+      // Edit full_name
+      await tester.enterText(
+        find.byKey(const Key('profile_full_name_field')),
+        'ريم الكعبي المحدثة',
+      );
 
       // Tap Save Changes
       final saveBtn = find.widgetWithText(GestureDetector, 'حفظ التعديلات').first;
@@ -252,7 +262,8 @@ void main() {
 
       expect(savedPayload, isNotNull);
       expect(savedPayload!['full_name'], 'ريم الكعبي المحدثة');
-      expect(savedPayload!['email'], 'reem.new@uae.ae');
+      expect(savedPayload!.containsKey('phone'), isFalse);
+      expect(savedPayload!.containsKey('email'), isFalse);
       expect(find.text('ريم الكعبي المحدثة'), findsOneWidget);
     });
 

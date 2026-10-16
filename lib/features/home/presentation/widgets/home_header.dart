@@ -2,21 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
-import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 
-/// Home Screen Luxury Header with Official Client Logo, City Selector, and Favorites adapting to Themes
+/// Home Screen Luxury Header with Official Client Logo and City Selector adapting to Themes
 class HomeHeader extends StatelessWidget {
   final String selectedCity;
   final ValueChanged<String> onCityChanged;
-  final VoidCallback onFavoritesTap;
 
   const HomeHeader({
     super.key,
     required this.selectedCity,
     required this.onCityChanged,
-    required this.onFavoritesTap,
   });
+
+  String _displayCityLabel(LocaleService loc) {
+    if (selectedCity == 'الكل' || selectedCity == 'All') {
+      return loc.tr('city_all');
+    }
+    if (selectedCity == 'دبي' || selectedCity == 'Dubai') {
+      return loc.isArabic ? 'دبي' : 'Dubai';
+    }
+    if (selectedCity == 'أبوظبي' || selectedCity == 'Abu Dhabi') {
+      return loc.isArabic ? 'أبوظبي' : 'Abu Dhabi';
+    }
+    return selectedCity;
+  }
 
   void _showCityPicker(BuildContext context) {
     final loc = LocaleService();
@@ -45,7 +55,18 @@ class HomeHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _CityOptionTile(
-                  title: loc.isArabic ? 'دبي (جميرا، داون تاون، دبي مارينا)' : 'Dubai (Jumeirah, Downtown, Marina)',
+                  title: loc.tr('city_all'),
+                  isSelected: selectedCity == 'الكل' || selectedCity == 'All',
+                  onTap: () {
+                    onCityChanged('الكل');
+                    Navigator.pop(ctx);
+                  },
+                ),
+                const SizedBox(height: 8),
+                _CityOptionTile(
+                  title: loc.isArabic
+                      ? 'دبي (جميرا، داون تاون، دبي مارينا)'
+                      : 'Dubai (Jumeirah, Downtown, Marina)',
                   isSelected: selectedCity == 'دبي' || selectedCity == 'Dubai',
                   onTap: () {
                     onCityChanged('دبي');
@@ -54,7 +75,9 @@ class HomeHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 _CityOptionTile(
-                  title: loc.isArabic ? 'أبوظبي (البطين، الكورنيش، جزيرة المارية)' : 'Abu Dhabi (Al Bateen, Corniche, Al Maryah)',
+                  title: loc.isArabic
+                      ? 'أبوظبي (البطين، الكورنيش، جزيرة المارية)'
+                      : 'Abu Dhabi (Al Bateen, Corniche, Al Maryah)',
                   isSelected: selectedCity == 'أبوظبي' || selectedCity == 'Abu Dhabi',
                   onTap: () {
                     onCityChanged('أبوظبي');
@@ -71,7 +94,6 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = AuthState();
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -81,79 +103,46 @@ class HomeHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 1. Official Brand Logo (assets/images/aesthetic_way_logo.png)
-          const AppBrandLogo.header(height: 30),
+          const AppBrandLogo.header(height: 46, width: 104),
 
-          // 2. City Selector & Favorites Actions
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => _showCityPicker(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface(context),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: AppColors.border(context),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 13.5,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        selectedCity == 'الكل'
-                            ? loc.tr('city_all')
-                            : selectedCity,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.text(context),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11.5,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 15,
-                        color: AppColors.mutedText(context),
-                      ),
-                    ],
-                  ),
+          // 2. City Selector (No heart/favorite icon on Home header per client spec)
+          GestureDetector(
+            onTap: () => _showCityPicker(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: AppColors.surface(context),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: AppColors.border(context),
+                  width: 0.8,
                 ),
               ),
-              const SizedBox(width: 8),
-              ListenableBuilder(
-                listenable: auth,
-                builder: (context, _) {
-                  final hasFavs = auth.favoriteClinicIds.isNotEmpty;
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface(context),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.border(context),
-                        width: 0.8,
-                      ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _displayCityLabel(loc),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.text(context),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
-                    child: IconButton(
-                      icon: Icon(
-                        hasFavs ? Icons.favorite : Icons.favorite_border,
-                        color: hasFavs ? const Color(0xFFF87171) : (isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary),
-                        size: 17,
-                      ),
-                      onPressed: onFavoritesTap,
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.all(7),
-                    ),
-                  );
-                },
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 16,
+                    color: AppColors.mutedText(context),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),

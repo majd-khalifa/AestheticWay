@@ -33,10 +33,10 @@ abstract class AppColors {
   static const Color lightCardSurfaceHover = Color(0xFFEEF2F6);
   static const Color lightCardSurfaceSubtle = Color(0xFFF8FAFC);
 
-  static const Color lightTextPrimary = Color(0xFF0F172A); // Deep Slate Navy text
-  static const Color lightTextSecondary = Color(0xFF475569); // Slate Grey
-  static const Color lightTextMuted = Color(0xFF64748B); // Muted text
-
+  static const Color lightTextPrimary = Color(0xFF0A0E17); // Deep Obsidian Navy text
+  static const Color lightTextSecondary = Color(0xFF1E293B); // High-contrast Slate Charcoal
+  static const Color lightTextMuted = Color(0xFF334155); // Strong readable Slate
+  
   static const Color lightBorder = Color(0xFFD9E1EC); // Soft Luxury Border
   static const Color primarySoftNavy = Color(0xFF1F3A5F); // Primary soft navy for chips/links
 
@@ -100,13 +100,19 @@ abstract class AppColors {
     return isDark(context) ? cardSurfaceSubtle : lightCardSurfaceSubtle;
   }
 
+  static const Color lightBackgroundAlt = lightCardSurfaceSubtle;
+
   static Color text(BuildContext context) {
     return isDark(context) ? textPrimary : lightTextPrimary;
   }
 
+  static Color primaryText(BuildContext context) => text(context);
+
   static Color subtext(BuildContext context) {
     return isDark(context) ? textSecondary : lightTextSecondary;
   }
+
+  static Color secondaryText(BuildContext context) => subtext(context);
 
   static Color mutedText(BuildContext context) {
     return isDark(context) ? textMuted : lightTextMuted;

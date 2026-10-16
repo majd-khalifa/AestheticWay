@@ -5,11 +5,13 @@ import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/home/presentation/screens/home_screen.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinics_list_screen.dart';
+import 'package:aesthetic_way/features/products/presentation/screens/products_screen.dart';
+import 'package:aesthetic_way/features/offers/presentation/screens/offers_screen.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/my_requests_screen.dart';
 import 'package:aesthetic_way/features/profile/presentation/screens/profile_screen.dart';
 
 /// Luxury Floating Bottom Navigation Container adapting to Dark and Light modes
-/// Strict Visual Order: [ Home (Left) | Clinics | Requests | Profile (Right) ]
+/// Strict Visual Order: [ Home | Clinics | Products | Offers | Profile ]
 class MainNavScreen extends StatefulWidget {
   final int initialIndex;
 
@@ -51,9 +53,15 @@ class _MainNavScreenState extends State<MainNavScreen> {
         },
       ),
       const ClinicsListScreen(),
-      const MyRequestsScreen(),
+      const ProductsScreen(),
+      const OffersScreen(),
       ProfileScreen(
-        onNavigateToRequests: () => _onTabTapped(2),
+        onNavigateToRequests: () {
+          Navigator.push(
+            context,
+            LuxuryPageRoute(page: const MyRequestsScreen()),
+          );
+        },
       ),
     ];
 
@@ -112,7 +120,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
                           ),
                         ],
                 ),
-                // Enforce strictly visual Left-to-Right: [ Home | Clinics | Requests | Profile ]
+                // Enforce strictly visual Left-to-Right: [ Home | Clinics | Products | Offers | Profile ]
                 child: Directionality(
                   textDirection: TextDirection.ltr,
                   child: Row(
@@ -137,18 +145,26 @@ class _MainNavScreenState extends State<MainNavScreen> {
                       _FloatingNavItem(
                         index: 2,
                         selectedIndex: _currentIndex,
-                        icon: Icons.receipt_long_outlined,
-                        activeIcon: Icons.receipt_long_rounded,
-                        label: localeService.tr('nav_requests'),
+                        icon: Icons.shopping_bag_outlined,
+                        activeIcon: Icons.shopping_bag_rounded,
+                        label: localeService.tr('nav_products'),
                         onTap: () => _onTabTapped(2),
                       ),
                       _FloatingNavItem(
                         index: 3,
                         selectedIndex: _currentIndex,
+                        icon: Icons.local_offer_outlined,
+                        activeIcon: Icons.local_offer_rounded,
+                        label: localeService.tr('nav_offers'),
+                        onTap: () => _onTabTapped(3),
+                      ),
+                      _FloatingNavItem(
+                        index: 4,
+                        selectedIndex: _currentIndex,
                         icon: Icons.person_outline_rounded,
                         activeIcon: Icons.person_rounded,
                         label: localeService.tr('nav_profile'),
-                        onTap: () => _onTabTapped(3),
+                        onTap: () => _onTabTapped(4),
                       ),
                     ],
                   ),

@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -15,6 +16,7 @@ import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.da
 import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 import 'package:aesthetic_way/features/auth/data/models/auth_models.dart';
 import 'package:aesthetic_way/features/referral/presentation/screens/referral_screen.dart';
+import 'package:aesthetic_way/core/services/support_service.dart';
 
 /// Screen 25: Patient Profile & Settings — Live API (/api/v1/auth/me/)
 class ProfileScreen extends StatefulWidget {
@@ -43,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isSaving = false;
   bool _isEditing = false;
   String? _errorMessage;
+  String? _profileEditErrorMessage;
 
   @override
   void initState() {
@@ -102,13 +105,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final loc = LocaleService();
     setState(() {
       _isSaving = true;
+      _profileEditErrorMessage = null;
     });
 
     try {
       final updated = await _authRepo.updateMe(
         fullName: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
       );
       if (!mounted) return;
       setState(() {
@@ -119,6 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isSaving = false;
         _isEditing = false;
         _errorMessage = null;
+        _profileEditErrorMessage = null;
       });
       showAppSnackBar(
         context,
@@ -129,6 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       setState(() {
         _isSaving = false;
+        _profileEditErrorMessage = e.message;
       });
       showAppSnackBar(
         context,
@@ -137,12 +141,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      final msg = loc.isArabic ? 'فشل حفظ التعديلات، يرجى المحاولة مرة أخرى' : 'Failed to save changes, please try again';
       setState(() {
         _isSaving = false;
+        _profileEditErrorMessage = msg;
       });
       showAppSnackBar(
         context,
-        loc.isArabic ? 'فشل حفظ التعديلات، يرجى المحاولة مرة أخرى' : 'Failed to save changes, please try again',
+        msg,
         type: AppSnackBarType.error,
       );
     }
@@ -217,6 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showSupportSheet(BuildContext context, LocaleService loc) {
     final isDark = AppColors.isDark(context);
+    final supportService = SupportService();
+    supportService.fetchSupportInfo(); // Trigger async refresh in background
 
     showModalBottomSheet(
       context: context,
@@ -225,6 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final info = supportService.info;
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
@@ -266,7 +275,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
+                Text(
+                  loc.isArabic ? info.workingHoursAr : info.workingHoursEn,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.accentChampagne,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 14),
                 ListTile(
                   tileColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                   shape: RoundedRectangleBorder(
@@ -283,13 +301,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    '${ContactLauncher.platformSupportPhoneDisplay} (WhatsApp)',
+                    '${info.phoneDisplay} (WhatsApp)',
                     style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
                   ),
                   trailing: Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
                   onTap: () {
                     Navigator.pop(ctx);
-                    ContactLauncher.openPlatformSupportWhatsApp(
+                    ContactLauncher.openWhatsApp(
+                      phoneNumber: info.whatsapp,
                       message: loc.isArabic
                           ? 'مرحباً، أود التواصل مع خدمة عملاء منصة AESTHETIC WAY.'
                           : 'Hello, I would like to contact Aesthetic Way platform support.',
@@ -313,13 +332,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    ContactLauncher.platformSupportPhoneDisplay,
+                    info.phoneDisplay,
                     style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
                   ),
                   trailing: Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
                   onTap: () {
                     Navigator.pop(ctx);
-                    ContactLauncher.callPlatformSupport();
+                    ContactLauncher.makePhoneCall(info.phone);
                   },
                 ),
               ],
@@ -369,6 +388,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
               ],
             ),
+            if (_profileEditErrorMessage != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.redAccent.withValues(alpha: 0.6),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _profileEditErrorMessage!,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                      onPressed: () {
+                        setState(() => _profileEditErrorMessage = null);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             TextFormField(
               key: const Key('profile_full_name_field'),
@@ -396,60 +456,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             const SizedBox(height: 12),
-            LtrTextFormField(
+            LuxuryPhoneInputField(
               key: const Key('profile_phone_field'),
+              fieldKey: const Key('profile_phone_field_input'),
               controller: _phoneController,
-              enabled: !_isSaving,
-              keyboardType: TextInputType.phone,
-              style: TextStyle(
-                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                fontSize: 13.5,
-              ),
-              decoration: InputDecoration(
-                labelText: loc.tr('phone_uae'),
-                prefixIcon: Icon(Icons.phone_outlined, size: 19, color: AppColors.mutedText(context)),
-                filled: true,
-                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border(context)),
-                ),
-              ),
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) {
-                  return loc.isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
-                }
-                return null;
-              },
+              readOnly: true,
+              enabled: true,
             ),
             const SizedBox(height: 12),
             LtrTextFormField(
               key: const Key('profile_email_field'),
               controller: _emailController,
-              enabled: !_isSaving,
+              readOnly: true,
+              enabled: true,
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(
-                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                color: AppColors.mutedText(context),
                 fontSize: 13.5,
               ),
               decoration: InputDecoration(
                 labelText: loc.tr('email_address'),
                 hintText: 'name@example.com',
                 prefixIcon: Icon(Icons.email_outlined, size: 19, color: AppColors.mutedText(context)),
+                suffixIcon: Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.mutedText(context)),
                 filled: true,
-                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                fillColor: isDark ? AppColors.cardSurface : AppColors.lightBackgroundAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: AppColors.border(context)),
                 ),
               ),
-              validator: (val) {
-                final trimmed = val?.trim() ?? '';
-                if (trimmed.isNotEmpty && !trimmed.contains('@')) {
-                  return loc.isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address';
-                }
-                return null;
-              },
+            ),
+            const SizedBox(height: 10),
+            Container(
+              key: const Key('profile_contact_readonly_note'),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.accentChampagne.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.accentChampagne.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.verified_user_outlined,
+                    size: 16,
+                    color: AppColors.accentChampagne,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      loc.isArabic
+                          ? 'لحماية حسابك، يرجى التواصل مع خدمة العملاء لتغيير رقم الهاتف أو البريد الإلكتروني الموثق'
+                          : 'For your security, please contact customer support to change your verified phone or email',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.secondaryText(context),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             SilverButton(
@@ -583,9 +652,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   icon: Icons.login_rounded,
                                   isFullWidth: true,
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
+                                    Navigator.of(context).pushAndRemoveUntil(
                                       LuxuryPageRoute(page: const LoginScreen()),
+                                      (route) => false,
                                     );
                                   },
                                 ),
@@ -768,19 +837,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? 'متابعة حالة الطلبات والتواصل مع العيادات'
                                 : 'Track lead status and clinic responses',
                             onTap: widget.onNavigateToRequests,
-                          ),
-                          const SizedBox(height: 10),
-                          _ProfileMenuTile(
-                            icon: Icons.favorite_border_rounded,
-                            title: loc.tr('my_favs'),
-                            subtitle: '${auth.favoriteClinicIds.length} ${loc.isArabic ? "عيادات محفوظة" : "saved clinics"}',
-                            onTap: () {
-                              showAppSnackBar(
-                                context,
-                                loc.isArabic ? 'قائمة المفضلة مفعلة وجاهزة' : 'Favorites list is active',
-                                type: AppSnackBarType.info,
-                              );
-                            },
                           ),
                           const SizedBox(height: 10),
 

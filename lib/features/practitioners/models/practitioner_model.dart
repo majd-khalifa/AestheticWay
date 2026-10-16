@@ -60,6 +60,7 @@ class PractitionerModel {
   final String clinicId;
   final String clinicNameAr;
   final String? clinicNameEn;
+  final String? clinicLogoUrl;
   final List<String> procedures;
   final List<String>? proceduresEn;
   final String aboutAr;
@@ -85,6 +86,7 @@ class PractitionerModel {
     required this.clinicId,
     required this.clinicNameAr,
     this.clinicNameEn,
+    this.clinicLogoUrl,
     required this.procedures,
     this.proceduresEn,
     required this.aboutAr,
@@ -111,6 +113,7 @@ class PractitionerModel {
     String? clinicId,
     String? clinicNameAr,
     String? clinicNameEn,
+    String? clinicLogoUrl,
     List<String>? procedures,
     List<String>? proceduresEn,
     String? aboutAr,
@@ -136,6 +139,7 @@ class PractitionerModel {
       clinicId: clinicId ?? this.clinicId,
       clinicNameAr: clinicNameAr ?? this.clinicNameAr,
       clinicNameEn: clinicNameEn ?? this.clinicNameEn,
+      clinicLogoUrl: clinicLogoUrl ?? this.clinicLogoUrl,
       procedures: procedures ?? this.procedures,
       proceduresEn: proceduresEn ?? this.proceduresEn,
       aboutAr: aboutAr ?? this.aboutAr,
@@ -180,6 +184,7 @@ class PractitionerModel {
         ? clinicNameAr
         : (json['clinic_name_ar']?.toString() ?? '');
     String? resolvedClinicNameEn = clinicNameEn ?? json['clinic_name_en']?.toString();
+    String? resolvedClinicLogo = json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString();
 
     if (json['clinic'] is Map<String, dynamic>) {
       final clinicMap = json['clinic'] as Map<String, dynamic>;
@@ -192,6 +197,7 @@ class PractitionerModel {
       }
       resolvedClinicNameEn ??=
           clinicMap['name_en']?.toString() ?? clinicMap['name_ar']?.toString();
+      resolvedClinicLogo ??= clinicMap['logo']?.toString() ?? clinicMap['logo_url']?.toString();
     } else if (json['clinic'] is String && resolvedClinicId.isEmpty) {
       resolvedClinicId = json['clinic'] as String;
     }
@@ -240,6 +246,7 @@ class PractitionerModel {
       clinicId: resolvedClinicId,
       clinicNameAr: resolvedClinicNameAr,
       clinicNameEn: resolvedClinicNameEn,
+      clinicLogoUrl: resolvedClinicLogo,
       procedures: parsedProcedures,
       proceduresEn: parsedProceduresEn,
       aboutAr: json['bio_ar'] ?? json['about_ar'] ?? '',

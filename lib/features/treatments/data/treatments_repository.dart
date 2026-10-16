@@ -4,16 +4,23 @@ import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
 
 class TreatmentsRepository {
   static final TreatmentsRepository _instance = TreatmentsRepository._internal();
-  factory TreatmentsRepository() => _instance;
-  TreatmentsRepository._internal();
+  factory TreatmentsRepository({ApiClient? apiClient}) {
+    if (apiClient != null) {
+      return TreatmentsRepository._internal(apiClient: apiClient);
+    }
+    return _instance;
+  }
+  TreatmentsRepository._internal({ApiClient? apiClient}) : _client = apiClient ?? ApiClient();
 
-  final ApiClient _client = ApiClient();
+  final ApiClient _client;
 
   /// GET /api/v1/treatments/
   Future<List<TreatmentModel>> getTreatments({
     String? search,
     String? category,
     String? clinic,
+    int page = 1,
+    int pageSize = 20,
   }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.trim().isNotEmpty) {
@@ -24,6 +31,12 @@ class TreatmentsRepository {
     }
     if (clinic != null && clinic.trim().isNotEmpty) {
       queryParams['clinic'] = clinic.trim();
+    }
+    if (page >= 1) {
+      queryParams['page'] = page;
+    }
+    if (pageSize > 0) {
+      queryParams['page_size'] = pageSize;
     }
 
     final response = await _client.get(

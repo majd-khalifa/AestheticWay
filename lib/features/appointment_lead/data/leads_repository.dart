@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
@@ -38,6 +39,13 @@ class LeadSubmitResult {
 
 /// Repository managing patient appointment inquiries (leads) and personal request history
 class LeadsRepository {
+  /// Global notifier triggered whenever a new lead is submitted or when the Requests tab gains focus.
+  static final ValueNotifier<int> refreshNotifier = ValueNotifier<int>(0);
+
+  static void notifyLeadsUpdated() {
+    refreshNotifier.value++;
+  }
+
   final ApiClient _apiClient;
 
   LeadsRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
@@ -48,6 +56,7 @@ class LeadsRepository {
       final isRealClinicUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
           .hasMatch(payload['clinic']?.toString() ?? '');
       if (!isRealClinicUuid) {
+        notifyLeadsUpdated();
         return LeadSubmitResult(
           success: true,
           leadReference: '#REQ-12345',
@@ -64,9 +73,12 @@ class LeadsRepository {
       );
 
       final data = response.data as Map<String, dynamic>;
-      return LeadSubmitResult.fromJson(data);
+      final result = LeadSubmitResult.fromJson(data);
+      notifyLeadsUpdated();
+      return result;
     } on ApiException catch (e) {
       if (Platform.environment.containsKey('FLUTTER_TEST') && e.errorCode == 'CONNECTION_ERROR') {
+        notifyLeadsUpdated();
         return LeadSubmitResult(
           success: true,
           leadReference: '#REQ-12345',

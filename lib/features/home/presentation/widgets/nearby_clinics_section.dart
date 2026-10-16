@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
-import 'package:aesthetic_way/core/widgets/distance_chip.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -158,6 +157,7 @@ class _NearbyClinicCard extends StatelessWidget {
                 // High-resolution rounded image
                 LuxuryImage(
                   imageUrl: clinic.coverImageUrl,
+                  fallbackLogoUrl: clinic.logoUrl,
                   width: 78,
                   height: 78,
                   borderRadius: BorderRadius.circular(14),
@@ -209,10 +209,6 @@ class _NearbyClinicCard extends StatelessWidget {
                             reviewCount: clinic.reviewCount,
                             isCompact: true,
                             showGoogleSource: true,
-                          ),
-                          DistanceChip(
-                            distanceKm: clinic.distanceKm,
-                            areaName: loc.isArabic ? clinic.areaAr : clinic.areaEn,
                           ),
                         ],
                       ),

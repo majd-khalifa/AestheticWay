@@ -13,6 +13,7 @@ import 'package:aesthetic_way/features/appointment_lead/data/leads_repository.da
 
 void main() {
   setUp(() {
+    LocaleService().setLanguage(AppLanguage.arabic);
     AuthState().login(
       name: 'ماجد خليفة',
       phone: '+971 50 123 4567',

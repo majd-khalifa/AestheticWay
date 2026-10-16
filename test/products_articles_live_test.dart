@@ -5,6 +5,7 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
 import 'package:aesthetic_way/features/articles/data/articles_repository.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
 import 'package:aesthetic_way/features/articles/presentation/screens/article_detail_screen.dart';
@@ -393,6 +394,43 @@ void main() {
       expect(deleteArticleCalled, isTrue);
       expect(service.clinicArticles.any((a) => a.id == 'live-art-1'), isFalse);
     });
+
+    test('ClinicCatalogRepository strips empty price and transmits brand metadata', () async {
+      Map<String, dynamic>? postedData;
+      final fakeClient = FakeApiClient(
+        onGet: (path, _) => {'results': []},
+        onPost: (path, data) {
+          postedData = data as Map<String, dynamic>;
+          return {
+            'id': 'brand-prod-99',
+            'name_en': postedData?['name_en'],
+            'brand_name_en': postedData?['brand_name_en'],
+            'brand_name_ar': postedData?['brand_name_ar'],
+            'sponsor_company': postedData?['sponsor_company'],
+            'is_active': true,
+          };
+        },
+      );
+      final catalogRepo = ClinicCatalogRepository(apiClient: fakeClient);
+      final created = await catalogRepo.createProduct({
+        'name_en': 'C E Ferulic',
+        'name_ar': 'سي إي فيروليك',
+        'brand_name_en': 'SkinCeuticals',
+        'brand_name_ar': 'سكين سوتيكالز',
+        'sponsor_company': "L'Oreal Middle East",
+        'price': '', // Empty price string from UI or omitted
+        'is_active': true,
+      });
+
+      expect(created.id, 'brand-prod-99');
+      expect(created.brandNameEn, 'SkinCeuticals');
+      expect(created.brandNameAr, 'سكين سوتيكالز');
+      expect(created.sponsorCompany, "L'Oreal Middle East");
+      expect(postedData != null, isTrue);
+      expect(postedData!.containsKey('price'), isFalse);
+      expect(postedData!['brand_name_en'], 'SkinCeuticals');
+      expect(postedData!['sponsor_company'], "L'Oreal Middle East");
+    });
   });
 
   group('Patient Discovery Screens & Clinic Form UI Tests', () {
@@ -441,9 +479,10 @@ void main() {
 
       expect(find.byType(ProductDetailScreen), findsOneWidget);
       expect(find.text('سيروم طبي مضاد للأكسدة'), findsOneWidget);
-      // Verify inquiry button exists and no cart/checkout exists
-      expect(find.byIcon(Icons.send_rounded), findsOneWidget);
+      // Verify brand showcase has no cart, no checkout, and no inquiry button (informational showcase)
+      expect(find.byIcon(Icons.send_rounded), findsNothing);
       expect(find.byIcon(Icons.shopping_cart), findsNothing);
+      expect(find.text('العلامة / الجهة الراعية'), findsOneWidget);
     });
 
     testWidgets('ArticlesScreen displays live articles and opens ArticleDetailScreen', (tester) async {
@@ -518,6 +557,128 @@ void main() {
 
       // Verify LtrTextFormField is present in Product form
       expect(find.byType(LtrTextFormField), findsWidgets);
+      // Verify Price field is completely removed and brand metadata fields are present
+      expect(find.textContaining('Price'), findsNothing);
+      expect(find.textContaining('السعر'), findsNothing);
+      expect(find.text('اسم العلامة التجارية بالإنجليزية'), findsOneWidget);
+      expect(find.text('الشركة / الجهة الراعية'), findsOneWidget);
+    });
+
+    testWidgets('ClinicProfileScreen Product form displays inline error banner on failure without closing sheet', (tester) async {
+      tester.view.physicalSize = const Size(1080, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeClient = FakeApiClient(
+        onGet: (path, _) => {'results': []},
+        onPost: (path, data) {
+          throw DioException(
+            requestOptions: RequestOptions(path: path),
+            response: Response(
+              requestOptions: RequestOptions(path: path),
+              statusCode: 400,
+              data: {'name_en': ['A product with this name already exists.']},
+            ),
+          );
+        },
+      );
+      final catalogRepo = ClinicCatalogRepository(apiClient: fakeClient);
+      final service = ClinicPortalService();
+      service.setCatalogRepositoryForTesting(catalogRepo);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: const Scaffold(
+            body: ClinicProfileScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final addProdTooltip = LocaleService().tr('clinic_add_product');
+      final addProdBtn = find.byTooltip(addProdTooltip);
+      await tester.scrollUntilVisible(addProdBtn, 300, scrollable: find.byType(Scrollable).first);
+      await tester.tap(addProdBtn);
+      await tester.pumpAndSettle();
+
+      // Enter product name
+      final nameEnFinder = find.byType(LtrTextFormField).first;
+      await tester.enterText(nameEnFinder, 'Duplicate Serum');
+      await tester.pumpAndSettle();
+
+      // Tap submit button inside modal sheet
+      final submitBtn = find.text('إضافة المنتج للإعلان');
+      await tester.scrollUntilVisible(submitBtn, 300, scrollable: find.byType(Scrollable).last);
+      await tester.tap(submitBtn);
+      await tester.pumpAndSettle();
+
+      // Modal bottom sheet must remain open (not popped)
+      expect(nameEnFinder, findsOneWidget);
+      // Inline Error Banner should be visible with error
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+    });
+
+    testWidgets('ClinicProfileScreen Article form uses LuxuryImagePickerField and shows inline error on failure', (tester) async {
+      tester.view.physicalSize = const Size(1080, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeClient = FakeApiClient(
+        onGet: (path, _) => {'results': []},
+        onPost: (path, data) {
+          throw DioException(
+            requestOptions: RequestOptions(path: path),
+            response: Response(
+              requestOptions: RequestOptions(path: path),
+              statusCode: 400,
+              data: {'title_en': ['An article with this title already exists.']},
+            ),
+          );
+        },
+      );
+      final catalogRepo = ClinicCatalogRepository(apiClient: fakeClient);
+      final service = ClinicPortalService();
+      service.setCatalogRepositoryForTesting(catalogRepo);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: const Scaffold(
+            body: ClinicProfileScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final addArtTooltip = LocaleService().tr('clinic_add_article');
+      final addArtBtn = find.byTooltip(addArtTooltip);
+      await tester.scrollUntilVisible(addArtBtn, 300, scrollable: find.byType(Scrollable).first);
+      await tester.tap(addArtBtn);
+      await tester.pumpAndSettle();
+
+      // Verify LuxuryImagePickerField is present and no raw https:// URL field exists
+      expect(find.byType(LuxuryImagePickerField), findsOneWidget);
+      expect(find.textContaining('https://'), findsNothing);
+
+      // Enter required fields
+      final ltrFields = find.byType(LtrTextFormField);
+      await tester.enterText(ltrFields.first, 'Duplicate Guide'); // Title EN
+      await tester.enterText(ltrFields.last, 'Article Content in English'); // Content EN
+      await tester.pumpAndSettle();
+
+      // Tap submit button inside modal sheet
+      final submitBtn = find.text('نشر / حفظ المقال');
+      await tester.scrollUntilVisible(submitBtn, 300, scrollable: find.byType(Scrollable).last);
+      await tester.tap(submitBtn);
+      await tester.pumpAndSettle();
+
+      // Modal bottom sheet must remain open (not popped)
+      expect(find.byType(LuxuryImagePickerField), findsOneWidget);
+      // Inline Error Banner should be visible with error
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
     });
   });
 }

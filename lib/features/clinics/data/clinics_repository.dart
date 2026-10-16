@@ -1,6 +1,7 @@
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/clinics/models/review_model.dart';
 
 class ClinicsRepository {
   final ApiClient _apiClient;
@@ -15,6 +16,7 @@ class ClinicsRepository {
     double? latitude,
     double? longitude,
     int page = 1,
+    int pageSize = 20,
   }) async {
     final Map<String, dynamic> queryParams = {};
 
@@ -44,8 +46,12 @@ class ClinicsRepository {
       queryParams['longitude'] = longitude;
     }
 
-    if (page > 1) {
+    if (page >= 1) {
       queryParams['page'] = page;
+    }
+
+    if (pageSize > 0) {
+      queryParams['page_size'] = pageSize;
     }
 
     final response = await _apiClient.get(
@@ -76,5 +82,55 @@ class ClinicsRepository {
 
     final response = await _apiClient.get(endpoint);
     return ClinicModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Fetches approved patient reviews for a clinic
+  Future<List<ReviewModel>> getClinicReviews(String clinicId) async {
+    final cleanId = clinicId.trim();
+    if (cleanId.isEmpty) return [];
+
+    try {
+      final response = await _apiClient.get(ApiConfig.clinicReviews(cleanId));
+      final data = response.data;
+      List<dynamic> items = [];
+      if (data is Map<String, dynamic> && data.containsKey('results')) {
+        items = data['results'] as List<dynamic>? ?? [];
+      } else if (data is List) {
+        items = data;
+      }
+
+      return items
+          .whereType<Map<String, dynamic>>()
+          .map((m) => ReviewModel.fromJson(m, defaultClinicId: cleanId))
+          .toList();
+    } catch (_) {
+      // Graceful fallback when database is empty or reviews table is unpopulated
+      return [];
+    }
+  }
+
+  /// Submits a patient review/feedback for a clinic
+  Future<bool> submitClinicReview(
+    String clinicId, {
+    required double rating,
+    required String comment,
+    String? patientName,
+  }) async {
+    final cleanId = clinicId.trim();
+    if (cleanId.isEmpty) return false;
+
+    final payload = <String, dynamic>{
+      'clinic': cleanId,
+      'rating': rating,
+      'comment': comment.trim(),
+      if (patientName != null && patientName.trim().isNotEmpty) 'patient_name': patientName.trim(),
+    };
+
+    final response = await _apiClient.post(
+      ApiConfig.clinicReviewSubmit(cleanId),
+      data: payload,
+    );
+
+    return response.statusCode == 200 || response.statusCode == 201;
   }
 }

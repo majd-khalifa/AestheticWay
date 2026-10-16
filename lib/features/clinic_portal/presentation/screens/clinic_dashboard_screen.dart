@@ -8,19 +8,21 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_lead_detail_screen.dart';
-import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_verify_code_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_practitioners_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_treatments_screen.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/widgets/clinic_setup_checklist_card.dart';
 
 /// Clinic Tab 1: Luxury Clinic Dashboard Screen with Key Metrics, Shortcuts & Recent Leads
 class ClinicDashboardScreen extends StatefulWidget {
   final VoidCallback onNavigateToLeads;
   final VoidCallback onNavigateToOffers;
+  final VoidCallback? onNavigateToProfile;
 
   const ClinicDashboardScreen({
     super.key,
     required this.onNavigateToLeads,
     required this.onNavigateToOffers,
+    this.onNavigateToProfile,
   });
 
   @override
@@ -175,6 +177,18 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                           ),
                           const SizedBox(height: 16),
 
+                          // Clinic Onboarding Setup Checklist (Shown when setup is incomplete)
+                          if (clinic.setupStatus != 'approved' ||
+                              (clinicService.setupChecklist != null &&
+                                  !clinicService.setupChecklist!.isReadyForReview)) ...[
+                            ClinicSetupChecklistCard(
+                              clinic: clinic,
+                              checklist: clinicService.setupChecklist,
+                              onNavigateToProfile: widget.onNavigateToProfile,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
                           // 4 Metrics Summary Grid
                           Row(
                             children: [
@@ -268,6 +282,28 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _CatalogCountCard(
+                                  title: loc.isArabic ? 'المنتجات الطبية' : 'Skincare Products',
+                                  count: '${clinicService.activeProductsCount}',
+                                  icon: Icons.shopping_bag_outlined,
+                                  onTap: widget.onNavigateToProfile,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _CatalogCountCard(
+                                  title: loc.isArabic ? 'المقالات والأدلة' : 'Articles & Guides',
+                                  count: '${clinicService.activeArticlesCount}',
+                                  icon: Icons.article_outlined,
+                                  onTap: widget.onNavigateToProfile,
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 18),
 
                           // Quick Actions Row
@@ -299,22 +335,6 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                               ),
                             ],
                           ),
-              const SizedBox(height: 8),
-              _ShortcutButton(
-                label: loc.tr('clinic_verify_code_title'),
-                icon: Icons.qr_code_scanner_rounded,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(
-                      page: ClinicVerifyCodeScreen(
-                        clinicId: clinic.id,
-                        clinicName: loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                      ),
-                    ),
-                  );
-                },
-              ),
               const SizedBox(height: 20),
 
               // Recent Consultation Leads Section
@@ -604,13 +624,13 @@ class _CatalogCountCard extends StatelessWidget {
   final String title;
   final String count;
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _CatalogCountCard({
     required this.title,
     required this.count,
     required this.icon,
-    required this.onTap,
+    this.onTap,
   });
 
   @override

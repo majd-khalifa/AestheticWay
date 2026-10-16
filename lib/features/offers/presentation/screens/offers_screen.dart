@@ -29,16 +29,21 @@ class OffersScreen extends StatefulWidget {
 class _OffersScreenState extends State<OffersScreen> {
   final OffersRepository _offersRepository = OffersRepository();
 
+  final ScrollController _scrollController = ScrollController();
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   List<OfferModel>? _offers;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     if (widget.initialOffers != null) {
       _offers = widget.initialOffers;
       _isLoading = false;
@@ -49,22 +54,43 @@ class _OffersScreenState extends State<OffersScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= 250) {
+      _loadMoreOffers();
+    }
   }
 
   Future<void> _loadOffers() async {
     setState(() {
       _isLoading = true;
+      _isLoadingMore = false;
+      _hasMore = true;
+      _currentPage = 1;
       _errorMessage = null;
     });
 
     try {
-      final offers = await _offersRepository.getOffers(search: _searchQuery);
+      final offers = await _offersRepository.getOffers(
+        search: _searchQuery,
+        page: 1,
+        pageSize: 20,
+      );
       if (mounted) {
         setState(() {
           _offers = offers;
           _isLoading = false;
+          if (offers.length < 20) {
+            _hasMore = false;
+          }
         });
       }
     } catch (e) {
@@ -72,6 +98,39 @@ class _OffersScreenState extends State<OffersScreen> {
         setState(() {
           _errorMessage = e.toString();
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreOffers() async {
+    if (_isLoadingMore || !_hasMore || _isLoading) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final nextPage = _currentPage + 1;
+      final nextList = await _offersRepository.getOffers(
+        search: _searchQuery,
+        page: nextPage,
+        pageSize: 20,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _currentPage = nextPage;
+        _isLoadingMore = false;
+        if (nextList.length < 20) {
+          _hasMore = false;
+        }
+        _offers = [...?_offers, ...nextList];
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
         });
       }
     }
@@ -161,6 +220,7 @@ class _OffersScreenState extends State<OffersScreen> {
           backgroundColor: AppColors.bg(context),
           appBar: AppBar(
             backgroundColor: AppColors.bg(context),
+            automaticallyImplyLeading: false,
             title: Text(
               loc.tr('category_offers_title'),
               style: AppTypography.screenTitle.copyWith(
@@ -168,10 +228,12 @@ class _OffersScreenState extends State<OffersScreen> {
                 fontSize: 16,
               ),
             ),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
-              onPressed: () => Navigator.pop(context),
-            ),
+            leading: Navigator.canPop(context)
+                ? IconButton(
+                    icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                : null,
           ),
           body: RefreshIndicator(
             onRefresh: _loadOffers,
@@ -238,16 +300,81 @@ class _OffersScreenState extends State<OffersScreen> {
                               onRetry: _loadOffers,
                             )
                           : filteredOffers.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    loc.isArabic ? 'لا توجد عروض متاحة حالياً' : 'No offers currently available',
-                                    style: TextStyle(color: AppColors.mutedText(context)),
-                                  ),
+                              ? ListView(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  children: [
+                                    SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                      child: LuxuryCard(
+                                        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.accentChampagne.withValues(alpha: 0.12),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.local_offer_outlined, size: 36, color: AppColors.accentChampagne),
+                                              ),
+                                              const SizedBox(height: 14),
+                                              Text(
+                                                loc.isArabic ? 'لا توجد باقات عروض حالياً' : 'No offers currently available',
+                                                style: AppTypography.cardTitle.copyWith(
+                                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                loc.isArabic
+                                                    ? 'ترقبوا عروض وخصومات مميزة من أفضل العيادات قريباً'
+                                                    : 'Stay tuned for exclusive offers from premier clinics soon',
+                                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              const SizedBox(height: 16),
+                                              ElevatedButton.icon(
+                                                onPressed: _loadOffers,
+                                                icon: const Icon(Icons.refresh_rounded, size: 16),
+                                                label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                                  foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 )
                               : ListView.builder(
+                                  controller: _scrollController,
                                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                                  itemCount: filteredOffers.length,
+                                  itemCount: filteredOffers.length + (_isLoadingMore ? 1 : 0),
                                   itemBuilder: (context, index) {
+                                    if (index == filteredOffers.length) {
+                                      return const Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 24),
+                                        child: Center(
+                                          child: SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppColors.accentChampagne,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
                                     final offer = filteredOffers[index];
                                     return Padding(
                                       padding: const EdgeInsets.only(bottom: 16),
@@ -261,6 +388,7 @@ class _OffersScreenState extends State<OffersScreen> {
                                               children: [
                                                 LuxuryImage(
                                                   imageUrl: offer.imageUrl,
+                                                  fallbackLogoUrl: offer.clinicLogoUrl,
                                                   height: 160,
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,

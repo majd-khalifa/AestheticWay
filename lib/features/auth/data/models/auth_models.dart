@@ -8,6 +8,8 @@ class UserModel {
   final bool isVerified;
   final String? devicePlatform;
   final String? createdAt;
+  final String? referralCode;
+  final String? inviteLink;
 
   const UserModel({
     required this.id,
@@ -18,6 +20,8 @@ class UserModel {
     this.isVerified = false,
     this.devicePlatform,
     this.createdAt,
+    this.referralCode,
+    this.inviteLink,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +34,8 @@ class UserModel {
       isVerified: json['is_verified'] == true,
       devicePlatform: json['device_platform']?.toString(),
       createdAt: json['created_at']?.toString(),
+      referralCode: json['referral_code']?.toString(),
+      inviteLink: json['invite_link']?.toString(),
     );
   }
 
@@ -43,6 +49,8 @@ class UserModel {
       'is_verified': isVerified,
       'device_platform': devicePlatform,
       'created_at': createdAt,
+      'referral_code': referralCode,
+      'invite_link': inviteLink,
     };
   }
 

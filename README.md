@@ -1,6 +1,14 @@
 # aesthetic_way
 
-A new Flutter project.
+AESTHETIC WAY — UAE Medical Aesthetic & Dermatology Discovery + Lead Generation App (Flutter).
+
+## Documentation (`docs/`)
+See the [`docs/`](./docs/) directory for production handoff and engineering references:
+- [`docs/PROJECT_HANDOFF.md`](./docs/PROJECT_HANDOFF.md) — Product scope, hard boundaries, roles & seed accounts, and UI standards
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — `lib/` architecture, repository mappings, and `LocaleService`/`ThemeService` defaults
+- [`docs/API_CONTRACT.md`](./docs/API_CONTRACT.md) — Production REST API contract (`https://aestheticway.ae/api/v1/`)
+- [`docs/CURRENT_STATUS.md`](./docs/CURRENT_STATUS.md) — Completed features, OTP email status, and seed clinics
+- [`docs/QA_CHECKLIST.md`](./docs/QA_CHECKLIST.md) — Manual QA checklist for Patient, Clinic Portal, and Super Admin
 
 ## Getting Started
 

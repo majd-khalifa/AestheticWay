@@ -7,6 +7,8 @@ import '../../../../core/widgets/ltr_text_field.dart';
 import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/practitioner_badge.dart';
 import '../../../../core/widgets/silver_button.dart';
+import '../../../../core/widgets/luxury_image_picker_field.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../practitioners/models/practitioner_model.dart';
 import '../../services/clinic_portal_service.dart';
 
@@ -44,6 +46,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
     final formKey = GlobalKey<FormState>();
     final isEditing = existing != null;
 
+    String? avatarPath = existing?.avatarUrl;
     final nameEnController = TextEditingController(text: existing?.nameEn ?? '');
     final nameArController = TextEditingController(text: existing?.nameAr ?? '');
     final specialtyEnController = TextEditingController(text: existing?.specialtyEn ?? '');
@@ -55,6 +58,8 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
 
     PractitionerType selectedType = existing?.type ?? PractitionerType.doctor;
     String status = existing?.status ?? 'active';
+    String? modalErrorMessage;
+    bool isSubmitting = false;
 
     final isDark = AppColors.isDark(context);
 
@@ -101,6 +106,60 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                         color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      ),
+                    ),
+                    if (modalErrorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.redAccent.withValues(alpha: 0.6),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                modalErrorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                              onPressed: () {
+                                setModalState(() => modalErrorMessage = null);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+
+                    // Practitioner Avatar Picker
+                    Center(
+                      child: LuxuryImagePickerField(
+                        label: loc.isArabic ? 'صورة الطبيب / الممارس' : 'Practitioner Photo',
+                        initialUrl: existing?.avatarUrl.isNotEmpty == true ? existing?.avatarUrl : null,
+                        isCircular: true,
+                        height: 110,
+                        width: 110,
+                        onImageSelected: (path) => avatarPath = path,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -278,54 +337,72 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       icon: Icons.check_circle_outline,
                       isFullWidth: true,
                       height: 46,
-                      onPressed: () async {
-                        if (!formKey.currentState!.validate()) return;
+                      isLoading: isSubmitting,
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              setModalState(() => modalErrorMessage = null);
+                              if (!formKey.currentState!.validate()) return;
 
-                        final data = {
-                          'name_en': nameEnController.text.trim(),
-                          'name_ar': nameArController.text.trim().isNotEmpty
-                              ? nameArController.text.trim()
-                              : nameEnController.text.trim(),
-                          'title_en': titleEnController.text.trim().isNotEmpty
-                              ? titleEnController.text.trim()
-                              : specialtyEnController.text.trim(),
-                          'title_ar': titleArController.text.trim().isNotEmpty
-                              ? titleArController.text.trim()
-                              : specialtyArController.text.trim(),
-                          'speciality_en': specialtyEnController.text.trim().isNotEmpty
-                              ? specialtyEnController.text.trim()
-                              : 'Aesthetic Practitioner',
-                          'speciality_ar': specialtyArController.text.trim().isNotEmpty
-                              ? specialtyArController.text.trim()
-                              : 'ممارس تجميلي معتمد',
-                          'type': selectedType.value,
-                          'bio_en': bioEnController.text.trim(),
-                          'bio_ar': bioArController.text.trim(),
-                          'status': status,
-                        };
+                              final data = <String, dynamic>{
+                                'name_en': nameEnController.text.trim(),
+                                'name_ar': nameArController.text.trim().isNotEmpty
+                                    ? nameArController.text.trim()
+                                    : nameEnController.text.trim(),
+                                'title_en': titleEnController.text.trim().isNotEmpty
+                                    ? titleEnController.text.trim()
+                                    : specialtyEnController.text.trim(),
+                                'title_ar': titleArController.text.trim().isNotEmpty
+                                    ? titleArController.text.trim()
+                                    : specialtyArController.text.trim(),
+                                'speciality_en': specialtyEnController.text.trim().isNotEmpty
+                                    ? specialtyEnController.text.trim()
+                                    : 'Aesthetic Practitioner',
+                                'speciality_ar': specialtyArController.text.trim().isNotEmpty
+                                    ? specialtyArController.text.trim()
+                                    : 'ممارس تجميلي معتمد',
+                                'type': selectedType.value,
+                                'bio_en': bioEnController.text.trim(),
+                                'bio_ar': bioArController.text.trim(),
+                                'status': status,
+                              };
+                              if (avatarPath != null && avatarPath!.isNotEmpty) {
+                                data['avatar'] = avatarPath;
+                              }
 
-                        try {
-                          if (isEditing) {
-                            await ClinicPortalService().updatePractitioner(existing.id, data);
-                          } else {
-                            await ClinicPortalService().createPractitioner(data);
-                          }
-                          if (ctx.mounted) Navigator.pop(ctx);
-                          if (context.mounted) {
-                            showAppSnackBar(
-                              context,
-                              isEditing
-                                  ? (loc.isArabic ? 'تم تحديث بيانات الممارس بنجاح' : 'Practitioner updated successfully')
-                                  : (loc.isArabic ? 'تم إضافة الممارس بنجاح' : 'Practitioner added successfully'),
-                              type: AppSnackBarType.success,
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
-                          }
-                        }
-                      },
+                              setModalState(() => isSubmitting = true);
+
+                              try {
+                                if (isEditing) {
+                                  await ClinicPortalService().updatePractitioner(existing.id, data);
+                                } else {
+                                  await ClinicPortalService().createPractitioner(data);
+                                }
+                                if (ctx.mounted) Navigator.pop(ctx);
+                                if (context.mounted) {
+                                  showAppSnackBar(
+                                    context,
+                                    isEditing
+                                        ? (loc.isArabic ? 'تم تحديث بيانات الممارس بنجاح' : 'Practitioner updated successfully')
+                                        : (loc.isArabic ? 'تم إضافة الممارس بنجاح' : 'Practitioner added successfully'),
+                                    type: AppSnackBarType.success,
+                                  );
+                                }
+                              } catch (e) {
+                                String cleanMsg;
+                                if (e is ApiException) {
+                                  cleanMsg = e.message;
+                                } else {
+                                  cleanMsg = ApiException.sanitizeRegulatoryCompliance(
+                                    e.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', ''),
+                                  );
+                                }
+                                setModalState(() {
+                                  modalErrorMessage = cleanMsg;
+                                  isSubmitting = false;
+                                });
+                              }
+                            },
                     ),
                     const SizedBox(height: 16),
                   ],

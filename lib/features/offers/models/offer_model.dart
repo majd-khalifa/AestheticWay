@@ -5,6 +5,7 @@ class OfferModel {
   final String clinicId;
   final String clinicNameAr;
   final String? clinicNameEn;
+  final String? clinicLogoUrl;
   final double originalPrice;
   final double offerPrice;
   final int discountPercentage;
@@ -26,6 +27,7 @@ class OfferModel {
     required this.clinicId,
     required this.clinicNameAr,
     this.clinicNameEn,
+    this.clinicLogoUrl,
     required this.originalPrice,
     required this.offerPrice,
     required this.discountPercentage,
@@ -48,6 +50,7 @@ class OfferModel {
     String? clinicId,
     String? clinicNameAr,
     String? clinicNameEn,
+    String? clinicLogoUrl,
     double? originalPrice,
     double? offerPrice,
     int? discountPercentage,
@@ -69,6 +72,7 @@ class OfferModel {
       clinicId: clinicId ?? this.clinicId,
       clinicNameAr: clinicNameAr ?? this.clinicNameAr,
       clinicNameEn: clinicNameEn ?? this.clinicNameEn,
+      clinicLogoUrl: clinicLogoUrl ?? this.clinicLogoUrl,
       originalPrice: originalPrice ?? this.originalPrice,
       offerPrice: offerPrice ?? this.offerPrice,
       discountPercentage: discountPercentage ?? this.discountPercentage,
@@ -141,6 +145,10 @@ class OfferModel {
     final img = json['image_url']?.toString() ??
         (clinicObj != null ? clinicObj['logo']?.toString() ?? '' : '');
 
+    final clinicLogo = clinicObj != null
+        ? (clinicObj['logo']?.toString() ?? clinicObj['logo_url']?.toString())
+        : (json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
+
     return OfferModel(
       id: json['id']?.toString() ?? '',
       titleAr: json['title_ar'] ?? json['title_en'] ?? '',
@@ -154,6 +162,7 @@ class OfferModel {
       clinicNameEn: clinicObj != null
           ? (clinicObj['name_en'] ?? clinicObj['name_ar'] ?? '')
           : json['clinic_name_en'],
+      clinicLogoUrl: clinicLogo,
       originalPrice: origPrice,
       offerPrice: offPrice,
       discountPercentage: discount,

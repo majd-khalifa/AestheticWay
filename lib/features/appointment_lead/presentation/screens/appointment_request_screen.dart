@@ -1,6 +1,6 @@
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
@@ -51,10 +51,10 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   String? _selectedBranchId;
   String? _selectedTreatment;
   String? _selectedPractitionerId;
-  DateTime _preferredDate = DateTime.now().add(const Duration(days: 2));
-  PreferredTimeWindow _timeWindow = PreferredTimeWindow.evening;
+  final PreferredTimeWindow _timeWindow = PreferredTimeWindow.evening;
   bool _consentAccepted = false;
   bool _isSubmitting = false;
+  String? _rateLimitBannerMessage;
 
   final Map<String, String> _treatmentNameToId = {};
 
@@ -156,45 +156,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     super.dispose();
   }
 
-  Future<void> _selectDate() async {
-    final isDark = AppColors.isDark(context);
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _preferredDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 60)),
-      builder: (context, child) {
-        return Theme(
-          data: isDark
-              ? ThemeData.dark().copyWith(
-                  colorScheme: const ColorScheme.dark(
-                    primary: AppColors.accentChampagne,
-                    onPrimary: AppColors.backgroundDeep,
-                    surface: AppColors.cardSurface,
-                    onSurface: AppColors.textPrimary,
-                  ),
-                )
-              : ThemeData.light().copyWith(
-                  colorScheme: const ColorScheme.light(
-                    primary: AppColors.primarySoftNavy,
-                    onPrimary: Colors.white,
-                    surface: Colors.white,
-                    onSurface: AppColors.lightTextPrimary,
-                  ),
-                ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        _preferredDate = picked;
-      });
-    }
-  }
-
   void _submitLeadRequest() async {
+    if (_isSubmitting) return;
     final loc = LocaleService();
     if (!_formKey.currentState!.validate()) {
       return;
@@ -212,15 +175,12 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
 
     setState(() {
       _isSubmitting = true;
+      _rateLimitBannerMessage = null;
     });
 
     // Format phone into E.164: +9715XXXXXXXX
     final rawPhone = _phoneController.text.trim();
-    final digitsOnly = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
-    final localDigits = digitsOnly.startsWith('971')
-        ? digitsOnly.substring(3)
-        : (digitsOnly.startsWith('0') ? digitsOnly.substring(1) : digitsOnly);
-    final formattedPhone = '+971$localDigits';
+    final formattedPhone = LuxuryPhoneInputField.normalizeToE164(rawPhone);
 
     final actualServiceName = widget.selectedOfferTitle != null && widget.selectedOfferTitle!.isNotEmpty
         ? widget.selectedOfferTitle!
@@ -287,7 +247,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         practitionerNameAr: selectedPractitioner?.nameAr,
         practitionerNameEn: selectedPractitioner?.nameEn,
         practitionerType: selectedPractitioner?.type,
-        preferredDate: _preferredDate,
+        preferredDate: DateTime.now(),
         preferredTimeWindow: _timeWindow,
         patientFullName: _nameController.text.trim(),
         patientPhone: formattedPhone,
@@ -308,19 +268,35 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _isSubmitting = false;
-      });
       final is429 = e.statusCode == 429 ||
           e.message.contains('already submitted') ||
           e.message.contains('too many requests') ||
           e.message.contains('مؤخراً') ||
           e.message.contains('مؤخرا');
+      final isSuspendedOrInactive = e.statusCode == 403 ||
+          e.statusCode == 404 ||
+          (e.statusCode == 400 && (e.message.toLowerCase().contains('suspended') ||
+              e.message.toLowerCase().contains('inactive') ||
+              e.message.contains('معلقة') ||
+              e.message.contains('غير متاحة') ||
+              e.message.toLowerCase().contains('not found')));
+      setState(() {
+        _isSubmitting = false;
+        if (is429) {
+          _rateLimitBannerMessage = loc.isArabic
+              ? 'يرجى الانتظار لحظات قبل إرسال طلب جديد لنفس العيادة'
+              : 'Please wait a moment before submitting another request to this clinic';
+        }
+      });
       final errorMessage = is429
           ? (loc.isArabic
               ? 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'
               : 'A similar request was recently submitted. Please try again shortly.')
-          : e.message;
+          : isSuspendedOrInactive
+              ? (loc.isArabic
+                  ? 'العيادة غير متاحة حالياً لتلقي الطلبات. يرجى اختيار عيادة أخرى'
+                  : 'This clinic is currently unavailable to accept requests. Please choose another clinic.')
+              : e.message;
       showAppSnackBar(
         context,
         errorMessage,
@@ -453,6 +429,34 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
+              ],
+
+              if (_rateLimitBannerMessage != null) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.hourglass_top_rounded, color: Color(0xFFEF4444), size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _rateLimitBannerMessage!,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: const Color(0xFFEF4444),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
 
               // Clinic Summary Card
@@ -659,103 +663,6 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                 const SizedBox(height: 14),
               ],
 
-                // Preferred Date & Time Window
-                Text(
-                  loc.tr('preferred_datetime'),
-                  style: AppTypography.cardTitle.copyWith(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                InkWell(
-                  onTap: _selectDate,
-                  borderRadius: BorderRadius.circular(12),
-                  child: LuxuryCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.accentChampagne),
-                        const SizedBox(width: 10),
-                        Text(
-                          DateFormat('yyyy/MM/dd').format(_preferredDate),
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.edit_calendar_outlined,
-                          size: 16,
-                          color: AppColors.mutedText(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Time Slots Radio Chips
-                Row(
-                  children: PreferredTimeWindow.values.map((slot) {
-                    final isSelected = _timeWindow == slot;
-                    String label;
-                    switch (slot) {
-                      case PreferredTimeWindow.morning:
-                        label = loc.tr('time_morning');
-                        break;
-                      case PreferredTimeWindow.afternoon:
-                        label = loc.tr('time_afternoon');
-                        break;
-                      case PreferredTimeWindow.evening:
-                        label = loc.tr('time_evening');
-                        break;
-                    }
-
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _timeWindow = slot;
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          padding: const EdgeInsets.symmetric(vertical: 9),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.20 : 0.16)
-                                : (isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected ? AppColors.accentChampagne : AppColors.border(context),
-                              width: isSelected ? 1.2 : 0.8,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              label,
-                              style: AppTypography.caption.copyWith(
-                                color: isSelected
-                                    ? AppColors.accentChampagne
-                                    : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                fontSize: 10.5,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 18),
-
                 // Patient Info
                 Text(
                   loc.tr('contact_info_title'),
@@ -801,54 +708,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   },
                 ),
                 const SizedBox(height: 10),
-                TextFormField(
+                LuxuryPhoneInputField(
                   controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  textDirection: TextDirection.ltr,
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: loc.tr('phone_uae'),
-                    hintText: '50 123 4567',
-                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                    floatingLabelStyle: TextStyle(
-                      color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    prefixText: '+971  ',
-                    prefixStyle: TextStyle(
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13.5,
-                    ),
-                    prefixIcon: Icon(Icons.phone_outlined, color: AppColors.mutedText(context), size: 18),
-                    filled: true,
-                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border(context), width: 0.85),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                        width: 1.4,
-                      ),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return loc.isArabic ? 'يرجى إدخال رقم الهاتف' : 'Please enter phone number';
-                    final digits = v.replaceAll(RegExp(r'[^0-9]'), '');
-                    final local = digits.startsWith('971') ? digits.substring(3) : (digits.startsWith('0') ? digits.substring(1) : digits);
-                    if (local.length < 8 || local.length > 10) {
-                      return loc.isArabic ? 'يرجى إدخال رقم هاتف إماراتي صحيح (مثال: 501234567)' : 'Please enter valid UAE phone (e.g. 501234567)';
-                    }
-                    return null;
-                  },
+                  isRequired: true,
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
@@ -931,7 +793,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   isFullWidth: true,
                   height: 48,
                   isLoading: _isSubmitting,
-                  onPressed: _submitLeadRequest,
+                  onPressed: _isSubmitting ? null : _submitLeadRequest,
                 ),
                 const SizedBox(height: 24),
               ],

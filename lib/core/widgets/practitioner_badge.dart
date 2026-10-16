@@ -18,6 +18,7 @@ class PractitionerBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
+    final isDark = AppColors.isDark(context);
     Color bg;
     Color border;
     Color textColor;
@@ -26,23 +27,35 @@ class PractitionerBadge extends StatelessWidget {
 
     switch (type) {
       case PractitionerType.doctor:
-        bg = const Color(0xFF172554).withValues(alpha: 0.6);
-        border = AppColors.medicalBlue.withValues(alpha: 0.6);
-        textColor = const Color(0xFFBFDBFE);
+        bg = isDark
+            ? const Color(0xFF172554).withValues(alpha: 0.75)
+            : const Color(0xFFEFF6FF);
+        border = isDark
+            ? AppColors.medicalBlue.withValues(alpha: 0.65)
+            : const Color(0xFF93C5FD);
+        textColor = isDark ? const Color(0xFFBFDBFE) : const Color(0xFF1E3A8A);
         label = loc.tr('role_doctor');
         icon = Icons.medical_services_outlined;
         break;
       case PractitionerType.nurse:
-        bg = const Color(0xFF042F2E).withValues(alpha: 0.6);
-        border = AppColors.nurseTeal.withValues(alpha: 0.6);
-        textColor = const Color(0xFF99F6E4);
+        bg = isDark
+            ? const Color(0xFF042F2E).withValues(alpha: 0.75)
+            : const Color(0xFFF0FDFA);
+        border = isDark
+            ? AppColors.nurseTeal.withValues(alpha: 0.65)
+            : const Color(0xFF5EEAD4);
+        textColor = isDark ? const Color(0xFF99F6E4) : const Color(0xFF115E59);
         label = loc.tr('role_nurse');
         icon = Icons.health_and_safety_outlined;
         break;
       case PractitionerType.licensedProfessional:
-        bg = const Color(0xFF1E293B).withValues(alpha: 0.6);
-        border = AppColors.silverBorder.withValues(alpha: 0.4);
-        textColor = AppColors.silverPrimary;
+        bg = isDark
+            ? const Color(0xFF1E293B).withValues(alpha: 0.75)
+            : const Color(0xFFF1F5F9);
+        border = isDark
+            ? AppColors.silverBorder.withValues(alpha: 0.5)
+            : const Color(0xFFCBD5E1);
+        textColor = isDark ? AppColors.silverPrimary : const Color(0xFF0A0E17);
         label = loc.tr('role_specialist');
         icon = Icons.spa_outlined;
         break;

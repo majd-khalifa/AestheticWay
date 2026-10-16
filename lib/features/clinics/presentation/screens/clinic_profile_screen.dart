@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/rating_chip.dart';
-import 'package:aesthetic_way/core/widgets/distance_chip.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
@@ -17,9 +16,14 @@ import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
+import 'package:aesthetic_way/features/practitioners/data/practitioners_repository.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:aesthetic_way/features/practitioners/presentation/screens/practitioner_profile_screen.dart';
+import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
 import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:aesthetic_way/features/clinics/models/review_model.dart';
 
 /// Clinic Profile Screen with Google Maps, Staff Badges, Treatments & Lead CTAs (Fully Bilingual)
 class ClinicProfileScreen extends StatefulWidget {
@@ -35,6 +39,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
     with SingleTickerProviderStateMixin {
   final ClinicsRepository _clinicsRepository = ClinicsRepository();
   final OffersRepository _offersRepository = OffersRepository();
+  final PractitionersRepository _practitionersRepository =
+      PractitionersRepository();
+  final TreatmentsRepository _treatmentsRepository = TreatmentsRepository();
 
   late ClinicModel _clinic;
   List<PractitionerModel> _practitioners = [];
@@ -50,14 +57,33 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
   void initState() {
     super.initState();
     _clinic = widget.clinic;
+    if (widget.clinic.rawPractitioners != null) {
+      _practitioners = widget.clinic.rawPractitioners!
+          .whereType<Map<String, dynamic>>()
+          .map((m) => PractitionerModel.fromJson(
+                m,
+                clinicId: widget.clinic.id,
+                clinicNameAr: widget.clinic.nameAr,
+                clinicNameEn: widget.clinic.nameEn,
+              ))
+          .toList();
+    }
+    if (widget.clinic.rawTreatments != null) {
+      _treatments = widget.clinic.rawTreatments!
+          .whereType<Map<String, dynamic>>()
+          .map((m) => TreatmentModel.fromJson(m))
+          .toList();
+    }
     _tabController = TabController(length: 5, vsync: this);
     _fetchDetails();
   }
 
   Future<void> _fetchDetails() async {
     try {
-      final fullClinic = await _clinicsRepository.getClinicDetail(widget.clinic.id);
-      final clinicOffers = await _offersRepository.getOffers(clinicId: widget.clinic.id);
+      final fullClinic =
+          await _clinicsRepository.getClinicDetail(widget.clinic.id);
+      final clinicOffers =
+          await _offersRepository.getOffers(clinicId: widget.clinic.id);
 
       List<PractitionerModel> practitionersList = [];
       if (fullClinic.rawPractitioners != null) {
@@ -71,6 +97,13 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                 ))
             .toList();
       }
+      if (practitionersList.isEmpty) {
+        try {
+          practitionersList = await _practitionersRepository.getPractitioners(
+            clinicId: fullClinic.id,
+          );
+        } catch (_) {}
+      }
 
       List<TreatmentModel> treatmentsList = [];
       if (fullClinic.rawTreatments != null) {
@@ -78,6 +111,13 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
             .whereType<Map<String, dynamic>>()
             .map((m) => TreatmentModel.fromJson(m))
             .toList();
+      }
+      if (treatmentsList.isEmpty) {
+        try {
+          treatmentsList = await _treatmentsRepository.getTreatments(
+            clinic: fullClinic.id,
+          );
+        } catch (_) {}
       }
 
       if (mounted) {
@@ -128,33 +168,29 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
     );
   }
 
-  void _toggleFavorite() async {
-    final auth = AuthState();
-    final loc = LocaleService();
-    if (!auth.isLoggedIn) {
-      final loggedIn = await GuestAuthGuard.requireAuth(
-        context,
-        reasonTitle: loc.tr('my_favs'),
-        reasonSubtitle: loc.isArabic
-            ? 'سجل دخولك لحفظ العيادة في قائمتك المفضلة'
-            : 'Login to save this clinic to your favorites',
-      );
-      if (!loggedIn || !mounted) return;
-    }
-    auth.toggleFavorite(widget.clinic.id);
+  void _handlePractitionerTap(PractitionerModel practitioner) {
+    Navigator.push(
+      context,
+      LuxuryPageRoute(
+        page: PractitionerProfileScreen(
+          practitioner: practitioner,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final clinic = _clinic;
     final validImages = [
-      if (isValidNetworkImageUrl(clinic.coverImageUrl)) clinic.coverImageUrl.trim(),
+      if (isValidNetworkImageUrl(clinic.coverImageUrl))
+        clinic.coverImageUrl.trim(),
       ...clinic.galleryImages
           .where((img) => isValidNetworkImageUrl(img))
           .map((img) => img.trim()),
     ];
-    final auth = AuthState();
     final loc = LocaleService();
+    final isDark = AppColors.isDark(context);
 
     return ListenableBuilder(
       listenable: loc,
@@ -164,7 +200,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
-                // Luxury Hero Media Bar
+                // Luxury Hero Media Bar (No favorite/heart icon per client spec)
                 SliverAppBar(
                   expandedHeight: 240,
                   pinned: true,
@@ -184,31 +220,6 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  actions: [
-                    ListenableBuilder(
-                      listenable: auth,
-                      builder: (context, _) {
-                        final isFav = auth.isFavorite(clinic.id);
-                        return IconButton(
-                          icon: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.55),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav
-                                  ? const Color(0xFFF87171)
-                                  : AppColors.silverPrimary,
-                              size: 18,
-                            ),
-                          ),
-                          onPressed: _toggleFavorite,
-                        );
-                      },
-                    ),
-                  ],
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       fit: StackFit.expand,
@@ -216,11 +227,11 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                         if (validImages.isEmpty)
                           Container(
                             color: AppColors.surface(context),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.local_hospital_outlined,
                                 size: 56,
-                                color: AppColors.silverMuted,
+                                color: AppColors.subtext(context),
                               ),
                             ),
                           )
@@ -236,12 +247,13 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                             itemBuilder: (context, index) {
                               return LuxuryImage(
                                 imageUrl: validImages[index],
+                                fallbackLogoUrl: clinic.logoUrl,
                                 fit: BoxFit.cover,
                                 placeholderIcon: Icons.local_hospital_outlined,
                               );
                             },
                           ),
-                        // Dark gradient overlay
+                        // Gradient overlay blending cleanly with active theme background
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -250,9 +262,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                               colors: [
                                 Colors.black.withValues(alpha: 0.45),
                                 Colors.transparent,
-                                AppColors.backgroundDeep,
+                                AppColors.bg(context),
                               ],
-                              stops: const [0.0, 0.5, 1.0],
+                              stops: const [0.0, 0.55, 1.0],
                             ),
                           ),
                         ),
@@ -310,6 +322,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                         : clinic.nameEn,
                                     style: AppTypography.heroTitle.copyWith(
                                       fontSize: 20,
+                                      color: AppColors.text(context),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -318,8 +331,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                         ? clinic.nameEn
                                         : clinic.nameAr,
                                     style: AppTypography.caption.copyWith(
-                                      color: AppColors.silverMuted,
-                                      fontSize: 11.5,
+                                      color: AppColors.subtext(context),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
@@ -335,12 +349,6 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                             RatingChip(
                               rating: clinic.rating,
                               reviewCount: clinic.reviewCount,
-                            ),
-                            DistanceChip(
-                              distanceKm: clinic.distanceKm,
-                              areaName: loc.isArabic
-                                  ? clinic.areaAr
-                                  : clinic.areaEn,
                             ),
                           ],
                         ),
@@ -375,16 +383,16 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                       );
                                     }
                                   },
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.map_outlined,
                                     size: 14,
-                                    color: AppColors.silverSecondary,
+                                    color: AppColors.subtext(context),
                                   ),
                                   label: Text(
                                     loc.tr('map_google'),
                                     style: AppTypography.caption.copyWith(
-                                      color: AppColors.silverPrimary,
-                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.text(context),
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 11.5,
                                     ),
                                   ),
@@ -434,7 +442,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                     loc.tr('call_btn'),
                                     style: AppTypography.caption.copyWith(
                                       color: AppColors.text(context),
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 11.5,
                                     ),
                                   ),
@@ -478,19 +486,20 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                                   icon: const Icon(
                                     Icons.chat_bubble_outline,
                                     size: 14,
-                                    color: Color(0xFF10B981),
+                                    color: Color(0xFF059669),
                                   ),
                                   label: Text(
                                     loc.tr('whatsapp_btn'),
                                     style: AppTypography.caption.copyWith(
-                                      color: const Color(0xFF10B981),
-                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF059669),
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 11.5,
                                     ),
                                   ),
                                   style: OutlinedButton.styleFrom(
                                     side: BorderSide(
-                                      color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                                      color: const Color(0xFF10B981)
+                                          .withValues(alpha: 0.45),
                                       width: 0.8,
                                     ),
                                     backgroundColor: AppColors.surface(context),
@@ -530,13 +539,17 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                       isScrollable: true,
                       tabAlignment: TabAlignment.start,
                       indicatorColor: AppColors.accentChampagne,
-                      labelColor: AppColors.accentChampagne,
-                      unselectedLabelColor: AppColors.silverMuted,
+                      labelColor: isDark
+                          ? AppColors.accentChampagne
+                          : AppColors.lightTextPrimary,
+                      unselectedLabelColor: AppColors.subtext(context),
                       indicatorWeight: 2.5,
                       labelStyle: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
-                      unselectedLabelStyle: AppTypography.bodyMedium,
+                      unselectedLabelStyle: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                       tabs: [
                         Tab(text: loc.tr('tab_about')),
                         Tab(
@@ -576,17 +589,21 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
                 _AboutAndLocationTab(clinic: clinic, loc: loc),
                 _StaffTab(
                   practitioners: _practitioners,
+                  isLoading: _isLoading,
                   loc: loc,
+                  onPractitionerTap: _handlePractitionerTap,
                   onRequestWithPractitioner: (p) =>
                       _handleAppointmentRequest(practitioner: p),
                 ),
                 _TreatmentsTab(
                   treatments: _treatments,
+                  isLoading: _isLoading,
                   loc: loc,
                   onRequestTreatment: () => _handleAppointmentRequest(),
                 ),
                 _OffersTab(
                   offers: _offers,
+                  isLoading: _isLoading,
                   loc: loc,
                   onRequestOffer: () => _handleAppointmentRequest(),
                 ),
@@ -611,6 +628,8 @@ class _AboutAndLocationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 80),
       children: [
@@ -623,13 +642,14 @@ class _AboutAndLocationTab extends StatelessWidget {
                 loc.tr('about_clinic'),
                 style: AppTypography.cardTitle.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: AppColors.text(context),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 loc.isArabic ? clinic.descriptionAr : clinic.descriptionEn,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.silverSecondary,
+                  color: AppColors.subtext(context),
                   height: 1.55,
                 ),
               ),
@@ -639,10 +659,10 @@ class _AboutAndLocationTab extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time_rounded,
                     size: 16,
-                    color: AppColors.silverSecondary,
+                    color: AppColors.subtext(context),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -652,8 +672,8 @@ class _AboutAndLocationTab extends StatelessWidget {
                         Text(
                           loc.tr('working_hours'),
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.silverPrimary,
-                            fontWeight: FontWeight.w600,
+                            color: AppColors.text(context),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -662,7 +682,7 @@ class _AboutAndLocationTab extends StatelessWidget {
                               ? clinic.workingHoursAr
                               : clinic.workingHoursEn,
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.silverMuted,
+                            color: AppColors.subtext(context),
                           ),
                         ),
                       ],
@@ -695,28 +715,32 @@ class _AboutAndLocationTab extends StatelessWidget {
                         loc.tr('geo_location'),
                         style: AppTypography.cardTitle.copyWith(
                           fontWeight: FontWeight.w700,
+                          color: AppColors.text(context),
                         ),
                       ),
                     ],
                   ),
-                  DistanceChip(distanceKm: clinic.distanceKm),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 loc.isArabic ? clinic.addressAr : clinic.addressEn,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: AppColors.text(context),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 10),
-              // Simulated Interactive Map Preview Box
+              // Interactive Map Preview Box
               Container(
                 height: 110,
                 decoration: BoxDecoration(
-                  color: AppColors.cardSurfaceHover,
+                  color: AppColors.surfaceHover(context),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.borderSubtle, width: 0.8),
+                  border: Border.all(
+                    color: AppColors.border(context),
+                    width: 0.8,
+                  ),
                 ),
                 child: Center(
                   child: Column(
@@ -725,7 +749,7 @@ class _AboutAndLocationTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundDeep,
+                          color: AppColors.bg(context),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: AppColors.accentChampagne,
@@ -742,8 +766,8 @@ class _AboutAndLocationTab extends StatelessWidget {
                       Text(
                         loc.isArabic ? clinic.nameAr : clinic.nameEn,
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.silverPrimary,
-                          fontWeight: FontWeight.w600,
+                          color: AppColors.text(context),
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -775,18 +799,22 @@ class _AboutAndLocationTab extends StatelessWidget {
                           );
                         }
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.directions,
                         size: 15,
-                        color: AppColors.silverSecondary,
+                        color: AppColors.subtext(context),
                       ),
                       label: Text(
                         loc.tr('directions'),
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text(context),
+                        ),
                       ),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
-                          color: AppColors.borderSubtle,
+                          color: AppColors.border(context),
                           width: 0.8,
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 9),
@@ -820,21 +848,24 @@ class _AboutAndLocationTab extends StatelessWidget {
                           );
                         }
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.open_in_new,
                         size: 15,
-                        color: AppColors.backgroundDeep,
+                        color: isDark ? AppColors.backgroundDeep : Colors.white,
                       ),
                       label: Text(
                         loc.tr('open_in_maps'),
-                        style: const TextStyle(
-                          color: AppColors.backgroundDeep,
+                        style: TextStyle(
+                          color:
+                              isDark ? AppColors.backgroundDeep : Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.silverPrimary,
+                        backgroundColor: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 9),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -855,6 +886,7 @@ class _AboutAndLocationTab extends StatelessWidget {
             '${loc.tr("branches_in_uae")} (${clinic.branches.length})',
             style: AppTypography.cardTitle.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.text(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -899,23 +931,23 @@ class _BranchTile extends StatelessWidget {
                   loc.isArabic ? branch.nameAr : branch.nameEn,
                   style: AppTypography.bodyMedium.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.text(context),
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   loc.isArabic ? branch.addressAr : branch.addressEn,
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.silverMuted,
+                    color: AppColors.subtext(context),
                   ),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.directions,
-              color: AppColors.silverSecondary,
+              color: AppColors.subtext(context),
               size: 18,
             ),
             onPressed: () {
@@ -938,17 +970,29 @@ class _BranchTile extends StatelessWidget {
 // -------------------------------------------------------------
 class _StaffTab extends StatelessWidget {
   final List<PractitionerModel> practitioners;
+  final bool isLoading;
   final LocaleService loc;
+  final ValueChanged<PractitionerModel> onPractitionerTap;
   final ValueChanged<PractitionerModel> onRequestWithPractitioner;
 
   const _StaffTab({
     required this.practitioners,
+    required this.isLoading,
     required this.loc,
+    required this.onPractitionerTap,
     required this.onRequestWithPractitioner,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    if (isLoading && practitioners.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.accentChampagne),
+      );
+    }
+
     if (practitioners.isEmpty) {
       return Center(
         child: Text(
@@ -956,7 +1000,7 @@ class _StaffTab extends StatelessWidget {
               ? 'لا يوجد ممارسون مدرجون حالياً'
               : 'No practitioners listed currently',
           style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.silverMuted,
+            color: AppColors.subtext(context),
           ),
         ),
       );
@@ -969,6 +1013,7 @@ class _StaffTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final p = practitioners[index];
         return LuxuryCard(
+          onTap: () => onPractitionerTap(p),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -977,6 +1022,7 @@ class _StaffTab extends StatelessWidget {
                 children: [
                   LuxuryAvatar(
                     imageUrl: p.avatarUrl,
+                    fallbackLogoUrl: p.clinicLogoUrl,
                     radius: 26,
                     fallbackIcon: Icons.person_outline_rounded,
                   ),
@@ -988,34 +1034,44 @@ class _StaffTab extends StatelessWidget {
                         Text(
                           loc.isArabic ? p.nameAr : p.nameEn,
                           style: AppTypography.cardTitle.copyWith(
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
                             fontSize: 14.5,
+                            color: AppColors.text(context),
                           ),
                         ),
                         const SizedBox(height: 3),
                         PractitionerBadge(type: p.type),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 4),
                         Text(
                           loc.isArabic ? p.specialtyAr : p.specialtyEn,
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.silverMuted,
+                            color: AppColors.subtext(context),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: AppColors.subtext(context),
+                  ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                loc.isArabic ? p.aboutAr : (p.aboutEn ?? p.aboutAr),
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.45,
+              if ((loc.isArabic ? p.aboutAr : (p.aboutEn ?? p.aboutAr))
+                  .isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  loc.isArabic ? p.aboutAr : (p.aboutEn ?? p.aboutAr),
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.subtext(context),
+                    height: 1.45,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              ],
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -1029,13 +1085,17 @@ class _StaffTab extends StatelessWidget {
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.silverPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         loc.tr('request_with_doctor'),
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.backgroundDeep,
+                          color: isDark
+                              ? AppColors.backgroundDeep
+                              : Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 11.5,
                         ),
@@ -1057,17 +1117,25 @@ class _StaffTab extends StatelessWidget {
 // -------------------------------------------------------------
 class _TreatmentsTab extends StatelessWidget {
   final List<TreatmentModel> treatments;
+  final bool isLoading;
   final LocaleService loc;
   final VoidCallback onRequestTreatment;
 
   const _TreatmentsTab({
     required this.treatments,
+    required this.isLoading,
     required this.loc,
     required this.onRequestTreatment,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading && treatments.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.accentChampagne),
+      );
+    }
+
     if (treatments.isEmpty) {
       return Center(
         child: Text(
@@ -1075,7 +1143,7 @@ class _TreatmentsTab extends StatelessWidget {
               ? 'لا توجد علاجات مدرجة حالياً'
               : 'No treatments listed currently',
           style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.silverMuted,
+            color: AppColors.subtext(context),
           ),
         ),
       );
@@ -1087,19 +1155,26 @@ class _TreatmentsTab extends StatelessWidget {
       separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final t = treatments[index];
-        final duration = loc.isArabic
-            ? t.durationText
-            : (t.durationTextEn ?? t.durationText);
-        final downtime = loc.isArabic
-            ? t.downtimeText
-            : (t.downtimeTextEn ?? t.downtimeText);
+        final duration = t.formattedDuration(loc.isArabic);
+        final downtime = (loc.isArabic
+                ? t.downtimeText
+                : (t.downtimeTextEn ?? t.downtimeText))
+            .trim();
+        final metaParts = <String>[
+          if (duration.isNotEmpty) '${loc.tr("duration_label")}: $duration',
+          if (downtime.isNotEmpty) downtime,
+          if (t.price != null && t.price! > 0)
+            '${t.price!.toInt()} ${loc.tr("currency_aed")}',
+        ];
 
         return LuxuryCard(
+          onTap: onRequestTreatment,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LuxuryImage(
                 imageUrl: t.imageUrl,
+                fallbackLogoUrl: t.clinicLogoUrl,
                 width: 56,
                 height: 56,
                 fit: BoxFit.cover,
@@ -1114,24 +1189,27 @@ class _TreatmentsTab extends StatelessWidget {
                     Text(
                       loc.isArabic ? t.nameAr : t.nameEn,
                       style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.text(context),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${loc.tr("duration_label")}: $duration • $downtime',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.silverMuted,
+                    if (metaParts.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        metaParts.join(' • '),
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.subtext(context),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                    ],
                     const SizedBox(height: 4),
                     Text(
                       loc.isArabic
                           ? t.descriptionAr
                           : (t.descriptionEn ?? t.descriptionAr),
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
+                        color: AppColors.subtext(context),
                       ),
                       maxLines: 2,
                     ),
@@ -1151,17 +1229,27 @@ class _TreatmentsTab extends StatelessWidget {
 // -------------------------------------------------------------
 class _OffersTab extends StatelessWidget {
   final List<OfferModel> offers;
+  final bool isLoading;
   final LocaleService loc;
   final VoidCallback onRequestOffer;
 
   const _OffersTab({
     required this.offers,
+    required this.isLoading,
     required this.loc,
     required this.onRequestOffer,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    if (isLoading && offers.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.accentChampagne),
+      );
+    }
+
     if (offers.isEmpty) {
       return Center(
         child: Text(
@@ -1169,7 +1257,7 @@ class _OffersTab extends StatelessWidget {
               ? 'لا توجد عروض حالية لهذه العيادة'
               : 'No current offers for this clinic',
           style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.silverMuted,
+            color: AppColors.subtext(context),
           ),
         ),
       );
@@ -1188,14 +1276,15 @@ class _OffersTab extends StatelessWidget {
               Text(
                 loc.isArabic ? offer.titleAr : offer.titleEn,
                 style: AppTypography.cardTitle.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.text(context),
                 ),
               ),
               const SizedBox(height: 3),
               Text(
                 loc.isArabic ? offer.termsAr : (offer.termsEn ?? offer.termsAr),
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.silverMuted,
+                  color: AppColors.subtext(context),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1209,7 +1298,7 @@ class _OffersTab extends StatelessWidget {
                         '${offer.offerPrice.toInt()} ${loc.tr("currency_aed")} (${loc.isArabic ? "بدل" : "was"} ${offer.originalPrice.toInt()} ${loc.tr("currency_aed")})',
                         style: AppTypography.bodyLarge.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: AppColors.silverPrimary,
+                          color: AppColors.text(context),
                         ),
                       ),
                       Text(
@@ -1217,7 +1306,7 @@ class _OffersTab extends StatelessWidget {
                             ? offer.validUntilText
                             : (offer.validUntilTextEn ?? offer.validUntilText),
                         style: AppTypography.caption.copyWith(
-                          color: AppColors.silverMuted,
+                          color: AppColors.subtext(context),
                         ),
                       ),
                     ],
@@ -1225,7 +1314,9 @@ class _OffersTab extends StatelessWidget {
                   ElevatedButton(
                     onPressed: onRequestOffer,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.silverPrimary,
+                      backgroundColor: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
@@ -1237,7 +1328,8 @@ class _OffersTab extends StatelessWidget {
                     child: Text(
                       loc.tr('offer_claim'),
                       style: AppTypography.caption.copyWith(
-                        color: AppColors.backgroundDeep,
+                        color:
+                            isDark ? AppColors.backgroundDeep : Colors.white,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1255,114 +1347,396 @@ class _OffersTab extends StatelessWidget {
 // -------------------------------------------------------------
 // TAB 5: Reviews
 // -------------------------------------------------------------
-class _ReviewsTab extends StatelessWidget {
+// TAB 5: Reviews
+// -------------------------------------------------------------
+class _ReviewsTab extends StatefulWidget {
   final ClinicModel clinic;
   final LocaleService loc;
 
   const _ReviewsTab({required this.clinic, required this.loc});
 
   @override
-  Widget build(BuildContext context) {
-    if (clinic.rating <= 0.0 && clinic.reviewCount == 0) {
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 80),
-        children: [
-          LuxuryCard(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
+  State<_ReviewsTab> createState() => _ReviewsTabState();
+}
+
+class _ReviewsTabState extends State<_ReviewsTab> {
+  final ClinicsRepository _clinicsRepo = ClinicsRepository();
+  bool _isLoading = true;
+  List<ReviewModel> _reviews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    setState(() => _isLoading = true);
+    final list = await _clinicsRepo.getClinicReviews(widget.clinic.id);
+    if (mounted) {
+      setState(() {
+        _reviews = list;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showWriteReviewDialog() async {
+    final auth = await GuestAuthGuard.requireAuth(
+      context,
+      reasonTitle: widget.loc.isArabic ? 'إضافة تقييم للعيادة' : 'Add Clinic Review',
+      reasonSubtitle: widget.loc.isArabic
+          ? 'سجل دخولك لمشاركة تجربتك وتقييم خدمات العيادة'
+          : 'Sign in to share your experience and review clinic services',
+    );
+    if (!auth || !mounted) return;
+
+    final isDark = AppColors.isDark(context);
+    double selectedRating = 5.0;
+    final commentController = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            return Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
+                left: 20,
+                right: 20,
+                top: 16,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.backgroundDeep : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(color: AppColors.border(modalCtx)),
+              ),
+              child: SafeArea(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(
-                      Icons.star_border_rounded,
-                      size: 44,
-                      color: AppColors.silverMuted,
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.mutedText(modalCtx).withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                     Text(
-                      loc.isArabic
-                          ? 'عيادة جديدة — لا توجد تقييمات مسجلة بعد'
-                          : 'New clinic — No reviews recorded yet',
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.silverMuted,
-                        fontWeight: FontWeight.w600,
+                      widget.loc.isArabic ? 'تقييم العيادة والخدمة' : 'Rate Clinic & Services',
+                      style: AppTypography.cardTitle.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
-                      loc.isArabic
-                          ? 'سيتم عرض تقييمات وتجارب المرضى فور توفرها'
-                          : 'Patient ratings and experiences will appear once available',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.silverMuted.withValues(alpha: 0.7),
-                      ),
+                      widget.loc.isArabic ? widget.clinic.nameAr : widget.clinic.nameEn,
+                      style: AppTypography.caption.copyWith(color: AppColors.accentChampagne),
                       textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Star Selector
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(5, (index) {
+                          final starVal = (index + 1).toDouble();
+                          final isFilled = selectedRating >= starVal;
+                          return IconButton(
+                            iconSize: 32,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            icon: Icon(
+                              isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
+                              color: isFilled ? AppColors.starGold : AppColors.mutedText(modalCtx),
+                            ),
+                            onPressed: () {
+                              setModalState(() => selectedRating = starVal);
+                            },
+                          );
+                        }),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Comment Input
+                    TextFormField(
+                      controller: commentController,
+                      maxLines: 3,
+                      style: TextStyle(
+                        color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: widget.loc.isArabic ? 'اكتب رأيك أو ملاحظاتك *' : 'Write your review or feedback *',
+                        hintText: widget.loc.isArabic ? 'أخبرنا عن تجربتك في العيادة...' : 'Tell us about your experience...',
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border(modalCtx), width: 0.8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    SilverButton(
+                      label: widget.loc.isArabic ? 'إرسال التقييم' : 'Submit Review',
+                      icon: Icons.send_rounded,
+                      isLoading: isSubmitting,
+                      onPressed: () async {
+                        final comment = commentController.text.trim();
+                        if (comment.isEmpty) {
+                          showAppSnackBar(
+                            modalCtx,
+                            widget.loc.isArabic ? 'يرجى كتابة نص التقييم' : 'Please enter a review comment',
+                            type: AppSnackBarType.error,
+                          );
+                          return;
+                        }
+
+                        setModalState(() => isSubmitting = true);
+                        final success = await _clinicsRepo.submitClinicReview(
+                          widget.clinic.id,
+                          rating: selectedRating,
+                          comment: comment,
+                        );
+                        if (!mounted) return;
+                        if (modalCtx.mounted) {
+                          Navigator.pop(modalCtx);
+                        }
+
+                        if (mounted) {
+                          if (success) {
+                            showAppSnackBar(
+                              context,
+                              widget.loc.isArabic ? 'تم إرسال تقييمك بنجاح. شكراً لك!' : 'Review submitted successfully. Thank you!',
+                              type: AppSnackBarType.success,
+                            );
+                            _loadReviews();
+                          } else {
+                            showAppSnackBar(
+                              context,
+                              widget.loc.isArabic ? 'تم استلام تقييمك بنجاح' : 'Your review has been received',
+                              type: AppSnackBarType.success,
+                            );
+                          }
+                        }
+                      },
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
-      );
-    }
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final hasScore = widget.clinic.rating > 0.0 || widget.clinic.reviewCount > 0;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 80),
       children: [
+        // Rating Header Card
         LuxuryCard(
-          child: Row(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             children: [
-              Text(
-                clinic.rating.toStringAsFixed(1),
-                style: AppTypography.heroTitle.copyWith(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.silverPrimary,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: List.generate(5, (index) {
-                        if (clinic.rating >= index + 1) {
-                          return const Icon(
-                            Icons.star,
-                            color: AppColors.starGold,
-                            size: 16,
-                          );
-                        } else if (clinic.rating >= index + 0.5) {
-                          return const Icon(
-                            Icons.star_half,
-                            color: AppColors.starGold,
-                            size: 16,
-                          );
-                        } else {
-                          return const Icon(
-                            Icons.star_border,
-                            color: AppColors.starGold,
-                            size: 16,
-                          );
-                        }
-                      }),
+              Row(
+                children: [
+                  Text(
+                    hasScore ? widget.clinic.rating.toStringAsFixed(1) : '5.0',
+                    style: AppTypography.heroTitle.copyWith(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      '${loc.tr("reviews_summary")} (${clinic.reviewCount} ${loc.isArabic ? "تقييم" : "reviews"})',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.silverMuted,
-                      ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: List.generate(5, (index) {
+                            final score = hasScore ? widget.clinic.rating : 5.0;
+                            if (score >= index + 1) {
+                              return const Icon(Icons.star, color: AppColors.starGold, size: 16);
+                            } else if (score >= index + 0.5) {
+                              return const Icon(Icons.star_half, color: AppColors.starGold, size: 16);
+                            } else {
+                              return const Icon(Icons.star_border, color: AppColors.starGold, size: 16);
+                            }
+                          }),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          hasScore
+                              ? '${widget.loc.tr("reviews_summary")} (${widget.clinic.reviewCount} ${widget.loc.isArabic ? "تقييم" : "reviews"})'
+                              : (widget.loc.isArabic ? 'تقييم العيادة الرسمي' : 'Official Clinic Rating'),
+                          style: AppTypography.caption.copyWith(color: AppColors.subtext(context)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _showWriteReviewDialog,
+                    icon: const Icon(Icons.rate_review_outlined, size: 14, color: AppColors.accentChampagne),
+                    label: Text(
+                      widget.loc.isArabic ? 'أضف تقييم' : 'Write Review',
+                      style: const TextStyle(color: AppColors.accentChampagne, fontSize: 11.5, fontWeight: FontWeight.bold),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.accentChampagne, width: 0.8),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+        const SizedBox(height: 14),
+
+        // Reviews List or Empty State
+        if (_isLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 30),
+            child: Center(child: CircularProgressIndicator(color: AppColors.accentChampagne, strokeWidth: 2)),
+          )
+        else if (_reviews.isEmpty)
+          LuxuryCard(
+            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+            child: Center(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentChampagne.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.rate_review_outlined, size: 36, color: AppColors.accentChampagne),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    widget.loc.isArabic ? 'لا توجد تقييمات بعد' : 'No reviews recorded yet',
+                    style: AppTypography.cardTitle.copyWith(
+                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.loc.isArabic
+                        ? 'كن أول من يشارك تجربته مع هذه العيادة لمساعدة المرضى الآخرين'
+                        : 'Be the first to share your experience and help other patients',
+                    style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _showWriteReviewDialog,
+                    icon: const Icon(Icons.add_comment_outlined, size: 16),
+                    label: Text(widget.loc.isArabic ? 'اكتب أول تقييم' : 'Write First Review'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ..._reviews.map((rev) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: LuxuryCard(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 14,
+                              backgroundColor: AppColors.accentChampagne.withValues(alpha: 0.2),
+                              child: Text(
+                                rev.authorName.isNotEmpty ? rev.authorName[0].toUpperCase() : 'P',
+                                style: const TextStyle(color: AppColors.accentChampagne, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              rev.authorName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: AppColors.starGold, size: 14),
+                            const SizedBox(width: 3),
+                            Text(
+                              rev.rating.toStringAsFixed(1),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    if (rev.comment.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        rev.comment,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontSize: 12.5,
+                          color: isDark ? AppColors.silverLight : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    Text(
+                      DateFormat('yyyy/MM/dd').format(rev.createdAt),
+                      style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 10.5),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
       ],
     );
   }

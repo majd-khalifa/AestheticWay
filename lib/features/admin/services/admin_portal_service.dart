@@ -491,4 +491,63 @@ class AdminPortalService extends ChangeNotifier {
       return matchesClinic && matchesStatus;
     }).toList();
   }
+
+  /// Provision a new clinic and its administrator
+  Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await _repository.createClinic(data);
+      await loadClinics();
+      return res;
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Reset temporary password for a clinic administrator
+  Future<Map<String, dynamic>> resetClinicAdminPassword(
+    String clinicId, {
+    String? customPassword,
+  }) async {
+    return await _repository.resetClinicAdminPassword(
+      clinicId,
+      customPassword: customPassword,
+    );
+  }
+
+  /// Archive / Soft-delete a clinic
+  Future<void> archiveClinic(String clinicId) async {
+    await _repository.archiveClinic(clinicId);
+    _clinics.removeWhere((c) => c.id == clinicId);
+    notifyListeners();
+  }
+
+  /// Update an existing clinic's details, tier, or branding
+  Future<AdminClinicModel> updateClinic(String id, Map<String, dynamic> data) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updated = await _repository.updateClinic(id, data);
+      final idx = _clinics.indexWhere((c) => c.id == id);
+      if (idx != -1) {
+        _clinics[idx] = updated;
+      }
+      return updated;
+    } catch (e) {
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

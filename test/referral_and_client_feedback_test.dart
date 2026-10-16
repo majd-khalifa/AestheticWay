@@ -10,6 +10,10 @@ import 'package:aesthetic_way/features/practitioners/models/practitioner_model.d
 import 'package:aesthetic_way/features/practitioners/presentation/screens/practitioner_profile_screen.dart';
 
 void main() {
+  setUp(() {
+    LocaleService().setLanguage(AppLanguage.arabic);
+  });
+
   group('Referral & Rewards System Unit Tests', () {
     late ReferralService referralService;
 
@@ -247,7 +251,7 @@ void main() {
   });
 
   group('Referral and Before/After Widget Tests', () {
-    testWidgets('ReferralScreen renders copyable code and points progress', (WidgetTester tester) async {
+    testWidgets('ReferralScreen renders unified invite link and points progress', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2200);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -260,8 +264,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('برنامج الدعوات والمكافآت'), findsWidgets);
-      expect(find.text('AW-DUBAI-88'), findsOneWidget);
-      expect(find.text('نسخ الكود'), findsWidgets);
+      expect(find.textContaining('https://aestheticway.ae/invite/'), findsOneWidget);
+      expect(find.text('نسخ الرابط'), findsWidgets);
       expect(find.text('مستويات النقاط والمكافآت'), findsOneWidget);
     });
 

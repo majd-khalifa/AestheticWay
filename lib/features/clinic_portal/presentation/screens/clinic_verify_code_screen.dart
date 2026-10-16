@@ -335,7 +335,8 @@ class _ClinicVerifyCodeScreenState extends State<ClinicVerifyCodeScreen> {
                             label: loc.tr('clinic_mark_used_btn'),
                             icon: Icons.check_circle_outline_rounded,
                             isFullWidth: true,
-                            onPressed: () => _markAsRedeemed(_searchedCode!),
+                            isLoading: _isSubmitting,
+                            onPressed: _isSubmitting ? null : () => _markAsRedeemed(_searchedCode!),
                           )
                         else
                           Padding(

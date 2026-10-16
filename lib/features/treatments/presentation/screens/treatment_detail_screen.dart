@@ -3,6 +3,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -29,6 +30,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
 
   late TreatmentModel _treatment;
   List<ClinicModel> _availableClinics = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -60,8 +62,13 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         } else if (clinics.isNotEmpty) {
           _availableClinics = [clinics.first];
         }
+        _isLoading = false;
       });
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   ClinicModel _resolvePrimaryClinic() {
@@ -137,21 +144,14 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // Hero Cover Image
-          ClipRRect(
+          LuxuryImage(
+            imageUrl: _treatment.imageUrl,
+            fallbackLogoUrl: _treatment.clinicLogoUrl,
+            height: 200,
+            width: double.infinity,
             borderRadius: BorderRadius.circular(18),
-            child: Image.network(
-              _treatment.imageUrl,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                height: 200,
-                color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                child: const Center(
-                  child: Icon(Icons.medical_services_rounded, color: AppColors.accentChampagne, size: 48),
-                ),
-              ),
-            ),
+            placeholderIcon: Icons.medical_services_rounded,
+            iconSize: 48,
           ),
           const SizedBox(height: 16),
 
@@ -190,7 +190,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                   (loc.isArabic ? _treatment.descriptionAr : _treatment.descriptionEn) ?? '',
                   style: AppTypography.bodyMedium.copyWith(
                     fontSize: 13,
-                    color: AppColors.mutedText(context),
+                    color: AppColors.subtext(context),
                     height: 1.6,
                   ),
                 ),
@@ -199,32 +199,74 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Clinical Spec Parameters Card
-          LuxuryCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _SpecRow(
-                  icon: Icons.timer_outlined,
-                  label: loc.tr('duration_label'),
-                  value: (loc.isArabic ? _treatment.durationText : (_treatment.durationTextEn ?? _treatment.durationText)),
+          // Clinical Spec Parameters Card (Only render rows with live backend values)
+          Builder(
+            builder: (context) {
+              final durationVal = _treatment.formattedDuration(loc.isArabic);
+              final downtimeVal = (loc.isArabic
+                      ? _treatment.downtimeText
+                      : (_treatment.downtimeTextEn ?? _treatment.downtimeText))
+                  .trim();
+              final targetAreaVal = (loc.isArabic
+                      ? _treatment.targetAreaAr
+                      : (_treatment.targetAreaEn ?? _treatment.targetAreaAr))
+                  .trim();
+              final priceVal = _treatment.price != null && _treatment.price! > 0
+                  ? '${_treatment.price!.toInt()} ${loc.tr("currency_aed")}'
+                  : '';
+
+              final rows = <Widget>[];
+              if (durationVal.isNotEmpty) {
+                rows.add(
+                  _SpecRow(
+                    icon: Icons.timer_outlined,
+                    label: loc.tr('duration_label'),
+                    value: durationVal,
+                  ),
+                );
+              }
+              if (priceVal.isNotEmpty) {
+                if (rows.isNotEmpty) rows.add(const Divider(height: 20));
+                rows.add(
+                  _SpecRow(
+                    icon: Icons.sell_outlined,
+                    label: loc.isArabic ? 'السعر الاسترشادي' : 'Estimated Price',
+                    value: priceVal,
+                  ),
+                );
+              }
+              if (downtimeVal.isNotEmpty) {
+                if (rows.isNotEmpty) rows.add(const Divider(height: 20));
+                rows.add(
+                  _SpecRow(
+                    icon: Icons.healing_outlined,
+                    label: loc.tr('downtime_label'),
+                    value: downtimeVal,
+                  ),
+                );
+              }
+              if (targetAreaVal.isNotEmpty) {
+                if (rows.isNotEmpty) rows.add(const Divider(height: 20));
+                rows.add(
+                  _SpecRow(
+                    icon: Icons.track_changes_outlined,
+                    label: loc.tr('target_area_label'),
+                    value: targetAreaVal,
+                  ),
+                );
+              }
+
+              if (rows.isEmpty) return const SizedBox.shrink();
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: LuxuryCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(children: rows),
                 ),
-                const Divider(height: 20),
-                _SpecRow(
-                  icon: Icons.healing_outlined,
-                  label: loc.tr('downtime_label'),
-                  value: (loc.isArabic ? _treatment.downtimeText : (_treatment.downtimeTextEn ?? _treatment.downtimeText)),
-                ),
-                const Divider(height: 20),
-                _SpecRow(
-                  icon: Icons.track_changes_outlined,
-                  label: loc.tr('target_area_label'),
-                  value: (loc.isArabic ? _treatment.targetAreaAr : (_treatment.targetAreaEn ?? _treatment.targetAreaAr)),
-                ),
-              ],
-            ),
+              );
+            },
           ),
-          const SizedBox(height: 16),
 
           // Available in Clinics Section
           Text(
@@ -232,11 +274,19 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
             style: AppTypography.cardTitle.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              color: AppColors.text(context),
             ),
           ),
           const SizedBox(height: 10),
-          ...(clinicsToShow.map((clinic) {
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.accentChampagne),
+              ),
+            )
+          else
+            ...(clinicsToShow.map((clinic) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: LuxuryCard(

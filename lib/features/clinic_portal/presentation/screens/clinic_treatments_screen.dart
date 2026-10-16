@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/ltr_text_field.dart';
 import '../../../../core/widgets/luxury_card.dart';
@@ -53,13 +54,17 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
     final descEnController = TextEditingController(text: existing?.descriptionEn ?? '');
     final descArController = TextEditingController(text: existing?.descriptionAr ?? '');
 
+    final categories = clinicService.categories;
     String? chosenCategoryId = existing?.categoryId;
-    if (chosenCategoryId == null && clinicService.categories.isNotEmpty) {
-      chosenCategoryId = clinicService.categories.first.id;
+    if (chosenCategoryId == null && categories.isNotEmpty) {
+      chosenCategoryId = categories.first.id;
     }
 
     final selectedPractitioners = List<String>.from(existing?.practitionerIds ?? []);
     final isDark = AppColors.isDark(context);
+
+    String? modalErrorMessage;
+    bool isSubmitting = false;
 
     showModalBottomSheet(
       context: context,
@@ -106,38 +111,82 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                         color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                       ),
                     ),
+                    if (modalErrorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.redAccent.withValues(alpha: 0.6),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                modalErrorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                              onPressed: () {
+                                setModalState(() => modalErrorMessage = null);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 14),
 
                     // Category Selector
-                    if (clinicService.categories.isNotEmpty)
-                      DropdownButtonFormField<String>(
-                        initialValue: chosenCategoryId,
-                        dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                        decoration: InputDecoration(
-                          labelText: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
-                          filled: true,
-                          fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                          ),
+                    DropdownButtonFormField<String>(
+                      initialValue: chosenCategoryId,
+                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                      decoration: InputDecoration(
+                        labelText: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
+                        filled: true,
+                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        prefixIcon: const Icon(Icons.category_outlined, color: AppColors.accentChampagne, size: 18),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                         ),
-                        items: clinicService.categories.map((cat) {
-                          return DropdownMenuItem(
-                            value: cat.id,
-                            child: Text(
-                              loc.isArabic ? cat.nameAr : cat.nameEn,
-                              style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            setModalState(() => chosenCategoryId = v);
-                          }
-                        },
-                        validator: (v) => v == null ? loc.tr('clinic_validation_required') : null,
                       ),
+                      items: categories.map((cat) {
+                        return DropdownMenuItem(
+                          value: cat.id,
+                          child: Text(
+                            loc.isArabic ? cat.nameAr : cat.nameEn,
+                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        if (v != null) {
+                          setModalState(() {
+                            chosenCategoryId = v;
+                            modalErrorMessage = null;
+                          });
+                        }
+                      },
+                      validator: (v) => v == null ? loc.tr('clinic_validation_required') : null,
+                    ),
                     const SizedBox(height: 10),
 
                     // Name EN & Name AR
@@ -269,55 +318,70 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                       icon: Icons.check_circle_outline,
                       isFullWidth: true,
                       height: 46,
-                      onPressed: () async {
-                        if (!formKey.currentState!.validate()) return;
-                        if (chosenCategoryId == null) {
-                          showAppSnackBar(
-                            context,
-                            loc.isArabic ? 'يرجى اختيار التصنيف الطبي' : 'Please select a category',
-                            type: AppSnackBarType.error,
-                          );
-                          return;
-                        }
+                      isLoading: isSubmitting,
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              setModalState(() => modalErrorMessage = null);
+                              if (!formKey.currentState!.validate()) return;
+                              if (chosenCategoryId == null) {
+                                setModalState(() {
+                                  modalErrorMessage = loc.isArabic
+                                      ? 'يرجى اختيار التصنيف الطبي'
+                                      : 'Please select a medical category';
+                                });
+                                return;
+                              }
 
-                        final data = <String, dynamic>{
-                          'category': chosenCategoryId,
-                          'name_en': nameEnController.text.trim(),
-                          'name_ar': nameArController.text.trim().isNotEmpty
-                              ? nameArController.text.trim()
-                              : nameEnController.text.trim(),
-                          'description_en': descEnController.text.trim(),
-                          'description_ar': descArController.text.trim(),
-                          'status': 'active',
-                          'is_active': true,
-                          if (priceController.text.trim().isNotEmpty)
-                            'price': double.tryParse(priceController.text.trim()) ?? 0.0,
-                          if (selectedPractitioners.isNotEmpty)
-                            'practitioners': selectedPractitioners,
-                        };
+                              final data = <String, dynamic>{
+                                'category': chosenCategoryId,
+                                'category_id': chosenCategoryId,
+                                'name_en': nameEnController.text.trim(),
+                                'name_ar': nameArController.text.trim().isNotEmpty
+                                    ? nameArController.text.trim()
+                                    : nameEnController.text.trim(),
+                                'description_en': descEnController.text.trim(),
+                                'description_ar': descArController.text.trim(),
+                                'status': 'active',
+                                'is_active': true,
+                                if (priceController.text.trim().isNotEmpty)
+                                  'price': double.tryParse(priceController.text.trim()) ?? 0.0,
+                                'practitioners': selectedPractitioners,
+                              };
 
-                        try {
-                          if (isEditing) {
-                            await clinicService.updateTreatment(existing.id, data);
-                          } else {
-                            await clinicService.createTreatment(data);
-                          }
-                          if (ctx.mounted) Navigator.pop(ctx);
-                          if (context.mounted) {
-                            showAppSnackBar(
-                              context,
-                              isEditing
-                                  ? (loc.isArabic ? 'تم تحديث الإجراء بنجاح' : 'Treatment updated successfully')
-                                  : (loc.isArabic ? 'تمت إضافة الإجراء بنجاح' : 'Treatment added successfully'),
-                              type: AppSnackBarType.success,
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
-                          }
-                        }
-                      },
+                              setModalState(() => isSubmitting = true);
+
+                              try {
+                                if (isEditing) {
+                                  await clinicService.updateTreatment(existing.id, data);
+                                } else {
+                                  await clinicService.createTreatment(data);
+                                }
+                                if (ctx.mounted) Navigator.pop(ctx);
+                                if (context.mounted) {
+                                  showAppSnackBar(
+                                    context,
+                                    isEditing
+                                        ? (loc.isArabic ? 'تم تحديث الإجراء بنجاح' : 'Treatment updated successfully')
+                                        : (loc.isArabic ? 'تمت إضافة الإجراء بنجاح' : 'Treatment added successfully'),
+                                    type: AppSnackBarType.success,
+                                  );
+                                }
+                              } catch (e) {
+                                String cleanMsg;
+                                if (e is ApiException) {
+                                  cleanMsg = e.message;
+                                } else {
+                                  cleanMsg = ApiException.sanitizeRegulatoryCompliance(
+                                    e.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', ''),
+                                  );
+                                }
+                                setModalState(() {
+                                  modalErrorMessage = cleanMsg;
+                                  isSubmitting = false;
+                                });
+                              }
+                            },
                     ),
                     const SizedBox(height: 16),
                   ],

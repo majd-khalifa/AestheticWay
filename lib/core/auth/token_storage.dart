@@ -67,12 +67,8 @@ class TokenStorage {
     _cachedAccessToken = accessToken;
     _cachedRefreshToken = refreshToken;
     try {
-      await _storage
-          .write(key: _keyAccessToken, value: accessToken)
-          .timeout(const Duration(milliseconds: 200));
-      await _storage
-          .write(key: _keyRefreshToken, value: refreshToken)
-          .timeout(const Duration(milliseconds: 200));
+      await _storage.write(key: _keyAccessToken, value: accessToken);
+      await _storage.write(key: _keyRefreshToken, value: refreshToken);
     } catch (_) {}
   }
 
@@ -80,9 +76,7 @@ class TokenStorage {
   Future<void> saveUser(Map<String, dynamic> userJson) async {
     _cachedUserData = userJson;
     try {
-      await _storage
-          .write(key: _keyUserData, value: jsonEncode(userJson))
-          .timeout(const Duration(milliseconds: 200));
+      await _storage.write(key: _keyUserData, value: jsonEncode(userJson));
     } catch (_) {}
   }
 
@@ -104,15 +98,9 @@ class TokenStorage {
     _cachedRefreshToken = null;
     _cachedUserData = null;
     try {
-      await _storage
-          .delete(key: _keyAccessToken)
-          .timeout(const Duration(milliseconds: 200));
-      await _storage
-          .delete(key: _keyRefreshToken)
-          .timeout(const Duration(milliseconds: 200));
-      await _storage
-          .delete(key: _keyUserData)
-          .timeout(const Duration(milliseconds: 200));
+      await _storage.delete(key: _keyAccessToken);
+      await _storage.delete(key: _keyRefreshToken);
+      await _storage.delete(key: _keyUserData);
     } catch (_) {}
   }
 }

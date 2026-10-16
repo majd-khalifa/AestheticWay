@@ -18,6 +18,10 @@ class ProductModel {
   final bool isPublishedByAdmin;
   final String status;
   final DateTime? createdAt;
+  final String? brandNameEn;
+  final String? brandNameAr;
+  final String? sponsorCompany;
+  final String? clinicLogoUrl;
 
   const ProductModel({
     required this.id,
@@ -26,6 +30,7 @@ class ProductModel {
     required this.clinicId,
     required this.clinicNameAr,
     this.clinicNameEn,
+    this.clinicLogoUrl,
     required this.descriptionAr,
     required this.descriptionEn,
     required this.price,
@@ -37,6 +42,9 @@ class ProductModel {
     this.isPublishedByAdmin = true,
     this.status = 'active',
     this.createdAt,
+    this.brandNameEn,
+    this.brandNameAr,
+    this.sponsorCompany,
   });
 
   ProductModel copyWith({
@@ -57,6 +65,10 @@ class ProductModel {
     bool? isPublishedByAdmin,
     String? status,
     DateTime? createdAt,
+    String? brandNameEn,
+    String? brandNameAr,
+    String? sponsorCompany,
+    String? clinicLogoUrl,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -65,6 +77,7 @@ class ProductModel {
       clinicId: clinicId ?? this.clinicId,
       clinicNameAr: clinicNameAr ?? this.clinicNameAr,
       clinicNameEn: clinicNameEn ?? this.clinicNameEn,
+      clinicLogoUrl: clinicLogoUrl ?? this.clinicLogoUrl,
       descriptionAr: descriptionAr ?? this.descriptionAr,
       descriptionEn: descriptionEn ?? this.descriptionEn,
       price: price ?? this.price,
@@ -76,6 +89,9 @@ class ProductModel {
       isPublishedByAdmin: isPublishedByAdmin ?? this.isPublishedByAdmin,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
+      brandNameEn: brandNameEn ?? this.brandNameEn,
+      brandNameAr: brandNameAr ?? this.brandNameAr,
+      sponsorCompany: sponsorCompany ?? this.sponsorCompany,
     );
   }
 
@@ -94,6 +110,11 @@ class ProductModel {
         ? json['description_ar'] as String
         : descEnVal;
 
+    final clinicLogo = clinic?['logo'] as String? ??
+        clinic?['logo_url'] as String? ??
+        json['clinic_logo'] as String? ??
+        json['clinic_logo_url'] as String?;
+
     return ProductModel(
       id: json['id']?.toString() ?? '',
       nameAr: nameArVal,
@@ -101,6 +122,7 @@ class ProductModel {
       clinicId: clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
       clinicNameAr: clinic?['name_ar'] as String? ?? clinic?['name_en'] as String? ?? '',
       clinicNameEn: clinic?['name_en'] as String?,
+      clinicLogoUrl: clinicLogo,
       descriptionAr: descArVal,
       descriptionEn: descEnVal,
       price: (json['price'] != null)
@@ -116,6 +138,9 @@ class ProductModel {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
+      brandNameEn: json['brand_name_en'] as String?,
+      brandNameAr: json['brand_name_ar'] as String?,
+      sponsorCompany: json['sponsor_company'] as String?,
     );
   }
 
@@ -129,7 +154,16 @@ class ProductModel {
       'is_active': isAvailable,
       'status': status,
     };
-    if (price >= 0) {
+    if (brandNameEn != null && brandNameEn!.trim().isNotEmpty) {
+      map['brand_name_en'] = brandNameEn!.trim();
+    }
+    if (brandNameAr != null && brandNameAr!.trim().isNotEmpty) {
+      map['brand_name_ar'] = brandNameAr!.trim();
+    }
+    if (sponsorCompany != null && sponsorCompany!.trim().isNotEmpty) {
+      map['sponsor_company'] = sponsorCompany!.trim();
+    }
+    if (price > 0) {
       map['price'] = price.toStringAsFixed(2);
     }
     if (imageUrl.trim().isNotEmpty) {

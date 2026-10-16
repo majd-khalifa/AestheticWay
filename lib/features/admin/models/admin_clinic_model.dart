@@ -51,6 +51,9 @@ class AdminClinicModel {
   final String city;
   final String emirate;
   final String status; // active, suspended, pending, rejected
+  final String setupStatus; // draft, submitted, approved, rejected
+  final String licenseNumber;
+  final String licenseAuthority;
   final SubscriptionTier subscriptionTier;
   final bool isActive;
   final bool isFeatured;
@@ -60,6 +63,7 @@ class AdminClinicModel {
   final String email;
   final String logo;
   final String coverImage;
+  final String? videoAdFile;
   final int branchesCount;
   final int practitionersCount;
   final int treatmentsCount;
@@ -81,6 +85,9 @@ class AdminClinicModel {
     required this.city,
     this.emirate = '',
     required this.status,
+    this.setupStatus = 'draft',
+    this.licenseNumber = '',
+    this.licenseAuthority = 'DHA',
     required this.subscriptionTier,
     required this.isActive,
     this.isFeatured = false,
@@ -90,6 +97,7 @@ class AdminClinicModel {
     this.email = '',
     this.logo = '',
     this.coverImage = '',
+    this.videoAdFile,
     this.branchesCount = 0,
     this.practitionersCount = 0,
     this.treatmentsCount = 0,
@@ -152,6 +160,9 @@ class AdminClinicModel {
       city: json['city']?.toString() ?? '',
       emirate: json['emirate']?.toString() ?? '',
       status: json['status']?.toString().toLowerCase() ?? 'active',
+      setupStatus: json['setup_status']?.toString() ?? 'draft',
+      licenseNumber: json['license_number']?.toString() ?? '',
+      licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       subscriptionTier: tier,
       isActive: json['is_active'] != false && json['status']?.toString().toLowerCase() != 'suspended',
       isFeatured: json['is_featured'] == true,
@@ -161,6 +172,7 @@ class AdminClinicModel {
       email: json['email']?.toString() ?? '',
       logo: json['logo']?.toString() ?? '',
       coverImage: json['cover_image']?.toString() ?? json['cover_image_url']?.toString() ?? '',
+      videoAdFile: json['video_ad_file']?.toString() ?? json['video_url']?.toString(),
       branchesCount: (json['branches_count'] as num?)?.toInt() ?? parsedBranches.length,
       practitionersCount: (json['practitioners_count'] as num?)?.toInt() ?? 0,
       treatmentsCount: (json['treatments_count'] as num?)?.toInt() ?? 0,
@@ -178,6 +190,9 @@ class AdminClinicModel {
 
   AdminClinicModel copyWith({
     String? status,
+    String? setupStatus,
+    String? licenseNumber,
+    String? licenseAuthority,
     bool? isActive,
     SubscriptionTier? subscriptionTier,
     String? moderationNotes,
@@ -190,6 +205,9 @@ class AdminClinicModel {
       city: city,
       emirate: emirate,
       status: status ?? this.status,
+      setupStatus: setupStatus ?? this.setupStatus,
+      licenseNumber: licenseNumber ?? this.licenseNumber,
+      licenseAuthority: licenseAuthority ?? this.licenseAuthority,
       subscriptionTier: subscriptionTier ?? this.subscriptionTier,
       isActive: isActive ?? this.isActive,
       isFeatured: isFeatured,

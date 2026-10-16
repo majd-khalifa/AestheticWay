@@ -7,10 +7,12 @@ import 'package:aesthetic_way/features/appointment_lead/models/appointment_reque
 import 'package:aesthetic_way/features/appointment_lead/data/leads_repository.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/my_requests_screen.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
+import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
 void main() {
   setUp(() {
+    LocaleService().setLanguage(AppLanguage.arabic);
     AuthState().login(
       name: 'سارة المنصوري',
       phone: '+971 50 987 6543',
@@ -202,8 +204,9 @@ void main() {
       expect(find.byType(AppointmentRequestScreen), findsOneWidget);
       expect(find.text('استشارة تجميلية وجلدية عامة'), findsOneWidget);
 
-      // Verify UAE phone prefix is shown as prefixText
-      expect(find.text('+971  '), findsOneWidget);
+      // Verify UAE phone input is rendered with LuxuryPhoneInputField
+      expect(find.byType(LuxuryPhoneInputField), findsOneWidget);
+      expect(find.text('+971'), findsOneWidget);
 
       // Accept consent
       final checkbox = find.byType(Checkbox);

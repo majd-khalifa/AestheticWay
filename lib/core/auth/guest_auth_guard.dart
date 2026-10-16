@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/luxury_animations.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import 'token_storage.dart';
 
@@ -100,7 +99,8 @@ class AuthState extends ChangeNotifier {
   }
 }
 
-/// Guard to redirect to LoginScreen when unauthenticated user tries to perform restricted actions
+/// Guard to ensure authentication and prevent unauthenticated access.
+/// Guest Mode is completely deprecated: authentication is strictly mandatory.
 class GuestAuthGuard {
   static Future<bool> requireAuth(
     BuildContext context, {
@@ -111,12 +111,18 @@ class GuestAuthGuard {
       return true;
     }
 
-    final result = await Navigator.of(context).push<bool>(
-      LuxuryPageRoute(
-        page: const LoginScreen(),
+    // In mandatory auth mode, if session is ever lost, redirect cleanly to LoginScreen and clear stack
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+        transitionDuration: const Duration(milliseconds: 400),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
       ),
+      (route) => false,
     );
-
-    return result ?? AuthState().isLoggedIn;
+    return false;
   }
 }
+

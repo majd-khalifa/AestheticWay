@@ -143,6 +143,7 @@ class ReferralMilestone {
 /// Patient Referral Status Model matching GET /api/v1/referral/my-status/
 class PatientReferralStatusModel {
   final String referralCode;
+  final String inviteLink;
   final int successfulInvitesCount;
   final int totalSuccessfulInvites;
   final int currentPoints;
@@ -154,6 +155,7 @@ class PatientReferralStatusModel {
 
   const PatientReferralStatusModel({
     required this.referralCode,
+    this.inviteLink = '',
     required this.successfulInvitesCount,
     required this.totalSuccessfulInvites,
     required this.currentPoints,
@@ -181,8 +183,13 @@ class PatientReferralStatusModel {
         (json['total_successful_invites'] as num?)?.toInt() ??
         0;
 
+    final code = json['referral_code']?.toString() ?? '';
+    final link = json['invite_link']?.toString() ??
+        (code.isNotEmpty ? 'https://aestheticway.ae/invite/$code' : '');
+
     return PatientReferralStatusModel(
-      referralCode: json['referral_code']?.toString() ?? '',
+      referralCode: code,
+      inviteLink: link,
       successfulInvitesCount: invites,
       totalSuccessfulInvites: (json['total_successful_invites'] as num?)?.toInt() ?? invites,
       currentPoints: (json['current_points'] as num?)?.toInt() ?? 0,

@@ -91,6 +91,45 @@ class AdminRepository {
     return response.data as Map<String, dynamic>? ?? {};
   }
 
+  /// Atomically provision a new Clinic and its initial Administrator
+  Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {
+    final response = await _api.post(
+      ApiConfig.adminClinics,
+      data: data,
+    );
+    return response.data as Map<String, dynamic>? ?? {};
+  }
+
+  /// Reset temporary password for a Clinic Administrator
+  Future<Map<String, dynamic>> resetClinicAdminPassword(
+    String clinicId, {
+    String? customPassword,
+  }) async {
+    final payload = <String, dynamic>{};
+    if (customPassword != null && customPassword.trim().isNotEmpty) {
+      payload['custom_password'] = customPassword.trim();
+    }
+    final response = await _api.post(
+      ApiConfig.adminClinicResetPassword(clinicId),
+      data: payload,
+    );
+    return response.data as Map<String, dynamic>? ?? {};
+  }
+
+  /// Archive / Soft-delete a clinic and all associated catalog entities
+  Future<void> archiveClinic(String clinicId) async {
+    await _api.delete(ApiConfig.adminClinicDetail(clinicId));
+  }
+
+  /// Update clinic details and settings (`PATCH /api/v1/admin/clinics/{id}/`)
+  Future<AdminClinicModel> updateClinic(String id, Map<String, dynamic> data) async {
+    final response = await _api.patch(
+      ApiConfig.adminClinicDetail(id),
+      data: data,
+    );
+    return AdminClinicModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
   // -------------------------------------------------------------
   // 3. LEADS (READ-ONLY SUPERVISION)
   // -------------------------------------------------------------

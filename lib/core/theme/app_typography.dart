@@ -7,7 +7,6 @@ abstract class AppTypography {
     fontSize: 24,
     height: 1.3,
     fontWeight: FontWeight.w800,
-    color: AppColors.textPrimary,
     letterSpacing: -0.3,
   );
 
@@ -15,7 +14,6 @@ abstract class AppTypography {
     fontSize: 19,
     height: 1.35,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
     letterSpacing: -0.2,
   );
 
@@ -23,28 +21,24 @@ abstract class AppTypography {
     fontSize: 15.5,
     height: 1.35,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 14.5,
     height: 1.5,
     fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 13,
     height: 1.45,
     fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary,
   );
 
   static const TextStyle caption = TextStyle(
     fontSize: 11.5,
     height: 1.35,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle button = TextStyle(

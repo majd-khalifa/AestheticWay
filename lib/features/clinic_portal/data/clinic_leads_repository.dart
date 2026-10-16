@@ -2,6 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../appointment_lead/models/appointment_request_model.dart';
 import 'models/clinic_dashboard_model.dart';
+import 'models/clinic_badge_counts_model.dart';
 
 /// Repository for Clinic Partner Leads Management & Telemetry Dashboard
 class ClinicLeadsRepository {
@@ -18,10 +19,28 @@ class ClinicLeadsRepository {
     return ClinicDashboardModel.fromJson(data);
   }
 
-  /// Fetch incoming consultation leads for the authenticated clinic
+  /// Fetch lightweight badge counts from backend API (GET /api/v1/clinic-portal/badges/)
+  Future<ClinicBadgeCountsModel> getBadgeCounts() async {
+    final response = await _api.get(ApiConfig.clinicBadges);
+    if (response.data is Map<String, dynamic>) {
+      return ClinicBadgeCountsModel.fromJson(response.data as Map<String, dynamic>);
+    }
+    if (response.data is Map) {
+      return ClinicBadgeCountsModel.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    }
+    return ClinicBadgeCountsModel.zero();
+  }
+
+  /// Fetch incoming consultation leads for the authenticated clinic.
+  /// Seamlessly supports both paginated envelope ({'results': [...], 'count': N})
+  /// and direct list responses.
   Future<List<AppointmentRequestModel>> getLeads({
     String? status,
     String? search,
+    int? page,
+    int? pageSize,
   }) async {
     final queryParams = <String, dynamic>{};
     if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
@@ -29,6 +48,12 @@ class ClinicLeadsRepository {
     }
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
+    }
+    if (page != null && page > 1) {
+      queryParams['page'] = page;
+    }
+    if (pageSize != null && pageSize > 0) {
+      queryParams['page_size'] = pageSize;
     }
 
     final response = await _api.get(
@@ -38,8 +63,8 @@ class ClinicLeadsRepository {
 
     final rawData = response.data;
     List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
+    if (rawData is Map && rawData.containsKey('results')) {
+      items = (rawData['results'] as List<dynamic>?) ?? [];
     } else if (rawData is List) {
       items = rawData;
     }

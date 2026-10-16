@@ -36,7 +36,20 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
   void initState() {
     super.initState();
     _leadsRepository = widget.leadsRepository ?? LeadsRepository();
+    LeadsRepository.refreshNotifier.addListener(_onExternalRefresh);
     _fetchRequests();
+  }
+
+  @override
+  void dispose() {
+    LeadsRepository.refreshNotifier.removeListener(_onExternalRefresh);
+    super.dispose();
+  }
+
+  void _onExternalRefresh() {
+    if (mounted) {
+      _fetchRequests(isRefresh: true);
+    }
   }
 
   Future<void> _fetchRequests({bool isRefresh = false}) async {
@@ -363,7 +376,10 @@ class _LeadRequestCard extends StatelessWidget {
     final effectivePhone = request.clinicPhone?.trim() ?? '';
     final effectiveWhatsapp = request.clinicWhatsapp?.trim() ?? '';
 
+    final isProductLead = request.leadType == 'product';
+
     return LuxuryCard(
+      onTap: () => _showLeadDetailsSheet(context, statusBg, statusBorder, statusColor, statusText),
       padding: const EdgeInsets.all(14),
       borderRadius: 18,
       child: Column(
@@ -373,13 +389,34 @@ class _LeadRequestCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                request.referenceCode,
-                style: AppTypography.cardTitle.copyWith(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.accentChampagne,
-                ),
+              Row(
+                children: [
+                  Text(
+                    request.referenceCode,
+                    style: AppTypography.cardTitle.copyWith(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.accentChampagne,
+                    ),
+                  ),
+                  if (isProductLead) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentChampagne.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        loc.isArabic ? 'استفسار منتج' : 'Product',
+                        style: AppTypography.badge.copyWith(
+                          color: AppColors.accentChampagne,
+                          fontSize: 9.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -408,10 +445,10 @@ class _LeadRequestCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            '$branchName • $serviceName',
+            branchName.isNotEmpty ? '$branchName • $serviceName' : serviceName,
             style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
           ),
-          if (practitionerName != null) ...[
+          if (!isProductLead && practitionerName != null) ...[
             const SizedBox(height: 5),
             Row(
               children: [
@@ -431,11 +468,24 @@ class _LeadRequestCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(Icons.schedule_rounded, size: 13, color: AppColors.mutedText(context)),
+              Icon(
+                isProductLead ? Icons.calendar_today_outlined : Icons.schedule_rounded,
+                size: 13,
+                color: AppColors.mutedText(context),
+              ),
               const SizedBox(width: 4),
-              Text(
-                '${loc.tr("date_label")} ${DateFormat('yyyy/MM/dd').format(request.preferredDate)} ($timeWindowLabel)',
-                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11),
+              Expanded(
+                child: Text(
+                  isProductLead
+                      ? '${loc.isArabic ? "تاريخ الطلب:" : "Submitted:"} ${DateFormat('yyyy/MM/dd').format(request.createdAt)}'
+                      : '${loc.tr("date_label")} ${DateFormat('yyyy/MM/dd').format(request.preferredDate)} ($timeWindowLabel)',
+                  style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: AppColors.mutedText(context),
               ),
             ],
           ),
@@ -494,6 +544,248 @@ class _LeadRequestCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+
+  void _showLeadDetailsSheet(
+    BuildContext context,
+    Color statusBg,
+    Color statusBorder,
+    Color statusColor,
+    String statusText,
+  ) {
+    final isDark = AppColors.isDark(context);
+    final isProductLead = request.leadType == 'product';
+    final clinicName = loc.isArabic
+        ? request.clinicNameAr
+        : (request.clinicNameEn ?? request.clinicNameAr);
+    final branchName = loc.isArabic
+        ? request.branchNameAr
+        : (request.branchNameEn ?? request.branchNameAr);
+    final serviceName = loc.isArabic
+        ? request.serviceNameAr
+        : (request.serviceNameEn ?? request.serviceNameAr);
+    final practitionerName = loc.isArabic
+        ? request.practitionerNameAr
+        : (request.practitionerNameEn ?? request.practitionerNameAr);
+    final timeWindowLabel = loc.isArabic
+        ? request.preferredTimeWindow.labelAr
+        : request.preferredTimeWindow.labelEn;
+    final effectivePhone = request.clinicPhone?.trim() ?? '';
+    final effectiveWhatsapp = request.clinicWhatsapp?.trim() ?? '';
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return Directionality(
+          textDirection: loc.textDirection,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+            decoration: BoxDecoration(
+              color: AppColors.surface(sheetCtx),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border.all(color: AppColors.border(sheetCtx)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.mutedText(sheetCtx).withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loc.isArabic ? 'تفاصيل الطلب' : 'Request Details',
+                            style: AppTypography.screenTitle.copyWith(
+                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            request.referenceCode,
+                            style: AppTypography.cardTitle.copyWith(
+                              color: AppColors.accentChampagne,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: statusBg,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: statusBorder, width: 0.8),
+                        ),
+                        child: Text(
+                          statusText,
+                          style: AppTypography.badge.copyWith(
+                            color: statusColor,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  _DetailModalRow(
+                    label: loc.isArabic ? 'العيادة' : 'Clinic',
+                    value: clinicName,
+                  ),
+                  if (!isProductLead && branchName.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _DetailModalRow(
+                      label: loc.isArabic ? 'الفرع' : 'Branch',
+                      value: branchName,
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  _DetailModalRow(
+                    label: isProductLead
+                        ? (loc.isArabic ? 'المنتج' : 'Product')
+                        : (loc.isArabic ? 'الخدمة / الإجراء' : 'Service / Treatment'),
+                    value: serviceName,
+                  ),
+                  if (!isProductLead && practitionerName != null && practitionerName.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _DetailModalRow(
+                      label: loc.isArabic ? 'الممارس الصحي' : 'Practitioner',
+                      value: practitionerName,
+                    ),
+                  ],
+                  if (!isProductLead) ...[
+                    const SizedBox(height: 10),
+                    _DetailModalRow(
+                      label: loc.isArabic ? 'التاريخ والفترة المفضلة' : 'Preferred Date & Time',
+                      value: '${DateFormat('yyyy/MM/dd').format(request.preferredDate)} • $timeWindowLabel',
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  _DetailModalRow(
+                    label: loc.isArabic ? 'تاريخ الإرسال' : 'Created Date',
+                    value: DateFormat('yyyy/MM/dd • hh:mm a').format(request.createdAt),
+                  ),
+                  if (request.notes != null && request.notes!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _DetailModalRow(
+                      label: loc.isArabic ? 'الاستفسار / الملاحظات' : 'Inquiry / Notes',
+                      value: request.notes!.trim(),
+                    ),
+                  ],
+                  if (effectiveWhatsapp.isNotEmpty || effectivePhone.isNotEmpty) ...[
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        if (effectiveWhatsapp.isNotEmpty)
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => ContactLauncher.openWhatsApp(phoneNumber: effectiveWhatsapp),
+                              icon: const Icon(Icons.chat_bubble_outline, size: 16, color: Color(0xFF10B981)),
+                              label: Text(
+                                loc.tr('whatsapp_btn'),
+                                style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w700),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFF10B981)),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        if (effectiveWhatsapp.isNotEmpty && effectivePhone.isNotEmpty)
+                          const SizedBox(width: 10),
+                        if (effectivePhone.isNotEmpty)
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => ContactLauncher.makePhoneCall(effectivePhone),
+                              icon: Icon(
+                                Icons.phone_outlined,
+                                size: 16,
+                                color: isDark ? AppColors.backgroundDeep : Colors.white,
+                              ),
+                              label: Text(
+                                loc.tr('contact_btn'),
+                                style: TextStyle(
+                                  color: isDark ? AppColors.backgroundDeep : Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DetailModalRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _DetailModalRow({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTypography.caption.copyWith(
+            color: AppColors.mutedText(context),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

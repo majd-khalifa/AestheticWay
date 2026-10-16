@@ -3,6 +3,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
 import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
@@ -183,8 +184,8 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                             cat['label']!,
                             style: TextStyle(
                               fontSize: 11.5,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                              color: isSelected ? AppColors.backgroundDeep : AppColors.mutedText(context),
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              color: isSelected ? AppColors.backgroundDeep : AppColors.text(context),
                             ),
                           ),
                           selected: isSelected,
@@ -226,10 +227,62 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                             ),
                           )
                         : filteredTreatments.isEmpty
-                            ? Center(
-                                child: Text(
-                                  loc.isArabic ? 'لا توجد علاجات مطابقة' : 'No treatments found',
-                                  style: TextStyle(color: AppColors.mutedText(context)),
+                            ? RefreshIndicator(
+                                color: AppColors.accentChampagne,
+                                onRefresh: _loadData,
+                                child: ListView(
+                                  children: [
+                                    SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                      child: LuxuryCard(
+                                        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.accentChampagne.withValues(alpha: 0.12),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.spa_outlined, size: 36, color: AppColors.accentChampagne),
+                                              ),
+                                              const SizedBox(height: 14),
+                                              Text(
+                                                loc.isArabic ? 'لا توجد علاجات متاحة حالياً' : 'No treatments available',
+                                                style: AppTypography.cardTitle.copyWith(
+                                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                loc.isArabic
+                                                    ? 'سيتم إضافة خدمات تجميلية وجلدية جديدة قريباً'
+                                                    : 'New cosmetic and derma treatments will be listed soon',
+                                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              const SizedBox(height: 16),
+                                              ElevatedButton.icon(
+                                                onPressed: _loadData,
+                                                icon: const Icon(Icons.refresh_rounded, size: 16),
+                                                label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                                  foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               )
                             : RefreshIndicator(
@@ -252,20 +305,13 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                                         padding: const EdgeInsets.all(12),
                                         child: Row(
                                           children: [
-                                            ClipRRect(
+                                            LuxuryImage(
+                                              imageUrl: treatment.imageUrl,
+                                              fallbackLogoUrl: treatment.clinicLogoUrl,
+                                              width: 80,
+                                              height: 80,
                                               borderRadius: BorderRadius.circular(12),
-                                              child: Image.network(
-                                                treatment.imageUrl,
-                                                width: 80,
-                                                height: 80,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (_, _, _) => Container(
-                                                  width: 80,
-                                                  height: 80,
-                                                  color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                                  child: const Icon(Icons.medical_services_rounded, color: AppColors.accentChampagne),
-                                                ),
-                                              ),
+                                              placeholderIcon: Icons.medical_services_rounded,
                                             ),
                                             const SizedBox(width: 14),
                                             Expanded(
@@ -298,11 +344,21 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                                                     maxLines: 1,
                                                     overflow: TextOverflow.ellipsis,
                                                   ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    '${loc.tr("duration_label")}: ${loc.isArabic ? treatment.durationText : treatment.durationTextEn}',
-                                                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
-                                                  ),
+                                                  if (treatment.formattedDuration(loc.isArabic).isNotEmpty) ...[
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      '${loc.tr("duration_label")}: ${treatment.formattedDuration(loc.isArabic)}',
+                                                      style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5, fontWeight: FontWeight.w600),
+                                                    ),
+                                                  ] else if ((loc.isArabic ? treatment.clinicNameAr : treatment.clinicNameEn)?.isNotEmpty == true) ...[
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      (loc.isArabic ? treatment.clinicNameAr : treatment.clinicNameEn)!,
+                                                      style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
                                                 ],
                                               ),
                                             ),

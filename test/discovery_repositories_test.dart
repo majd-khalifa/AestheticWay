@@ -1,7 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dio/dio.dart';
+import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/features/home/data/models/home_feed_model.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
+import 'package:aesthetic_way/features/products/models/product_model.dart';
+import 'package:aesthetic_way/features/articles/models/article_model.dart';
+import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
+import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
+import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
+import 'package:aesthetic_way/features/products/data/products_repository.dart';
+import 'package:aesthetic_way/features/articles/data/articles_repository.dart';
+import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
 
 void main() {
   group('Discovery Data Layer Tests', () {
@@ -112,6 +123,7 @@ void main() {
           'id': 'clinic-abc',
           'name_ar': 'عيادة النور',
           'name_en': 'Al Noor Clinic',
+          'logo': 'https://example.com/clinic_logo.png',
         }
       };
 
@@ -120,7 +132,129 @@ void main() {
       expect(offer.discountPercentage, 50);
       expect(offer.clinicId, 'clinic-abc');
       expect(offer.clinicNameEn, 'Al Noor Clinic');
+      expect(offer.clinicLogoUrl, 'https://example.com/clinic_logo.png');
       expect(offer.daysRemaining >= 9, isTrue);
     });
+
+    test('Models correctly extract clinicLogoUrl from nested clinic JSON', () {
+      final product = ProductModel.fromJson({
+        'id': 'prod-1',
+        'name_ar': 'كريم طبي',
+        'name_en': 'Medical Cream',
+        'clinic': {
+          'id': 'c-1',
+          'name_ar': 'العيادة',
+          'logo': 'https://example.com/c1_logo.png',
+        }
+      });
+      expect(product.clinicLogoUrl, equals('https://example.com/c1_logo.png'));
+
+      final article = ArticleModel.fromJson({
+        'id': 'art-1',
+        'title_ar': 'دليل العناية بالبشرة',
+        'title_en': 'Skincare Guide',
+        'content_ar': 'محتوى',
+        'content_en': 'content',
+        'clinic': {
+          'id': 'c-2',
+          'name_ar': 'العيادة',
+          'logo': 'https://example.com/c2_logo.png',
+        }
+      });
+      expect(article.clinicLogoUrl, equals('https://example.com/c2_logo.png'));
+
+      final treatment = TreatmentModel.fromJson({
+        'id': 't-1',
+        'name_ar': 'جلسة نضارة',
+        'name_en': 'Glow Session',
+        'clinic': {
+          'id': 'c-3',
+          'name_ar': 'العيادة',
+          'logo': 'https://example.com/c3_logo.png',
+        }
+      });
+      expect(treatment.clinicLogoUrl, equals('https://example.com/c3_logo.png'));
+
+      final practitioner = PractitionerModel.fromJson({
+        'id': 'p-1',
+        'name_ar': 'د. سارة',
+        'name_en': 'Dr. Sarah',
+        'specialty_ar': 'جلدية',
+        'specialty_en': 'Dermatology',
+        'type': 'doctor',
+        'clinic': {
+          'id': 'c-4',
+          'name_ar': 'عيادة دبي',
+          'logo': 'https://example.com/c4_logo.png',
+        }
+      });
+      expect(practitioner.clinicLogoUrl, equals('https://example.com/c4_logo.png'));
+    });
   });
+
+  group('Repository Pagination Query Parameters Tests', () {
+    late _TestCaptureInterceptor interceptor;
+    late ApiClient apiClient;
+
+    setUp(() {
+      interceptor = _TestCaptureInterceptor();
+      apiClient = ApiClient();
+      apiClient.dio.interceptors.insert(0, interceptor);
+    });
+
+    tearDown(() {
+      apiClient.dio.interceptors.remove(interceptor);
+    });
+
+    test('ClinicsRepository passes page and pageSize in query parameters', () async {
+      final repo = ClinicsRepository(apiClient: apiClient);
+      await repo.getClinics(page: 3, pageSize: 25);
+      expect(interceptor.lastQueryParams?['page'], equals(3));
+      expect(interceptor.lastQueryParams?['page_size'], equals(25));
+    });
+
+    test('OffersRepository passes page and pageSize in query parameters', () async {
+      final repo = OffersRepository(apiClient: apiClient);
+      await repo.getOffers(page: 2, pageSize: 20);
+      expect(interceptor.lastQueryParams?['page'], equals(2));
+      expect(interceptor.lastQueryParams?['page_size'], equals(20));
+    });
+
+    test('ProductsRepository passes page and pageSize in query parameters', () async {
+      final repo = ProductsRepository(apiClient: apiClient);
+      await repo.getProducts(page: 4, pageSize: 15);
+      expect(interceptor.lastQueryParams?['page'], equals(4));
+      expect(interceptor.lastQueryParams?['page_size'], equals(15));
+    });
+
+    test('ArticlesRepository passes page and pageSize in query parameters', () async {
+      final repo = ArticlesRepository(apiClient: apiClient);
+      await repo.getArticles(page: 5, pageSize: 10);
+      expect(interceptor.lastQueryParams?['page'], equals(5));
+      expect(interceptor.lastQueryParams?['page_size'], equals(10));
+    });
+
+    test('TreatmentsRepository passes page and pageSize in query parameters', () async {
+      final repo = TreatmentsRepository(apiClient: apiClient);
+      await repo.getTreatments(page: 2, pageSize: 30);
+      expect(interceptor.lastQueryParams?['page'], equals(2));
+      expect(interceptor.lastQueryParams?['page_size'], equals(30));
+    });
+  });
+}
+
+class _TestCaptureInterceptor extends Interceptor {
+  Map<String, dynamic>? lastQueryParams;
+  String? lastPath;
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    lastPath = options.path;
+    lastQueryParams = options.queryParameters;
+    handler.resolve(Response(
+      requestOptions: options,
+      data: {'results': []},
+      statusCode: 200,
+    ));
+  }
 }

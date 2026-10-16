@@ -47,26 +47,27 @@ void main() {
       expect(practitioners.any((p) => p.type == PractitionerType.licensedProfessional), isTrue);
     });
 
-    test('ThemeService manages Dark, Light, and System modes', () {
+    test('ThemeService manages Light default, Dark, and System modes', () {
       final themeService = ThemeService();
-      expect(themeService.themeMode, equals(ThemeMode.dark));
-
-      themeService.setThemeMode(ThemeMode.light);
-      expect(themeService.isLightMode, isTrue);
-      expect(themeService.isDarkMode, isFalse);
+      expect(themeService.themeMode, equals(ThemeMode.light));
 
       themeService.setThemeMode(ThemeMode.dark);
       expect(themeService.isDarkMode, isTrue);
       expect(themeService.isLightMode, isFalse);
 
+      themeService.setThemeMode(ThemeMode.light);
+      expect(themeService.isLightMode, isTrue);
+      expect(themeService.isDarkMode, isFalse);
+
       themeService.setThemeMode(ThemeMode.system);
       expect(themeService.themeMode, equals(ThemeMode.system));
 
-      // Reset to default dark mode
-      themeService.setThemeMode(ThemeMode.dark);
+      // Reset to default light mode
+      themeService.setThemeMode(ThemeMode.light);
     });
 
     testWidgets('TierBadge renders VIP and Featured properly', (WidgetTester tester) async {
+      LocaleService().setLanguage(AppLanguage.arabic);
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -85,6 +86,7 @@ void main() {
     });
 
     testWidgets('PractitionerBadge renders distinct roles', (WidgetTester tester) async {
+      LocaleService().setLanguage(AppLanguage.arabic);
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -105,6 +107,7 @@ void main() {
     });
 
     testWidgets('LicenseBadge renders compliant verified text without regulator names', (WidgetTester tester) async {
+      LocaleService().setLanguage(AppLanguage.arabic);
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -147,9 +150,6 @@ void main() {
 
       // Assert that translated Arabic strings DO appear
       expect(find.text('طلب موعد استشارة'), findsOneWidget);
-      expect(find.text('صباحاً (9 ص - 1 م)'), findsOneWidget);
-      expect(find.text('ظهراً (1 م - 5 م)'), findsOneWidget);
-      expect(find.text('مساءً (5 م - 9 م)'), findsOneWidget);
       expect(find.text('بيانات التواصل / المريض'), findsOneWidget);
       expect(find.text('رقم الهاتف (الإمارات)'), findsOneWidget);
       expect(find.text('ملاحظات إضافية (اختياري)'), findsOneWidget);
@@ -229,7 +229,7 @@ void main() {
 
       // Check Slide 1 content
       expect(find.text('عيادات التجميل والجلدية'), findsOneWidget);
-      expect(find.text('تخطي'), findsOneWidget);
+      expect(find.text('تخطي'), findsNothing);
       expect(find.text('التالي'), findsOneWidget);
       expect(find.text('المتابعة كزائر'), findsNothing);
 
@@ -271,6 +271,7 @@ void main() {
       expect(find.text('نسيت كلمة المرور؟'), findsOneWidget);
       expect(find.text('إنشاء حساب جديد'), findsOneWidget);
       expect(find.text('المتابعة كزائر'), findsNothing);
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
     });
 
     testWidgets('RegisterScreen renders all input fields and terms checkbox', (WidgetTester tester) async {
@@ -404,7 +405,8 @@ void main() {
       expect(find.byType(AppBrandLogo), findsWidgets);
       expect(find.text('الرئيسية'), findsOneWidget);
       expect(find.text('العيادات'), findsWidgets);
-      expect(find.text('طلباتي'), findsOneWidget);
+      expect(find.text('المنتجات'), findsWidgets);
+      expect(find.text('العروض'), findsWidgets);
       expect(find.text('حسابي'), findsOneWidget);
     });
 

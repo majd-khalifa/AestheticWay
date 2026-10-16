@@ -338,6 +338,8 @@ void main() {
       expect(find.text('الأطباء'), findsOneWidget);
       expect(find.text('العلاجات'), findsOneWidget);
       expect(find.text('باقات العروض'), findsOneWidget);
+      expect(find.text('المنتجات الطبية'), findsOneWidget);
+      expect(find.text('المقالات والأدلة'), findsOneWidget);
     });
   });
 }

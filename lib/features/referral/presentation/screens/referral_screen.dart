@@ -7,10 +7,7 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
-import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
-import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
-import '../../models/referral_model.dart';
 import '../../services/referral_service.dart';
 
 /// Luxury Patient Referral & Rewards Hub connected to Live Backend API
@@ -22,7 +19,6 @@ class ReferralScreen extends StatefulWidget {
 }
 
 class _ReferralScreenState extends State<ReferralScreen> {
-  bool _isCollecting = false;
 
   @override
   void initState() {
@@ -34,29 +30,35 @@ class _ReferralScreenState extends State<ReferralScreen> {
     });
   }
 
-  void _copyToClipboard(String text, String message) {
-    Clipboard.setData(ClipboardData(text: text));
+  void _copyInviteLink(String inviteUrl) {
+    HapticFeedback.lightImpact();
+    Clipboard.setData(ClipboardData(text: inviteUrl));
     if (!mounted) return;
+    final loc = LocaleService();
     showAppSnackBar(
       context,
-      message,
+      loc.isArabic ? 'تم نسخ رابط الدعوة الخاص بك بنجاح' : 'Your invite link has been copied to clipboard',
       type: AppSnackBarType.success,
       duration: const Duration(seconds: 2),
     );
   }
 
-  Future<void> _shareInvite(String code) async {
+  Future<void> _shareInvite(String inviteUrlOrCode) async {
+    HapticFeedback.mediumImpact();
     final loc = LocaleService();
+    final inviteUrl = inviteUrlOrCode.startsWith('http')
+        ? inviteUrlOrCode
+        : 'https://aestheticway.ae/invite/$inviteUrlOrCode';
     final message = loc.isArabic
-        ? 'حمّل تطبيق AESTHETIC WAY لاكتشاف وتحديد مواعيد أفضل عيادات وأطباء التجميل في الإمارات!\nاستخدم كود الدعوة الخاص بي: $code'
-        : 'Download AESTHETIC WAY app to discover and request leads with certified medical aesthetic clinics in the UAE!\nUse my referral code: $code';
+        ? 'انضم إلى تطبيق AESTHETIC WAY — المنصة الفاخرة لاكتشاف أفضل عيادات وأطباء التجميل المعتمدين في الإمارات! 🌟\n\nسجل عبر رابط دعوتي الحصري:\n$inviteUrl'
+        : 'Join me on AESTHETIC WAY — the premier luxury platform to discover certified aesthetic & dermatology clinics in the UAE! 🌟\n\nRegister using my exclusive invite link:\n$inviteUrl';
 
     // Copy to clipboard first
     Clipboard.setData(ClipboardData(text: message));
     if (mounted) {
       showAppSnackBar(
         context,
-        loc.isArabic ? 'تم نسخ نص الدعوة ورابط الكود للمشاركة' : 'Invite text and code copied to clipboard',
+        loc.isArabic ? 'تم نسخ نص ورابط الدعوة للمشاركة' : 'Invite link and message copied to clipboard',
         type: AppSnackBarType.success,
         duration: const Duration(seconds: 2),
       );
@@ -71,190 +73,60 @@ class _ReferralScreenState extends State<ReferralScreen> {
     } catch (_) {}
   }
 
-  Future<void> _handleCollectCode() async {
-    final loc = LocaleService();
-    final referralService = ReferralService();
-
-    if (!referralService.canCollectDiscountCode || _isCollecting) return;
-
-    setState(() => _isCollecting = true);
-
-    try {
-      final code = await referralService.collectDiscountCode();
-      if (!mounted) return;
-
-      _showSuccessCodeModal(code);
-    } catch (e) {
-      if (!mounted) return;
-      showAppSnackBar(
-        context,
-        loc.isArabic
-            ? 'تعذر استبدال النقاط حالياً: ${e.toString()}'
-            : 'Could not redeem points: ${e.toString()}',
-        type: AppSnackBarType.error,
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isCollecting = false);
-      }
-    }
-  }
-
-  void _showSuccessCodeModal(ReferralDiscountCode code) {
-    final loc = LocaleService();
+  Widget _buildHowItWorksStep({
+    required IconData icon,
+    required String title,
+    required String desc,
+    required BuildContext context,
+  }) {
     final isDark = AppColors.isDark(context);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) {
-        return Container(
-          padding: const EdgeInsets.all(24),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isDark ? AppColors.cardSurface : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.22),
+            shape: BoxShape.circle,
             border: Border.all(
-              color: AppColors.accentChampagne.withValues(alpha: 0.3),
+              color: AppColors.accentChampagne.withValues(alpha: 0.6),
               width: 1.0,
             ),
           ),
+          child: Icon(
+            icon,
+            color: AppColors.accentChampagne,
+            size: 15,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.accentChampagne.withValues(alpha: 0.5),
-                    width: 1.5,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.card_giftcard_rounded,
-                  color: AppColors.accentChampagne,
-                  size: 36,
-                ),
-              ),
-              const SizedBox(height: 16),
               Text(
-                loc.isArabic ? 'تم استبدال 500 نقطة بنجاح!' : '500 Points Successfully Redeemed!',
-                style: AppTypography.cardTitle.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                title,
+                style: AppTypography.caption.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12.5,
                   color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 2),
               Text(
-                loc.isArabic
-                    ? 'كود الخصم الحصري الخاص بك (15%) للاستخدام في العيادة'
-                    : 'Your exclusive 15% discount code for clinic use',
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.mutedText(context),
-                  fontSize: 13,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-
-              // Code Display Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.accentChampagne,
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      code.code,
-                      style: AppTypography.heroTitle.copyWith(
-                        color: AppColors.accentChampagne,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      loc.isArabic
-                          ? 'خصم 15% على الإجراءات خارج العروض'
-                          : '15% off original non-offer procedures',
-                      style: AppTypography.caption.copyWith(
-                        color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              Text(
-                loc.isArabic
-                    ? 'الخصم يُطبَّق في العيادة مباشرة على الإجراءات خارج باقات العروض (ليس سعر العرض المخفّض).'
-                    : 'The discount applies in-clinic on non-offer procedures (not on already discounted offer prices).',
+                desc,
                 style: AppTypography.caption.copyWith(
                   color: AppColors.mutedText(context),
                   fontSize: 11.5,
-                  height: 1.4,
+                  height: 1.35,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.pop(modalContext),
-                      icon: const Icon(Icons.close_rounded, size: 16),
-                      label: Text(loc.isArabic ? 'إغلاق' : 'Close'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                        side: BorderSide(color: AppColors.border(context)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SilverButton(
-                      label: loc.tr('copy_code'),
-                      icon: Icons.copy_rounded,
-                      variant: SilverButtonVariant.primary,
-                      onPressed: () {
-                        Navigator.pop(modalContext);
-                        _copyToClipboard(code.code, loc.tr('code_copied'));
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
             ],
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
@@ -263,7 +135,6 @@ class _ReferralScreenState extends State<ReferralScreen> {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final referralService = ReferralService();
-    final isLoggedIn = AuthState().isLoggedIn;
 
     return ListenableBuilder(
       listenable: Listenable.merge([loc, referralService, AuthState()]),
@@ -271,8 +142,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
         final currentPoints = referralService.currentPoints;
         final invitesCount = referralService.successfulInvites;
         final progressRatio = referralService.nextMilestoneProgressRatio;
-        final userCodes = referralService.userCodes;
-        final referralCode = referralService.userReferralCode;
+        final inviteUrl = referralService.inviteLink;
 
         return Scaffold(
           backgroundColor: AppColors.bg(context),
@@ -301,7 +171,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     strokeWidth: 2.5,
                   ),
                 )
-              : referralService.errorMessage != null && referralService.statusModel == null && isLoggedIn
+              : referralService.errorMessage != null && referralService.statusModel == null
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
@@ -341,78 +211,13 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       color: AppColors.accentChampagne,
                       backgroundColor: isDark ? AppColors.cardSurface : Colors.white,
                       onRefresh: () async {
-                        if (isLoggedIn) {
-                          await referralService.loadReferralStatus(refresh: true);
-                        }
+                        await referralService.loadReferralStatus(refresh: true);
                       },
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
                         children: [
-                          // Guest Notice Banner (If not logged in)
-                          if (!isLoggedIn) ...[
-                            Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.15),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppColors.accentChampagne.withValues(alpha: 0.4),
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.account_circle_outlined, color: AppColors.accentChampagne, size: 28),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          loc.isArabic ? 'سجّل دخولك لبدء جمع النقاط' : 'Sign in to start earning points',
-                                          style: AppTypography.cardTitle.copyWith(
-                                            fontSize: 13.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          loc.isArabic
-                                              ? 'احصل على كود دعوة خاص بك وتابع دعواتك الناجحة للحصول على خصم 15%'
-                                              : 'Get your personal invite code and track successful invites for 15% off',
-                                          style: AppTypography.caption.copyWith(
-                                            color: AppColors.mutedText(context),
-                                            fontSize: 11.5,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        LuxuryPageRoute(page: const LoginScreen()),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.accentChampagne,
-                                      foregroundColor: AppColors.backgroundDeep,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                      textStyle: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
-                                    ),
-                                    child: Text(loc.isArabic ? 'دخول' : 'Login'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
 
-                          // Referral Hero Card
+                          // Unified Referral & Invite Link Hero Card
                           LuxuryCard(
                             padding: const EdgeInsets.all(20),
                             child: Column(
@@ -421,7 +226,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.all(8),
+                                      padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
                                         color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.20),
                                         shape: BoxShape.circle,
@@ -431,117 +236,92 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                         ),
                                       ),
                                       child: const Icon(
-                                        Icons.card_giftcard_rounded,
+                                        Icons.share_rounded,
                                         color: AppColors.accentChampagne,
-                                        size: 20,
+                                        size: 22,
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
+                                    const SizedBox(width: 14),
                                     Expanded(
-                                      child: Text(
-                                        loc.tr('referral_title'),
-                                        style: AppTypography.cardTitle.copyWith(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  loc.tr('referral_sub'),
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: AppColors.mutedText(context),
-                                    fontSize: 13,
-                                    height: 1.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 18),
-
-                                // User Referral Code Box
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: AppColors.accentChampagne.withValues(alpha: 0.4),
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Row(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                loc.tr('your_referral_code'),
-                                                style: AppTypography.caption.copyWith(
-                                                  color: AppColors.mutedText(context),
-                                                  fontSize: 11,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                referralCode,
-                                                style: AppTypography.heroTitle.copyWith(
-                                                  color: AppColors.accentChampagne,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w900,
-                                                  letterSpacing: 1.2,
-                                                ),
-                                              ),
-                                            ],
+                                          Text(
+                                            loc.tr('referral_title'),
+                                            style: AppTypography.cardTitle.copyWith(
+                                              fontSize: 16.5,
+                                              fontWeight: FontWeight.w800,
+                                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                            ),
                                           ),
-                                          const Spacer(),
-                                          TextButton.icon(
-                                            onPressed: () => _copyToClipboard(
-                                              referralCode,
-                                              loc.tr('code_copied'),
-                                            ),
-                                            icon: const Icon(Icons.copy_rounded, size: 15, color: AppColors.accentChampagne),
-                                            label: Text(
-                                              loc.tr('copy_code'),
-                                              style: AppTypography.caption.copyWith(
-                                                color: AppColors.accentChampagne,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: AppColors.accentChampagne.withValues(alpha: 0.12),
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            loc.tr('referral_sub'),
+                                            style: AppTypography.caption.copyWith(
+                                              color: AppColors.mutedText(context),
+                                              fontSize: 11.5,
                                             ),
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 10),
-                                      const Divider(height: 1, thickness: 0.8),
-                                      const SizedBox(height: 10),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
 
-                                      // Share Invite Action
+                                // Unified Link Box
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: AppColors.accentChampagne.withValues(alpha: 0.45),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.link_rounded,
+                                        color: AppColors.accentChampagne,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          inviteUrl,
+                                          style: AppTypography.caption.copyWith(
+                                            color: AppColors.accentChampagne,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 13,
+                                            letterSpacing: 0.3,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
                                       InkWell(
-                                        onTap: () => _shareInvite(referralCode),
+                                        onTap: () => _copyInviteLink(inviteUrl),
                                         borderRadius: BorderRadius.circular(8),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.accentChampagne.withValues(alpha: 0.18),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              const Icon(Icons.share_rounded, size: 16, color: AppColors.accentChampagne),
-                                              const SizedBox(width: 8),
+                                              const Icon(Icons.copy_rounded, size: 13, color: AppColors.accentChampagne),
+                                              const SizedBox(width: 4),
                                               Text(
-                                                loc.tr('share_invite'),
+                                                loc.isArabic ? 'نسخ الرابط' : 'Copy Link',
                                                 style: AppTypography.caption.copyWith(
                                                   color: AppColors.accentChampagne,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 12.5,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 11.5,
                                                 ),
                                               ),
                                             ],
@@ -550,6 +330,62 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                       ),
                                     ],
                                   ),
+                                ),
+                                const SizedBox(height: 14),
+
+                                // Share via WhatsApp (Full Width)
+                                SilverButton(
+                                  label: loc.isArabic ? 'مشاركة رابط الدعوة عبر واتساب' : 'Share Invite Link via WhatsApp',
+                                  icon: Icons.send_rounded,
+                                  isFullWidth: true,
+                                  variant: SilverButtonVariant.primary,
+                                  onPressed: () => _shareInvite(inviteUrl),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // How It Works Card
+                          LuxuryCard(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  loc.isArabic ? 'كيف يعمل برنامج الدعوة؟' : 'How It Works',
+                                  style: AppTypography.cardTitle.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                _buildHowItWorksStep(
+                                  icon: Icons.send_rounded,
+                                  title: loc.isArabic ? 'شارك رابط الدعوة' : 'Share Your Link',
+                                  desc: loc.isArabic
+                                      ? 'أرسل رابطك الشخصي لأصدقائك عبر واتساب أو شبكات التواصل'
+                                      : 'Send your personalized invite link via WhatsApp or socials',
+                                  context: context,
+                                ),
+                                const SizedBox(height: 10),
+                                _buildHowItWorksStep(
+                                  icon: Icons.person_add_alt_1_rounded,
+                                  title: loc.isArabic ? 'انضمام الصديق وطلب الموعد' : 'Friend Signs Up & Inquires',
+                                  desc: loc.isArabic
+                                      ? 'يسجل صديقك حسابه ويطلب موعد استشارته الأولى مع العيادة'
+                                      : 'Your friend registers and submits their first clinic consultation lead',
+                                  context: context,
+                                ),
+                                const SizedBox(height: 10),
+                                _buildHowItWorksStep(
+                                  icon: Icons.card_giftcard_rounded,
+                                  title: loc.isArabic ? 'مكافآت ونقاط فورية' : 'Earn Exclusive Rewards',
+                                  desc: loc.isArabic
+                                      ? 'تكسب رصيد نقاط يُستبدل بخصومات حصرية 15% في أرقى العيادات'
+                                      : 'Earn reward points redeemable for exclusive 15% vouchers at premier clinics',
+                                  context: context,
                                 ),
                               ],
                             ),
@@ -816,179 +652,6 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                     ),
                                   );
                                 }),
-                                const SizedBox(height: 18),
-
-                                // Collect Button (Active ONLY at >= 500 points)
-                                SilverButton(
-                                  label: _isCollecting
-                                      ? (loc.isArabic ? 'جاري التوليد...' : 'Generating Code...')
-                                      : loc.tr('collect_discount_btn'),
-                                  icon: Icons.redeem_rounded,
-                                  isFullWidth: true,
-                                  variant: referralService.canCollectDiscountCode && !_isCollecting
-                                      ? SilverButtonVariant.primary
-                                      : SilverButtonVariant.secondary,
-                                  onPressed: referralService.canCollectDiscountCode && !_isCollecting
-                                      ? _handleCollectCode
-                                      : null,
-                                ),
-
-                                if (!referralService.canCollectDiscountCode) ...[
-                                  const SizedBox(height: 8),
-                                  Center(
-                                    child: Text(
-                                      loc.isArabic
-                                          ? 'اجمع 500 نقطة على الأقل عبر دعوة أصدقائك لتفعيل زر الاستبدال (النقاط الحالية: $currentPoints / 500)'
-                                          : 'Accumulate at least 500 points to unlock (You have: $currentPoints / 500)',
-                                      style: AppTypography.caption.copyWith(
-                                        color: AppColors.mutedText(context),
-                                        fontSize: 11,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Issued 15% Discount Codes Section
-                          LuxuryCard(
-                            padding: const EdgeInsets.all(18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.confirmation_number_outlined, color: AppColors.accentChampagne, size: 18),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      loc.tr('discount_codes_title'),
-                                      style: AppTypography.cardTitle.copyWith(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-
-                                if (userCodes.isEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    child: Text(
-                                      loc.tr('no_discount_codes'),
-                                      style: AppTypography.caption.copyWith(
-                                        color: AppColors.mutedText(context),
-                                        fontSize: 12.5,
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  ...userCodes.map((c) {
-                                    final isAvailable = c.status == ReferralCodeStatus.available;
-                                    final isUsed = c.status == ReferralCodeStatus.used;
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 10),
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isAvailable
-                                              ? AppColors.accentChampagne.withValues(alpha: 0.5)
-                                              : AppColors.border(context),
-                                          width: 0.8,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                c.code,
-                                                style: AppTypography.cardTitle.copyWith(
-                                                  color: AppColors.accentChampagne,
-                                                  fontWeight: FontWeight.w900,
-                                                  fontSize: 15.5,
-                                                  letterSpacing: 1.1,
-                                                ),
-                                              ),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                                decoration: BoxDecoration(
-                                                  color: isAvailable
-                                                      ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                                                      : isUsed
-                                                          ? AppColors.border(context)
-                                                          : Colors.amber.withValues(alpha: 0.15),
-                                                  borderRadius: BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  isAvailable
-                                                      ? loc.tr('code_status_available')
-                                                      : isUsed
-                                                          ? loc.tr('code_status_used')
-                                                          : loc.tr('code_status_expired'),
-                                                  style: AppTypography.caption.copyWith(
-                                                    color: isAvailable
-                                                        ? const Color(0xFF10B981)
-                                                        : isUsed
-                                                            ? AppColors.mutedText(context)
-                                                            : Colors.amber,
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 10.5,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  loc.isArabic
-                                                      ? 'خصم 15% على الإجراءات خارج العروض'
-                                                      : '15% off non-offer procedures',
-                                                  style: AppTypography.caption.copyWith(
-                                                    color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
-                                                    fontSize: 11.5,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              if (isAvailable)
-                                                InkWell(
-                                                  onTap: () => _copyToClipboard(
-                                                    c.code,
-                                                    loc.tr('code_copied'),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      const Icon(Icons.copy_rounded, size: 13, color: AppColors.accentChampagne),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        loc.tr('copy_code'),
-                                                        style: AppTypography.caption.copyWith(
-                                                          color: AppColors.accentChampagne,
-                                                          fontSize: 11,
-                                                          fontWeight: FontWeight.w700,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
                               ],
                             ),
                           ),

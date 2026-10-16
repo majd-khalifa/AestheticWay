@@ -71,6 +71,13 @@ class ReferralService extends ChangeNotifier {
       ? _statusModel!.referralCode
       : _fallbackReferralCode;
 
+  String get inviteLink {
+    if (_statusModel?.inviteLink.isNotEmpty == true) {
+      return _statusModel!.inviteLink;
+    }
+    return 'https://aestheticway.ae/invite/$userReferralCode';
+  }
+
   int get successfulInvites => _statusModel?.successfulInvitesCount ?? _fallbackSuccessfulInvites;
 
   int get currentPoints {

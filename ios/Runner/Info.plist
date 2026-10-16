@@ -66,5 +66,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>whatsapp</string>
+		<string>comgooglemaps</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Aesthetic Way needs camera access to allow clinics and users to capture and upload photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Aesthetic Way needs photos access to select and upload clinic, doctor, and product images.</string>
 </dict>
 </plist>

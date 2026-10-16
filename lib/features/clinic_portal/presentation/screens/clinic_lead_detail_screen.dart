@@ -44,6 +44,44 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
     if (_currentStatus == newStatus || _isUpdatingStatus) return;
 
     final loc = LocaleService();
+
+    // Guard: warn clinic staff if closing an untouched lead
+    if (_currentStatus == AppointmentLeadStatus.sent && newStatus == AppointmentLeadStatus.closed) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.surface(ctx),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            loc.isArabic ? 'إغلاق الطلب دون تواصل؟' : 'Close without contacting?',
+            style: AppTypography.cardTitle.copyWith(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            loc.isArabic
+                ? 'لم يتم تسجيل التواصل مع المريض بعد. هل أنت متأكد من إغلاق هذا الطلب مباشرة؟'
+                : 'Patient contact has not been logged yet. Are you sure you want to close this lead directly?',
+            style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(ctx)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(loc.isArabic ? 'إلغاء' : 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(loc.isArabic ? 'إغلاق الطلب' : 'Close Lead'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+
     final prevStatus = _currentStatus;
     setState(() {
       _currentStatus = newStatus;

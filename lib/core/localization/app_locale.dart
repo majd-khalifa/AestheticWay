@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Supported App Locales
 enum AppLanguage {
@@ -18,23 +19,59 @@ class LocaleService extends ChangeNotifier {
   factory LocaleService() => _instance;
   LocaleService._internal();
 
-  AppLanguage _currentLanguage = AppLanguage.arabic;
+  static const String storageKey = 'aw_pref_locale';
+
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
+
+  // Default on first launch (when no saved preference exists) is English (LTR)
+  AppLanguage _currentLanguage = AppLanguage.english;
 
   AppLanguage get currentLanguage => _currentLanguage;
   bool get isArabic => _currentLanguage == AppLanguage.arabic;
+  bool get isEnglish => _currentLanguage == AppLanguage.english;
   Locale get locale => Locale(_currentLanguage.code);
   TextDirection get textDirection => _currentLanguage.direction;
 
-  void toggleLanguage() {
-    _currentLanguage = _currentLanguage == AppLanguage.arabic ? AppLanguage.english : AppLanguage.arabic;
-    notifyListeners();
+  /// Restores persisted language choice; defaults to English (LTR) when unset.
+  Future<void> init() async {
+    try {
+      final savedCode = await _storage.read(key: storageKey);
+      if (savedCode == AppLanguage.arabic.code) {
+        _currentLanguage = AppLanguage.arabic;
+      } else if (savedCode == AppLanguage.english.code) {
+        _currentLanguage = AppLanguage.english;
+      } else {
+        _currentLanguage = AppLanguage.english;
+      }
+      notifyListeners();
+    } catch (_) {
+      _currentLanguage = AppLanguage.english;
+    }
   }
 
-  void setLanguage(AppLanguage language) {
+  Future<void> toggleLanguage() async {
+    _currentLanguage = _currentLanguage == AppLanguage.arabic
+        ? AppLanguage.english
+        : AppLanguage.arabic;
+    notifyListeners();
+    await _persistLanguage(_currentLanguage);
+  }
+
+  Future<void> setLanguage(AppLanguage language) async {
     if (_currentLanguage != language) {
       _currentLanguage = language;
       notifyListeners();
     }
+    await _persistLanguage(language);
+  }
+
+  Future<void> _persistLanguage(AppLanguage language) async {
+    try {
+      await _storage.write(key: storageKey, value: language.code);
+    } catch (_) {}
   }
 
   /// Translation Lookup Helper with Safe Fallback
@@ -175,7 +212,7 @@ class LocaleService extends ChangeNotifier {
     'clinic_doctor_languages': {'ar': 'اللغات (مثال: العربية، الإنجليزية)', 'en': 'Languages (e.g. Arabic, English)'},
     'clinic_doctor_bio': {'ar': 'نبذة تعريفية موجزة', 'en': 'Short Professional Bio'},
     'clinic_doctor_license_ref': {'ar': 'الرمز المرجعي للاعتماد بالمنصة', 'en': 'Platform License Reference'},
-    'clinic_doctor_avatar_opt': {'ar': 'رابط الصورة الشخصية (اختياري)', 'en': 'Photo URL (Optional)'},
+    'clinic_doctor_avatar_opt': {'ar': 'الصورة الشخصية للطبيب', 'en': 'Doctor Profile Photo'},
     'clinic_practitioner_saved': {'ar': 'تمت إضافة الممارس بنجاح', 'en': 'Practitioner added successfully'},
 
     'clinic_services_title': {'ar': 'العلاجات والخدمات المقدمة', 'en': 'Services & Treatments'},
@@ -277,6 +314,8 @@ class LocaleService extends ChangeNotifier {
     // Navigation
     'nav_home': {'ar': 'الرئيسية', 'en': 'Home'},
     'nav_clinics': {'ar': 'العيادات', 'en': 'Clinics'},
+    'nav_products': {'ar': 'المنتجات', 'en': 'Products'},
+    'nav_offers': {'ar': 'العروض', 'en': 'Offers'},
     'nav_requests': {'ar': 'طلباتي', 'en': 'Requests'},
     'nav_profile': {'ar': 'حسابي', 'en': 'Profile'},
 
@@ -373,7 +412,7 @@ class LocaleService extends ChangeNotifier {
     'clinic_product_price': {'ar': 'السعر (د.إ)', 'en': 'Price (AED)'},
     'clinic_product_orig_price': {'ar': 'السعر قبل الخصم (اختياري)', 'en': 'Original Price (Optional)'},
     'clinic_product_description': {'ar': 'وصف المنتج ومكوناته', 'en': 'Description & Key Ingredients'},
-    'clinic_product_image': {'ar': 'رابط صورة المنتج (اختياري)', 'en': 'Product Image URL (Optional)'},
+    'clinic_product_image': {'ar': 'صورة المنتج التجميلي', 'en': 'Product Image'},
     'clinic_product_toggle_avail': {'ar': 'تبديل حالة التوفر', 'en': 'Toggle Availability'},
     'admin_products_moderation': {'ar': 'إشراف ومراقبة المنتجات المعروضة', 'en': 'Products Moderation'},
     'admin_suspend_product_btn': {'ar': 'إيقاف نشر المنتج', 'en': 'Suspend Product'},
@@ -398,7 +437,7 @@ class LocaleService extends ChangeNotifier {
     'clinic_article_summary': {'ar': 'ملخص المقال', 'en': 'Article Summary'},
     'clinic_article_content': {'ar': 'محتوى المقال الكامل', 'en': 'Full Article Content'},
     'clinic_article_category': {'ar': 'تصنيف المقال', 'en': 'Article Category'},
-    'clinic_article_cover': {'ar': 'رابط صورة الغلاف (اختياري)', 'en': 'Cover Image URL (Optional)'},
+    'clinic_article_cover': {'ar': 'صورة غلاف المقال', 'en': 'Article Cover Image'},
     'admin_articles_moderation': {'ar': 'إشراف ومراقبة المقالات المنشورة', 'en': 'Articles Moderation'},
     'admin_suspend_article_btn': {'ar': 'إيقاف نشر المقال', 'en': 'Suspend Article'},
     'admin_activate_article_btn': {'ar': 'إعادة نشر وتفعيل المقال', 'en': 'Activate Article'},

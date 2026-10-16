@@ -19,6 +19,7 @@ class ArticleModel {
   final String clinicId;
   final String clinicNameAr;
   final String? clinicNameEn;
+  final String? clinicLogoUrl;
   final String categoryAr;
   final String categoryEn;
   final DateTime publishedAt;
@@ -45,6 +46,7 @@ class ArticleModel {
     this.clinicId = '',
     this.clinicNameAr = '',
     this.clinicNameEn,
+    this.clinicLogoUrl,
     this.categoryAr = '',
     this.categoryEn = '',
     required this.publishedAt,
@@ -72,6 +74,7 @@ class ArticleModel {
     String? clinicId,
     String? clinicNameAr,
     String? clinicNameEn,
+    String? clinicLogoUrl,
     String? categoryAr,
     String? categoryEn,
     DateTime? publishedAt,
@@ -98,6 +101,7 @@ class ArticleModel {
       clinicId: clinicId ?? this.clinicId,
       clinicNameAr: clinicNameAr ?? this.clinicNameAr,
       clinicNameEn: clinicNameEn ?? this.clinicNameEn,
+      clinicLogoUrl: clinicLogoUrl ?? this.clinicLogoUrl,
       categoryAr: categoryAr ?? this.categoryAr,
       categoryEn: categoryEn ?? this.categoryEn,
       publishedAt: publishedAt ?? this.publishedAt,
@@ -160,6 +164,10 @@ class ArticleModel {
           clinic?['name_en'] as String? ??
           '',
       clinicNameEn: clinic?['name_en'] as String?,
+      clinicLogoUrl: clinic?['logo'] as String? ??
+          clinic?['logo_url'] as String? ??
+          json['clinic_logo'] as String? ??
+          json['clinic_logo_url'] as String?,
       categoryAr: json['category_ar'] as String? ?? '',
       categoryEn: json['category_en'] as String? ?? '',
       publishedAt: json['published_at'] != null

@@ -84,11 +84,11 @@ class AppointmentSuccessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Official Brand Logo (assets/images/aesthetic_way_logo.png)
+                    // Official Brand Logo (Prominent Auth/Splash Standard Sizing)
                     const Center(
-                      child: AppBrandLogo.header(height: 28),
+                      child: AppBrandLogo.auth(),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
 
                     // Success Heading
                     Center(
@@ -117,9 +117,7 @@ class AppointmentSuccessScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            loc.isArabic
-                                ? 'تم إرسال طلبك وستتواصل العيادة معك'
-                                : 'Your request has been sent and the clinic will contact you',
+                            'تم إرسال طلبك وستتواصل العيادة معك',
                             style: AppTypography.cardTitle.copyWith(
                               color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
                               fontWeight: FontWeight.w700,
@@ -127,11 +125,23 @@ class AppointmentSuccessScreen extends StatelessWidget {
                             ),
                             textAlign: TextAlign.center,
                           ),
+                          if (!loc.isArabic) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Your request has been sent and the clinic will contact you',
+                              style: AppTypography.cardTitle.copyWith(
+                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                           const SizedBox(height: 6),
                           Text(
                             loc.isArabic
-                                ? 'تم إرسال طلب الموعد بنجاح إلى $clinicName. سيقوم فريق الاستقبال في العيادة بالتواصل معك قريباً عبر الهاتف أو الواتساب لتأكيد الموعد النهائي والتفاصيل.'
-                                : 'Your appointment lead has been sent to $clinicName. The clinic reception will contact you shortly via phone or WhatsApp to coordinate your appointment details.',
+                                ? 'تم إرسال طلبك بنجاح إلى $clinicName. سيقوم فريق الاستقبال في العيادة بالتواصل معك قريباً عبر الهاتف أو الواتساب لمتابعة التفاصيل.'
+                                : 'Your inquiry lead has been sent to $clinicName. The clinic reception will contact you shortly via phone or WhatsApp to assist you.',
                             style: AppTypography.bodyMedium.copyWith(
                               color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
                               height: 1.5,
@@ -185,20 +195,33 @@ class AppointmentSuccessScreen extends StatelessWidget {
                           const Divider(),
                           const SizedBox(height: 8),
                           _SummaryRow(label: loc.tr('clinic_label'), value: clinicName),
-                          _SummaryRow(label: loc.tr('branch_label'), value: branchName),
-                          _SummaryRow(label: loc.tr('service_label'), value: serviceName),
-                          if (practitionerName != null)
+                          if (request.leadType != 'product' && branchName.trim().isNotEmpty)
+                            _SummaryRow(label: loc.tr('branch_label'), value: branchName),
+                          _SummaryRow(
+                            label: request.leadType == 'product'
+                                ? (loc.isArabic ? 'المنتج:' : 'Product:')
+                                : loc.tr('service_label'),
+                            value: serviceName,
+                          ),
+                          if (request.leadType != 'product' && practitionerName != null)
                             _SummaryRow(label: loc.tr('practitioner_label'), value: practitionerName),
-                          _SummaryRow(
-                            label: loc.tr('date_label'),
-                            value: DateFormat('yyyy/MM/dd').format(request.preferredDate),
-                          ),
-                          _SummaryRow(
-                            label: loc.tr('period_label'),
-                            value: timeWindowLabel,
-                          ),
+                          if (request.leadType != 'product') ...[
+                            _SummaryRow(
+                              label: loc.tr('date_label'),
+                              value: DateFormat('yyyy/MM/dd').format(request.preferredDate),
+                            ),
+                            _SummaryRow(
+                              label: loc.tr('period_label'),
+                              value: timeWindowLabel,
+                            ),
+                          ],
                           _SummaryRow(label: loc.tr('patient_label'), value: request.patientFullName),
                           _SummaryRow(label: loc.tr('phone_label'), value: request.patientPhone),
+                          if (request.notes != null && request.notes!.trim().isNotEmpty)
+                            _SummaryRow(
+                              label: loc.isArabic ? 'الملاحظات:' : 'Notes:',
+                              value: request.notes!.trim(),
+                            ),
                         ],
                       ),
                     ),
