@@ -12,6 +12,7 @@ import 'package:aesthetic_way/features/appointment_lead/models/appointment_reque
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/features/clinic_portal/data/models/clinic_dashboard_model.dart';
 
 void main() {
@@ -271,6 +272,36 @@ void main() {
       expect(find.text('العلاجات والخدمات المقدمة'), findsOneWidget);
       expect(find.text('فتح في Google Maps'), findsOneWidget);
       expect(find.text('تسجيل الخروج من لوحة العيادة'), findsOneWidget);
+    });
+
+    testWidgets('ClinicProfileScreen header card renders logo/cover via LuxuryImage and dialog omits phone/whatsapp inputs', (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 2000));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: const ClinicProfileScreen(),
+        ),
+      );
+
+      // Verify LuxuryImage is used in the header for clinic logo
+      expect(find.byType(LuxuryImage), findsWidgets);
+
+      // Tap Edit Clinic Profile button
+      final editBtn = find.byTooltip('تعديل ملف العيادة');
+      expect(editBtn, findsOneWidget);
+      await tester.tap(editBtn);
+      await tester.pumpAndSettle();
+
+      // Verify dialog is open
+      expect(find.text('تعديل ملف العيادة'), findsWidgets);
+
+      // Verify Phone and WhatsApp input fields are removed
+      expect(find.text('رقم الهاتف'), findsNothing);
+      expect(find.text('رقم الواتساب'), findsNothing);
+
+      // Verify Logo and Cover photo pickers are present
+      expect(find.text('شعار العيادة'), findsOneWidget);
+      expect(find.text('صورة الغلاف'), findsOneWidget);
     });
   });
 }

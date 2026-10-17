@@ -1069,9 +1069,13 @@ class ClinicPortalService extends ChangeNotifier {
       nameEn: nameEn,
       descriptionAr: descriptionAr,
       descriptionEn: descriptionEn,
-      coverImageUrl: coverImage ?? _activeClinic.coverImageUrl,
+      coverImageUrl: (_mockMode || (coverImage != null && coverImage.startsWith('http')))
+          ? (coverImage ?? _activeClinic.coverImageUrl)
+          : _activeClinic.coverImageUrl,
       galleryImages: _activeClinic.galleryImages,
-      logoUrl: logo ?? _activeClinic.logoUrl,
+      logoUrl: (_mockMode || (logo != null && logo.startsWith('http')))
+          ? (logo ?? _activeClinic.logoUrl)
+          : _activeClinic.logoUrl,
       rating: _activeClinic.rating,
       reviewCount: _activeClinic.reviewCount,
       subscriptionTier: _activeClinic.subscriptionTier,

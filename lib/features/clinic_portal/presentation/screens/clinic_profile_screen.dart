@@ -1,4 +1,3 @@
-import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -18,6 +17,7 @@ import 'package:aesthetic_way/features/articles/models/article_model.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
 import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'clinic_practitioners_screen.dart';
@@ -1446,8 +1446,6 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     final nameEnCtrl = TextEditingController(text: clinic.nameEn);
     final descArCtrl = TextEditingController(text: clinic.descriptionAr);
     final descEnCtrl = TextEditingController(text: clinic.descriptionEn);
-    final phoneCtrl = TextEditingController(text: clinic.mainPhone);
-    final whatsappCtrl = TextEditingController(text: clinic.whatsapp);
     final addressArCtrl = TextEditingController(text: clinic.addressAr);
     final mapsUrlCtrl = TextEditingController(text: clinic.googleMapsUrl ?? '');
     final isDark = AppColors.isDark(context);
@@ -1581,18 +1579,6 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    LuxuryPhoneInputField(
-                      controller: phoneCtrl,
-                      labelText: loc.isArabic ? 'رقم الهاتف' : 'Phone Number',
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 10),
-                    LuxuryPhoneInputField(
-                      controller: whatsappCtrl,
-                      labelText: loc.isArabic ? 'رقم الواتساب' : 'WhatsApp Number',
-                      isRequired: false,
-                    ),
-                    const SizedBox(height: 10),
                     TextFormField(
                       controller: addressArCtrl,
                       decoration: InputDecoration(
@@ -1655,8 +1641,8 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                   nameEn: nameEnCtrl.text.trim().isNotEmpty ? nameEnCtrl.text.trim() : nameArCtrl.text.trim(),
                                   descriptionAr: descArCtrl.text.trim(),
                                   descriptionEn: descEnCtrl.text.trim(),
-                                  phone: phoneCtrl.text.trim(),
-                                  whatsapp: whatsappCtrl.text.trim(),
+                                  phone: clinic.mainPhone,
+                                  whatsapp: clinic.whatsapp,
                                   addressAr: addressArCtrl.text.trim(),
                                   googleMapsUrl: mapsUrlCtrl.text.trim().isNotEmpty ? mapsUrlCtrl.text.trim() : null,
                                   logo: logoPath,
@@ -1726,64 +1712,76 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
             children: [
               // Clinic Overview Card
               LuxuryCard(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.zero,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            clinic.coverImageUrl,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Container(
-                              width: 60,
-                              height: 60,
-                              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                              child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
-                            ),
-                          ),
+                    if (clinic.coverImageUrl.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                        child: LuxuryImage(
+                          imageUrl: clinic.coverImageUrl,
+                          height: 130,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholderIcon: Icons.photo_library_outlined,
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                                style: AppTypography.cardTitle.copyWith(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              LuxuryImage(
+                                imageUrl: clinic.logoUrl,
+                                width: 60,
+                                height: 60,
+                                borderRadius: BorderRadius.circular(12),
+                                placeholderIcon: Icons.apartment_rounded,
+                                fit: BoxFit.cover,
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                                      style: AppTypography.cardTitle.copyWith(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
+                                      style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    TierBadge(tier: clinic.subscriptionTier),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.accentChampagne),
+                                tooltip: loc.isArabic ? 'تعديل ملف العيادة' : 'Edit Clinic Profile',
+                                onPressed: () => _showEditClinicProfileDialog(context, loc),
                               ),
-                              const SizedBox(height: 6),
-                              TierBadge(tier: clinic.subscriptionTier),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.accentChampagne),
-                          tooltip: loc.isArabic ? 'تعديل ملف العيادة' : 'Edit Clinic Profile',
-                          onPressed: () => _showEditClinicProfileDialog(context, loc),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 20),
-                    Text(
-                      loc.isArabic ? clinic.descriptionAr : clinic.descriptionEn,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.mutedText(context),
-                        fontSize: 12,
-                        height: 1.5,
+                          const Divider(height: 20),
+                          Text(
+                            loc.isArabic ? clinic.descriptionAr : clinic.descriptionEn,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.mutedText(context),
+                              fontSize: 12,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

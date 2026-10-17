@@ -54,7 +54,7 @@ class AdminRepository {
           final f = localFiles[entry.key]!;
           formDataMap[entry.key] = await MultipartFile.fromFile(
             f.path,
-            filename: f.path.split(Platform.pathSeparator).last,
+            filename: f.path.split(RegExp(r'[\\/]')).last,
           );
         } else {
           formDataMap[entry.key] = entry.value;
@@ -64,7 +64,7 @@ class AdminRepository {
         if (!formDataMap.containsKey(entry.key)) {
           formDataMap[entry.key] = await MultipartFile.fromFile(
             entry.value.path,
-            filename: entry.value.path.split(Platform.pathSeparator).last,
+            filename: entry.value.path.split(RegExp(r'[\\/]')).last,
           );
         }
       }
