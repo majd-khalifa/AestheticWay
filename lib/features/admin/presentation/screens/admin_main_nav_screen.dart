@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_clinics_screen.dart';
@@ -10,7 +11,6 @@ import 'package:aesthetic_way/features/admin/presentation/screens/admin_leads_sc
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_offers_screen.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_analytics_screen.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_settings_screen.dart';
-import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 
 /// Super Admin Main Navigation Shell with Floating Luxury Pill Navigation Bar
 /// Visual Tab Order (LTR): [ Dashboard | Clinics | Leads | Offers | Analytics ]
@@ -25,6 +25,7 @@ class AdminMainNavScreen extends StatefulWidget {
 
 class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
   late int _currentIndex;
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -42,6 +43,24 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _handleBackPress(BuildContext context, LocaleService loc) {
+    if (_currentIndex != 0) {
+      _onTabSelected(0);
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+      _lastBackPressTime = now;
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'اضغط مرة أخرى للخروج من التطبيق' : 'Press back again to exit',
+        type: AppSnackBarType.info,
+      );
+      return;
+    }
+    SystemNavigator.pop();
   }
 
   @override
@@ -65,8 +84,14 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
     return ListenableBuilder(
       listenable: Listenable.merge([loc, adminService]),
       builder: (context, _) {
-        return Scaffold(
-          backgroundColor: AppColors.bg(context),
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            _handleBackPress(context, loc);
+          },
+          child: Scaffold(
+            backgroundColor: AppColors.bg(context),
           appBar: AppBar(
             backgroundColor: AppColors.bg(context),
             title: Row(
@@ -89,26 +114,6 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
             ),
             automaticallyImplyLeading: false,
             actions: [
-              ActionChip(
-                avatar: const Icon(Icons.visibility_outlined, size: 14, color: AppColors.accentChampagne),
-                label: Text(
-                  loc.isArabic ? 'معاينة تطبيق المرضى' : 'Preview Patient App',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                  ),
-                ),
-                backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                side: BorderSide(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(page: const MainNavScreen()),
-                  );
-                },
-              ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: AppColors.accentChampagne, size: 20),
                 tooltip: loc.tr('admin_nav_settings'),
@@ -219,9 +224,10 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 }
 

@@ -9,7 +9,6 @@ import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
 import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
-import 'package:aesthetic_way/core/services/media_upload_service.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
@@ -789,17 +788,13 @@ class AdminClinicDetailSheet extends StatelessWidget {
                                 'is_featured': isFeatured,
                               };
 
-                              setModalState(() => isSubmitting = true);
-
                               try {
-                                if (logoPath != null && logoPath!.isNotEmpty && !logoPath!.startsWith('http')) {
-                                  final res = await MediaUploadService().uploadImage(filePath: logoPath!, mediaType: 'clinic_logo');
-                                  if (res['url'] != null) payload['logo'] = res['url'];
+                                if (logoPath != null && logoPath!.isNotEmpty) {
+                                  payload['logo'] = logoPath;
                                 }
 
-                                if (coverPath != null && coverPath!.isNotEmpty && !coverPath!.startsWith('http')) {
-                                  final res = await MediaUploadService().uploadImage(filePath: coverPath!, mediaType: 'clinic_cover');
-                                  if (res['url'] != null) payload['cover_image'] = res['url'];
+                                if (coverPath != null && coverPath!.isNotEmpty) {
+                                  payload['cover_image'] = coverPath;
                                 }
 
                                 await adminService.updateClinic(clinic.id, payload);

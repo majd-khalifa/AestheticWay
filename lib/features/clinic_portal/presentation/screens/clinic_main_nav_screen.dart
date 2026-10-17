@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_dashboard_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_leads_screen.dart';
@@ -22,6 +23,7 @@ class ClinicMainNavScreen extends StatefulWidget {
 class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
   late int _currentIndex;
   final GlobalKey<ClinicProfileScreenState> _profileKey = GlobalKey<ClinicProfileScreenState>();
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -43,6 +45,24 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _profileKey.currentState?.scrollToSection(section);
     });
+  }
+
+  void _handleBackPress(BuildContext context, LocaleService loc) {
+    if (_currentIndex != 0) {
+      _onTabSelected(0);
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+      _lastBackPressTime = now;
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'اضغط مرة أخرى للخروج من التطبيق' : 'Press back again to exit',
+        type: AppSnackBarType.info,
+      );
+      return;
+    }
+    SystemNavigator.pop();
   }
 
   @override
@@ -68,8 +88,14 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
       builder: (context, _) {
         final newLeadsCount = clinicService.newLeadsCount;
 
-        return Scaffold(
-          backgroundColor: AppColors.bg(context),
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            _handleBackPress(context, loc);
+          },
+          child: Scaffold(
+            backgroundColor: AppColors.bg(context),
           body: IndexedStack(
             index: _currentIndex,
             children: screens,
@@ -161,9 +187,10 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 }
 

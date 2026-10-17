@@ -78,20 +78,31 @@ class TreatmentsRepository {
     );
 
     final body = response.data;
-    final rawData = body is Map<String, dynamic>
-        ? (body['data'] ?? body['results'] ?? body)
-        : body;
-    if (rawData is List) {
-      return rawData
-          .whereType<Map<String, dynamic>>()
-          .map((e) => {
-                'id': e['id']?.toString() ?? '',
-                'name_ar': e['name_ar']?.toString() ?? e['name_en']?.toString() ?? '',
-                'name_en': e['name_en']?.toString() ?? e['name_ar']?.toString() ?? '',
-                'slug': e['slug']?.toString() ?? '',
-              })
-          .toList();
+    List<dynamic> items = [];
+    if (body is Map<String, dynamic>) {
+      if (body.containsKey('results') && body['results'] is List) {
+        items = body['results'] as List<dynamic>;
+      } else if (body.containsKey('data')) {
+        final d = body['data'];
+        if (d is List) {
+          items = d;
+        } else if (d is Map && d.containsKey('results') && d['results'] is List) {
+          items = d['results'] as List<dynamic>;
+        }
+      }
+    } else if (body is List) {
+      items = body;
     }
-    return [];
+
+    return items
+        .whereType<Map<String, dynamic>>()
+        .map((e) => {
+              'id': e['id']?.toString() ?? '',
+              'name_ar': e['name_ar']?.toString() ?? e['name_en']?.toString() ?? '',
+              'name_en': e['name_en']?.toString() ?? e['name_ar']?.toString() ?? '',
+              'slug': e['slug']?.toString() ?? '',
+            })
+        .where((e) => e['id']!.isNotEmpty)
+        .toList();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../offers/models/offer_model.dart';
@@ -21,6 +23,56 @@ class AdminRepository {
   AdminRepository._custom(this._api);
 
   final ApiClient _api;
+
+  Future<dynamic> _buildPayload(
+    Map<String, dynamic> data, {
+    required List<String> fileKeys,
+  }) async {
+    final mapCopy = Map<String, dynamic>.from(data);
+    bool hasLocalFiles = false;
+    final Map<String, File> localFiles = {};
+
+    for (final key in fileKeys) {
+      final val = mapCopy[key]?.toString();
+      if (val != null && val.isNotEmpty && !val.startsWith('http')) {
+        final f = File(val);
+        if (f.existsSync()) {
+          hasLocalFiles = true;
+          localFiles[key] = f;
+        } else {
+          mapCopy.remove(key);
+        }
+      } else {
+        mapCopy.remove(key);
+      }
+    }
+
+    if (hasLocalFiles) {
+      final formDataMap = <String, dynamic>{};
+      for (final entry in mapCopy.entries) {
+        if (localFiles.containsKey(entry.key)) {
+          final f = localFiles[entry.key]!;
+          formDataMap[entry.key] = await MultipartFile.fromFile(
+            f.path,
+            filename: f.path.split(Platform.pathSeparator).last,
+          );
+        } else {
+          formDataMap[entry.key] = entry.value;
+        }
+      }
+      for (final entry in localFiles.entries) {
+        if (!formDataMap.containsKey(entry.key)) {
+          formDataMap[entry.key] = await MultipartFile.fromFile(
+            entry.value.path,
+            filename: entry.value.path.split(Platform.pathSeparator).last,
+          );
+        }
+      }
+      return FormData.fromMap(formDataMap);
+    } else {
+      return mapCopy;
+    }
+  }
 
   // -------------------------------------------------------------
   // 1. DASHBOARD
@@ -93,9 +145,13 @@ class AdminRepository {
 
   /// Atomically provision a new Clinic and its initial Administrator
   Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {
+    final payload = await _buildPayload(
+      data,
+      fileKeys: ['logo', 'cover_image', 'video_ad_file'],
+    );
     final response = await _api.post(
       ApiConfig.adminClinics,
-      data: data,
+      data: payload,
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
@@ -123,9 +179,13 @@ class AdminRepository {
 
   /// Update clinic details and settings (`PATCH /api/v1/admin/clinics/{id}/`)
   Future<AdminClinicModel> updateClinic(String id, Map<String, dynamic> data) async {
+    final payload = await _buildPayload(
+      data,
+      fileKeys: ['logo', 'cover_image', 'video_ad_file'],
+    );
     final response = await _api.patch(
       ApiConfig.adminClinicDetail(id),
-      data: data,
+      data: payload,
     );
     return AdminClinicModel.fromJson(response.data as Map<String, dynamic>);
   }

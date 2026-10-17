@@ -11,7 +11,6 @@ import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_practitioners_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_treatments_screen.dart';
 import 'package:aesthetic_way/features/clinic_portal/presentation/widgets/clinic_setup_checklist_card.dart';
-import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 
 /// Clinic Tab 1: Luxury Clinic Dashboard Screen with Key Metrics, Shortcuts & Recent Leads
 class ClinicDashboardScreen extends StatefulWidget {
@@ -76,31 +75,6 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
               ],
             ),
             automaticallyImplyLeading: false,
-            actions: [
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 12),
-                child: ActionChip(
-                  avatar: const Icon(Icons.visibility_outlined, size: 14, color: AppColors.accentChampagne),
-                  label: Text(
-                    loc.isArabic ? 'معاينة تطبيق المرضى' : 'Preview Patient App',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                  side: BorderSide(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      LuxuryPageRoute(page: const MainNavScreen()),
-                    );
-                  },
-                ),
-              ),
-            ],
           ),
           body: clinicService.isLoading && clinicService.clinicLeads.isEmpty && clinicService.dashboardData == null
               ? const Center(

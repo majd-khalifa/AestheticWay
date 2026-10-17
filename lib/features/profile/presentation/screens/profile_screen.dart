@@ -17,8 +17,6 @@ import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 import 'package:aesthetic_way/features/auth/data/models/auth_models.dart';
 import 'package:aesthetic_way/features/referral/presentation/screens/referral_screen.dart';
 import 'package:aesthetic_way/core/services/support_service.dart';
-import 'package:aesthetic_way/features/clinic_portal/presentation/screens/clinic_main_nav_screen.dart';
-import 'package:aesthetic_way/features/admin/presentation/screens/admin_main_nav_screen.dart';
 
 /// Screen 25: Patient Profile & Settings — Live API (/api/v1/auth/me/)
 class ProfileScreen extends StatefulWidget {
@@ -840,130 +838,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (_isEditing) ...[
                             _buildEditProfileSection(context, loc, isDark),
                             const SizedBox(height: 16),
-                          ],
-
-                          // Role-Based Portals (Clinic Partner or Super Admin)
-                          if (_user?.role == 'clinic_admin' ||
-                              _user?.role == 'clinic_staff' ||
-                              auth.userRole == 'clinic_admin' ||
-                              auth.userRole == 'clinic_staff') ...[
-                            LuxuryCard(
-                              padding: const EdgeInsets.all(14),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    LuxuryPageRoute(page: const ClinicMainNavScreen()),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.accentChampagne.withValues(alpha: 0.15),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                                      ),
-                                      child: const Icon(
-                                        Icons.local_hospital_outlined,
-                                        color: AppColors.accentChampagne,
-                                        size: 22,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            loc.isArabic ? 'بوابة إدارة العيادة' : 'Clinic Partner Portal',
-                                            style: AppTypography.cardTitle.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 14,
-                                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            loc.isArabic
-                                                ? 'إدارة الحجوزات، الأطباء، العروض والمقالات'
-                                                : 'Manage leads, doctors, offers and catalog',
-                                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 14,
-                                      color: AppColors.accentChampagne,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                          ] else if (_user?.role == 'super_admin' || auth.userRole == 'super_admin') ...[
-                            LuxuryCard(
-                              padding: const EdgeInsets.all(14),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    LuxuryPageRoute(page: const AdminMainNavScreen()),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.accentChampagne.withValues(alpha: 0.15),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                                      ),
-                                      child: const Icon(
-                                        Icons.admin_panel_settings_outlined,
-                                        color: AppColors.accentChampagne,
-                                        size: 22,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            loc.isArabic ? 'بوابة الإدارة العامة للمنصة' : 'Super Admin Portal',
-                                            style: AppTypography.cardTitle.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 14,
-                                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            loc.isArabic
-                                                ? 'التحكم بالعيادات، الإعلانات، الاشتراكات والرقابة'
-                                                : 'Manage clinics, ads, subscriptions & platform',
-                                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 14,
-                                      color: AppColors.accentChampagne,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
                           ],
 
                           // Menu Items

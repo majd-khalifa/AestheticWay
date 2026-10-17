@@ -54,49 +54,10 @@ class ClinicPortalService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  static const List<CategoryModel> defaultCategories = [
-    CategoryModel(
-      id: 'cat-injectables',
-      nameEn: 'Injectables & Fillers',
-      nameAr: 'الحقن والفيلر',
-      slug: 'injectables',
-      displayOrder: 1,
-    ),
-    CategoryModel(
-      id: 'cat-skincare',
-      nameEn: 'Skin Care & Facials',
-      nameAr: 'العناية بالبشرة',
-      slug: 'skincare',
-      displayOrder: 2,
-    ),
-    CategoryModel(
-      id: 'cat-laser',
-      nameEn: 'Laser & Hair Removal',
-      nameAr: 'الليزر وإزالة الشعر',
-      slug: 'laser',
-      displayOrder: 3,
-    ),
-    CategoryModel(
-      id: 'cat-plastic-surgery',
-      nameEn: 'Plastic Surgery',
-      nameAr: 'الجراحة التجميلية',
-      slug: 'plastic-surgery',
-      displayOrder: 4,
-    ),
-    CategoryModel(
-      id: 'cat-body-contouring',
-      nameEn: 'Body Contouring',
-      nameAr: 'نحت وقوام الجسم',
-      slug: 'body-contouring',
-      displayOrder: 5,
-    ),
-  ];
-
   List<OfferModel> get clinicOffers => List.unmodifiable(_clinicOffers);
   List<PractitionerModel> get clinicPractitioners => List.unmodifiable(_clinicPractitioners);
   List<TreatmentModel> get clinicTreatments => List.unmodifiable(_clinicTreatments);
-  List<CategoryModel> get categories =>
-      _categories.isNotEmpty ? List.unmodifiable(_categories) : defaultCategories;
+  List<CategoryModel> get categories => List.unmodifiable(_categories);
   List<ProductModel> get clinicProducts => List.unmodifiable(_clinicProducts);
   List<ArticleModel> get clinicArticles => List.unmodifiable(_clinicArticles);
   List<ClinicBranch> get clinicBranches => List.unmodifiable(_clinicBranches);
@@ -112,7 +73,7 @@ class ClinicPortalService extends ChangeNotifier {
         return _categories;
       }
     } catch (_) {}
-    return categories;
+    return _categories;
   }
 
   void _initializeDefaultActiveClinic() {
@@ -301,6 +262,10 @@ class ClinicPortalService extends ChangeNotifier {
 
       try {
         await loadSetupChecklist();
+      } catch (_) {}
+
+      try {
+        await getOrFetchCategories();
       } catch (_) {}
 
       _hasLoadedFromApi = true;
@@ -1151,7 +1116,15 @@ class ClinicPortalService extends ChangeNotifier {
     if (coverImage != null && coverImage.isNotEmpty) payload['cover_image'] = coverImage;
 
     final updated = await _catalogRepository.updateClinicProfile(payload);
-    _activeClinic = updated;
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    String addCacheBuster(String url) {
+      if (url.isEmpty || !url.startsWith('http')) return url;
+      return url.contains('?') ? '$url&v=$ts' : '$url?v=$ts';
+    }
+    _activeClinic = updated.copyWith(
+      logoUrl: addCacheBuster(updated.logoUrl),
+      coverImageUrl: addCacheBuster(updated.coverImageUrl),
+    );
     _calculateLocalChecklist();
     notifyListeners();
   }

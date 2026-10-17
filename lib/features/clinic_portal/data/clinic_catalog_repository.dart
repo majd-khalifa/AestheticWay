@@ -2,8 +2,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
-import '../../../core/network/api_exception.dart';
-import '../../../core/services/media_upload_service.dart';
 import '../../articles/models/article_model.dart';
 import '../../clinics/models/clinic_model.dart';
 import '../../offers/models/offer_model.dart';
@@ -16,52 +14,66 @@ import 'models/clinic_setup_checklist_model.dart';
 /// Repository for Clinic Partner Catalog Management (Practitioners, Treatments, Offers, Products, Articles, Categories)
 class ClinicCatalogRepository {
   static final ClinicCatalogRepository _instance = ClinicCatalogRepository._internal();
-  factory ClinicCatalogRepository({ApiClient? apiClient, MediaUploadService? mediaUploadService}) {
-    if (apiClient != null || mediaUploadService != null) {
-      return ClinicCatalogRepository._custom(
-        apiClient ?? ApiClient(),
-        mediaUploadService ?? MediaUploadService(),
-      );
+  factory ClinicCatalogRepository({ApiClient? apiClient}) {
+    if (apiClient != null) {
+      return ClinicCatalogRepository._custom(apiClient);
     }
     return _instance;
   }
-  ClinicCatalogRepository._internal()
-      : _api = ApiClient(),
-        _mediaUpload = MediaUploadService();
-  ClinicCatalogRepository._custom(this._api, this._mediaUpload);
+  ClinicCatalogRepository._internal() : _api = ApiClient();
+  ClinicCatalogRepository._custom(this._api);
 
   final ApiClient _api;
-  final MediaUploadService _mediaUpload;
 
-  Future<Map<String, dynamic>> _resolveMediaPayload(
+  Future<dynamic> _buildPayload(
     Map<String, dynamic> data, {
-    required String fileKey,
-    required String mediaType,
+    required List<String> fileKeys,
   }) async {
-    final payload = Map<String, dynamic>.from(data);
-    final fileVal = payload[fileKey]?.toString();
-    if (fileVal != null && fileVal.isNotEmpty && !fileVal.startsWith('http')) {
-      final file = File(fileVal);
-      if (file.existsSync()) {
-        try {
-          final res = await _mediaUpload.uploadImage(
-            filePath: fileVal,
-            mediaType: mediaType,
-          );
-          if (res['id'] != null) {
-            payload['media_asset'] = res['id'];
-          }
-          final uploadedUrl = res['url'] ?? res['file_url'];
-          if (uploadedUrl != null) {
-            payload[fileKey] = uploadedUrl.toString();
-          }
-        } catch (e) {
-          if (e is ApiException) rethrow;
-          throw ApiException(message: 'فشل في رفع الصورة: ${e.toString()}');
+    final mapCopy = Map<String, dynamic>.from(data);
+    bool hasLocalFiles = false;
+    final Map<String, File> localFiles = {};
+
+    for (final key in fileKeys) {
+      final val = mapCopy[key]?.toString();
+      if (val != null && val.isNotEmpty && !val.startsWith('http')) {
+        final f = File(val);
+        if (f.existsSync()) {
+          hasLocalFiles = true;
+          localFiles[key] = f;
+        } else {
+          mapCopy.remove(key);
         }
+      } else {
+        // null, empty, or existing remote URL -> omit so Django keeps existing image
+        mapCopy.remove(key);
       }
     }
-    return payload;
+
+    if (hasLocalFiles) {
+      final formDataMap = <String, dynamic>{};
+      for (final entry in mapCopy.entries) {
+        if (localFiles.containsKey(entry.key)) {
+          final f = localFiles[entry.key]!;
+          formDataMap[entry.key] = await MultipartFile.fromFile(
+            f.path,
+            filename: f.path.split(Platform.pathSeparator).last,
+          );
+        } else {
+          formDataMap[entry.key] = entry.value;
+        }
+      }
+      for (final entry in localFiles.entries) {
+        if (!formDataMap.containsKey(entry.key)) {
+          formDataMap[entry.key] = await MultipartFile.fromFile(
+            entry.value.path,
+            filename: entry.value.path.split(Platform.pathSeparator).last,
+          );
+        }
+      }
+      return FormData.fromMap(formDataMap);
+    } else {
+      return mapCopy;
+    }
   }
 
 
@@ -95,10 +107,9 @@ class ClinicCatalogRepository {
   }
 
   Future<PractitionerModel> createPractitioner(Map<String, dynamic> data) async {
-    final payload = await _resolveMediaPayload(
+    final payload = await _buildPayload(
       data,
-      fileKey: 'avatar',
-      mediaType: 'practitioner_avatar',
+      fileKeys: ['avatar'],
     );
     final response = await _api.post(
       ApiConfig.clinicPractitioners,
@@ -108,10 +119,9 @@ class ClinicCatalogRepository {
   }
 
   Future<PractitionerModel> updatePractitioner(String id, Map<String, dynamic> data) async {
-    final payload = await _resolveMediaPayload(
+    final payload = await _buildPayload(
       data,
-      fileKey: 'avatar',
-      mediaType: 'practitioner_avatar',
+      fileKeys: ['avatar'],
     );
     final response = await _api.patch(
       ApiConfig.clinicPractitionerDetail(id),
@@ -233,10 +243,9 @@ class ClinicCatalogRepository {
   }
 
   Future<OfferModel> createOffer(Map<String, dynamic> data) async {
-    final payload = await _resolveMediaPayload(
+    final payload = await _buildPayload(
       data,
-      fileKey: 'image',
-      mediaType: 'offer_image',
+      fileKeys: ['image'],
     );
     final response = await _api.post(
       ApiConfig.clinicOffers,
@@ -246,10 +255,9 @@ class ClinicCatalogRepository {
   }
 
   Future<OfferModel> updateOffer(String id, Map<String, dynamic> data) async {
-    final payload = await _resolveMediaPayload(
+    final payload = await _buildPayload(
       data,
-      fileKey: 'image',
-      mediaType: 'offer_image',
+      fileKeys: ['image'],
     );
     final response = await _api.patch(
       ApiConfig.clinicOfferDetail(id),
@@ -303,37 +311,35 @@ class ClinicCatalogRepository {
   }
 
   Future<ProductModel> createProduct(Map<String, dynamic> data) async {
-    final payload = await _resolveMediaPayload(
-      data,
-      fileKey: 'image',
-      mediaType: 'product_image',
-    );
-    final sanitized = Map<String, dynamic>.from(payload);
+    final sanitized = Map<String, dynamic>.from(data);
     if (sanitized.containsKey('price') &&
         (sanitized['price'] == null || sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
+    final payload = await _buildPayload(
+      sanitized,
+      fileKeys: ['image'],
+    );
     final response = await _api.post(
       ApiConfig.clinicProducts,
-      data: sanitized,
+      data: payload,
     );
     return ProductModel.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<ProductModel> updateProduct(String id, Map<String, dynamic> data) async {
-    final payload = await _resolveMediaPayload(
-      data,
-      fileKey: 'image',
-      mediaType: 'product_image',
-    );
-    final sanitized = Map<String, dynamic>.from(payload);
+    final sanitized = Map<String, dynamic>.from(data);
     if (sanitized.containsKey('price') &&
         (sanitized['price'] == null || sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
+    final payload = await _buildPayload(
+      sanitized,
+      fileKeys: ['image'],
+    );
     final response = await _api.patch(
       ApiConfig.clinicProductDetail(id),
-      data: sanitized,
+      data: payload,
     );
     return ProductModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -376,14 +382,10 @@ class ClinicCatalogRepository {
     if (sanitized['cover_image'] == null && sanitized['image'] != null) {
       sanitized['cover_image'] = sanitized['image'];
     }
-    final payload = await _resolveMediaPayload(
+    final payload = await _buildPayload(
       sanitized,
-      fileKey: 'cover_image',
-      mediaType: 'article_cover',
+      fileKeys: ['cover_image', 'image'],
     );
-    if (payload['cover_image'] != null && payload['image'] == null) {
-      payload['image'] = payload['cover_image'];
-    }
     final response = await _api.post(
       ApiConfig.clinicArticles,
       data: payload,
@@ -396,14 +398,10 @@ class ClinicCatalogRepository {
     if (sanitized['cover_image'] == null && sanitized['image'] != null) {
       sanitized['cover_image'] = sanitized['image'];
     }
-    final payload = await _resolveMediaPayload(
+    final payload = await _buildPayload(
       sanitized,
-      fileKey: 'cover_image',
-      mediaType: 'article_cover',
+      fileKeys: ['cover_image', 'image'],
     );
-    if (payload['cover_image'] != null && payload['image'] == null) {
-      payload['image'] = payload['cover_image'];
-    }
     final response = await _api.patch(
       ApiConfig.clinicArticleDetail(id),
       data: payload,
@@ -424,8 +422,17 @@ class ClinicCatalogRepository {
 
     final rawData = response.data;
     List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
+    if (rawData is Map<String, dynamic>) {
+      if (rawData.containsKey('results') && rawData['results'] is List) {
+        items = rawData['results'] as List<dynamic>;
+      } else if (rawData.containsKey('data')) {
+        final d = rawData['data'];
+        if (d is List) {
+          items = d;
+        } else if (d is Map && d.containsKey('results') && d['results'] is List) {
+          items = d['results'] as List<dynamic>;
+        }
+      }
     } else if (rawData is List) {
       items = rawData;
     }
@@ -448,47 +455,10 @@ class ClinicCatalogRepository {
   }
 
   Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
-    dynamic requestData;
-    bool hasLocalFiles = false;
-    final mapCopy = Map<String, dynamic>.from(data);
-
-    // If logo or cover_image is a remote URL or unchanged, omit it from the payload
-    // so neither multipart nor JSON sends string URLs to ImageField
-    for (final key in ['logo', 'cover_image']) {
-      final val = mapCopy[key]?.toString();
-      if (val != null && val.isNotEmpty && !val.startsWith('http')) {
-        final f = File(val);
-        if (f.existsSync()) {
-          hasLocalFiles = true;
-        } else {
-          mapCopy.remove(key);
-        }
-      } else {
-        mapCopy.remove(key);
-      }
-    }
-
-    if (hasLocalFiles) {
-      final formDataMap = <String, dynamic>{};
-      for (final entry in mapCopy.entries) {
-        if ((entry.key == 'logo' || entry.key == 'cover_image') &&
-            entry.value != null &&
-            !entry.value.toString().startsWith('http')) {
-          final f = File(entry.value.toString());
-          if (f.existsSync()) {
-            formDataMap[entry.key] = await MultipartFile.fromFile(
-              f.path,
-              filename: f.path.split(Platform.pathSeparator).last,
-            );
-            continue;
-          }
-        }
-        formDataMap[entry.key] = entry.value;
-      }
-      requestData = FormData.fromMap(formDataMap);
-    } else {
-      requestData = mapCopy;
-    }
+    final requestData = await _buildPayload(
+      data,
+      fileKeys: ['logo', 'cover_image', 'video_ad_file'],
+    );
 
     final response = await _api.patch(
       ApiConfig.clinicProfile,

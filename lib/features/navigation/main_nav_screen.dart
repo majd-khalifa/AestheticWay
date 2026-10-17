@@ -4,6 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/features/home/presentation/screens/home_screen.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinics_list_screen.dart';
 import 'package:aesthetic_way/features/products/presentation/screens/products_screen.dart';
@@ -24,6 +25,7 @@ class MainNavScreen extends StatefulWidget {
 
 class _MainNavScreenState extends State<MainNavScreen> {
   late int _currentIndex;
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -38,6 +40,24 @@ class _MainNavScreenState extends State<MainNavScreen> {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _handleBackPress(BuildContext context, LocaleService loc) {
+    if (_currentIndex != 0) {
+      setState(() => _currentIndex = 0);
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+      _lastBackPressTime = now;
+      showAppSnackBar(
+        context,
+        loc.isArabic ? 'اضغط مرة أخرى للخروج من التطبيق' : 'Press back again to exit',
+        type: AppSnackBarType.info,
+      );
+      return;
+    }
+    SystemNavigator.pop();
   }
 
   @override
@@ -74,8 +94,14 @@ class _MainNavScreenState extends State<MainNavScreen> {
       builder: (context, _) {
         return Directionality(
           textDirection: localeService.textDirection,
-          child: Scaffold(
-            backgroundColor: AppColors.bg(context),
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              _handleBackPress(context, localeService);
+            },
+            child: Scaffold(
+              backgroundColor: AppColors.bg(context),
             extendBody: true,
             body: IndexedStack(
               index: _currentIndex,
@@ -176,9 +202,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 }
 

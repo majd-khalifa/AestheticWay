@@ -425,6 +425,9 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     final descEnController = TextEditingController();
     final descArController = TextEditingController();
     final clinicService = ClinicPortalService();
+    if (clinicService.categories.isEmpty) {
+      clinicService.getOrFetchCategories();
+    }
     final categories = clinicService.categories;
     String? chosenCategoryId = categories.isNotEmpty ? categories.first.id : null;
     final isDark = AppColors.isDark(context);
@@ -519,38 +522,68 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                     const SizedBox(height: 14),
 
                     // Category Selector Dropdown (Live API categories)
-                    DropdownButtonFormField<String>(
-                      initialValue: chosenCategoryId,
-                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
-                        filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                        prefixIcon: const Icon(Icons.category_outlined, color: AppColors.accentChampagne, size: 18),
-                        enabledBorder: OutlineInputBorder(
+                    if (categories.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          border: Border.all(color: AppColors.border(ctx), width: 0.8),
                         ),
-                      ),
-                      items: categories.map((cat) {
-                        return DropdownMenuItem(
-                          value: cat.id,
-                          child: Text(
-                            loc.isArabic ? cat.nameAr : cat.nameEn,
-                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary),
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentChampagne),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              loc.isArabic
+                                  ? 'جارٍ مزامنة التصنيفات الطبية...'
+                                  : 'Syncing medical categories...',
+                              style: TextStyle(
+                                color: isDark ? AppColors.silverMuted : AppColors.lightTextSecondary,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      DropdownButtonFormField<String>(
+                        initialValue: categories.any((c) => c.id == chosenCategoryId) ? chosenCategoryId : null,
+                        dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                        decoration: InputDecoration(
+                          labelText: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
+                          hintText: loc.isArabic ? 'اختر التصنيف الطبي' : 'Select Category',
+                          filled: true,
+                          fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          prefixIcon: const Icon(Icons.category_outlined, color: AppColors.accentChampagne, size: 18),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (v) {
-                        if (v != null) {
-                          setModalState(() {
-                            chosenCategoryId = v;
-                            modalErrorMessage = null;
-                          });
-                        }
-                      },
-                      validator: (v) => v == null ? loc.tr('clinic_validation_required') : null,
-                    ),
+                        ),
+                        items: categories.map((cat) {
+                          return DropdownMenuItem(
+                            value: cat.id,
+                            child: Text(
+                              loc.isArabic ? cat.nameAr : cat.nameEn,
+                              style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (v) {
+                          if (v != null) {
+                            setModalState(() {
+                              chosenCategoryId = v;
+                              modalErrorMessage = null;
+                            });
+                          }
+                        },
+                        validator: (v) => v == null ? loc.tr('clinic_validation_required') : null,
+                      ),
                     const SizedBox(height: 10),
 
                     // Service Name EN & AR
@@ -655,8 +688,13 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           ? null
                           : () async {
                               if (!formKey.currentState!.validate()) return;
-                              if (chosenCategoryId == null && categories.isNotEmpty) {
-                                chosenCategoryId = categories.first.id;
+                              if (chosenCategoryId == null) {
+                                setModalState(() {
+                                  modalErrorMessage = loc.isArabic
+                                      ? 'يرجى اختيار التصنيف الطبي'
+                                      : 'Please select a medical category';
+                                });
+                                return;
                               }
 
                               final data = <String, dynamic>{
@@ -1357,7 +1395,6 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                               };
                               if (selectedArticleImagePath != null && selectedArticleImagePath!.isNotEmpty) {
                                 payload['cover_image'] = selectedArticleImagePath;
-                                payload['image'] = selectedArticleImagePath;
                               }
 
                               try {
