@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
+
 /// Subscription tier for B2B clinic listing priority
 enum SubscriptionTier {
   vipPlatinum, // 6-12 Months: Top Carousel slots 1 & 2, VIP badge
@@ -178,11 +180,11 @@ class ClinicModel {
         ? branchesRaw.map((b) => ClinicBranch.fromJson(b as Map<String, dynamic>)).toList()
         : <ClinicBranch>[];
 
-    final cover = json['cover_image']?.toString() ?? '';
-    final logo = json['logo']?.toString() ?? '';
+    final cover = ApiConfig.resolveUrl(json['cover_image']?.toString() ?? json['cover_image_url']?.toString());
+    final logo = ApiConfig.resolveUrl(json['logo']?.toString() ?? json['logo_url']?.toString());
     final rawGallery = json['gallery_images'] as List<dynamic>?;
     final gallery = rawGallery != null && rawGallery.isNotEmpty
-        ? rawGallery.map((e) => e.toString()).toList()
+        ? rawGallery.map((e) => ApiConfig.resolveUrl(e.toString())).where((e) => e.isNotEmpty).toList()
         : (cover.isNotEmpty ? [cover] : <String>[]);
 
     final practitionersRaw = json['practitioners'] as List<dynamic>?;
@@ -208,7 +210,10 @@ class ClinicModel {
             json['ad_video_url'])
         ?.toString()
         .trim();
-    final hasVideoUrl = rawVideoUrl != null && rawVideoUrl.isNotEmpty;
+    final resolvedVideoUrl = rawVideoUrl != null && rawVideoUrl.isNotEmpty
+        ? ApiConfig.resolveUrl(rawVideoUrl)
+        : null;
+    final hasVideoUrl = resolvedVideoUrl != null && resolvedVideoUrl.isNotEmpty;
     final rawMediaType = json['media_type']?.toString().trim().toLowerCase();
     final resolvedMediaType =
         (rawMediaType == 'video' || hasVideoUrl) ? 'video' : 'image';
@@ -254,7 +259,7 @@ class ClinicModel {
       treatmentIds: treatmentIds,
       slug: json['slug']?.toString(),
       googleMapsUrl: json['google_maps_url']?.toString(),
-      videoUrl: hasVideoUrl ? rawVideoUrl : null,
+      videoUrl: hasVideoUrl ? resolvedVideoUrl : null,
       mediaType: resolvedMediaType,
       setupStatus: json['setup_status']?.toString() ?? 'approved',
       rawPractitioners: practitionersRaw,

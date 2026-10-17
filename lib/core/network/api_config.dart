@@ -16,6 +16,23 @@ class ApiConfig {
     _customBaseUrl = null;
   }
 
+  /// Resolves relative URLs (e.g. /media/...) against [siteOrigin].
+  static String resolveUrl(String? url) {
+    if (url == null) return '';
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return '';
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/')) {
+      return '$siteOrigin$trimmed';
+    }
+    if (trimmed.startsWith('media/')) {
+      return '$siteOrigin/$trimmed';
+    }
+    return trimmed;
+  }
+
   /// Production-first Base URL:
   /// 1. Runtime override via [setBaseUrl]
   /// 2. Compile-time --dart-define=API_BASE_URL=...

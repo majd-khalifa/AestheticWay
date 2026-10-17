@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
+
 /// Practitioner types strictly defined in AESTHETIC WAY
 enum PractitionerType {
   doctor, // طبيب / Doctor
@@ -184,7 +186,8 @@ class PractitionerModel {
         ? clinicNameAr
         : (json['clinic_name_ar']?.toString() ?? '');
     String? resolvedClinicNameEn = clinicNameEn ?? json['clinic_name_en']?.toString();
-    String? resolvedClinicLogo = json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString();
+    String? resolvedClinicLogo = ApiConfig.resolveUrl(json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
+    if (resolvedClinicLogo.isEmpty) resolvedClinicLogo = null;
 
     if (json['clinic'] is Map<String, dynamic>) {
       final clinicMap = json['clinic'] as Map<String, dynamic>;
@@ -197,7 +200,10 @@ class PractitionerModel {
       }
       resolvedClinicNameEn ??=
           clinicMap['name_en']?.toString() ?? clinicMap['name_ar']?.toString();
-      resolvedClinicLogo ??= clinicMap['logo']?.toString() ?? clinicMap['logo_url']?.toString();
+      final clinicLogoFromMap = ApiConfig.resolveUrl(clinicMap['logo']?.toString() ?? clinicMap['logo_url']?.toString());
+      if (clinicLogoFromMap.isNotEmpty) {
+        resolvedClinicLogo = clinicLogoFromMap;
+      }
     } else if (json['clinic'] is String && resolvedClinicId.isEmpty) {
       resolvedClinicId = json['clinic'] as String;
     }
@@ -234,7 +240,7 @@ class PractitionerModel {
       classificationEn: json['title_en'] ?? json['speciality_en'] ?? 'Certified Practitioner',
       licenseAuthority: json['license_authority']?.toString() ?? '',
       licenseNumber: json['license_number']?.toString() ?? '',
-      avatarUrl: json['avatar_url']?.toString() ?? json['photo_url']?.toString() ?? json['avatar']?.toString() ?? '',
+      avatarUrl: ApiConfig.resolveUrl(json['avatar_url']?.toString() ?? json['photo_url']?.toString() ?? json['avatar']?.toString() ?? ''),
       yearsOfExperience: (json['years_of_experience'] ?? json['experience_years']) is int
           ? (json['years_of_experience'] ?? json['experience_years']) as int
           : 5,

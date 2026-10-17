@@ -42,7 +42,10 @@ class AuthInterceptor extends QueuedInterceptor {
 
     // 2. Set Standard Headers
     options.headers['Accept'] = 'application/json';
-    if (options.data != null && options.headers['Content-Type'] == null) {
+    if (options.data is FormData) {
+      options.headers.remove('Content-Type');
+      options.contentType = null;
+    } else if (options.data != null && options.headers['Content-Type'] == null) {
       options.headers['Content-Type'] = 'application/json';
     }
 

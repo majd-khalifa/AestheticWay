@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
 /// Branch representation inside Admin Clinic Detail
@@ -170,9 +171,13 @@ class AdminClinicModel {
       phone: json['phone']?.toString() ?? '',
       whatsapp: json['whatsapp']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
-      logo: json['logo']?.toString() ?? '',
-      coverImage: json['cover_image']?.toString() ?? json['cover_image_url']?.toString() ?? '',
-      videoAdFile: json['video_ad_file']?.toString() ?? json['video_url']?.toString(),
+      logo: ApiConfig.resolveUrl(json['logo']?.toString() ?? json['logo_url']?.toString()),
+      coverImage: ApiConfig.resolveUrl(json['cover_image']?.toString() ?? json['cover_image_url']?.toString()),
+      videoAdFile: () {
+        final raw = json['video_ad_file']?.toString() ?? json['video_url']?.toString();
+        final res = ApiConfig.resolveUrl(raw);
+        return res.isNotEmpty ? res : null;
+      }(),
       branchesCount: (json['branches_count'] as num?)?.toInt() ?? parsedBranches.length,
       practitionersCount: (json['practitioners_count'] as num?)?.toInt() ?? 0,
       treatmentsCount: (json['treatments_count'] as num?)?.toInt() ?? 0,

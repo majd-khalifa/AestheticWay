@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
+
 /// Medical Aesthetic Awareness & Knowledge Guide Article
 /// Published through the clinic by a licensed practitioner/doctor.
 class ArticleModel {
@@ -141,10 +143,12 @@ class ArticleModel {
       slug: json['slug'] as String? ?? '',
       titleAr: titleArVal,
       titleEn: titleEnVal,
-      coverImageUrl: json['cover_image_url'] as String? ??
-          json['cover_image'] as String? ??
-          json['image_url'] as String? ??
-          '',
+      coverImageUrl: ApiConfig.resolveUrl(
+        json['cover_image_url'] as String? ??
+            json['cover_image'] as String? ??
+            json['image_url'] as String? ??
+            '',
+      ),
       summaryAr: contentArVal,
       summaryEn: contentEnVal,
       contentAr: contentArVal,
@@ -158,16 +162,20 @@ class ArticleModel {
           authorMap?['title_en'] as String? ??
           '',
       authorDoctorSpecialtyEn: authorMap?['title_en'] as String? ?? '',
-      authorDoctorAvatar: authorMap?['avatar_url'] as String? ?? '',
+      authorDoctorAvatar: ApiConfig.resolveUrl(authorMap?['avatar_url'] as String? ?? ''),
       clinicId: clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
       clinicNameAr: clinic?['name_ar'] as String? ??
           clinic?['name_en'] as String? ??
           '',
       clinicNameEn: clinic?['name_en'] as String?,
-      clinicLogoUrl: clinic?['logo'] as String? ??
-          clinic?['logo_url'] as String? ??
-          json['clinic_logo'] as String? ??
-          json['clinic_logo_url'] as String?,
+      clinicLogoUrl: () {
+        final raw = clinic?['logo'] as String? ??
+            clinic?['logo_url'] as String? ??
+            json['clinic_logo'] as String? ??
+            json['clinic_logo_url'] as String?;
+        final res = ApiConfig.resolveUrl(raw);
+        return res.isNotEmpty ? res : null;
+      }(),
       categoryAr: json['category_ar'] as String? ?? '',
       categoryEn: json['category_en'] as String? ?? '',
       publishedAt: json['published_at'] != null

@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
+
 /// Product Entity for Aesthetic & Medical Skincare, Cosmeceuticals and Beauty Devices
 /// Note: AESTHETIC WAY does not process in-app payments or carts; products are for discovery & lead inquiry.
 class ProductModel {
@@ -110,10 +112,11 @@ class ProductModel {
         ? json['description_ar'] as String
         : descEnVal;
 
-    final clinicLogo = clinic?['logo'] as String? ??
+    final clinicLogoRaw = clinic?['logo'] as String? ??
         clinic?['logo_url'] as String? ??
         json['clinic_logo'] as String? ??
         json['clinic_logo_url'] as String?;
+    final clinicLogo = ApiConfig.resolveUrl(clinicLogoRaw);
 
     return ProductModel(
       id: json['id']?.toString() ?? '',
@@ -122,14 +125,14 @@ class ProductModel {
       clinicId: clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
       clinicNameAr: clinic?['name_ar'] as String? ?? clinic?['name_en'] as String? ?? '',
       clinicNameEn: clinic?['name_en'] as String?,
-      clinicLogoUrl: clinicLogo,
+      clinicLogoUrl: clinicLogo.isNotEmpty ? clinicLogo : null,
       descriptionAr: descArVal,
       descriptionEn: descEnVal,
       price: (json['price'] != null)
           ? (double.tryParse(json['price'].toString()) ?? 0.0)
           : 0.0,
       originalPrice: null,
-      imageUrl: json['image_url'] as String? ?? json['image'] as String? ?? '',
+      imageUrl: ApiConfig.resolveUrl(json['image_url'] as String? ?? json['image'] as String? ?? ''),
       categoryAr: json['category_ar'] as String? ?? '',
       categoryEn: json['category_en'] as String? ?? '',
       isAvailable: isActive,

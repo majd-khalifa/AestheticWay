@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
+import '../../../core/services/media_upload_service.dart';
 import '../../articles/models/article_model.dart';
 import '../../clinics/models/clinic_model.dart';
 import '../../offers/models/offer_model.dart';
@@ -14,16 +16,64 @@ import 'models/clinic_setup_checklist_model.dart';
 /// Repository for Clinic Partner Catalog Management (Practitioners, Treatments, Offers, Products, Articles, Categories)
 class ClinicCatalogRepository {
   static final ClinicCatalogRepository _instance = ClinicCatalogRepository._internal();
-  factory ClinicCatalogRepository({ApiClient? apiClient}) {
-    if (apiClient != null) {
-      return ClinicCatalogRepository._custom(apiClient);
+  factory ClinicCatalogRepository({ApiClient? apiClient, MediaUploadService? mediaUploadService}) {
+    if (apiClient != null || mediaUploadService != null) {
+      final client = apiClient ?? ApiClient();
+      return ClinicCatalogRepository._custom(
+        client,
+        mediaUploadService ?? MediaUploadService(client: client),
+      );
     }
     return _instance;
   }
-  ClinicCatalogRepository._internal() : _api = ApiClient();
-  ClinicCatalogRepository._custom(this._api);
+  ClinicCatalogRepository._internal()
+      : _api = ApiClient(),
+        _mediaUpload = MediaUploadService();
+  ClinicCatalogRepository._custom(this._api, this._mediaUpload);
 
   final ApiClient _api;
+  final MediaUploadService _mediaUpload;
+
+  /// Resolves local image files for entities backed by [MediaAsset] (Practitioners, Offers, Products, Articles).
+  /// Uploads local files to /api/v1/media/upload/ first to obtain the asset UUID and public URL.
+  Future<Map<String, dynamic>> _resolveMediaAssetPayload(
+    Map<String, dynamic> data, {
+    required String imageKey,
+    required String mediaType,
+  }) async {
+    final payload = Map<String, dynamic>.from(data);
+    final rawVal = payload[imageKey]?.toString();
+
+    if (rawVal != null &&
+        rawVal.isNotEmpty &&
+        !rawVal.startsWith('http') &&
+        File(rawVal).existsSync()) {
+      try {
+        final uploadResult = await _mediaUpload.uploadImage(
+          filePath: rawVal,
+          mediaType: mediaType,
+        );
+        final assetId = uploadResult['id']?.toString();
+        final assetUrl = uploadResult['url']?.toString();
+
+        if (assetId != null && assetId.isNotEmpty) {
+          payload['media_asset'] = assetId;
+        }
+        if (assetUrl != null && assetUrl.isNotEmpty) {
+          payload[imageKey] = assetUrl;
+        } else {
+          payload.remove(imageKey);
+        }
+      } catch (e) {
+        debugPrint('[ClinicCatalogRepository] Media upload failed for $imageKey: $e');
+        payload.remove(imageKey);
+      }
+    } else if (rawVal != null && (rawVal.isEmpty || !rawVal.startsWith('http'))) {
+      payload.remove(imageKey);
+    }
+
+    return payload;
+  }
 
   Future<dynamic> _buildPayload(
     Map<String, dynamic> data, {
@@ -107,9 +157,10 @@ class ClinicCatalogRepository {
   }
 
   Future<PractitionerModel> createPractitioner(Map<String, dynamic> data) async {
-    final payload = await _buildPayload(
+    final payload = await _resolveMediaAssetPayload(
       data,
-      fileKeys: ['avatar'],
+      imageKey: 'avatar',
+      mediaType: 'practitioner_avatar',
     );
     final response = await _api.post(
       ApiConfig.clinicPractitioners,
@@ -119,9 +170,10 @@ class ClinicCatalogRepository {
   }
 
   Future<PractitionerModel> updatePractitioner(String id, Map<String, dynamic> data) async {
-    final payload = await _buildPayload(
+    final payload = await _resolveMediaAssetPayload(
       data,
-      fileKeys: ['avatar'],
+      imageKey: 'avatar',
+      mediaType: 'practitioner_avatar',
     );
     final response = await _api.patch(
       ApiConfig.clinicPractitionerDetail(id),
@@ -243,9 +295,10 @@ class ClinicCatalogRepository {
   }
 
   Future<OfferModel> createOffer(Map<String, dynamic> data) async {
-    final payload = await _buildPayload(
+    final payload = await _resolveMediaAssetPayload(
       data,
-      fileKeys: ['image'],
+      imageKey: 'image',
+      mediaType: 'offer_image',
     );
     final response = await _api.post(
       ApiConfig.clinicOffers,
@@ -255,9 +308,10 @@ class ClinicCatalogRepository {
   }
 
   Future<OfferModel> updateOffer(String id, Map<String, dynamic> data) async {
-    final payload = await _buildPayload(
+    final payload = await _resolveMediaAssetPayload(
       data,
-      fileKeys: ['image'],
+      imageKey: 'image',
+      mediaType: 'offer_image',
     );
     final response = await _api.patch(
       ApiConfig.clinicOfferDetail(id),
@@ -316,9 +370,10 @@ class ClinicCatalogRepository {
         (sanitized['price'] == null || sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
-    final payload = await _buildPayload(
+    final payload = await _resolveMediaAssetPayload(
       sanitized,
-      fileKeys: ['image'],
+      imageKey: 'image',
+      mediaType: 'product_image',
     );
     final response = await _api.post(
       ApiConfig.clinicProducts,
@@ -333,9 +388,10 @@ class ClinicCatalogRepository {
         (sanitized['price'] == null || sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
-    final payload = await _buildPayload(
+    final payload = await _resolveMediaAssetPayload(
       sanitized,
-      fileKeys: ['image'],
+      imageKey: 'image',
+      mediaType: 'product_image',
     );
     final response = await _api.patch(
       ApiConfig.clinicProductDetail(id),
@@ -382,9 +438,11 @@ class ClinicCatalogRepository {
     if (sanitized['cover_image'] == null && sanitized['image'] != null) {
       sanitized['cover_image'] = sanitized['image'];
     }
-    final payload = await _buildPayload(
+    sanitized.remove('image');
+    final payload = await _resolveMediaAssetPayload(
       sanitized,
-      fileKeys: ['cover_image', 'image'],
+      imageKey: 'cover_image',
+      mediaType: 'article_cover',
     );
     final response = await _api.post(
       ApiConfig.clinicArticles,
@@ -398,9 +456,11 @@ class ClinicCatalogRepository {
     if (sanitized['cover_image'] == null && sanitized['image'] != null) {
       sanitized['cover_image'] = sanitized['image'];
     }
-    final payload = await _buildPayload(
+    sanitized.remove('image');
+    final payload = await _resolveMediaAssetPayload(
       sanitized,
-      fileKeys: ['cover_image', 'image'],
+      imageKey: 'cover_image',
+      mediaType: 'article_cover',
     );
     final response = await _api.patch(
       ApiConfig.clinicArticleDetail(id),

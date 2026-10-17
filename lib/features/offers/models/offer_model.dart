@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
+
 class OfferModel {
   final String id;
   final String titleAr;
@@ -142,12 +144,15 @@ class OfferModel {
       }
     }
 
-    final img = json['image_url']?.toString() ??
-        (clinicObj != null ? clinicObj['logo']?.toString() ?? '' : '');
+    final rawImg = json['image_url']?.toString() ??
+        json['image']?.toString() ??
+        (clinicObj != null ? (clinicObj['logo']?.toString() ?? clinicObj['logo_url']?.toString()) : null);
+    final img = ApiConfig.resolveUrl(rawImg);
 
-    final clinicLogo = clinicObj != null
+    final rawClinicLogo = clinicObj != null
         ? (clinicObj['logo']?.toString() ?? clinicObj['logo_url']?.toString())
         : (json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
+    final clinicLogo = ApiConfig.resolveUrl(rawClinicLogo);
 
     return OfferModel(
       id: json['id']?.toString() ?? '',

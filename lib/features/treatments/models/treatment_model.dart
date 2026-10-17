@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_config.dart';
+
 class TreatmentModel {
   final String id;
   final String nameAr;
@@ -192,11 +194,14 @@ class TreatmentModel {
       targetAreaAr: (json['target_area_ar'] ?? json['target_area'])?.toString().trim() ?? '',
       targetAreaEn: (json['target_area_en'] ?? json['target_area'])?.toString().trim(),
       clinicsCount: json['clinics_count'] is int ? json['clinics_count'] as int : 1,
-      imageUrl: (json['image_url'] ?? json['image'])?.toString() ?? '',
+      imageUrl: ApiConfig.resolveUrl((json['image_url'] ?? json['image'])?.toString() ?? ''),
       clinicId: parsedClinicId,
       clinicNameAr: parsedClinicNameAr,
       clinicNameEn: parsedClinicNameEn,
-      clinicLogoUrl: parsedClinicLogo,
+      clinicLogoUrl: () {
+        final res = ApiConfig.resolveUrl(parsedClinicLogo);
+        return res.isNotEmpty ? res : null;
+      }(),
       price: double.tryParse(json['price']?.toString() ?? ''),
       status: json['status']?.toString() ?? 'active',
       isActive: json['is_active'] is bool ? json['is_active'] as bool : true,
