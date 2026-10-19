@@ -60,7 +60,9 @@ class TreatmentModel {
     if (durationMinutes != null && durationMinutes! > 0) {
       return isArabic ? '$durationMinutes دقيقة' : '$durationMinutes mins';
     }
-    final raw = isArabic ? durationText.trim() : (durationTextEn ?? durationText).trim();
+    final raw = isArabic
+        ? durationText.trim()
+        : (durationTextEn ?? durationText).trim();
     return raw;
   }
 
@@ -136,45 +138,71 @@ class TreatmentModel {
   }
 
   factory TreatmentModel.fromJson(Map<String, dynamic> json) {
-    final cat = json['category'] is Map<String, dynamic> ? json['category'] as Map<String, dynamic> : null;
+    final cat = json['category'] is Map<String, dynamic>
+        ? json['category'] as Map<String, dynamic>
+        : null;
     final catId = cat != null
         ? cat['id']?.toString()
         : json['category']?.toString();
     final catAr = cat != null
         ? (cat['name_ar'] ?? cat['name_en'] ?? '')
-        : (json['category_name_ar'] ?? json['category_name'] ?? json['category_ar'] ?? '');
+        : (json['category_name_ar'] ??
+              json['category_name'] ??
+              json['category_ar'] ??
+              '');
     final catEn = cat != null
         ? (cat['name_en'] ?? cat['name_ar'] ?? '')
-        : (json['category_name_en'] ?? json['category_name'] ?? json['category_en'] ?? '');
+        : (json['category_name_en'] ??
+              json['category_name'] ??
+              json['category_en'] ??
+              '');
 
-    final clinicMap = json['clinic'] is Map<String, dynamic> ? json['clinic'] as Map<String, dynamic> : null;
-    final parsedClinicId = clinicMap != null ? clinicMap['id']?.toString() : json['clinic_id']?.toString();
-    final parsedClinicNameAr = clinicMap != null ? clinicMap['name_ar']?.toString() : json['clinic_name_ar']?.toString();
-    final parsedClinicNameEn = clinicMap != null ? clinicMap['name_en']?.toString() : json['clinic_name_en']?.toString();
-    final parsedClinicLogo = clinicMap != null
-        ? (clinicMap['logo']?.toString() ?? clinicMap['logo_url']?.toString())
-        : (json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
+    final clinicMap = json['clinic'] is Map<String, dynamic>
+        ? json['clinic'] as Map<String, dynamic>
+        : null;
+    final parsedClinicId = clinicMap != null
+        ? clinicMap['id']?.toString()
+        : json['clinic_id']?.toString();
+    final parsedClinicNameAr = clinicMap != null
+        ? clinicMap['name_ar']?.toString()
+        : json['clinic_name_ar']?.toString();
+    final parsedClinicNameEn = clinicMap != null
+        ? clinicMap['name_en']?.toString()
+        : json['clinic_name_en']?.toString();
+    final parsedClinicLogo = ApiConfig.firstMediaUrl([
+      clinicMap?['logo'],
+      clinicMap?['logo_url'],
+      json['clinic_logo'],
+      json['clinic_logo_url'],
+    ]);
 
     final rawDuration = json['duration_minutes'] ?? json['duration'];
     final int? parsedDurationMins = rawDuration is int
         ? rawDuration
         : int.tryParse(rawDuration?.toString() ?? '');
 
-    final rawDurTextAr = (json['duration_text'] ?? json['duration_ar'])?.toString().trim() ?? '';
-    final rawDurTextEn = (json['duration_text_en'] ?? json['duration_en'])?.toString().trim() ?? '';
+    final rawDurTextAr =
+        (json['duration_text'] ?? json['duration_ar'])?.toString().trim() ?? '';
+    final rawDurTextEn =
+        (json['duration_text_en'] ?? json['duration_en'])?.toString().trim() ??
+        '';
 
     final resolvedDurationAr = rawDurTextAr.isNotEmpty
         ? rawDurTextAr
-        : (parsedDurationMins != null && parsedDurationMins > 0 ? '$parsedDurationMins دقيقة' : '');
+        : (parsedDurationMins != null && parsedDurationMins > 0
+              ? '$parsedDurationMins دقيقة'
+              : '');
     final resolvedDurationEn = rawDurTextEn.isNotEmpty
         ? rawDurTextEn
-        : (parsedDurationMins != null && parsedDurationMins > 0 ? '$parsedDurationMins mins' : '');
+        : (parsedDurationMins != null && parsedDurationMins > 0
+              ? '$parsedDurationMins mins'
+              : '');
 
     final practs = json['practitioners'] is List
         ? (json['practitioners'] as List)
-            .map((p) => p is Map ? (p['id']?.toString() ?? '') : p.toString())
-            .where((id) => id.isNotEmpty)
-            .toList()
+              .map((p) => p is Map ? (p['id']?.toString() ?? '') : p.toString())
+              .where((id) => id.isNotEmpty)
+              .toList()
         : <String>[];
 
     return TreatmentModel(
@@ -189,12 +217,22 @@ class TreatmentModel {
       durationMinutes: parsedDurationMins,
       durationText: resolvedDurationAr,
       durationTextEn: resolvedDurationEn,
-      downtimeText: (json['downtime_text'] ?? json['downtime_ar'])?.toString().trim() ?? '',
-      downtimeTextEn: (json['downtime_text_en'] ?? json['downtime_en'])?.toString().trim(),
-      targetAreaAr: (json['target_area_ar'] ?? json['target_area'])?.toString().trim() ?? '',
-      targetAreaEn: (json['target_area_en'] ?? json['target_area'])?.toString().trim(),
-      clinicsCount: json['clinics_count'] is int ? json['clinics_count'] as int : 1,
-      imageUrl: ApiConfig.resolveUrl((json['image_url'] ?? json['image'])?.toString() ?? ''),
+      downtimeText:
+          (json['downtime_text'] ?? json['downtime_ar'])?.toString().trim() ??
+          '',
+      downtimeTextEn: (json['downtime_text_en'] ?? json['downtime_en'])
+          ?.toString()
+          .trim(),
+      targetAreaAr:
+          (json['target_area_ar'] ?? json['target_area'])?.toString().trim() ??
+          '',
+      targetAreaEn: (json['target_area_en'] ?? json['target_area'])
+          ?.toString()
+          .trim(),
+      clinicsCount: json['clinics_count'] is int
+          ? json['clinics_count'] as int
+          : 1,
+      imageUrl: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
       clinicId: parsedClinicId,
       clinicNameAr: parsedClinicNameAr,
       clinicNameEn: parsedClinicNameEn,

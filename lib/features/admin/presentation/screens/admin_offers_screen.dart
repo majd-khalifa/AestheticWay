@@ -241,12 +241,12 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      offer.imageUrl,
+                    child: LuxuryImage(
+                      imageUrl: offer.imageUrl,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
+                      customPlaceholder: Container(
                         width: 60,
                         height: 60,
                         color: isDark
@@ -257,7 +257,6 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                           color: AppColors.accentChampagne,
                         ),
                       ),
-                      cacheWidth: computeSafeCacheWidth(context, 400, null),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -394,12 +393,12 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      product.imageUrl,
+                    child: LuxuryImage(
+                      imageUrl: product.imageUrl,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
+                      customPlaceholder: Container(
                         width: 60,
                         height: 60,
                         color: isDark
@@ -410,7 +409,6 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                           color: AppColors.accentChampagne,
                         ),
                       ),
-                      cacheWidth: computeSafeCacheWidth(context, 400, null),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -550,12 +548,12 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      article.coverImageUrl,
+                    child: LuxuryImage(
+                      imageUrl: article.coverImageUrl,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
+                      customPlaceholder: Container(
                         width: 60,
                         height: 60,
                         color: isDark
@@ -566,7 +564,6 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                           color: AppColors.accentChampagne,
                         ),
                       ),
-                      cacheWidth: computeSafeCacheWidth(context, 400, null),
                     ),
                   ),
                   const SizedBox(width: 12),

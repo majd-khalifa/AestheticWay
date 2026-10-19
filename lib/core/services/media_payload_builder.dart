@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import '../network/api_exception.dart';
+import '../network/api_config.dart';
 import 'media_upload_service.dart';
 
 /// Keeps URL, binary, omission and explicit removal semantics consistent.
@@ -11,6 +12,7 @@ class MediaPayloadBuilder {
   Future<dynamic> build(
     Map<String, dynamic> data, {
     required List<String> fileKeys,
+    String? clinicId,
   }) async {
     final mapCopy = Map<String, dynamic>.from(data);
     // JSON preserves explicit nulls. If another image is replaced in the same
@@ -21,7 +23,11 @@ class MediaPayloadBuilder {
     bool hasFiles = false;
     for (final key in fileKeys) {
       final value = mapCopy[key];
-      if (value == null || _isRemoteUrl(value.toString())) continue;
+      if (value == null) continue;
+      if (value is String && _isRemoteUrl(value.trim())) {
+        mapCopy[key] = value.trim();
+        continue;
+      }
       if (value is MultipartFile) {
         if (hasRemoval) {
           throw const ApiException(
@@ -43,9 +49,10 @@ class MediaPayloadBuilder {
         final uploaded = await _mediaUpload.uploadImage(
           filePath: path,
           mediaType: key == 'logo' ? 'clinic_logo' : 'clinic_cover',
+          clinicId: clinicId,
         );
-        final url = uploaded['url']?.toString();
-        if (url == null || !_isRemoteUrl(url)) {
+        final url = ApiConfig.firstMediaUrl([uploaded['url']]);
+        if (!_isRemoteUrl(url)) {
           throw const ApiException(
             message: 'The image upload response is missing its URL.',
           );

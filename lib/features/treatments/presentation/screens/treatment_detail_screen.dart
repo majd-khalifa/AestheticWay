@@ -332,12 +332,12 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          clinic.coverImageUrl,
+                        child: LuxuryImage(
+                          imageUrl: clinic.coverImageUrl,
                           width: 50,
                           height: 50,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
+                          customPlaceholder: Container(
                             width: 50,
                             height: 50,
                             color: isDark
@@ -348,7 +348,6 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                               color: AppColors.accentChampagne,
                             ),
                           ),
-                          cacheWidth: computeSafeCacheWidth(context, 400, null),
                         ),
                       ),
                       const SizedBox(width: 12),

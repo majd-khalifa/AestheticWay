@@ -233,12 +233,13 @@ class _AdminClinicsScreenState extends State<AdminClinicsScreen> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(10),
-                                      child: Image.network(
-                                        clinic.coverImageUrl,
+                                      child: LuxuryImage(
+                                        imageUrl: clinic.logo,
+                                        fallbackLogoUrl: clinic.coverImageUrl,
                                         width: 48,
                                         height: 48,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, _, _) => Container(
+                                        customPlaceholder: Container(
                                           width: 48,
                                           height: 48,
                                           color: isDark
@@ -248,11 +249,6 @@ class _AdminClinicsScreenState extends State<AdminClinicsScreen> {
                                             Icons.apartment_rounded,
                                             color: AppColors.accentChampagne,
                                           ),
-                                        ),
-                                        cacheWidth: computeSafeCacheWidth(
-                                          context,
-                                          400,
-                                          null,
                                         ),
                                       ),
                                     ),

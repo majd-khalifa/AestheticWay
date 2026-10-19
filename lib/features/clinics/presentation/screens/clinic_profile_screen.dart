@@ -294,13 +294,13 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen>
   @override
   Widget build(BuildContext context) {
     final clinic = _clinic;
-    final validImages = [
-      if (isValidNetworkImageUrl(clinic.coverImageUrl))
+    final validImages = {
+      if (resolveImageProvider(clinic.coverImageUrl) != null)
         clinic.coverImageUrl.trim(),
       ...clinic.galleryImages
-          .where((img) => isValidNetworkImageUrl(img))
+          .where((img) => resolveImageProvider(img) != null)
           .map((img) => img.trim()),
-    ];
+    }.toList();
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 

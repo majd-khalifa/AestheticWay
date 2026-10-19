@@ -918,12 +918,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(22),
-                                        child: Image.network(
-                                          p.avatarUrl,
+                                        child: LuxuryImage(
+                                          imageUrl: p.avatarUrl,
                                           width: 44,
                                           height: 44,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (_, _, _) => Container(
+                                          customPlaceholder: Container(
                                             width: 44,
                                             height: 44,
                                             color: isDark
@@ -935,11 +935,6 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                                               color: AppColors.accentChampagne,
                                               size: 24,
                                             ),
-                                          ),
-                                          cacheWidth: computeSafeCacheWidth(
-                                            context,
-                                            400,
-                                            null,
                                           ),
                                         ),
                                       ),

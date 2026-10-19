@@ -170,12 +170,13 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                clinic.coverImageUrl,
+                              child: LuxuryImage(
+                                imageUrl: clinic.logoUrl,
+                                fallbackLogoUrl: clinic.coverImageUrl,
                                 width: 58,
                                 height: 58,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Container(
+                                customPlaceholder: Container(
                                   width: 58,
                                   height: 58,
                                   color: isDark
@@ -185,11 +186,6 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                                     Icons.apartment_rounded,
                                     color: AppColors.accentChampagne,
                                   ),
-                                ),
-                                cacheWidth: computeSafeCacheWidth(
-                                  context,
-                                  400,
-                                  null,
                                 ),
                               ),
                             ),

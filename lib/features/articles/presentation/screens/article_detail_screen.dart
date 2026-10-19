@@ -292,12 +292,12 @@ class ArticleDetailScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    article.authorDoctorAvatar,
+                  child: LuxuryImage(
+                    imageUrl: article.authorDoctorAvatar,
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
+                    customPlaceholder: Container(
                       width: 50,
                       height: 50,
                       color: isDark
@@ -308,7 +308,6 @@ class ArticleDetailScreen extends StatelessWidget {
                         color: AppColors.accentChampagne,
                       ),
                     ),
-                    cacheWidth: computeSafeCacheWidth(context, 400, null),
                   ),
                 ),
                 const SizedBox(width: 12),

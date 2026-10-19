@@ -72,12 +72,13 @@ class AdminClinicDetailSheet extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        clinic.coverImageUrl,
+                      child: LuxuryImage(
+                        imageUrl: clinic.logo,
+                        fallbackLogoUrl: clinic.coverImageUrl,
                         width: 54,
                         height: 54,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
+                        customPlaceholder: Container(
                           width: 54,
                           height: 54,
                           color: isDark
@@ -88,7 +89,6 @@ class AdminClinicDetailSheet extends StatelessWidget {
                             color: AppColors.accentChampagne,
                           ),
                         ),
-                        cacheWidth: computeSafeCacheWidth(context, 400, null),
                       ),
                     ),
                     const SizedBox(width: 14),

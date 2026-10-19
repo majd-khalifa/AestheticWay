@@ -117,8 +117,10 @@ class AdminClinicModel {
   String get coverImageUrl => coverImage;
   String get areaAr => city;
   String get areaEn => city;
-  double get latitude => branches.isNotEmpty ? branches.first.latitude : 25.2048;
-  double get longitude => branches.isNotEmpty ? branches.first.longitude : 55.2708;
+  double get latitude =>
+      branches.isNotEmpty ? branches.first.latitude : 25.2048;
+  double get longitude =>
+      branches.isNotEmpty ? branches.first.longitude : 55.2708;
 
   factory AdminClinicModel.fromJson(Map<String, dynamic> json) {
     SubscriptionTier tier = SubscriptionTier.basic;
@@ -139,7 +141,9 @@ class AdminClinicModel {
 
     Map<String, int> parseCountMap(dynamic raw) {
       if (raw is Map) {
-        return raw.map((k, v) => MapEntry(k.toString(), (v is num) ? v.toInt() : 0));
+        return raw.map(
+          (k, v) => MapEntry(k.toString(), (v is num) ? v.toInt() : 0),
+        );
       }
       return {};
     }
@@ -165,20 +169,27 @@ class AdminClinicModel {
       licenseNumber: json['license_number']?.toString() ?? '',
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       subscriptionTier: tier,
-      isActive: json['is_active'] != false && json['status']?.toString().toLowerCase() != 'suspended',
+      isActive:
+          json['is_active'] != false &&
+          json['status']?.toString().toLowerCase() != 'suspended',
       isFeatured: json['is_featured'] == true,
       displayOrder: (json['display_order'] as num?)?.toInt() ?? 0,
       phone: json['phone']?.toString() ?? '',
       whatsapp: json['whatsapp']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
-      logo: ApiConfig.resolveUrl(json['logo']?.toString() ?? json['logo_url']?.toString()),
-      coverImage: ApiConfig.resolveUrl(json['cover_image']?.toString() ?? json['cover_image_url']?.toString()),
+      logo: ApiConfig.firstMediaUrl([json['logo'], json['logo_url']]),
+      coverImage: ApiConfig.firstMediaUrl([
+        json['cover_image'],
+        json['cover_image_url'],
+      ]),
       videoAdFile: () {
-        final raw = json['video_ad_file']?.toString() ?? json['video_url']?.toString();
+        final raw =
+            json['video_ad_file']?.toString() ?? json['video_url']?.toString();
         final res = ApiConfig.resolveUrl(raw);
         return res.isNotEmpty ? res : null;
       }(),
-      branchesCount: (json['branches_count'] as num?)?.toInt() ?? parsedBranches.length,
+      branchesCount:
+          (json['branches_count'] as num?)?.toInt() ?? parsedBranches.length,
       practitionersCount: (json['practitioners_count'] as num?)?.toInt() ?? 0,
       treatmentsCount: (json['treatments_count'] as num?)?.toInt() ?? 0,
       offersCount: (json['offers_count'] as num?)?.toInt() ?? 0,

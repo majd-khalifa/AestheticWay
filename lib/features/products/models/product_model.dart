@@ -98,7 +98,9 @@ class ProductModel {
   }
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    final clinic = json['clinic'] as Map<String, dynamic>?;
+    final clinic = json['clinic'] is Map<String, dynamic>
+        ? json['clinic'] as Map<String, dynamic>
+        : null;
     final rawStatus = json['status']?.toString().toLowerCase() ?? 'active';
     final isActive = json['is_active'] as bool? ?? (rawStatus == 'active');
 
@@ -108,22 +110,26 @@ class ProductModel {
         : nameEnVal;
 
     final descEnVal = json['description_en'] as String? ?? '';
-    final descArVal = (json['description_ar'] as String? ?? '').trim().isNotEmpty
+    final descArVal =
+        (json['description_ar'] as String? ?? '').trim().isNotEmpty
         ? json['description_ar'] as String
         : descEnVal;
 
-    final clinicLogoRaw = clinic?['logo'] as String? ??
-        clinic?['logo_url'] as String? ??
-        json['clinic_logo'] as String? ??
-        json['clinic_logo_url'] as String?;
-    final clinicLogo = ApiConfig.resolveUrl(clinicLogoRaw);
+    final clinicLogo = ApiConfig.firstMediaUrl([
+      clinic?['logo'],
+      clinic?['logo_url'],
+      json['clinic_logo'],
+      json['clinic_logo_url'],
+    ]);
 
     return ProductModel(
       id: json['id']?.toString() ?? '',
       nameAr: nameArVal,
       nameEn: nameEnVal,
-      clinicId: clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
-      clinicNameAr: clinic?['name_ar'] as String? ?? clinic?['name_en'] as String? ?? '',
+      clinicId:
+          clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
+      clinicNameAr:
+          clinic?['name_ar'] as String? ?? clinic?['name_en'] as String? ?? '',
       clinicNameEn: clinic?['name_en'] as String?,
       clinicLogoUrl: clinicLogo.isNotEmpty ? clinicLogo : null,
       descriptionAr: descArVal,
@@ -132,11 +138,13 @@ class ProductModel {
           ? (double.tryParse(json['price'].toString()) ?? 0.0)
           : 0.0,
       originalPrice: null,
-      imageUrl: ApiConfig.resolveUrl(json['image_url'] as String? ?? json['image'] as String? ?? ''),
+      imageUrl: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
       categoryAr: json['category_ar'] as String? ?? '',
       categoryEn: json['category_en'] as String? ?? '',
       isAvailable: isActive,
-      isPublishedByAdmin: json['status'] != null ? (rawStatus == 'active') : isActive,
+      isPublishedByAdmin: json['status'] != null
+          ? (rawStatus == 'active')
+          : isActive,
       status: rawStatus,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())

@@ -518,14 +518,14 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child:
-                          (widget.clinic.coverImageUrl.isNotEmpty &&
-                              widget.clinic.coverImageUrl.startsWith('http'))
-                          ? Image.network(
-                              widget.clinic.coverImageUrl,
+                          (resolveImageProvider(widget.clinic.coverImageUrl) !=
+                              null)
+                          ? LuxuryImage(
+                              imageUrl: widget.clinic.coverImageUrl,
                               width: 52,
                               height: 52,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => Container(
+                              customPlaceholder: Container(
                                 width: 52,
                                 height: 52,
                                 color: isDark
@@ -537,11 +537,6 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                                       ? AppColors.silverMuted
                                       : AppColors.lightTextMuted,
                                 ),
-                              ),
-                              cacheWidth: computeSafeCacheWidth(
-                                context,
-                                400,
-                                null,
                               ),
                             )
                           : Container(

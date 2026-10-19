@@ -48,7 +48,8 @@ class ClinicCatalogRepository {
   }) async {
     final payload = Map<String, dynamic>.from(data);
     if (!payload.containsKey(imageKey)) return payload;
-    final rawVal = payload[imageKey];
+    final rawValue = payload[imageKey];
+    final rawVal = rawValue is String ? rawValue.trim() : rawValue;
     if (rawVal == null || rawVal == '') {
       // Clear both representations so a legacy URL cannot resurrect the image.
       payload[imageKey] = null;
@@ -60,18 +61,17 @@ class ClinicCatalogRepository {
         filePath: rawVal.toString(),
         mediaType: mediaType,
       );
-      final assetId = uploadResult['id']?.toString();
-      final assetUrl = uploadResult['url']?.toString();
-      if (assetId == null ||
-          assetId.isEmpty ||
-          assetUrl == null ||
-          !_isRemoteUrl(assetUrl)) {
+      final assetId = uploadResult['id']?.toString().trim();
+      final assetUrl = ApiConfig.firstMediaUrl([uploadResult['url']]);
+      if (assetId == null || assetId.isEmpty || !_isRemoteUrl(assetUrl)) {
         throw const ApiException(
           message: 'The image upload response is missing its asset ID or URL.',
         );
       }
       payload['media_asset'] = assetId;
       payload[imageKey] = assetUrl;
+    } else {
+      payload[imageKey] = rawVal;
     }
 
     return payload;

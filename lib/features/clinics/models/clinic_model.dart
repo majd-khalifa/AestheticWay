@@ -192,16 +192,15 @@ class ClinicModel {
               .toList()
         : <ClinicBranch>[];
 
-    final cover = ApiConfig.resolveUrl(
-      json['cover_image']?.toString() ?? json['cover_image_url']?.toString(),
-    );
-    final logo = ApiConfig.resolveUrl(
-      json['logo']?.toString() ?? json['logo_url']?.toString(),
-    );
+    final cover = ApiConfig.firstMediaUrl([
+      json['cover_image'],
+      json['cover_image_url'],
+    ]);
+    final logo = ApiConfig.firstMediaUrl([json['logo'], json['logo_url']]);
     final rawGallery = json['gallery_images'] as List<dynamic>?;
     final gallery = rawGallery != null && rawGallery.isNotEmpty
         ? rawGallery
-              .map((e) => ApiConfig.resolveUrl(e.toString()))
+              .map((e) => ApiConfig.firstMediaUrl([e]))
               .where((e) => e.isNotEmpty)
               .toList()
         : (cover.isNotEmpty ? [cover] : <String>[]);

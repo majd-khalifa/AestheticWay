@@ -1,3 +1,4 @@
+import '../../../../core/network/api_config.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 
@@ -41,7 +42,7 @@ class FeaturedAdApiModel {
   factory FeaturedAdApiModel.fromJson(Map<String, dynamic> json) {
     return FeaturedAdApiModel(
       id: json['id']?.toString() ?? '',
-      image: json['image'] as String? ?? '',
+      image: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
       link: json['link'] as String? ?? '',
     );
   }
