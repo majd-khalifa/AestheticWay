@@ -72,9 +72,9 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
     try {
       final XFile? file = await _picker.pickImage(
         source: source,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 82,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 78,
       );
 
       if (!mounted) return;
@@ -239,14 +239,16 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
         // Label & optional required mark
         Row(
           children: [
-            Text(
-              widget.label,
-              style: AppTypography.caption.copyWith(
-                color: isDark
-                    ? AppColors.silverPrimary
-                    : AppColors.lightTextPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
+            Expanded(
+              child: Text(
+                widget.label,
+                style: AppTypography.caption.copyWith(
+                  color: isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
               ),
             ),
             if (widget.isRequired)
@@ -341,6 +343,12 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                         ),
                       ],
                     )
+                  : widget.isCircular
+                  ? Icon(
+                      Icons.add_a_photo_outlined,
+                      color: AppColors.goldText(context),
+                      size: 28,
+                    )
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -387,6 +395,22 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
           ),
         ),
 
+        if (widget.isCircular) ...[
+          const SizedBox(height: 8),
+          Text(
+            loc.isArabic ? 'اضغط لاختيار صورة' : 'Tap to upload photo',
+            style: TextStyle(
+              color: AppColors.text(context),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            loc.isArabic ? 'الكاميرا أو معرض الصور' : 'Camera or Gallery',
+            style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
+          ),
+        ],
         if (widget.helperText != null) ...[
           const SizedBox(height: 4),
           Text(

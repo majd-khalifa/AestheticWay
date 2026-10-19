@@ -82,8 +82,8 @@ void main() {
             'note': 'تم الاتصال بالعميل وسيتم تأكيد الموعد غداً',
             'author_name': 'أحمد العلي',
             'created_at': '2026-09-22T11:00:00Z',
-          }
-        ]
+          },
+        ],
       };
 
       final lead = AppointmentRequestModel.fromJson(json);
@@ -94,25 +94,32 @@ void main() {
   });
 
   group('Clinic Portal Unit Tests - Service & State', () {
-    test('ClinicPortalService initializes with active clinic, leads, offers and practitioners', () {
-      final service = ClinicPortalService();
-      expect(service.activeClinic, isNotNull);
-      expect(service.clinicLeads.length, greaterThanOrEqualTo(5));
-      expect(service.newLeadsCount, greaterThan(0));
-      expect(service.totalLeadsCount, equals(service.clinicLeads.length));
-      expect(service.activeOffersCount, greaterThan(0));
-    });
+    test(
+      'ClinicPortalService initializes with active clinic, leads, offers and practitioners',
+      () {
+        final service = ClinicPortalService();
+        expect(service.activeClinic, isNotNull);
+        expect(service.clinicLeads.length, greaterThanOrEqualTo(5));
+        expect(service.newLeadsCount, greaterThan(0));
+        expect(service.totalLeadsCount, equals(service.clinicLeads.length));
+        expect(service.activeOffersCount, greaterThan(0));
+      },
+    );
 
     test('ClinicPortalService updates lead status and notifies listeners', () {
       final service = ClinicPortalService();
       final targetLeadId = service.clinicLeads.first.id;
 
       service.updateLeadStatus(targetLeadId, AppointmentLeadStatus.contacted);
-      final updatedLead = service.clinicLeads.firstWhere((l) => l.id == targetLeadId);
+      final updatedLead = service.clinicLeads.firstWhere(
+        (l) => l.id == targetLeadId,
+      );
       expect(updatedLead.status, equals(AppointmentLeadStatus.contacted));
 
       service.updateLeadStatus(targetLeadId, AppointmentLeadStatus.closed);
-      final closedLead = service.clinicLeads.firstWhere((l) => l.id == targetLeadId);
+      final closedLead = service.clinicLeads.firstWhere(
+        (l) => l.id == targetLeadId,
+      );
       expect(closedLead.status, equals(AppointmentLeadStatus.closed));
     });
 
@@ -120,8 +127,14 @@ void main() {
       final service = ClinicPortalService();
       final targetLeadId = service.clinicLeads.first.id;
 
-      service.saveInternalNotes(targetLeadId, 'Client requested callback after 5 PM.');
-      expect(service.getInternalNotes(targetLeadId), equals('Client requested callback after 5 PM.'));
+      service.saveInternalNotes(
+        targetLeadId,
+        'Client requested callback after 5 PM.',
+      );
+      expect(
+        service.getInternalNotes(targetLeadId),
+        equals('Client requested callback after 5 PM.'),
+      );
     });
 
     test('ClinicPortalService adds and deletes offers correctly', () {
@@ -153,7 +166,9 @@ void main() {
   });
 
   group('Clinic Portal UI Widget Tests', () {
-    testWidgets('ClinicMainNavScreen renders all 4 tabs cleanly', (WidgetTester tester) async {
+    testWidgets('ClinicMainNavScreen renders all 4 tabs cleanly', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));
       await tester.pumpWidget(
         MaterialApp(
@@ -168,140 +183,159 @@ void main() {
       expect(find.text('الملف'), findsOneWidget);
     });
 
-    testWidgets('ClinicDashboardScreen displays metrics, VIP badge and shortcuts', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: ClinicDashboardScreen(
-            onNavigateToLeads: () {},
-            onNavigateToOffers: () {},
+    testWidgets(
+      'ClinicDashboardScreen displays metrics, VIP badge and shortcuts',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1600));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: ClinicDashboardScreen(
+              onNavigateToLeads: () {},
+              onNavigateToOffers: () {},
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('طلبات جديدة'), findsOneWidget);
-      expect(find.text('تم التواصل'), findsWidgets);
-      expect(find.text('إجمالي الطلبات'), findsOneWidget);
-      expect(find.text('نسبة التحويل'), findsOneWidget);
-      expect(find.text('إجراءات سريعة'), findsOneWidget);
-      expect(find.text('عرض الطلبات الجديدة'), findsOneWidget);
-      expect(find.text('إضافة عرض جديد'), findsOneWidget);
-    });
+        expect(find.text('طلبات جديدة'), findsOneWidget);
+        expect(find.text('تم التواصل'), findsWidgets);
+        expect(find.text('إجمالي الطلبات'), findsOneWidget);
+        expect(find.text('نسبة التحويل'), findsOneWidget);
+        expect(find.text('إجراءات سريعة'), findsOneWidget);
+        expect(find.text('عرض الطلبات الجديدة'), findsOneWidget);
+        expect(find.text('إضافة عرض جديد'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ClinicLeadsScreen renders filter chips and search', (WidgetTester tester) async {
+    testWidgets('ClinicLeadsScreen renders filter chips and search', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const ClinicLeadsScreen(),
-        ),
+        MaterialApp(theme: AppTheme.darkTheme, home: const ClinicLeadsScreen()),
       );
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(ChoiceChip), findsWidgets);
     });
 
-    testWidgets('ClinicLeadDetailScreen allows updating lead status and notes', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1600));
-      final mockLead = AppointmentRequestModel(
-        id: 'test-lead-ui-1',
-        referenceCode: '#REQ-9901',
-        clinicId: 'kaya-jumeirah',
-        clinicNameAr: 'عيادة كايا',
-        clinicNameEn: 'Kaya Clinic',
-        branchNameAr: 'فرع جميرا',
-        branchNameEn: 'Jumeirah',
-        serviceNameAr: 'الهيدرافيسيال الملكي',
-        serviceNameEn: 'Royal HydraFacial',
-        practitionerNameAr: 'د. ريم الخالد',
-        practitionerNameEn: 'Dr. Reem Al Khaled',
-        practitionerType: PractitionerType.doctor,
-        preferredDate: DateTime.now().add(const Duration(days: 2)),
-        preferredTimeWindow: PreferredTimeWindow.evening,
-        patientFullName: 'مريم أحمد',
-        patientPhone: '+971 50 123 4567',
-        notes: 'ملاحظة خاصة بالبشرة',
-        consentAccepted: true,
-        status: AppointmentLeadStatus.sent,
-        createdAt: DateTime.now(),
-      );
+    testWidgets(
+      'ClinicLeadDetailScreen allows updating lead status and notes',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1600));
+        final mockLead = AppointmentRequestModel(
+          id: 'test-lead-ui-1',
+          referenceCode: '#REQ-9901',
+          clinicId: 'kaya-jumeirah',
+          clinicNameAr: 'عيادة كايا',
+          clinicNameEn: 'Kaya Clinic',
+          branchNameAr: 'فرع جميرا',
+          branchNameEn: 'Jumeirah',
+          serviceNameAr: 'الهيدرافيسيال الملكي',
+          serviceNameEn: 'Royal HydraFacial',
+          practitionerNameAr: 'د. ريم الخالد',
+          practitionerNameEn: 'Dr. Reem Al Khaled',
+          practitionerType: PractitionerType.doctor,
+          preferredDate: DateTime.now().add(const Duration(days: 2)),
+          preferredTimeWindow: PreferredTimeWindow.evening,
+          patientFullName: 'مريم أحمد',
+          patientPhone: '+971 50 123 4567',
+          notes: 'ملاحظة خاصة بالبشرة',
+          consentAccepted: true,
+          status: AppointmentLeadStatus.sent,
+          createdAt: DateTime.now(),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: ClinicLeadDetailScreen(lead: mockLead),
-        ),
-      );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: ClinicLeadDetailScreen(lead: mockLead),
+          ),
+        );
 
-      expect(find.text('مريم أحمد'), findsOneWidget);
-      expect(find.text('+971 50 123 4567'), findsOneWidget);
-      expect(find.text('اتصال بالمريض'), findsOneWidget);
-      expect(find.text('محادثة واتساب'), findsOneWidget);
-      expect(find.text('الهيدرافيسيال الملكي'), findsOneWidget);
+        expect(find.text('مريم أحمد'), findsOneWidget);
+        expect(find.text('+971 50 123 4567'), findsOneWidget);
+        expect(find.text('اتصال بالمريض'), findsOneWidget);
+        expect(find.text('محادثة واتساب'), findsOneWidget);
+        expect(find.text('الهيدرافيسيال الملكي'), findsOneWidget);
 
-      // Verify status chips
-      expect(find.text('جديد'), findsOneWidget);
-      expect(find.text('تم التواصل'), findsOneWidget);
-      expect(find.text('مكتمل / مغلق'), findsOneWidget);
-    });
+        // Verify status chips
+        expect(find.text('جديد'), findsOneWidget);
+        expect(find.text('تم التواصل'), findsOneWidget);
+        expect(find.text('مكتمل / مغلق'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ClinicOffersScreen displays add offer button and active offers', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const ClinicOffersScreen(),
-        ),
-      );
+    testWidgets(
+      'ClinicOffersScreen displays add offer button and active offers',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1600));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const ClinicOffersScreen(),
+          ),
+        );
 
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.text('إضافة عرض جديد'), findsWidgets);
-    });
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.text('إضافة عرض جديد'), findsWidgets);
+      },
+    );
 
-    testWidgets('ClinicProfileScreen displays staff, treatments and maps direction option', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 2000));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const ClinicProfileScreen(),
-        ),
-      );
+    testWidgets(
+      'ClinicProfileScreen displays staff, treatments and maps direction option',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 2000));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const ClinicProfileScreen(),
+          ),
+        );
 
-      expect(find.text('الكادر الطبي والممارسون المعتمدون'), findsOneWidget);
-      expect(find.text('العلاجات والخدمات المقدمة'), findsOneWidget);
-      expect(find.text('فتح في Google Maps'), findsOneWidget);
-      expect(find.text('تسجيل الخروج من لوحة العيادة'), findsOneWidget);
-    });
+        expect(find.text('الكادر الطبي والممارسون المعتمدون'), findsOneWidget);
+        expect(find.text('العلاجات والخدمات المقدمة'), findsOneWidget);
+        expect(find.text('فتح في خرائط Google'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('تسجيل الخروج من لوحة العيادة'),
+          500,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text('تسجيل الخروج من لوحة العيادة'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ClinicProfileScreen header card renders logo/cover via LuxuryImage and dialog omits phone/whatsapp inputs', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 2000));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const ClinicProfileScreen(),
-        ),
-      );
+    testWidgets(
+      'ClinicProfileScreen header card renders logo/cover via LuxuryImage and dialog omits phone/whatsapp inputs',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 2000));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const ClinicProfileScreen(),
+          ),
+        );
 
-      // Verify LuxuryImage is used in the header for clinic logo
-      expect(find.byType(LuxuryImage), findsWidgets);
+        // Verify LuxuryImage is used in the header for clinic logo
+        expect(find.byType(LuxuryImage), findsWidgets);
 
-      // Tap Edit Clinic Profile button
-      final editBtn = find.byTooltip('تعديل ملف العيادة');
-      expect(editBtn, findsOneWidget);
-      await tester.tap(editBtn);
-      await tester.pumpAndSettle();
+        // Tap Edit Clinic Profile button
+        final editBtn = find.byTooltip('تعديل ملف العيادة');
+        expect(editBtn, findsOneWidget);
+        await tester.tap(editBtn);
+        await tester.pumpAndSettle();
 
-      // Verify dialog is open
-      expect(find.text('تعديل ملف العيادة'), findsWidgets);
+        // Verify dialog is open
+        expect(find.text('تعديل ملف العيادة'), findsWidgets);
 
-      // Verify Phone and WhatsApp input fields are removed
-      expect(find.text('رقم الهاتف'), findsNothing);
-      expect(find.text('رقم الواتساب'), findsNothing);
+        // Verify Phone and WhatsApp input fields are removed
+        expect(find.text('رقم الهاتف'), findsNothing);
+        expect(find.text('رقم الواتساب'), findsNothing);
 
-      // Verify Logo and Cover photo pickers are present
-      expect(find.text('شعار العيادة'), findsOneWidget);
-      expect(find.text('صورة الغلاف'), findsOneWidget);
-    });
+        // Verify Logo and Cover photo pickers are present
+        expect(find.text('شعار العيادة'), findsOneWidget);
+        expect(find.text('صورة الغلاف'), findsOneWidget);
+      },
+    );
   });
 }

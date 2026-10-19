@@ -15,10 +15,9 @@ class ApiClient {
       BaseOptions(
         baseUrl: ApiConfig.baseUrl,
         connectTimeout: ApiConfig.connectTimeout,
+        sendTimeout: ApiConfig.sendTimeout,
         receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: {'Accept': 'application/json'},
       ),
     );
 

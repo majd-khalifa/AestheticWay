@@ -1,6 +1,5 @@
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
 import '../../data/clinic_catalog_repository.dart';
-import '../../../treatments/models/category_model.dart';
 import '../../../offers/models/offer_model.dart';
 import '../../../treatments/models/treatment_model.dart';
 import '../../../../core/widgets/bounded_catalog_preview.dart';
@@ -13,8 +12,6 @@ import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
-import 'package:aesthetic_way/core/widgets/tier_badge.dart';
-import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
@@ -24,9 +21,10 @@ import 'package:aesthetic_way/features/articles/models/article_model.dart';
 import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.dart';
 import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
+import '../widgets/clinic_editorial_header.dart';
+import '../widgets/clinic_location_selector.dart';
 import 'clinic_practitioners_screen.dart';
 import 'clinic_treatments_screen.dart';
 
@@ -239,6 +237,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           ? AppColors.cardSurface
                           : AppColors.lightCardSurface,
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نوع الممارس'
                             : 'Practitioner Type',
@@ -299,6 +298,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الاسم بالإنجليزية *'
                             : 'Full Name (English) *',
@@ -331,6 +331,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الاسم بالعربية *'
                             : 'Full Name (Arabic) *',
@@ -363,6 +364,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'التخصص بالإنجليزية'
                             : 'Specialty (English)',
@@ -392,6 +394,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'التخصص بالعربية'
                             : 'Specialty (Arabic)',
@@ -424,6 +427,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نبذة مهنية بالإنجليزية'
                             : 'Bio (English)',
@@ -462,6 +466,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نبذة مهنية بالعربية'
                             : 'Bio (Arabic)',
@@ -583,409 +588,12 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     );
   }
 
-  void _showAddServiceDialog(BuildContext context, LocaleService loc) {
-    final formKey = GlobalKey<FormState>();
-    final nameEnController = TextEditingController();
-    final nameArController = TextEditingController();
-    final priceController = TextEditingController(text: '750');
-    final descEnController = TextEditingController();
-    final descArController = TextEditingController();
-    final clinicService = ClinicPortalService();
-    if (clinicService.categories.isEmpty) {
-      clinicService.getOrFetchCategories();
-    }
-    final categories = clinicService.categories;
-    String? chosenCategoryId = categories.isNotEmpty
-        ? categories.first.id
-        : null;
-    String? chosenCategoryLabel;
-    final isDark = AppColors.isDark(context);
-
-    String? modalErrorMessage;
-    bool isSubmitting = false;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return Container(
-              height: MediaQuery.of(ctx).size.height * 0.88,
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-                left: 20,
-                right: 20,
-                top: 20,
-              ),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.backgroundDeep
-                    : AppColors.lightCardSurface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-                border: Border(
-                  top: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                ),
-              ),
-              child: Form(
-                key: formKey,
-                child: ListView(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.mutedText(
-                            ctx,
-                          ).withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      loc.tr('clinic_add_service'),
-                      style: AppTypography.cardTitle.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        color: isDark
-                            ? AppColors.silverPrimary
-                            : AppColors.lightTextPrimary,
-                      ),
-                    ),
-                    if (modalErrorMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(
-                            alpha: isDark ? 0.2 : 0.1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.redAccent.withValues(alpha: 0.6),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.error_outline_rounded,
-                              color: Colors.redAccent,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                modalErrorMessage!,
-                                style: const TextStyle(
-                                  color: Colors.redAccent,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(
-                                Icons.close_rounded,
-                                size: 16,
-                                color: Colors.redAccent,
-                              ),
-                              onPressed: () {
-                                setModalState(() => modalErrorMessage = null);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-
-                    // Category Selector Dropdown (Live API categories)
-                    PagedEntityField<CategoryModel>(
-                      label: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
-                      hint: loc.isArabic
-                          ? 'ابحث عن التصنيف الطبي'
-                          : 'Search medical categories',
-                      value: chosenCategoryId,
-                      valueLabel:
-                          chosenCategoryLabel ??
-                          categories
-                              .where((c) => c.id == chosenCategoryId)
-                              .map((c) => loc.isArabic ? c.nameAr : c.nameEn)
-                              .firstOrNull ??
-                          '',
-                      keyOf: (c) => c.id,
-                      labelOf: (c) => loc.isArabic ? c.nameAr : c.nameEn,
-                      loader: (page, search) => ClinicCatalogRepository()
-                          .getCategories(page: page, search: search),
-                      validator: (v) => v == null
-                          ? loc.tr('clinic_validation_required')
-                          : null,
-                      onChanged: (c) => setModalState(() {
-                        chosenCategoryId = c?.id;
-                        chosenCategoryLabel = c == null
-                            ? null
-                            : (loc.isArabic ? c.nameAr : c.nameEn);
-                        modalErrorMessage = null;
-                      }),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Service Name EN & AR
-                    LtrTextFormField(
-                      controller: nameEnController,
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textPrimary
-                            : AppColors.lightTextPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic
-                            ? 'اسم الإجراء بالإنجليزية *'
-                            : 'Treatment Name (English) *',
-                        hintText: 'e.g. HydraFacial Deluxe',
-                        filled: true,
-                        fillColor: isDark
-                            ? AppColors.cardSurfaceHover
-                            : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.border(ctx),
-                            width: 0.8,
-                          ),
-                        ),
-                      ),
-                      validator: (val) => (val == null || val.trim().isEmpty)
-                          ? loc.tr('clinic_validation_required')
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: nameArController,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textPrimary
-                            : AppColors.lightTextPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic
-                            ? 'اسم الإجراء بالعربية *'
-                            : 'Treatment Name (Arabic) *',
-                        hintText: 'مثال: هيدرافاشيال ديلوكس',
-                        filled: true,
-                        fillColor: isDark
-                            ? AppColors.cardSurfaceHover
-                            : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.border(ctx),
-                            width: 0.8,
-                          ),
-                        ),
-                      ),
-                      validator: (val) => (val == null || val.trim().isEmpty)
-                          ? loc.tr('clinic_validation_required')
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Price (AED)
-                    LtrTextFormField(
-                      controller: priceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textPrimary
-                            : AppColors.lightTextPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: loc.tr('clinic_service_price'),
-                        hintText: '750',
-                        filled: true,
-                        fillColor: isDark
-                            ? AppColors.cardSurfaceHover
-                            : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.border(ctx),
-                            width: 0.8,
-                          ),
-                        ),
-                      ),
-                      validator: (val) => (val == null || val.trim().isEmpty)
-                          ? loc.tr('clinic_validation_required')
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Description EN & AR
-                    LtrTextFormField(
-                      controller: descEnController,
-                      maxLines: 2,
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textPrimary
-                            : AppColors.lightTextPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic
-                            ? 'الوصف الطبي بالإنجليزية'
-                            : 'Description (English)',
-                        hintText: 'e.g. Deep cleansing and skin hydration...',
-                        filled: true,
-                        fillColor: isDark
-                            ? AppColors.cardSurfaceHover
-                            : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.border(ctx),
-                            width: 0.8,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: descArController,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      maxLines: 2,
-                      style: TextStyle(
-                        color: isDark
-                            ? AppColors.textPrimary
-                            : AppColors.lightTextPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic
-                            ? 'الوصف الطبي بالعربية'
-                            : 'Description (Arabic)',
-                        hintText: 'وصف للمزايا وشروط الجلسة...',
-                        filled: true,
-                        fillColor: isDark
-                            ? AppColors.cardSurfaceHover
-                            : AppColors.lightCardSurfaceHover,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.border(ctx),
-                            width: 0.8,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Save Button
-                    SilverButton(
-                      label: loc.tr('clinic_add_service'),
-                      icon: Icons.check,
-                      isFullWidth: true,
-                      height: 44,
-                      isLoading: isSubmitting,
-                      onPressed: isSubmitting
-                          ? null
-                          : () async {
-                              if (!formKey.currentState!.validate()) return;
-                              if (chosenCategoryId == null) {
-                                setModalState(() {
-                                  modalErrorMessage = loc.isArabic
-                                      ? 'يرجى اختيار التصنيف الطبي'
-                                      : 'Please select a medical category';
-                                });
-                                return;
-                              }
-
-                              final data = <String, dynamic>{
-                                'category': chosenCategoryId,
-                                'category_id': chosenCategoryId,
-                                'name_en': nameEnController.text.trim(),
-                                'name_ar':
-                                    nameArController.text.trim().isNotEmpty
-                                    ? nameArController.text.trim()
-                                    : nameEnController.text.trim(),
-                                'description_en': descEnController.text.trim(),
-                                'description_ar': descArController.text.trim(),
-                                'price':
-                                    double.tryParse(
-                                      priceController.text.trim(),
-                                    ) ??
-                                    750.0,
-                                'status': 'active',
-                                'is_active': true,
-                                'practitioners': <String>[],
-                              };
-
-                              setModalState(() {
-                                modalErrorMessage = null;
-                                isSubmitting = true;
-                              });
-
-                              try {
-                                await clinicService.createTreatment(data);
-                                if (ctx.mounted) Navigator.pop(ctx);
-                                if (context.mounted) {
-                                  showAppSnackBar(
-                                    context,
-                                    loc.tr('clinic_service_saved'),
-                                    type: AppSnackBarType.success,
-                                  );
-                                }
-                              } catch (e) {
-                                if (!ctx.mounted) return;
-                                String cleanMsg;
-                                if (e is ApiException) {
-                                  cleanMsg = e.message;
-                                } else {
-                                  cleanMsg =
-                                      ApiException.sanitizeRegulatoryCompliance(
-                                        e
-                                            .toString()
-                                            .replaceFirst('Exception: ', '')
-                                            .replaceFirst('ApiException: ', ''),
-                                      );
-                                }
-                                setModalState(() {
-                                  modalErrorMessage = cleanMsg;
-                                  isSubmitting = false;
-                                });
-                              }
-                            },
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
+  void _showAddServiceDialog(
+    BuildContext context,
+    LocaleService loc, {
+    TreatmentModel? existing,
+  }) {
+    showClinicTreatmentEditor(context, loc, existing: existing);
   }
 
   void _showProductFormDialog(
@@ -1144,6 +752,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'اسم المنتج بالإنجليزية *'
                             : 'Product Name (English) *',
@@ -1183,6 +792,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'اسم المنتج بالعربية'
                             : 'Product Name (Arabic)',
@@ -1217,6 +827,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'اسم العلامة التجارية بالإنجليزية'
                             : 'Brand Name (English)',
@@ -1253,6 +864,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'اسم العلامة التجارية بالعربية'
                             : 'Brand Name (Arabic)',
@@ -1287,6 +899,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الشركة / الجهة الراعية'
                             : 'Sponsoring Agency / Company',
@@ -1322,6 +935,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'وصف المنتج بالإنجليزية'
                             : 'Description (English)',
@@ -1359,6 +973,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'وصف المنتج بالعربية'
                             : 'Description (Arabic)',
@@ -1669,6 +1284,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'عنوان المقال بالإنجليزية *'
                             : 'Article Title (English) *',
@@ -1708,6 +1324,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'عنوان المقال بالعربية'
                             : 'Article Title (Arabic)',
@@ -1775,6 +1392,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'محتوى المقال بالإنجليزية *'
                             : 'Article Content (English) *',
@@ -1815,6 +1433,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'محتوى المقال بالعربية'
                             : 'Article Content (Arabic)',
@@ -1975,8 +1594,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     final nameEnCtrl = TextEditingController(text: clinic.nameEn);
     final descArCtrl = TextEditingController(text: clinic.descriptionAr);
     final descEnCtrl = TextEditingController(text: clinic.descriptionEn);
-    final addressArCtrl = TextEditingController(text: clinic.addressAr);
-    final mapsUrlCtrl = TextEditingController(text: clinic.googleMapsUrl ?? '');
+    ClinicLocationSelection? selectedLocation;
     final isDark = AppColors.isDark(context);
     String? logoPath;
     String? coverPath;
@@ -2115,6 +1733,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                     TextFormField(
                       controller: nameArCtrl,
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'اسم العيادة (عربي)'
                             : 'Clinic Name (Arabic)',
@@ -2135,6 +1754,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                     LtrTextFormField(
                       controller: nameEnCtrl,
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'اسم العيادة (إنجليزي)'
                             : 'Clinic Name (English)',
@@ -2149,44 +1769,53 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    TextFormField(
-                      controller: addressArCtrl,
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'العنوان' : 'Address',
-                        hintText: loc.isArabic
-                            ? 'مثال: جميرا 1، شارع شاطئ جميرا، دبي'
-                            : 'e.g. Jumeirah 1, Jumeirah Beach Road, Dubai',
-                        hintStyle: TextStyle(
-                          color: AppColors.text(
-                            context,
-                          ).withValues(alpha: 0.68),
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w400,
-                        ),
+                    OutlinedButton.icon(
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              final result = await showClinicLocationSelector(
+                                ctx,
+                                city: selectedLocation?.city ?? clinic.city,
+                                addressAr:
+                                    selectedLocation?.addressAr ??
+                                    clinic.addressAr,
+                                addressEn:
+                                    selectedLocation?.addressEn ??
+                                    clinic.addressEn,
+                                latitude:
+                                    selectedLocation?.latitude ??
+                                    clinic.latitude,
+                                longitude:
+                                    selectedLocation?.longitude ??
+                                    clinic.longitude,
+                              );
+                              if (!ctx.mounted || result == null) return;
+                              setModalState(() => selectedLocation = result);
+                            },
+                      icon: const Icon(Icons.location_on_outlined),
+                      label: Text(
+                        loc.isArabic
+                            ? 'تحديد موقع العيادة على الخريطة'
+                            : 'Choose Clinic Location on Map',
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    LtrTextFormField(
-                      controller: mapsUrlCtrl,
-                      decoration: InputDecoration(
-                        labelText: loc.isArabic
-                            ? 'رابط خرائط جوجل'
-                            : 'Google Maps URL',
-                        hintText: 'https://maps.google.com/...',
-                        hintStyle: TextStyle(
-                          color: AppColors.text(
-                            context,
-                          ).withValues(alpha: 0.68),
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w400,
-                        ),
+                    const SizedBox(height: 8),
+                    Text(
+                      clinicLocationSummary(
+                        selectedLocation?.city ?? clinic.city,
+                        loc.isArabic
+                            ? (selectedLocation?.addressAr ?? clinic.addressAr)
+                            : (selectedLocation?.addressEn ?? clinic.addressEn),
+                        arabic: loc.isArabic,
                       ),
+                      style: TextStyle(color: AppColors.mutedText(ctx)),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                     TextFormField(
                       controller: descArCtrl,
                       maxLines: 2,
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نبذة عن العيادة'
                             : 'Description (Arabic)',
@@ -2207,6 +1836,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       controller: descEnCtrl,
                       maxLines: 3,
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نبذة عن العيادة (إنجليزي)'
                             : 'Description (English)',
@@ -2237,11 +1867,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                   descriptionEn: descEnCtrl.text.trim(),
                                   phone: clinic.mainPhone,
                                   whatsapp: clinic.whatsapp,
-                                  addressAr: addressArCtrl.text.trim(),
+                                  addressAr: selectedLocation?.addressAr,
+                                  addressEn: selectedLocation?.addressEn,
+                                  city: selectedLocation?.city,
+                                  emirate: selectedLocation?.city,
+                                  latitude: selectedLocation?.latitude,
+                                  longitude: selectedLocation?.longitude,
                                   googleMapsUrl:
-                                      mapsUrlCtrl.text.trim().isNotEmpty
-                                      ? mapsUrlCtrl.text.trim()
-                                      : null,
+                                      selectedLocation?.googleMapsUrl,
                                   logo: logoPath,
                                   coverImage: coverPath,
                                   clearLogo: logoChanged && logoPath == null,
@@ -2290,17 +1923,113 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     );
   }
 
+  Future<void> _updateClinicLocation(
+    BuildContext context,
+    LocaleService loc,
+  ) async {
+    final service = ClinicPortalService();
+    final clinic = service.activeClinic;
+    final result = await showClinicLocationSelector(
+      context,
+      city: clinic.city,
+      addressAr: clinic.addressAr,
+      addressEn: clinic.addressEn,
+      latitude: clinic.latitude,
+      longitude: clinic.longitude,
+    );
+    if (result == null || !context.mounted) return;
+    try {
+      await service.updateClinicProfile(
+        nameAr: clinic.nameAr,
+        nameEn: clinic.nameEn,
+        descriptionAr: clinic.descriptionAr,
+        descriptionEn: clinic.descriptionEn,
+        phone: clinic.mainPhone,
+        whatsapp: clinic.whatsapp,
+        addressAr: result.addressAr,
+        addressEn: result.addressEn,
+        city: result.city,
+        emirate: result.city,
+        latitude: result.latitude,
+        longitude: result.longitude,
+        googleMapsUrl: result.googleMapsUrl,
+      );
+      if (context.mounted) {
+        showAppSnackBar(
+          context,
+          loc.isArabic ? 'تم تحديث موقع العيادة' : 'Clinic location updated',
+          type: AppSnackBarType.success,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showAppSnackBar(
+          context,
+          e is ApiException
+              ? e.message
+              : loc.isArabic
+              ? 'تعذر حفظ الموقع. حاول مجدداً.'
+              : 'Could not save location. Please try again.',
+          type: AppSnackBarType.error,
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteCatalogItem(
+    BuildContext context,
+    LocaleService loc,
+    Future<void> Function() remove,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(loc.isArabic ? 'حذف العنصر؟' : 'Delete this item?'),
+        content: Text(
+          loc.isArabic
+              ? 'سيتم حذف العنصر من ملف العيادة.'
+              : 'This item will be removed from the clinic profile.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(loc.isArabic ? 'إلغاء' : 'Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(loc.isArabic ? 'حذف' : 'Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await remove();
+    } catch (e) {
+      if (context.mounted) {
+        showAppSnackBar(
+          context,
+          e is ApiException
+              ? e.message
+              : loc.isArabic
+              ? 'تعذر حذف العنصر'
+              : 'Could not delete item',
+          type: AppSnackBarType.error,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final themeService = ThemeService();
     final clinicService = ClinicPortalService();
     final isDark = AppColors.isDark(context);
-    final clinic = clinicService.activeClinic;
-
     return ListenableBuilder(
       listenable: Listenable.merge([loc, themeService, clinicService]),
       builder: (context, _) {
+        final clinic = clinicService.activeClinic;
         return Scaffold(
           backgroundColor: AppColors.bg(context),
           appBar: AppBar(
@@ -2319,152 +2048,97 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
             controller: _scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
-              // Clinic Overview Card
               LuxuryCard(
                 padding: EdgeInsets.zero,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (clinic.coverImageUrl.isNotEmpty)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(18),
-                        ),
-                        child: LuxuryImage(
-                          imageUrl: clinic.coverImageUrl,
-                          height: 130,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          placeholderIcon: Icons.photo_library_outlined,
-                        ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              LuxuryImage(
-                                imageUrl: clinic.logoUrl,
-                                width: 60,
-                                height: 60,
-                                borderRadius: BorderRadius.circular(12),
-                                placeholderIcon: Icons.apartment_rounded,
-                                fit: BoxFit.cover,
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      loc.isArabic
-                                          ? clinic.nameAr
-                                          : clinic.nameEn,
-                                      style: AppTypography.cardTitle.copyWith(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w800,
-                                        color: isDark
-                                            ? AppColors.silverPrimary
-                                            : AppColors.lightTextPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                                      style: AppTypography.caption.copyWith(
-                                        color: AppColors.mutedText(context),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    TierBadge(tier: clinic.subscriptionTier),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  size: 18,
-                                  color: AppColors.accentChampagne,
-                                ),
-                                tooltip: loc.isArabic
-                                    ? 'تعديل ملف العيادة'
-                                    : 'Edit Clinic Profile',
-                                onPressed: () =>
-                                    _showEditClinicProfileDialog(context, loc),
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 20),
-                          Text(
-                            loc.isArabic
-                                ? clinic.descriptionAr
-                                : clinic.descriptionEn,
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.mutedText(context),
-                              fontSize: 12,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: ClinicEditorialHeader(
+                  clinic: clinic,
+                  onEdit: () => _showEditClinicProfileDialog(context, loc),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Google Maps Location Card
               LuxuryCard(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.map_outlined,
-                          color: AppColors.accentChampagne,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          loc.tr('clinic_maps_config'),
-                          style: AppTypography.cardTitle.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.silverPrimary
-                                : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      loc.isArabic ? 'موقع العيادة' : 'Clinic Location',
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      loc.isArabic ? clinic.addressAr : clinic.addressEn,
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontSize: 12.5,
-                        color: isDark
-                            ? AppColors.silverPrimary
-                            : AppColors.lightTextPrimary,
+                      clinicLocationSummary(
+                        clinic.city,
+                        loc.isArabic ? clinic.addressAr : clinic.addressEn,
+                        arabic: loc.isArabic,
+                      ),
+                      style: TextStyle(
+                        color: AppColors.mutedText(context),
+                        height: 1.5,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    SilverButton(
-                      label: loc.tr('open_in_maps'),
-                      icon: Icons.directions_outlined,
-                      height: 38,
-                      onPressed: () {
-                        MapsLauncher.openDirections(
-                          latitude: clinic.latitude,
-                          longitude: clinic.longitude,
-                          destinationTitle: loc.isArabic
-                              ? clinic.nameAr
-                              : clinic.nameEn,
-                        );
-                      },
+                    if (ClinicLocationSelection.validCoordinates(
+                      clinic.latitude,
+                      clinic.longitude,
+                    ))
+                      ClinicMapPreview(
+                        key: ValueKey('${clinic.latitude},${clinic.longitude}'),
+                        latitude: clinic.latitude,
+                        longitude: clinic.longitude,
+                      )
+                    else
+                      Container(
+                        height: 100,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.goldText(
+                            context,
+                          ).withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Text(
+                          loc.isArabic
+                              ? 'حدد موقع العيادة على الخريطة'
+                              : 'Choose the clinic’s map location',
+                          style: TextStyle(color: AppColors.text(context)),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _updateClinicLocation(context, loc),
+                          icon: const Icon(Icons.edit_location_alt_outlined),
+                          label: Text(
+                            loc.isArabic
+                                ? 'تحديث موقع العيادة'
+                                : 'Update Location',
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => MapsLauncher.openMapLocation(
+                            latitude: clinic.latitude,
+                            longitude: clinic.longitude,
+                            googleMapsUrl: clinic.googleMapsUrl,
+                            placeName: loc.isArabic
+                                ? clinic.nameAr
+                                : clinic.nameEn,
+                          ),
+                          icon: const Icon(Icons.open_in_new),
+                          label: Text(
+                            loc.isArabic
+                                ? 'فتح في خرائط Google'
+                                : 'Open in Google Maps',
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -2493,10 +2167,16 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(
+                            IconButton.outlined(
+                              style: IconButton.styleFrom(
+                                foregroundColor: AppColors.text(context),
+                                side: BorderSide(
+                                  color: AppColors.border(context),
+                                ),
+                              ),
+                              icon: Icon(
                                 Icons.open_in_new_rounded,
-                                color: AppColors.silverPrimary,
+                                color: AppColors.text(context),
                                 size: 18,
                               ),
                               tooltip: loc.isArabic
@@ -2530,92 +2210,22 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       items: () => clinicService.clinicPractitioners,
                       listenable: clinicService,
                       page: clinicService.collection('practitioners'),
-                      itemBuilder: (context, p) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
-                                child: Image.network(
-                                  p.avatarUrl,
-                                  width: 36,
-                                  height: 36,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => Container(
-                                    width: 36,
-                                    height: 36,
-                                    color: isDark
-                                        ? AppColors.cardSurfaceHover
-                                        : AppColors.lightCardSurfaceHover,
-                                    child: const Icon(
-                                      Icons.person,
-                                      size: 20,
-                                      color: AppColors.accentChampagne,
-                                    ),
-                                  ),
-                                  cacheWidth: computeSafeCacheWidth(
-                                    context,
-                                    400,
-                                    null,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      loc.isArabic ? p.nameAr : p.nameEn,
-                                      style: AppTypography.bodyMedium.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13,
-                                        color: isDark
-                                            ? AppColors.silverPrimary
-                                            : AppColors.lightTextPrimary,
-                                      ),
-                                    ),
-                                    Text(
-                                      loc.isArabic
-                                          ? p.specialtyAr
-                                          : p.specialtyEn,
-                                      style: AppTypography.caption.copyWith(
-                                        color: AppColors.mutedText(context),
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              PractitionerBadge(type: p.type, showIcon: false),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  size: 16,
-                                  color: AppColors.silverPrimary,
-                                ),
-                                tooltip: loc.isArabic ? 'تعديل' : 'Edit',
-                                onPressed: () => _showAddPractitionerDialog(
-                                  context,
-                                  loc,
-                                  existing: p,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 16,
-                                  color: AppColors.errorRed,
-                                ),
-                                tooltip: loc.isArabic ? 'حذف' : 'Delete',
-                                onPressed: () =>
-                                    clinicService.deletePractitioner(p.id),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      itemBuilder: (context, p) => ClinicCatalogMiniRow(
+                        title: loc.isArabic ? p.nameAr : p.nameEn,
+                        subtitle: loc.isArabic ? p.specialtyAr : p.specialtyEn,
+                        imageUrl: p.avatarUrl,
+                        icon: Icons.person_outline,
+                        onEdit: () => _showAddPractitionerDialog(
+                          context,
+                          loc,
+                          existing: p,
+                        ),
+                        onDelete: () => _deleteCatalogItem(
+                          context,
+                          loc,
+                          () => clinicService.deletePractitioner(p.id),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -2644,10 +2254,16 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(
+                            IconButton.outlined(
+                              style: IconButton.styleFrom(
+                                foregroundColor: AppColors.text(context),
+                                side: BorderSide(
+                                  color: AppColors.border(context),
+                                ),
+                              ),
+                              icon: Icon(
                                 Icons.open_in_new_rounded,
-                                color: AppColors.silverPrimary,
+                                color: AppColors.text(context),
                                 size: 18,
                               ),
                               tooltip: loc.isArabic
@@ -2681,52 +2297,22 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       items: () => clinicService.clinicTreatments,
                       listenable: clinicService,
                       page: clinicService.collection('treatments'),
-                      itemBuilder: (context, t) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.spa_outlined,
-                                size: 16,
-                                color: AppColors.accentChampagne,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  loc.isArabic ? t.nameAr : t.nameEn,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12.5,
-                                    color: isDark
-                                        ? AppColors.silverPrimary
-                                        : AppColors.lightTextPrimary,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                loc.isArabic
-                                    ? t.durationText
-                                    : (t.durationTextEn ?? t.durationText),
-                                style: AppTypography.caption.copyWith(
-                                  color: AppColors.goldText(context),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 16,
-                                  color: AppColors.errorRed,
-                                ),
-                                tooltip: loc.isArabic ? 'حذف' : 'Delete',
-                                onPressed: () =>
-                                    clinicService.deleteTreatment(t.id),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      itemBuilder: (context, t) => ClinicCatalogMiniRow(
+                        title: loc.isArabic ? t.nameAr : t.nameEn,
+                        subtitle: loc.isArabic ? t.categoryAr : t.categoryEn,
+                        imageUrl: '',
+                        icon: Icons.spa_outlined,
+                        badge: t.price == null
+                            ? null
+                            : '${t.price!.toStringAsFixed(0)} ${loc.isArabic ? 'درهم' : 'AED'}',
+                        onEdit: () =>
+                            _showAddServiceDialog(context, loc, existing: t),
+                        onDelete: () => _deleteCatalogItem(
+                          context,
+                          loc,
+                          () => clinicService.deleteTreatment(t.id),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -2764,20 +2350,24 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       items: () => clinicService.clinicOffers,
                       listenable: clinicService,
                       page: clinicService.collection('offers'),
-                      itemBuilder: (context, offer) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          loc.isArabic ? offer.titleAr : offer.titleEn,
-                          style: TextStyle(color: AppColors.text(context)),
+                      itemBuilder: (context, offer) => ClinicCatalogMiniRow(
+                        title: loc.isArabic ? offer.titleAr : offer.titleEn,
+                        subtitle: loc.isArabic
+                            ? offer.termsAr
+                            : (offer.termsEn ?? ''),
+                        imageUrl: offer.imageUrl,
+                        icon: Icons.local_offer_outlined,
+                        badge:
+                            '${offer.offerPrice.toStringAsFixed(0)} ${loc.isArabic ? 'درهم' : 'AED'} · ${offer.discountPercentage}%',
+                        onEdit: () => showClinicOfferEditor(
+                          context,
+                          loc,
+                          existing: offer,
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          tooltip: loc.isArabic ? 'تعديل العرض' : 'Edit Offer',
-                          onPressed: () => showClinicOfferEditor(
-                            context,
-                            loc,
-                            existing: offer,
-                          ),
+                        onDelete: () => _deleteCatalogItem(
+                          context,
+                          loc,
+                          () => clinicService.deleteOffer(offer.id),
                         ),
                       ),
                     ),
@@ -2831,156 +2421,21 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         items: () => clinicService.clinicProducts,
                         listenable: clinicService,
                         page: clinicService.collection('products'),
-                        itemBuilder: (context, p) {
-                          final catLabel = loc.isArabic
-                              ? p.categoryAr
-                              : p.categoryEn;
-                          final brandLabel = loc.isArabic
-                              ? (p.brandNameAr?.isNotEmpty == true
-                                    ? p.brandNameAr!
-                                    : (p.brandNameEn?.isNotEmpty == true
-                                          ? p.brandNameEn!
-                                          : (p.sponsorCompany?.isNotEmpty ==
-                                                    true
-                                                ? p.sponsorCompany!
-                                                : (catLabel.isNotEmpty
-                                                      ? catLabel
-                                                      : 'إعلان علامة تجارية'))))
-                              : (p.brandNameEn?.isNotEmpty == true
-                                    ? p.brandNameEn!
-                                    : (p.brandNameAr?.isNotEmpty == true
-                                          ? p.brandNameAr!
-                                          : (p.sponsorCompany?.isNotEmpty ==
-                                                    true
-                                                ? p.sponsorCompany!
-                                                : (catLabel.isNotEmpty
-                                                      ? catLabel
-                                                      : 'Brand Showcase'))));
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    p.imageUrl,
-                                    width: 38,
-                                    height: 38,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
-                                      width: 38,
-                                      height: 38,
-                                      color: isDark
-                                          ? AppColors.cardSurfaceHover
-                                          : AppColors.lightCardSurfaceHover,
-                                      child: const Icon(
-                                        Icons.shopping_bag_outlined,
-                                        color: AppColors.accentChampagne,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    cacheWidth: computeSafeCacheWidth(
-                                      context,
-                                      400,
-                                      null,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        loc.isArabic ? p.nameAr : p.nameEn,
-                                        style: AppTypography.bodyMedium
-                                            .copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 12.5,
-                                              color: isDark
-                                                  ? AppColors.silverPrimary
-                                                  : AppColors.lightTextPrimary,
-                                            ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        brandLabel,
-                                        style: TextStyle(
-                                          color: AppColors.goldText(context),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_outlined,
-                                    size: 17,
-                                    color: AppColors.silverSecondary,
-                                  ),
-                                  tooltip: loc.isArabic ? 'تعديل' : 'Edit',
-                                  onPressed: () => _showProductFormDialog(
-                                    context,
-                                    loc,
-                                    existing: p,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    p.isAvailable
-                                        ? Icons.visibility_rounded
-                                        : Icons.visibility_off_rounded,
-                                    size: 18,
-                                    color: p.isAvailable
-                                        ? const Color(0xFF10B981)
-                                        : Colors.redAccent,
-                                  ),
-                                  tooltip: loc.tr(
-                                    'clinic_product_toggle_avail',
-                                  ),
-                                  onPressed: () async {
-                                    try {
-                                      await clinicService
-                                          .toggleProductAvailability(p.id);
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        showAppSnackBar(
-                                          context,
-                                          e.toString(),
-                                          type: AppSnackBarType.error,
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline_rounded,
-                                    size: 18,
-                                    color: Colors.redAccent,
-                                  ),
-                                  onPressed: () async {
-                                    try {
-                                      await clinicService.deleteProduct(p.id);
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        showAppSnackBar(
-                                          context,
-                                          e.toString(),
-                                          type: AppSnackBarType.error,
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                        itemBuilder: (context, p) => ClinicCatalogMiniRow(
+                          title: loc.isArabic ? p.nameAr : p.nameEn,
+                          subtitle: loc.isArabic
+                              ? (p.brandNameAr ?? p.brandNameEn ?? '')
+                              : (p.brandNameEn ?? p.brandNameAr ?? ''),
+                          imageUrl: p.imageUrl,
+                          icon: Icons.auto_awesome_outlined,
+                          onEdit: () =>
+                              _showProductFormDialog(context, loc, existing: p),
+                          onDelete: () => _deleteCatalogItem(
+                            context,
+                            loc,
+                            () => clinicService.deleteProduct(p.id),
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -3032,140 +2487,24 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         items: () => clinicService.clinicArticles,
                         listenable: clinicService,
                         page: clinicService.collection('articles'),
-                        itemBuilder: (context, art) {
-                          final authorName = loc.isArabic
+                        itemBuilder: (context, art) => ClinicCatalogMiniRow(
+                          title: loc.isArabic ? art.titleAr : art.titleEn,
+                          subtitle: loc.isArabic
                               ? art.authorDoctorNameAr
-                              : art.authorDoctorNameEn;
-                          final authorSubtitle = authorName.isNotEmpty
-                              ? '${loc.tr("article_author_by")}: $authorName'
-                              : (loc.isArabic ? clinic.nameAr : clinic.nameEn);
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    art.coverImageUrl,
-                                    width: 38,
-                                    height: 38,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
-                                      width: 38,
-                                      height: 38,
-                                      color: isDark
-                                          ? AppColors.cardSurfaceHover
-                                          : AppColors.lightCardSurfaceHover,
-                                      child: const Icon(
-                                        Icons.article_outlined,
-                                        color: AppColors.accentChampagne,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    cacheWidth: computeSafeCacheWidth(
-                                      context,
-                                      400,
-                                      null,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        loc.isArabic
-                                            ? art.titleAr
-                                            : art.titleEn,
-                                        style: AppTypography.bodyMedium
-                                            .copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 12.5,
-                                              color: isDark
-                                                  ? AppColors.silverPrimary
-                                                  : AppColors.lightTextPrimary,
-                                            ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        authorSubtitle,
-                                        style: TextStyle(
-                                          color: AppColors.mutedText(context),
-                                          fontSize: 10.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_outlined,
-                                    size: 17,
-                                    color: AppColors.silverSecondary,
-                                  ),
-                                  tooltip: loc.isArabic ? 'تعديل' : 'Edit',
-                                  onPressed: () => _showArticleFormDialog(
-                                    context,
-                                    loc,
-                                    existing: art,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    art.isPublished
-                                        ? Icons.public_rounded
-                                        : Icons.public_off_rounded,
-                                    size: 18,
-                                    color: art.isPublished
-                                        ? const Color(0xFF10B981)
-                                        : Colors.redAccent,
-                                  ),
-                                  tooltip: art.isPublished
-                                      ? (loc.isArabic ? 'منشور' : 'Published')
-                                      : (loc.isArabic ? 'مسودة' : 'Draft'),
-                                  onPressed: () async {
-                                    try {
-                                      await clinicService.toggleArticlePublish(
-                                        art.id,
-                                      );
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        showAppSnackBar(
-                                          context,
-                                          e.toString(),
-                                          type: AppSnackBarType.error,
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline_rounded,
-                                    size: 18,
-                                    color: Colors.redAccent,
-                                  ),
-                                  onPressed: () async {
-                                    try {
-                                      await clinicService.deleteArticle(art.id);
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        showAppSnackBar(
-                                          context,
-                                          e.toString(),
-                                          type: AppSnackBarType.error,
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                              : art.authorDoctorNameEn,
+                          imageUrl: art.coverImageUrl,
+                          icon: Icons.article_outlined,
+                          onEdit: () => _showArticleFormDialog(
+                            context,
+                            loc,
+                            existing: art,
+                          ),
+                          onDelete: () => _deleteCatalogItem(
+                            context,
+                            loc,
+                            () => clinicService.deleteArticle(art.id),
+                          ),
+                        ),
                       ),
                   ],
                 ),

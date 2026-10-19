@@ -118,6 +118,7 @@ class _ClinicLeadsScreenState extends State<ClinicLeadsScreen> {
                       fontSize: 13,
                     ),
                     decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                       hintText: loc.isArabic
                           ? 'بحث بالاسم، الهاتف، أو الخدمة...'
                           : 'Search by name, phone or service...',

@@ -225,6 +225,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                           ? AppColors.cardSurface
                           : AppColors.lightCardSurface,
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نوع الممارس'
                             : 'Practitioner Type',
@@ -271,6 +272,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الاسم الكامل بالإنجليزية *'
                             : 'Full Name (English) *',
@@ -310,6 +312,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الاسم الكامل بالعربية *'
                             : 'Full Name (Arabic) *',
@@ -349,6 +352,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'المسمى المهني بالإنجليزية'
                             : 'Professional Title (English)',
@@ -378,6 +382,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'المسمى المهني بالعربية'
                             : 'Professional Title (Arabic)',
@@ -407,6 +412,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'التخصص بالإنجليزية'
                             : 'Specialty (English)',
@@ -436,6 +442,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'التخصص بالعربية'
                             : 'Specialty (Arabic)',
@@ -466,6 +473,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نبذة مهنية بالإنجليزية'
                             : 'Bio (English)',
@@ -504,6 +512,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'نبذة مهنية بالعربية'
                             : 'Bio (Arabic)',
@@ -771,6 +780,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       fontSize: 13,
                     ),
                     decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                       hintText: loc.isArabic
                           ? 'بحث بالاسم أو التخصص...'
                           : 'Search by name or specialty...',

@@ -26,7 +26,8 @@ class ClinicSetupChecklistCard extends StatefulWidget {
   });
 
   @override
-  State<ClinicSetupChecklistCard> createState() => _ClinicSetupChecklistCardState();
+  State<ClinicSetupChecklistCard> createState() =>
+      _ClinicSetupChecklistCardState();
 }
 
 class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
@@ -40,8 +41,11 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
     final clinicService = ClinicPortalService();
 
     final isSubmitted = widget.clinic.setupStatus == 'submitted';
-    final progress = widget.checklist?.progressPercentage ?? _computeFallbackProgress(clinicService);
-    final isReady = progress >= 100 || (widget.checklist?.isReadyForReview == true);
+    final progress =
+        widget.checklist?.progressPercentage ??
+        _computeFallbackProgress(clinicService);
+    final isReady =
+        progress >= 100 || (widget.checklist?.isReadyForReview == true);
 
     return LuxuryCard(
       padding: const EdgeInsets.all(16),
@@ -63,8 +67,12 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
-                    isSubmitted ? Icons.verified_outlined : Icons.assignment_turned_in_rounded,
-                    color: isSubmitted ? const Color(0xFF10B981) : AppColors.accentChampagne,
+                    isSubmitted
+                        ? Icons.verified_outlined
+                        : Icons.assignment_turned_in_rounded,
+                    color: isSubmitted
+                        ? const Color(0xFF10B981)
+                        : AppColors.accentChampagne,
                     size: 20,
                   ),
                 ),
@@ -74,19 +82,30 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        loc.isArabic ? 'إكمال إعداد وتوثيق العيادة' : 'Complete Clinic Setup & Verification',
+                        loc.isArabic
+                            ? 'إكمال إعداد وتوثيق العيادة'
+                            : 'Complete Clinic Setup & Verification',
                         style: AppTypography.cardTitle.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         isSubmitted
-                            ? (loc.isArabic ? 'قيد التدقيق الطبي من قبل الإدارة' : 'Under medical compliance review')
-                            : (loc.isArabic ? 'أكمل المتطلبات لنشر خدمات العيادة' : 'Complete items to publish clinic catalog'),
-                        style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11),
+                            ? (loc.isArabic
+                                  ? 'قيد التدقيق الطبي من قبل الإدارة'
+                                  : 'Under medical compliance review')
+                            : (loc.isArabic
+                                  ? 'أكمل المتطلبات لنشر خدمات العيادة'
+                                  : 'Complete items to publish clinic catalog'),
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.mutedText(context),
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -95,18 +114,25 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
 
                 // Status Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isSubmitted
                         ? const Color(0xFF10B981).withValues(alpha: 0.2)
                         : (isReady
-                            ? AppColors.accentChampagne.withValues(alpha: 0.2)
-                            : (isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover)),
+                              ? AppColors.accentChampagne.withValues(alpha: 0.2)
+                              : (isDark
+                                    ? AppColors.cardSurfaceHover
+                                    : AppColors.lightCardSurfaceHover)),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSubmitted
                           ? const Color(0xFF10B981)
-                          : (isReady ? AppColors.accentChampagne : AppColors.border(context)),
+                          : (isReady
+                                ? AppColors.accentChampagne
+                                : AppColors.border(context)),
                       width: 0.8,
                     ),
                   ),
@@ -119,13 +145,19 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                       fontWeight: FontWeight.bold,
                       color: isSubmitted
                           ? const Color(0xFF10B981)
-                          : (isReady ? AppColors.goldText(context) : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary)),
+                          : (isReady
+                                ? AppColors.goldText(context)
+                                : (isDark
+                                      ? AppColors.silverPrimary
+                                      : AppColors.lightTextPrimary)),
                     ),
                   ),
                 ),
                 const SizedBox(width: 4),
                 Icon(
-                  _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                  _isExpanded
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
                   color: AppColors.mutedText(context),
                   size: 20,
                 ),
@@ -140,9 +172,13 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
             child: LinearProgressIndicator(
               value: progress / 100.0,
               minHeight: 6,
-              backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+              backgroundColor: isDark
+                  ? AppColors.cardSurfaceHover
+                  : AppColors.lightCardSurfaceHover,
               valueColor: AlwaysStoppedAnimation<Color>(
-                isSubmitted ? const Color(0xFF10B981) : AppColors.accentChampagne,
+                isSubmitted
+                    ? const Color(0xFF10B981)
+                    : AppColors.accentChampagne,
               ),
             ),
           ),
@@ -156,16 +192,26 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
             // Submit Button
             if (isSubmitted)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4), width: 0.8),
+                  border: Border.all(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.hourglass_top_rounded, color: Color(0xFF10B981), size: 16),
+                    const Icon(
+                      Icons.hourglass_top_rounded,
+                      color: Color(0xFF10B981),
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       loc.isArabic
@@ -184,7 +230,9 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
               SilverButton(
                 label: _isSubmitting
                     ? (loc.isArabic ? 'جاري الإرسال...' : 'Submitting...')
-                    : (loc.isArabic ? 'إرسال ملف العيادة للتدقيق والاعتماد' : 'Submit for Platform Verification'),
+                    : (loc.isArabic
+                          ? 'إرسال ملف العيادة للتدقيق والاعتماد'
+                          : 'Submit for Platform Verification'),
                 icon: Icons.send_rounded,
                 height: 42,
                 onPressed: (isReady && !_isSubmitting)
@@ -231,7 +279,9 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
         children: widget.checklist!.items.map((item) {
           VoidCallback? action;
           String actionLabel = loc.isArabic ? 'إدارة' : 'Manage';
-          if (item.key == 'branding' || item.key == 'details' || item.key == 'branch') {
+          if (item.key == 'branding' ||
+              item.key == 'details' ||
+              item.key == 'branch') {
             action = widget.onNavigateToProfile;
             actionLabel = loc.isArabic
                 ? (item.isCompleted ? 'تعديل' : 'إكمال')
@@ -267,36 +317,48 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
       );
     }
 
-    final hasBranding = widget.clinic.logoUrl.isNotEmpty || widget.clinic.coverImageUrl.isNotEmpty;
-    final hasDetails = widget.clinic.descriptionAr.isNotEmpty ||
+    final hasBranding =
+        widget.clinic.logoUrl.isNotEmpty ||
+        widget.clinic.coverImageUrl.isNotEmpty;
+    final hasDetails =
+        widget.clinic.descriptionAr.isNotEmpty ||
         widget.clinic.descriptionEn.isNotEmpty ||
         widget.clinic.nameEn.isNotEmpty;
-    final hasBranch = clinicService.clinicBranches.isNotEmpty ||
+    final hasBranch =
+        clinicService.clinicBranches.isNotEmpty ||
         widget.clinic.branches.isNotEmpty ||
         widget.clinic.hasMapLocation;
-    final hasPractitioner = clinicService.clinicPractitioners.isNotEmpty ||
+    final hasPractitioner =
+        clinicService.clinicPractitioners.isNotEmpty ||
         clinicService.activePractitionersCount > 0;
-    final hasTreatment = clinicService.clinicTreatments.isNotEmpty ||
+    final hasTreatment =
+        clinicService.clinicTreatments.isNotEmpty ||
         clinicService.activeTreatmentsCount > 0;
 
     return Column(
       children: [
         _ChecklistTile(
-          title: loc.isArabic ? 'الهوية البصرية والوصف التعريفي' : 'Clinic Branding & Bio Details',
+          title: loc.isArabic
+              ? 'الهوية البصرية والوصف التعريفي'
+              : 'Clinic Branding & Bio Details',
           isDone: hasBranding && hasDetails,
           actionLabel: loc.isArabic ? 'تعديل' : 'Edit',
           onAction: widget.onNavigateToProfile,
         ),
         const SizedBox(height: 8),
         _ChecklistTile(
-          title: loc.isArabic ? 'الفرع الرئيسي وموقع الخريطة' : 'Main Branch Location & Map',
+          title: loc.isArabic
+              ? 'الفرع الرئيسي وموقع الخريطة'
+              : 'Main Branch Location & Map',
           isDone: hasBranch,
           actionLabel: loc.isArabic ? 'إدارة' : 'Manage',
           onAction: widget.onNavigateToProfile,
         ),
         const SizedBox(height: 8),
         _ChecklistTile(
-          title: loc.isArabic ? 'إضافة طبيب أو ممارس مرخص واحد على الأقل' : 'At least 1 Medical Practitioner',
+          title: loc.isArabic
+              ? 'إضافة طبيب أو ممارس مرخص واحد على الأقل'
+              : 'At least 1 Medical Practitioner',
           isDone: hasPractitioner,
           actionLabel: loc.isArabic ? '+ إضافة' : '+ Add',
           onAction: () {
@@ -308,7 +370,9 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
         ),
         const SizedBox(height: 8),
         _ChecklistTile(
-          title: loc.isArabic ? 'إضافة خدمة أو علاج تجميلي واحد على الأقل' : 'At least 1 Treatment Service',
+          title: loc.isArabic
+              ? 'إضافة خدمة أو علاج تجميلي واحد على الأقل'
+              : 'At least 1 Treatment Service',
           isDone: hasTreatment,
           actionLabel: loc.isArabic ? '+ إضافة' : '+ Add',
           onAction: () {
@@ -324,11 +388,27 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
 
   int _computeFallbackProgress(ClinicPortalService clinicService) {
     int count = 0;
-    if (widget.clinic.logoUrl.isNotEmpty || widget.clinic.coverImageUrl.isNotEmpty) count++;
-    if (widget.clinic.descriptionAr.isNotEmpty || widget.clinic.descriptionEn.isNotEmpty) count++;
-    if (clinicService.clinicBranches.isNotEmpty || widget.clinic.branches.isNotEmpty || widget.clinic.hasMapLocation) count++;
-    if (clinicService.clinicPractitioners.isNotEmpty || clinicService.activePractitionersCount > 0) count++;
-    if (clinicService.clinicTreatments.isNotEmpty || clinicService.activeTreatmentsCount > 0) count++;
+    if (widget.clinic.logoUrl.isNotEmpty ||
+        widget.clinic.coverImageUrl.isNotEmpty) {
+      count++;
+    }
+    if (widget.clinic.descriptionAr.isNotEmpty ||
+        widget.clinic.descriptionEn.isNotEmpty) {
+      count++;
+    }
+    if (clinicService.clinicBranches.isNotEmpty ||
+        widget.clinic.branches.isNotEmpty ||
+        widget.clinic.hasMapLocation) {
+      count++;
+    }
+    if (clinicService.clinicPractitioners.isNotEmpty ||
+        clinicService.activePractitionersCount > 0) {
+      count++;
+    }
+    if (clinicService.clinicTreatments.isNotEmpty ||
+        clinicService.activeTreatmentsCount > 0) {
+      count++;
+    }
     return ((count / 5) * 100).round();
   }
 }
@@ -353,16 +433,22 @@ class _ChecklistTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+        color: isDark
+            ? AppColors.cardSurfaceHover
+            : AppColors.lightCardSurfaceHover,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.border(context), width: 0.8),
       ),
       child: Row(
         children: [
           Icon(
-            isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+            isDone
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked_rounded,
             size: 18,
-            color: isDone ? const Color(0xFF10B981) : AppColors.mutedText(context),
+            color: isDone
+                ? const Color(0xFF10B981)
+                : AppColors.mutedText(context),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -372,12 +458,35 @@ class _ChecklistTile extends StatelessWidget {
                 fontSize: 12.5,
                 fontWeight: isDone ? FontWeight.w600 : FontWeight.normal,
                 color: isDone
-                    ? (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary)
+                    ? (isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary)
                     : AppColors.mutedText(context),
-                decoration: isDone ? TextDecoration.lineThrough : null,
               ),
             ),
           ),
+          if (isDone) ...[
+            const SizedBox(width: 6),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  LocaleService().isArabic ? 'مكتمل' : 'Completed ✓',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? const Color(0xFF6EE7B7)
+                        : const Color(0xFF166534),
+                  ),
+                ),
+              ),
+            ),
+          ],
           if (onAction != null) ...[
             const SizedBox(width: 8),
             GestureDetector(
@@ -387,7 +496,10 @@ class _ChecklistTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.backgroundDeep : Colors.white,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4), width: 0.8),
+                  border: Border.all(
+                    color: AppColors.accentChampagne.withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
                 ),
                 child: Text(
                   actionLabel,
