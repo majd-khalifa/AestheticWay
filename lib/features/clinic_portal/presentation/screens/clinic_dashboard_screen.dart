@@ -1,3 +1,4 @@
+import '../widgets/clinic_location_selector.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -46,11 +47,11 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
     final loc = LocaleService();
     final clinicService = ClinicPortalService();
     final isDark = AppColors.isDark(context);
-    final clinic = clinicService.activeClinic;
 
     return ListenableBuilder(
       listenable: Listenable.merge([loc, clinicService]),
       builder: (context, _) {
+        final clinic = clinicService.activeClinic;
         final recentLeads = clinicService.clinicLeads.take(4).toList();
         final clinicDisplayName =
             clinicService.dashboardData?.clinicName.isNotEmpty == true
@@ -209,7 +210,13 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
+                                    clinicLocationSummary(
+                                      clinic.city,
+                                      loc.isArabic
+                                          ? clinic.addressAr
+                                          : clinic.addressEn,
+                                      arabic: loc.isArabic,
+                                    ),
                                     style: AppTypography.caption.copyWith(
                                       color: AppColors.mutedText(context),
                                     ),

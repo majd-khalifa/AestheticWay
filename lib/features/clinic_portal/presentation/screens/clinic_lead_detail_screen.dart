@@ -523,6 +523,7 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         hintText: loc.tr('clinic_internal_notes_hint'),
                         hintStyle: TextStyle(
                           color: AppColors.text(context),

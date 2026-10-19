@@ -161,6 +161,7 @@ Future<void> showClinicOfferEditor(
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'عنوان العرض بالإنجليزية *'
                             : 'Offer Title (English) *',
@@ -200,6 +201,7 @@ Future<void> showClinicOfferEditor(
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'عنوان العرض بالعربية *'
                             : 'Offer Title (Arabic) *',
@@ -259,6 +261,8 @@ Future<void> showClinicOfferEditor(
                               fontSize: 13,
                             ),
                             decoration: InputDecoration(
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.always,
                               labelText: loc.tr('clinic_offer_original_price'),
                               hintText: 'e.g. 1500',
                               hintStyle: TextStyle(
@@ -299,6 +303,8 @@ Future<void> showClinicOfferEditor(
                               fontSize: 13,
                             ),
                             decoration: InputDecoration(
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.always,
                               labelText: loc.tr('clinic_offer_discount_price'),
                               hintText: 'e.g. 990',
                               hintStyle: TextStyle(
@@ -475,6 +481,7 @@ Future<void> showClinicOfferEditor(
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الشروط والوصف بالإنجليزية'
                             : 'Terms & Description (English)',
@@ -506,6 +513,7 @@ Future<void> showClinicOfferEditor(
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
                             ? 'الشروط والوصف بالعربية'
                             : 'Terms & Description (Arabic)',

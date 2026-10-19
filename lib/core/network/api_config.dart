@@ -49,8 +49,9 @@ class ApiConfig {
     return defaultProductionBaseUrl;
   }
 
-  static const Duration connectTimeout = Duration(seconds: 15);
-  static const Duration receiveTimeout = Duration(seconds: 15);
+  static const Duration connectTimeout = Duration(seconds: 30);
+  static const Duration sendTimeout = Duration(seconds: 60);
+  static const Duration receiveTimeout = Duration(seconds: 60);
 
   // Auth Endpoints (Relative paths with trailing slash!)
   static const String register = 'auth/register/';
