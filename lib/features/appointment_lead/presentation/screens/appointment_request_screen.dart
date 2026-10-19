@@ -1,3 +1,10 @@
+import '../../../clinics/data/clinics_repository.dart';
+import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
+import 'package:aesthetic_way/core/data/paged_collection.dart';
+import '../../../treatments/data/treatments_repository.dart';
+import '../../../treatments/models/treatment_model.dart';
+import '../../../practitioners/data/practitioners_repository.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -6,7 +13,6 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
@@ -26,6 +32,8 @@ class AppointmentRequestScreen extends StatefulWidget {
   final String? selectedOfferTitle;
   final String? selectedOfferId;
   final LeadsRepository? leadsRepository;
+  final TreatmentsRepository? treatmentsRepository;
+  final PractitionersRepository? practitionersRepository;
 
   const AppointmentRequestScreen({
     super.key,
@@ -35,10 +43,13 @@ class AppointmentRequestScreen extends StatefulWidget {
     this.selectedOfferTitle,
     this.selectedOfferId,
     this.leadsRepository,
+    this.treatmentsRepository,
+    this.practitionersRepository,
   });
 
   @override
-  State<AppointmentRequestScreen> createState() => _AppointmentRequestScreenState();
+  State<AppointmentRequestScreen> createState() =>
+      _AppointmentRequestScreenState();
 }
 
 class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
@@ -51,7 +62,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   String? _selectedBranchId;
   String? _selectedTreatment;
   String? _selectedPractitionerId;
-  final PreferredTimeWindow _timeWindow = PreferredTimeWindow.evening;
+  String? _selectedPractitionerLabel;
   bool _consentAccepted = false;
   bool _isSubmitting = false;
   String? _rateLimitBannerMessage;
@@ -71,7 +82,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   Map<String, PractitionerModel> get _uniquePractitioners {
     final Map<String, PractitionerModel> map = {};
     if (widget.clinic.rawPractitioners != null) {
-      for (final raw in widget.clinic.rawPractitioners!) {
+      for (final raw in widget.clinic.rawPractitioners!.take(20)) {
         if (raw is Map<String, dynamic>) {
           try {
             final p = PractitionerModel.fromJson(
@@ -95,8 +106,10 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     super.initState();
     _leadsRepository = widget.leadsRepository ?? LeadsRepository();
     final auth = AuthState();
-    _nameController = TextEditingController(text: auth.isLoggedIn ? auth.userName : '');
-    
+    _nameController = TextEditingController(
+      text: auth.isLoggedIn ? auth.userName : '',
+    );
+
     // Clean local phone digits without country code prefix
     String initialPhone = '';
     if (auth.isLoggedIn && auth.userPhone.isNotEmpty) {
@@ -116,16 +129,25 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     }
 
     _selectedPractitionerId = widget.preselectedPractitioner?.id;
+    _selectedPractitionerLabel = LocaleService().isArabic
+        ? widget.preselectedPractitioner?.nameAr
+        : widget.preselectedPractitioner?.nameEn;
 
     // Build initial treatment options from clinic.rawTreatments
-    final defaultTreatment = 'استشارة تجميلية وجلدية عامة';
+    final defaultTreatment = LocaleService().isArabic
+        ? 'استشارة تجميلية وجلدية عامة'
+        : 'General Aesthetic & Derma Consultation';
     final Set<String> validOptions = {defaultTreatment};
 
     if (widget.clinic.rawTreatments != null) {
-      for (final raw in widget.clinic.rawTreatments!) {
+      for (final raw in widget.clinic.rawTreatments!.take(20)) {
         if (raw is Map<String, dynamic>) {
-          final nameAr = (raw['name_ar'] ?? raw['name_en'] ?? '').toString().trim();
-          final nameEn = (raw['name_en'] ?? raw['name_ar'] ?? '').toString().trim();
+          final nameAr = (raw['name_ar'] ?? raw['name_en'] ?? '')
+              .toString()
+              .trim();
+          final nameEn = (raw['name_en'] ?? raw['name_ar'] ?? '')
+              .toString()
+              .trim();
           final id = raw['id']?.toString() ?? '';
           if (nameAr.isNotEmpty) {
             validOptions.add(nameAr);
@@ -140,8 +162,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     }
 
     if (widget.preselectedServiceName != null &&
-        widget.preselectedServiceName!.isNotEmpty &&
-        validOptions.contains(widget.preselectedServiceName)) {
+        widget.preselectedServiceName!.isNotEmpty) {
       _selectedTreatment = widget.preselectedServiceName;
     } else {
       _selectedTreatment = defaultTreatment;
@@ -182,9 +203,14 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     final rawPhone = _phoneController.text.trim();
     final formattedPhone = LuxuryPhoneInputField.normalizeToE164(rawPhone);
 
-    final actualServiceName = widget.selectedOfferTitle != null && widget.selectedOfferTitle!.isNotEmpty
+    final actualServiceName =
+        widget.selectedOfferTitle != null &&
+            widget.selectedOfferTitle!.isNotEmpty
         ? widget.selectedOfferTitle!
-        : (_selectedTreatment ?? (loc.isArabic ? 'استشارة تجميلية وجلدية عامة' : 'General Aesthetic & Derma Consultation'));
+        : (_selectedTreatment ??
+              (loc.isArabic
+                  ? 'استشارة تجميلية وجلدية عامة'
+                  : 'General Aesthetic & Derma Consultation'));
 
     final payload = <String, dynamic>{
       'clinic': widget.clinic.id,
@@ -192,19 +218,26 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       'service_name': actualServiceName,
       'patient_name': _nameController.text.trim(),
       'patient_phone': formattedPhone,
-      'preferred_time_window': _timeWindow.name,
+      'preferred_time_window': '',
     };
 
-    final isUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    final isUuid = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
 
-    final selectedBranch = _selectedBranchId != null ? _uniqueBranches[_selectedBranchId] : null;
-    final selectedPractitioner = _selectedPractitionerId != null ? _uniquePractitioners[_selectedPractitionerId] : null;
+    final selectedBranch = _selectedBranchId != null
+        ? _uniqueBranches[_selectedBranchId]
+        : null;
+    final selectedPractitioner = _selectedPractitionerId != null
+        ? _uniquePractitioners[_selectedPractitionerId]
+        : null;
 
     if (_selectedBranchId != null && isUuid.hasMatch(_selectedBranchId!)) {
       payload['branch'] = _selectedBranchId;
     }
 
-    if (widget.selectedOfferId != null && isUuid.hasMatch(widget.selectedOfferId!)) {
+    if (widget.selectedOfferId != null &&
+        isUuid.hasMatch(widget.selectedOfferId!)) {
       payload['offer'] = widget.selectedOfferId;
       payload['lead_type'] = 'offer';
     } else {
@@ -214,7 +247,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       }
     }
 
-    if (_selectedPractitionerId != null && isUuid.hasMatch(_selectedPractitionerId!)) {
+    if (_selectedPractitionerId != null &&
+        isUuid.hasMatch(_selectedPractitionerId!)) {
       payload['practitioner'] = _selectedPractitionerId;
     }
 
@@ -247,8 +281,6 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         practitionerNameAr: selectedPractitioner?.nameAr,
         practitionerNameEn: selectedPractitioner?.nameEn,
         practitionerType: selectedPractitioner?.type,
-        preferredDate: DateTime.now(),
-        preferredTimeWindow: _timeWindow,
         patientFullName: _nameController.text.trim(),
         patientPhone: formattedPhone,
         notes: _notesController.text.trim(),
@@ -268,18 +300,21 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      final is429 = e.statusCode == 429 ||
+      final is429 =
+          e.statusCode == 429 ||
           e.message.contains('already submitted') ||
           e.message.contains('too many requests') ||
           e.message.contains('مؤخراً') ||
           e.message.contains('مؤخرا');
-      final isSuspendedOrInactive = e.statusCode == 403 ||
+      final isSuspendedOrInactive =
+          e.statusCode == 403 ||
           e.statusCode == 404 ||
-          (e.statusCode == 400 && (e.message.toLowerCase().contains('suspended') ||
-              e.message.toLowerCase().contains('inactive') ||
-              e.message.contains('معلقة') ||
-              e.message.contains('غير متاحة') ||
-              e.message.toLowerCase().contains('not found')));
+          (e.statusCode == 400 &&
+              (e.message.toLowerCase().contains('suspended') ||
+                  e.message.toLowerCase().contains('inactive') ||
+                  e.message.contains('معلقة') ||
+                  e.message.contains('غير متاحة') ||
+                  e.message.toLowerCase().contains('not found')));
       setState(() {
         _isSubmitting = false;
         if (is429) {
@@ -290,18 +325,14 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       });
       final errorMessage = is429
           ? (loc.isArabic
-              ? 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'
-              : 'A similar request was recently submitted. Please try again shortly.')
+                ? 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'
+                : 'A similar request was recently submitted. Please try again shortly.')
           : isSuspendedOrInactive
-              ? (loc.isArabic
-                  ? 'العيادة غير متاحة حالياً لتلقي الطلبات. يرجى اختيار عيادة أخرى'
-                  : 'This clinic is currently unavailable to accept requests. Please choose another clinic.')
-              : e.message;
-      showAppSnackBar(
-        context,
-        errorMessage,
-        type: AppSnackBarType.error,
-      );
+          ? (loc.isArabic
+                ? 'العيادة غير متاحة حالياً لتلقي الطلبات. يرجى اختيار عيادة أخرى'
+                : 'This clinic is currently unavailable to accept requests. Please choose another clinic.')
+          : e.message;
+      showAppSnackBar(context, errorMessage, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -309,7 +340,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       });
       showAppSnackBar(
         context,
-        loc.isArabic ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى' : 'Failed to send request. Please try again.',
+        loc.isArabic
+            ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى'
+            : 'Failed to send request. Please try again.',
         type: AppSnackBarType.error,
       );
     }
@@ -321,11 +354,13 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     final isDark = AppColors.isDark(context);
 
     // 1. Resilient Service / Treatment options derived from clinic.rawTreatments
-    final defaultTreatment = loc.isArabic ? 'استشارة تجميلية وجلدية عامة' : 'General Aesthetic & Derma Consultation';
+    final defaultTreatment = loc.isArabic
+        ? 'استشارة تجميلية وجلدية عامة'
+        : 'General Aesthetic & Derma Consultation';
     final Set<String> distinctTreatments = {defaultTreatment};
 
     if (widget.clinic.rawTreatments != null) {
-      for (final raw in widget.clinic.rawTreatments!) {
+      for (final raw in widget.clinic.rawTreatments!.take(20)) {
         if (raw is Map<String, dynamic>) {
           final name = loc.isArabic
               ? (raw['name_ar'] ?? raw['name_en'] ?? '').toString().trim()
@@ -338,15 +373,13 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         }
       }
     }
-    final treatmentList = distinctTreatments.toList();
 
-    if (_selectedTreatment == null || !distinctTreatments.contains(_selectedTreatment)) {
-      _selectedTreatment = defaultTreatment;
-    }
+    _selectedTreatment ??= defaultTreatment;
 
     // 2. Resilient Branch options
     final branchMap = _uniqueBranches;
-    if (_selectedBranchId != null && !branchMap.containsKey(_selectedBranchId)) {
+    if (_selectedBranchId != null &&
+        !branchMap.containsKey(_selectedBranchId)) {
       _selectedBranchId = branchMap.isNotEmpty ? branchMap.keys.first : null;
     }
     if (_selectedBranchId == null && branchMap.isNotEmpty) {
@@ -355,9 +388,6 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
 
     // 3. Resilient Practitioner options
     final practitionerMap = _uniquePractitioners;
-    if (_selectedPractitionerId != null && !practitionerMap.containsKey(_selectedPractitionerId)) {
-      _selectedPractitionerId = null;
-    }
 
     return PopScope(
       canPop: true,
@@ -369,14 +399,18 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
           title: Text(
             loc.tr('request_consultation'),
             style: AppTypography.screenTitle.copyWith(
-              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.silverPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
               size: 18,
-              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.silverPrimary
+                  : AppColors.lightTextPrimary,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -387,7 +421,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
               // Offer Summary Card (If opened from an offer)
-              if (widget.selectedOfferTitle != null && widget.selectedOfferTitle!.isNotEmpty) ...[
+              if (widget.selectedOfferTitle != null &&
+                  widget.selectedOfferTitle!.isNotEmpty) ...[
                 LuxuryCard(
                   padding: const EdgeInsets.all(14),
                   child: Row(
@@ -395,10 +430,16 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                          color: AppColors.accentChampagne.withValues(
+                            alpha: isDark ? 0.15 : 0.2,
+                          ),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.local_offer_outlined, color: AppColors.accentChampagne, size: 20),
+                        child: const Icon(
+                          Icons.local_offer_outlined,
+                          color: AppColors.accentChampagne,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -406,9 +447,11 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              loc.isArabic ? 'باقة العرض المختارة' : 'Selected Offer Package',
-                              style: const TextStyle(
-                                color: AppColors.accentChampagne,
+                              loc.isArabic
+                                  ? 'باقة العرض المختارة'
+                                  : 'Selected Offer Package',
+                              style: TextStyle(
+                                color: AppColors.goldText(context),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -419,7 +462,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                               style: AppTypography.cardTitle.copyWith(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                           ],
@@ -438,11 +483,17 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.4)),
+                    border: Border.all(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.4),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.hourglass_top_rounded, color: Color(0xFFEF4444), size: 18),
+                      const Icon(
+                        Icons.hourglass_top_rounded,
+                        color: Color(0xFFEF4444),
+                        size: 18,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -466,7 +517,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: (widget.clinic.coverImageUrl.isNotEmpty && widget.clinic.coverImageUrl.startsWith('http'))
+                      child:
+                          (widget.clinic.coverImageUrl.isNotEmpty &&
+                              widget.clinic.coverImageUrl.startsWith('http'))
                           ? Image.network(
                               widget.clinic.coverImageUrl,
                               width: 52,
@@ -475,20 +528,33 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                               errorBuilder: (_, _, _) => Container(
                                 width: 52,
                                 height: 52,
-                                color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                color: isDark
+                                    ? AppColors.cardSurfaceHover
+                                    : AppColors.lightCardSurfaceHover,
                                 child: Icon(
                                   Icons.local_hospital_outlined,
-                                  color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
+                                  color: isDark
+                                      ? AppColors.silverMuted
+                                      : AppColors.lightTextMuted,
                                 ),
+                              ),
+                              cacheWidth: computeSafeCacheWidth(
+                                context,
+                                400,
+                                null,
                               ),
                             )
                           : Container(
                               width: 52,
                               height: 52,
-                              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              color: isDark
+                                  ? AppColors.cardSurfaceHover
+                                  : AppColors.lightCardSurfaceHover,
                               child: Icon(
                                 Icons.local_hospital_outlined,
-                                color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
+                                color: isDark
+                                    ? AppColors.silverMuted
+                                    : AppColors.lightTextMuted,
                               ),
                             ),
                     ),
@@ -498,17 +564,23 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            loc.isArabic ? widget.clinic.nameAr : widget.clinic.nameEn,
+                            loc.isArabic
+                                ? widget.clinic.nameAr
+                                : widget.clinic.nameEn,
                             style: AppTypography.cardTitle.copyWith(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${widget.clinic.city} • ${loc.isArabic ? widget.clinic.areaAr : widget.clinic.areaEn}',
-                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.mutedText(context),
+                            ),
                           ),
                         ],
                       ),
@@ -525,35 +597,54 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
                 LuxuryCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String?>(
-                      value: _selectedBranchId,
-                      isExpanded: true,
-                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                      iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      items: branchMap.values.map((b) {
-                        return DropdownMenuItem<String?>(
-                          value: b.id,
-                          child: Text(
-                            loc.isArabic ? '${b.nameAr} (${b.areaAr})' : '${b.nameEn} (${b.areaEn})',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                            ),
-                          ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 3,
+                  ),
+                  child: PagedEntityField<ClinicBranch>(
+                    label: loc.tr('select_branch'),
+                    hint: loc.isArabic ? 'ابحث عن الفرع' : 'Search branches',
+                    value: _selectedBranchId,
+                    valueLabel: branchMap[_selectedBranchId] == null
+                        ? ''
+                        : (loc.isArabic
+                              ? branchMap[_selectedBranchId]!.nameAr
+                              : branchMap[_selectedBranchId]!.nameEn),
+                    keyOf: (b) => b.id,
+                    labelOf: (b) => loc.isArabic ? b.nameAr : b.nameEn,
+                    loader: (page, search) async {
+                      if (widget.clinic.hasBranchDirectory) {
+                        return ClinicsRepository().getBranches(
+                          widget.clinic.id,
+                          page: page,
+                          search: search,
                         );
-                      }).toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedBranchId = val;
-                        });
-                      },
-                    ),
+                      }
+                      final all = branchMap.values
+                          .where(
+                            (b) =>
+                                search.isEmpty ||
+                                '${b.nameAr} ${b.nameEn}'
+                                    .toLowerCase()
+                                    .contains(search.toLowerCase()),
+                          )
+                          .toList();
+                      return PageItems(
+                        all
+                            .skip((page - 1) * catalogPageSize)
+                            .take(catalogPageSize),
+                        hasMore: page * catalogPageSize < all.length,
+                        total: all.length,
+                      );
+                    },
+                    onChanged: (b) => setState(() => _selectedBranchId = b?.id),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -565,255 +656,297 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                 style: AppTypography.cardTitle.copyWith(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 6),
               LuxuryCard(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedTreatment,
-                    isExpanded: true,
-                    dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                    iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    items: treatmentList.map((tName) {
-                      return DropdownMenuItem<String>(
-                        value: tName,
-                        child: Text(
-                          tName,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 3,
+                ),
+                child: PagedEntityField<TreatmentModel>(
+                  label: loc.tr('select_service'),
+                  hint: loc.isArabic
+                      ? 'ابحث عن الخدمة الطبية'
+                      : 'Search medical services',
+                  value: _treatmentNameToId[_selectedTreatment],
+                  valueLabel: _selectedTreatment ?? defaultTreatment,
+                  clearLabel: defaultTreatment,
+                  keyOf: (t) => t.id,
+                  labelOf: (t) => loc.isArabic ? t.nameAr : t.nameEn,
+                  loader: (page, search) =>
+                      (widget.treatmentsRepository ?? TreatmentsRepository())
+                          .getTreatments(
+                            clinic: widget.clinic.id,
+                            page: page,
+                            search: search,
                           ),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedTreatment = val;
-                      });
-                    },
-                  ),
+                  onChanged: (t) => setState(() {
+                    _selectedTreatment = t == null
+                        ? defaultTreatment
+                        : (loc.isArabic ? t.nameAr : t.nameEn);
+                    if (t != null) {
+                      _treatmentNameToId[_selectedTreatment!] = t.id;
+                    }
+                  }),
                 ),
               ),
               const SizedBox(height: 14),
 
               // Preferred Practitioner (Optional)
-              if (practitionerMap.isNotEmpty) ...[
+              ...[
                 Text(
                   loc.tr('select_practitioner'),
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
                 LuxuryCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String?>(
-                      value: _selectedPractitionerId,
-                      isExpanded: true,
-                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                      iconEnabledColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      hint: Text(
-                        loc.tr('any_practitioner'),
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 3,
+                  ),
+                  child: PagedEntityField<PractitionerModel>(
+                    label: loc.tr('select_practitioner'),
+                    hint: loc.isArabic
+                        ? 'ابحث عن الممارس'
+                        : 'Search practitioners',
+                    value: _selectedPractitionerId,
+                    valueLabel:
+                        _selectedPractitionerLabel ??
+                        (practitionerMap[_selectedPractitionerId] == null
+                            ? ''
+                            : (loc.isArabic
+                                  ? practitionerMap[_selectedPractitionerId]!
+                                        .nameAr
+                                  : practitionerMap[_selectedPractitionerId]!
+                                        .nameEn)),
+                    clearLabel: loc.tr('any_practitioner'),
+                    keyOf: (p) => p.id,
+                    labelOf: (p) => loc.isArabic ? p.nameAr : p.nameEn,
+                    loader: (page, search) =>
+                        (widget.practitionersRepository ??
+                                PractitionersRepository())
+                            .getPractitioners(
+                              clinicId: widget.clinic.id,
+                              page: page,
+                              search: search,
+                            ),
+                    onChanged: (p) => setState(() {
+                      _selectedPractitionerId = p?.id;
+                      _selectedPractitionerLabel = p == null
+                          ? null
+                          : (loc.isArabic ? p.nameAr : p.nameEn);
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+
+              // Patient Info
+              Text(
+                loc.tr('contact_info_title'),
+                style: AppTypography.cardTitle.copyWith(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _nameController,
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.textPrimary
+                      : AppColors.lightTextPrimary,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  labelText: loc.tr('full_name'),
+                  hintText: loc.isArabic
+                      ? 'الاسم الكامل كما تود أن تناديك العيادة'
+                      : 'Your full name',
+                  hintStyle: TextStyle(
+                    color: AppColors.text(context).withValues(alpha: 0.68),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  labelStyle: TextStyle(
+                    color: AppColors.mutedText(context),
+                    fontSize: 12.5,
+                  ),
+                  floatingLabelStyle: TextStyle(
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.primarySoftNavy,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.person_outline,
+                    color: AppColors.mutedText(context),
+                    size: 18,
+                  ),
+                  filled: true,
+                  fillColor: isDark
+                      ? AppColors.cardSurfaceHover
+                      : AppColors.lightCardSurfaceHover,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: AppColors.border(context),
+                      width: 0.85,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.primarySoftNavy,
+                      width: 1.4,
+                    ),
+                  ),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return loc.isArabic
+                        ? 'يرجى كتابة الاسم'
+                        : 'Please enter full name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              LuxuryPhoneInputField(
+                controller: _phoneController,
+                isRequired: true,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _notesController,
+                maxLines: 2,
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.textPrimary
+                      : AppColors.lightTextPrimary,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  labelText: loc.tr('notes_opt'),
+                  hintText: loc.isArabic
+                      ? 'اكتب استفسارك أو الإجراء التجميلي المطلوب (اختياري)...'
+                      : 'Describe the treatment or consultation you are looking for (optional)...',
+                  hintStyle: TextStyle(
+                    color: AppColors.text(context).withValues(alpha: 0.68),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  labelStyle: TextStyle(
+                    color: AppColors.mutedText(context),
+                    fontSize: 12.5,
+                  ),
+                  floatingLabelStyle: TextStyle(
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.primarySoftNavy,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  alignLabelWithHint: true,
+                  filled: true,
+                  fillColor: isDark
+                      ? AppColors.cardSurfaceHover
+                      : AppColors.lightCardSurfaceHover,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: AppColors.border(context),
+                      width: 0.85,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.primarySoftNavy,
+                      width: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Legal Consent Checkbox
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _consentAccepted = !_consentAccepted;
+                  });
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _consentAccepted,
+                      activeColor: AppColors.accentChampagne,
+                      checkColor: isDark
+                          ? AppColors.backgroundDeep
+                          : Colors.white,
+                      side: BorderSide(
+                        color: AppColors.border(context),
+                        width: 1.2,
                       ),
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text(
-                            loc.tr('any_practitioner'),
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                            ),
-                          ),
-                        ),
-                        ...practitionerMap.values.map((p) {
-                          return DropdownMenuItem<String?>(
-                            value: p.id,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    loc.isArabic ? p.nameAr : p.nameEn,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                PractitionerBadge(type: p.type, showIcon: false),
-                              ],
-                            ),
-                          );
-                        }),
-                      ],
                       onChanged: (val) {
                         setState(() {
-                          _selectedPractitionerId = val;
+                          _consentAccepted = val ?? false;
                         });
                       },
                     ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-              ],
-
-                // Patient Info
-                Text(
-                  loc.tr('contact_info_title'),
-                  style: AppTypography.cardTitle.copyWith(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _nameController,
-                  style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: loc.tr('full_name'),
-                    hintText: loc.isArabic ? 'الاسم الكامل كما تود أن تناديك العيادة' : 'Your full name',
-                    hintStyle: TextStyle(
-                      color: AppColors.mutedText(context).withValues(alpha: 0.45),
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                    floatingLabelStyle: TextStyle(
-                      color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    prefixIcon: Icon(Icons.person_outline, color: AppColors.mutedText(context), size: 18),
-                    filled: true,
-                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border(context), width: 0.85),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                        width: 1.4,
-                      ),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return loc.isArabic ? 'يرجى كتابة الاسم' : 'Please enter full name';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                LuxuryPhoneInputField(
-                  controller: _phoneController,
-                  isRequired: true,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _notesController,
-                  maxLines: 2,
-                  style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: loc.tr('notes_opt'),
-                    hintText: loc.isArabic
-                        ? 'اكتب استفسارك أو الإجراء التجميلي المطلوب (اختياري)...'
-                        : 'Describe the treatment or consultation you are looking for (optional)...',
-                    hintStyle: TextStyle(
-                      color: AppColors.mutedText(context).withValues(alpha: 0.45),
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                    floatingLabelStyle: TextStyle(
-                      color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    alignLabelWithHint: true,
-                    filled: true,
-                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border(context), width: 0.85),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
-                        width: 1.4,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // Legal Consent Checkbox
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _consentAccepted = !_consentAccepted;
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                        value: _consentAccepted,
-                        activeColor: AppColors.accentChampagne,
-                        checkColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                        side: BorderSide(color: AppColors.border(context), width: 1.2),
-                        onChanged: (val) {
-                          setState(() {
-                            _consentAccepted = val ?? false;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            loc.tr('consent_text'),
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.mutedText(context),
-                              height: 1.45,
-                              fontSize: 11.5,
-                            ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          loc.tr('consent_text'),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.mutedText(context),
+                            height: 1.45,
+                            fontSize: 11.5,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
 
-                // Telegram-like Smooth Submit Button
-                SilverButton(
-                  label: loc.tr('submit_lead_btn'),
-                  icon: Icons.send_rounded,
-                  isFullWidth: true,
-                  height: 48,
-                  isLoading: _isSubmitting,
-                  onPressed: _isSubmitting ? null : _submitLeadRequest,
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              // Telegram-like Smooth Submit Button
+              SilverButton(
+                label: loc.tr('submit_lead_btn'),
+                icon: Icons.send_rounded,
+                isFullWidth: true,
+                height: 48,
+                isLoading: _isSubmitting,
+                onPressed: _isSubmitting ? null : _submitLeadRequest,
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 }

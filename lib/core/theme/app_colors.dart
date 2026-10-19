@@ -17,12 +17,12 @@ abstract class AppColors {
 
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textMuted = Color(0xFF64748B);
+  static const Color textMuted = Color(0xFF9AA9BD);
 
   static const Color silverPrimary = Color(0xFFF1F5F9);
   static const Color silverLight = Color(0xFFFFFFFF);
   static const Color silverSecondary = Color(0xFFCBD5E1);
-  static const Color silverMuted = Color(0xFF818E9E);
+  static const Color silverMuted = Color(0xFF9AA9BD);
   static const Color silverBorder = Color(0xFF334155);
 
   // ==========================================
@@ -33,17 +33,34 @@ abstract class AppColors {
   static const Color lightCardSurfaceHover = Color(0xFFEEF2F6);
   static const Color lightCardSurfaceSubtle = Color(0xFFF8FAFC);
 
-  static const Color lightTextPrimary = Color(0xFF0A0E17); // Deep Obsidian Navy text
-  static const Color lightTextSecondary = Color(0xFF1E293B); // High-contrast Slate Charcoal
-  static const Color lightTextMuted = Color(0xFF334155); // Strong readable Slate
-  
+  static const Color lightTextPrimary = Color(
+    0xFF0A0E17,
+  ); // Deep Obsidian Navy text
+  static const Color lightTextSecondary = Color(
+    0xFF1E293B,
+  ); // High-contrast Slate Charcoal
+  static const Color lightTextMuted = Color(
+    0xFF334155,
+  ); // Strong readable Slate
+
   static const Color lightBorder = Color(0xFFD9E1EC); // Soft Luxury Border
-  static const Color primarySoftNavy = Color(0xFF1F3A5F); // Primary soft navy for chips/links
+  static const Color primarySoftNavy = Color(
+    0xFF1F3A5F,
+  ); // Primary soft navy for chips/links
 
   // ==========================================
   // SHARED LUXURY ACCENTS (Both Themes)
   // ==========================================
-  static const Color accentChampagne = Color(0xFFC8A97E); // Universal Luxury Gold
+  static const Color accentChampagne = Color(
+    0xFFC8A97E,
+  ); // Universal Luxury Gold
+  static const Color lightGold = Color(0xFF9A7B1C);
+  static const Color darkGold = Color(0xFFD4AF37);
+  // Normal-size labels need a deeper bronze to meet 4.5:1 on soft light surfaces.
+  static const Color lightGoldText = Color(0xFF806615);
+  static Color goldText(BuildContext context) =>
+      isDark(context) ? darkGold : lightGoldText;
+
   static const Color accentChampagneBright = Color(0xFFDFC49F);
   static const Color accentChampagneSoft = Color(0xFF241B10);
   static const Color accentChampagneGlow = Color(0x33C8A97E);

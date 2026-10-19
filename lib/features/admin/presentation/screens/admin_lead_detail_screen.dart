@@ -36,20 +36,6 @@ class AdminLeadDetailScreen extends StatelessWidget {
         break;
     }
 
-    String timeWindowText;
-    switch (lead.preferredTimeWindow.toLowerCase()) {
-      case 'afternoon':
-        timeWindowText = loc.tr('time_afternoon');
-        break;
-      case 'evening':
-        timeWindowText = loc.tr('time_evening');
-        break;
-      case 'morning':
-      default:
-        timeWindowText = loc.tr('time_morning');
-        break;
-    }
-
     return Scaffold(
       backgroundColor: AppColors.bg(context),
       appBar: AppBar(
@@ -112,7 +98,7 @@ class AdminLeadDetailScreen extends StatelessWidget {
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.accentChampagne,
+                        color: AppColors.goldText(context),
                       ),
                     ),
                     Container(
@@ -218,15 +204,10 @@ class AdminLeadDetailScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 _ReadOnlyRow(
                   icon: Icons.calendar_today_outlined,
-                  label: loc.tr('select_date'),
-                  value: DateFormat('yyyy/MM/dd').format(lead.preferredDate),
+                  label: loc.tr('submitted_at'),
+                  value: DateFormat('yyyy/MM/dd').format(lead.createdAt),
                 ),
-                const SizedBox(height: 10),
-                _ReadOnlyRow(
-                  icon: Icons.access_time_rounded,
-                  label: loc.tr('preferred_time'),
-                  value: timeWindowText,
-                ),
+
                 if (lead.notes.isNotEmpty) ...[
                   const Divider(height: 20),
                   _ReadOnlyRow(

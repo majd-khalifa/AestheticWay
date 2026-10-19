@@ -119,7 +119,7 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                       fontWeight: FontWeight.bold,
                       color: isSubmitted
                           ? const Color(0xFF10B981)
-                          : (isReady ? AppColors.accentChampagne : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary)),
+                          : (isReady ? AppColors.goldText(context) : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary)),
                     ),
                   ),
                 ),
@@ -391,10 +391,10 @@ class _ChecklistTile extends StatelessWidget {
                 ),
                 child: Text(
                   actionLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.accentChampagne,
+                    color: AppColors.goldText(context),
                   ),
                 ),
               ),

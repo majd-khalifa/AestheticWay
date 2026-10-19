@@ -33,9 +33,6 @@ class AppointmentSuccessScreen extends StatelessWidget {
     final practitionerName = loc.isArabic
         ? request.practitionerNameAr
         : (request.practitionerNameEn ?? request.practitionerNameAr);
-    final timeWindowLabel = loc.isArabic
-        ? request.preferredTimeWindow.labelAr
-        : request.preferredTimeWindow.labelEn;
 
     return PopScope(
       canPop: false,
@@ -185,7 +182,7 @@ class AppointmentSuccessScreen extends StatelessWidget {
                                 child: Text(
                                   request.referenceCode,
                                   style: AppTypography.caption.copyWith(
-                                    color: AppColors.accentChampagne,
+                                    color: AppColors.goldText(context),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 11,
                                   ),
@@ -197,26 +194,20 @@ class AppointmentSuccessScreen extends StatelessWidget {
                           const Divider(),
                           const SizedBox(height: 8),
                           _SummaryRow(label: loc.tr('clinic_label'), value: clinicName),
-                          if (request.leadType != 'product' && branchName.trim().isNotEmpty)
+                          if (!request.isProductInquiry && branchName.trim().isNotEmpty)
                             _SummaryRow(label: loc.tr('branch_label'), value: branchName),
                           _SummaryRow(
-                            label: request.leadType == 'product'
+                            label: request.isProductInquiry
                                 ? (loc.isArabic ? 'المنتج:' : 'Product:')
                                 : loc.tr('service_label'),
                             value: serviceName,
                           ),
-                          if (request.leadType != 'product' && practitionerName != null)
+                          if (!request.isProductInquiry && practitionerName != null)
                             _SummaryRow(label: loc.tr('practitioner_label'), value: practitionerName),
-                          if (request.leadType != 'product') ...[
-                            _SummaryRow(
-                              label: loc.tr('date_label'),
-                              value: DateFormat('yyyy/MM/dd').format(request.preferredDate),
-                            ),
-                            _SummaryRow(
-                              label: loc.tr('period_label'),
-                              value: timeWindowLabel,
-                            ),
-                          ],
+                          _SummaryRow(
+                            label: loc.tr('submitted_at'),
+                            value: DateFormat('yyyy/MM/dd').format(request.createdAt),
+                          ),
                           _SummaryRow(label: loc.tr('patient_label'), value: request.patientFullName),
                           _SummaryRow(label: loc.tr('phone_label'), value: request.patientPhone),
                           if (request.notes != null && request.notes!.trim().isNotEmpty)

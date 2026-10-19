@@ -1,4 +1,9 @@
+import 'dart:collection';
+import '../../../core/data/single_flight.dart';
+import '../../../core/data/paged_collection.dart';
+import '../../../core/auth/session_changed_exception.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:aesthetic_way/data/mock_data.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
@@ -26,8 +31,6 @@ class ClinicPortalService extends ChangeNotifier {
   ClinicCatalogRepository _catalogRepository = ClinicCatalogRepository();
 
   bool _mockMode = false;
-  bool _hasLoadedFromApi = false;
-  bool _hasLoadedCatalogFromApi = false;
 
   late ClinicModel _activeClinic;
   final List<AppointmentRequestModel> _clinicLeads = [];
@@ -47,53 +50,53 @@ class ClinicPortalService extends ChangeNotifier {
   ClinicSetupChecklistModel? _setupChecklist;
 
   ClinicModel get activeClinic => _activeClinic;
-  List<AppointmentRequestModel> get clinicLeads => List.unmodifiable(_clinicLeads);
+  List<AppointmentRequestModel> get clinicLeads =>
+      UnmodifiableListView(_clinicLeads);
   ClinicDashboardModel? get dashboardData => _dashboardData;
   ClinicBadgeCountsModel? get badgeCounts => _badgeCounts;
   ClinicSetupChecklistModel? get setupChecklist => _setupChecklist;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  bool get isLoading =>
+      _isLoading || _pages.values.any((page) => page.isLoading);
+  String? get errorMessage =>
+      _errorMessage ??
+      _pages.values.map((page) => page.error).whereType<String>().firstOrNull;
 
-  List<OfferModel> get clinicOffers => List.unmodifiable(_clinicOffers);
-  List<PractitionerModel> get clinicPractitioners => List.unmodifiable(_clinicPractitioners);
-  List<TreatmentModel> get clinicTreatments => List.unmodifiable(_clinicTreatments);
-  List<CategoryModel> get categories => List.unmodifiable(_categories);
-  List<ProductModel> get clinicProducts => List.unmodifiable(_clinicProducts);
-  List<ArticleModel> get clinicArticles => List.unmodifiable(_clinicArticles);
-  List<ClinicBranch> get clinicBranches => List.unmodifiable(_clinicBranches);
+  List<OfferModel> get clinicOffers => UnmodifiableListView(_clinicOffers);
+  List<PractitionerModel> get clinicPractitioners =>
+      UnmodifiableListView(_clinicPractitioners);
+  List<TreatmentModel> get clinicTreatments =>
+      UnmodifiableListView(_clinicTreatments);
+  List<CategoryModel> get categories => UnmodifiableListView(_categories);
+  List<ProductModel> get clinicProducts =>
+      UnmodifiableListView(_clinicProducts);
+  List<ArticleModel> get clinicArticles =>
+      UnmodifiableListView(_clinicArticles);
+  List<ClinicBranch> get clinicBranches =>
+      UnmodifiableListView(_clinicBranches);
 
   Future<List<CategoryModel>> getOrFetchCategories() async {
-    if (_categories.isNotEmpty) return _categories;
-    try {
-      final cats = await _catalogRepository.getCategories();
-      if (cats.isNotEmpty) {
-        _categories.clear();
-        _categories.addAll(cats);
-        notifyListeners();
-        return _categories;
-      }
-    } catch (_) {}
-    return _categories;
+    await loadCollection('categories');
+    return UnmodifiableListView(_categories);
   }
 
   void _initializeDefaultActiveClinic() {
     _activeClinic = const ClinicModel(
-      id: 'clinic-active',
-      nameAr: 'عيادة شريكة معتمدة',
-      nameEn: 'Accredited Partner Clinic',
+      id: '',
+      nameAr: '',
+      nameEn: '',
       descriptionAr: '',
       descriptionEn: '',
       coverImageUrl: '',
       galleryImages: [],
       logoUrl: '',
-      rating: 5.0,
+      rating: 0.0,
       reviewCount: 0,
       subscriptionTier: SubscriptionTier.basic,
-      city: 'Dubai',
-      areaAr: 'دبي',
-      areaEn: 'Dubai',
-      addressAr: 'دبي، الإمارات العربية المتحدة',
-      addressEn: 'Dubai, UAE',
+      city: '',
+      areaAr: '',
+      areaEn: '',
+      addressAr: '',
+      addressEn: '',
     );
   }
 
@@ -105,7 +108,9 @@ class ClinicPortalService extends ChangeNotifier {
     ClinicSetupChecklistModel? testChecklist,
   }) {
     _mockMode = true;
-    if (_clinicLeads.isEmpty && _clinicOffers.isEmpty && _clinicPractitioners.isEmpty) {
+    if (_clinicLeads.isEmpty &&
+        _clinicOffers.isEmpty &&
+        _clinicPractitioners.isEmpty) {
       _initializeFallbackData();
     }
     if (testLeads != null) {
@@ -140,11 +145,124 @@ class ClinicPortalService extends ChangeNotifier {
     _catalogRepository = repository;
   }
 
-  @visibleForTesting
-  void resetTestingState() {
+  final Map<String, PagedCollection<dynamic>> _pages = {};
+  final SingleFlight _flights = SingleFlight();
+  bool _overviewLoaded = false;
+  final _noteDirectoryLeadIds = <String>{};
+
+  PagedCollection<dynamic> collection(String key) {
+    final result = _pages.putIfAbsent(key, () {
+      final PagedCollection<dynamic> page = switch (key) {
+        'leads' => PagedCollection<AppointmentRequestModel>(
+          items: _clinicLeads,
+          loader: (page, q) => _repository.getLeads(
+            page: page,
+            pageSize: 20,
+            status: q['status'] as String?,
+            search: q['search'] as String?,
+          ),
+          keyOf: (item) => item.id,
+        ),
+        'practitioners' => PagedCollection<PractitionerModel>(
+          items: _clinicPractitioners,
+          loader: (page, q) => _catalogRepository.getPractitioners(
+            page: page,
+            search: q['search'] as String?,
+          ),
+          keyOf: (item) => item.id,
+        ),
+        'treatments' => PagedCollection<TreatmentModel>(
+          items: _clinicTreatments,
+          loader: (page, q) => _catalogRepository.getTreatments(
+            page: page,
+            category: q['category'] as String?,
+            search: q['search'] as String?,
+          ),
+          keyOf: (item) => item.id,
+        ),
+        'offers' => PagedCollection<OfferModel>(
+          items: _clinicOffers,
+          loader: (page, q) => _catalogRepository.getOffers(
+            page: page,
+            search: q['search'] as String?,
+          ),
+          keyOf: (item) => item.id,
+        ),
+        'products' => PagedCollection<ProductModel>(
+          items: _clinicProducts,
+          loader: (page, q) => _catalogRepository.getProducts(
+            page: page,
+            search: q['search'] as String?,
+          ),
+          keyOf: (item) => item.id,
+        ),
+        'articles' => PagedCollection<ArticleModel>(
+          items: _clinicArticles,
+          loader: (page, q) => _catalogRepository.getArticles(
+            page: page,
+            search: q['search'] as String?,
+          ),
+          keyOf: (item) => item.id,
+        ),
+        'categories' => PagedCollection<CategoryModel>(
+          items: _categories,
+          loader: (page, q) => _catalogRepository.getCategories(page: page),
+          keyOf: (item) => item.id,
+        ),
+        'branches' => PagedCollection<ClinicBranch>(
+          items: _clinicBranches,
+          loader: (page, q) => _catalogRepository.getBranches(page: page),
+          keyOf: (item) => item.id,
+        ),
+        _ => throw ArgumentError.value(key, 'key', 'Unknown collection'),
+      };
+      page.addListener(notifyListeners);
+      return page;
+    });
+    if (_mockMode) {
+      result.isLoaded = true;
+      result.hasMore = false;
+    }
+    return result;
+  }
+
+  Future<void> loadCollection(
+    String key, {
+    bool refresh = false,
+    Map<String, dynamic>? query,
+  }) {
+    if (_mockMode) return Future.value();
+    return collection(key).refresh(query: query, force: refresh);
+  }
+
+  void searchCollection(String key, Map<String, dynamic> query) {
+    if (!_mockMode) collection(key).search(query);
+  }
+
+  Future<void> loadMore(String key) =>
+      _mockMode ? Future.value() : collection(key).loadMore();
+
+  final ValueNotifier<int> navigationBadge = ValueNotifier<int>(0);
+  @override
+  void notifyListeners() {
+    if (navigationBadge.value != newLeadsCount) {
+      navigationBadge.value = newLeadsCount;
+    }
+    super.notifyListeners();
+  }
+
+  int _sessionEpoch = 0;
+
+  /// Discard all account-scoped state and invalidate outstanding requests.
+  void clearSession({bool notify = true}) {
+    _sessionEpoch++;
+    for (final page in _pages.values) {
+      page.clear();
+    }
+    _flights.clear();
+    _overviewLoaded = false;
+    _noteDirectoryLeadIds.clear();
     _mockMode = false;
-    _hasLoadedFromApi = false;
-    _hasLoadedCatalogFromApi = false;
     _isLoading = false;
     _errorMessage = null;
     _internalNotes.clear();
@@ -160,6 +278,21 @@ class ClinicPortalService extends ChangeNotifier {
     _clinicBranches.clear();
     _setupChecklist = null;
     _initializeDefaultActiveClinic();
+    if (notify) notifyListeners();
+  }
+
+  @visibleForTesting
+  void resetTestingState() => clearSession(notify: false);
+
+  Future<T> _inSession<T>(Future<T> future, int epoch) async {
+    try {
+      final result = await future;
+      if (epoch != _sessionEpoch) throw const SessionChangedException();
+      return result;
+    } catch (_) {
+      if (epoch != _sessionEpoch) throw const SessionChangedException();
+      rethrow;
+    }
   }
 
   int get newLeadsCount =>
@@ -170,30 +303,41 @@ class ClinicPortalService extends ChangeNotifier {
   int get contactedLeadsCount =>
       _badgeCounts?.contactedRequests ??
       _dashboardData?.contactedLeads ??
-      _clinicLeads.where((l) => l.status == AppointmentLeadStatus.contacted).length;
+      _clinicLeads
+          .where((l) => l.status == AppointmentLeadStatus.contacted)
+          .length;
 
   int get closedLeadsCount =>
       _badgeCounts?.closedRequests ??
       _dashboardData?.closedLeads ??
-      _clinicLeads.where((l) => l.status == AppointmentLeadStatus.closed).length;
+      _clinicLeads
+          .where((l) => l.status == AppointmentLeadStatus.closed)
+          .length;
 
   int get totalLeadsCount =>
       _badgeCounts?.totalRequests ??
       _dashboardData?.totalLeads ??
-      _clinicLeads.length;
+      (_pages['leads']?.total ?? _clinicLeads.length);
 
   int get activeOffersCount =>
-      _clinicOffers.where((o) => o.status == 'active' && o.isActive).length;
+      (_mockMode ? null : _dashboardData?.activeOffersCount) ??
+      _clinicOffers.where((o) => o.isActive && o.status == 'active').length;
 
   int get activePractitionersCount =>
+      (_mockMode ? null : _dashboardData?.activePractitionersCount) ??
       _clinicPractitioners.where((p) => p.status == 'active').length;
 
   int get activeTreatmentsCount =>
-      _clinicTreatments.where((t) => t.status == 'active' && t.isActive).length;
+      (_mockMode ? null : _dashboardData?.activeTreatmentsCount) ??
+      _clinicTreatments.length;
 
-  int get activeProductsCount => _clinicProducts.length;
+  int get activeProductsCount =>
+      (_mockMode ? null : _dashboardData?.activeProductsCount) ??
+      _clinicProducts.where((p) => p.isAvailable).length;
 
-  int get activeArticlesCount => _clinicArticles.length;
+  int get activeArticlesCount =>
+      (_mockMode ? null : _dashboardData?.publishedArticlesCount) ??
+      _clinicArticles.length;
 
   String getInternalNotes(String leadId) {
     if (_internalNotes.containsKey(leadId)) {
@@ -224,127 +368,132 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   /// Fetch live leads and dashboard statistics from backend API
+  Future<List<ClinicInternalNote>> getLeadNotesPage(
+    AppointmentRequestModel lead,
+    int page,
+  ) async {
+    if (_mockMode) {
+      return PageItems(
+        lead.internalNotes
+            .skip((page - 1) * catalogPageSize)
+            .take(catalogPageSize),
+        hasMore: page * catalogPageSize < lead.internalNotes.length,
+        total: lead.internalNotes.length,
+      );
+    }
+    final epoch = _sessionEpoch;
+    if (lead.hasNotesDirectory || _noteDirectoryLeadIds.contains(lead.id)) {
+      return _inSession(_repository.getLeadNotes(lead.id, page: page), epoch);
+    }
+    final detail = await _inSession(_repository.getLeadDetail(lead.id), epoch);
+    if (detail.hasNotesDirectory) {
+      _noteDirectoryLeadIds.add(lead.id);
+      return _inSession(_repository.getLeadNotes(lead.id, page: page), epoch);
+    }
+    final notes = detail.internalNotes;
+    return PageItems(
+      notes.skip((page - 1) * catalogPageSize).take(catalogPageSize),
+      hasMore: page * catalogPageSize < notes.length,
+      total: notes.length,
+    );
+  }
+
   Future<void> loadPortalData({
     bool refresh = false,
     String? status,
     String? search,
-  }) async {
-    if (_mockMode) {
-      return;
+  }) {
+    if (_mockMode) return Future.value();
+    if (status != null || search != null) {
+      return loadCollection(
+        'leads',
+        refresh: true,
+        query: {'status': status, 'search': search},
+      );
     }
-    if (!refresh && _hasLoadedFromApi) {
-      return;
-    }
+    if (_overviewLoaded && !refresh) return Future.value();
+    return _flights.run('overview', () => _fetchOverview(refresh));
+  }
 
+  Future<void> _fetchOverview(bool refresh) async {
+    final epoch = _sessionEpoch;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-
     try {
-      final results = await Future.wait([
-        _repository.getLeads(status: status, search: search),
-        _repository.getDashboard(),
-        _repository.getBadgeCounts(),
-      ]);
-
-      _clinicLeads.clear();
-      _clinicLeads.addAll(results[0] as List<AppointmentRequestModel>);
-      _dashboardData = results[1] as ClinicDashboardModel;
-      _badgeCounts = results[2] as ClinicBadgeCountsModel;
-
-      try {
-        _activeClinic = await _catalogRepository.getClinicProfile();
-      } catch (_) {}
-
-      try {
-        await loadBranches();
-      } catch (_) {}
-
-      try {
-        await loadSetupChecklist();
-      } catch (_) {}
-
-      try {
-        await getOrFetchCategories();
-      } catch (_) {}
-
-      _hasLoadedFromApi = true;
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
+      final values = await _inSession(
+        Future.wait([
+          _repository.getDashboard(),
+          loadCollection('leads', refresh: refresh),
+          _catalogRepository.getClinicProfile(),
+          loadSetupChecklist(),
+        ]),
+        epoch,
+      );
+      _dashboardData = values[0] as ClinicDashboardModel;
+      _activeClinic = values[2] as ClinicModel;
+      final dashboard = _dashboardData!;
+      _badgeCounts = ClinicBadgeCountsModel(
+        newRequests: dashboard.newLeads,
+        unreadRequests: dashboard.newLeads,
+        contactedRequests: dashboard.contactedLeads,
+        closedRequests: dashboard.closedLeads,
+        totalRequests: dashboard.totalLeads,
+      );
+      _overviewLoaded = true;
+    } catch (error) {
+      if (epoch == _sessionEpoch) _errorMessage = error.toString();
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (epoch == _sessionEpoch) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
   /// Refresh lightweight clinic unread badge counters without refetching all lead records
   Future<void> refreshBadgeCounts() async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) return;
     try {
-      _badgeCounts = await _repository.getBadgeCounts();
+      _badgeCounts = await _inSession(
+        _repository.getBadgeCounts(),
+        sessionEpoch,
+      );
       notifyListeners();
-    } catch (_) {}
+    } catch (_) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
+    }
   }
 
   /// Fetch live catalog data (practitioners, treatments, offers, categories, products, articles)
-  Future<void> loadCatalogData({bool refresh = false}) async {
-    if (_mockMode) {
-      return;
-    }
-    if (!refresh && _hasLoadedCatalogFromApi) {
-      return;
-    }
-
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final results = await Future.wait([
-        _catalogRepository.getPractitioners(),
-        _catalogRepository.getTreatments(),
-        _catalogRepository.getOffers(),
-        _catalogRepository.getCategories(),
-        _catalogRepository.getProducts(),
-        _catalogRepository.getArticles(),
-      ]);
-
-      _clinicPractitioners.clear();
-      _clinicPractitioners.addAll(results[0] as List<PractitionerModel>);
-
-      _clinicTreatments.clear();
-      _clinicTreatments.addAll(results[1] as List<TreatmentModel>);
-
-      _clinicOffers.clear();
-      _clinicOffers.addAll(results[2] as List<OfferModel>);
-
-      _categories.clear();
-      _categories.addAll(results[3] as List<CategoryModel>);
-
-      _clinicProducts.clear();
-      _clinicProducts.addAll(results[4] as List<ProductModel>);
-
-      _clinicArticles.clear();
-      final rawArticles = results[5] as List<ArticleModel>;
-      _clinicArticles.addAll(rawArticles.map(_enrichArticleAuthor));
-
-      _hasLoadedCatalogFromApi = true;
-      _errorMessage = null;
-      _calculateLocalChecklist();
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+  Future<void> loadCatalogData({bool refresh = false}) {
+    if (_mockMode) return Future.value();
+    return _flights.run(
+      'all',
+      () => Future.wait([
+        for (final key in [
+          'practitioners',
+          'treatments',
+          'offers',
+          'categories',
+          'products',
+          'articles',
+        ])
+          loadCollection(key, refresh: refresh),
+      ]).then((_) {}),
+    );
   }
 
   ArticleModel _enrichArticleAuthor(ArticleModel article) {
     if (article.authorDoctorId.isNotEmpty &&
         article.authorDoctorNameEn.isEmpty &&
         article.authorDoctorNameAr.isEmpty) {
-      final idx = _clinicPractitioners.indexWhere((p) => p.id == article.authorDoctorId);
+      final idx = _clinicPractitioners.indexWhere(
+        (p) => p.id == article.authorDoctorId,
+      );
       if (idx != -1) {
         final doc = _clinicPractitioners[idx];
         return article.copyWith(
@@ -360,27 +509,11 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   /// Reload leads only (for search or tab filter changes)
-  Future<void> filterLeads({String? status, String? search}) async {
-    if (_mockMode) {
-      return;
-    }
-
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final leads = await _repository.getLeads(status: status, search: search);
-      _clinicLeads.clear();
-      _clinicLeads.addAll(leads);
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  Future<void> filterLeads({String? status, String? search}) => loadCollection(
+    'leads',
+    refresh: true,
+    query: {'status': status, 'search': search},
+  );
 
   void _initializeFallbackData() {
     final mock = MockDataService();
@@ -527,25 +660,35 @@ class ClinicPortalService extends ChangeNotifier {
       ),
     ]);
 
-    _internalNotes['cl-lead-103'] = 'تم الاتصال بالعميل وإرسال تفاصيل الجلسة عبر الواتساب.';
-    _internalNotes['cl-lead-104'] = 'تم التنسيق لتأكيد موعد استشارة يوم الخميس.';
+    _internalNotes['cl-lead-103'] =
+        'تم الاتصال بالعميل وإرسال تفاصيل الجلسة عبر الواتساب.';
+    _internalNotes['cl-lead-104'] =
+        'تم التنسيق لتأكيد موعد استشارة يوم الخميس.';
     _internalNotes['cl-lead-106'] = 'تم حضور الاستشارة بنجاح في فرع جميرا.';
 
     // Populate catalog placeholders for offline fallback
     _clinicOffers.clear();
-    _clinicOffers.addAll(mock.offers.where((o) => o.clinicId == _activeClinic.id || o.clinicId == 'kaya-jumeirah'));
+    _clinicOffers.addAll(
+      mock.offers.where(
+        (o) => o.clinicId == _activeClinic.id || o.clinicId == 'kaya-jumeirah',
+      ),
+    );
     if (_clinicOffers.isEmpty && mock.offers.isNotEmpty) {
       _clinicOffers.add(mock.offers.first);
     }
 
     _clinicPractitioners.clear();
-    _clinicPractitioners.addAll(mock.getPractitionersForClinic(_activeClinic.id));
+    _clinicPractitioners.addAll(
+      mock.getPractitionersForClinic(_activeClinic.id),
+    );
     if (_clinicPractitioners.isEmpty && mock.practitioners.isNotEmpty) {
       _clinicPractitioners.addAll(mock.practitioners.take(2));
     }
 
     _clinicTreatments.clear();
-    _clinicTreatments.addAll(mock.treatments.where((t) => _activeClinic.treatmentIds.contains(t.id)));
+    _clinicTreatments.addAll(
+      mock.treatments.where((t) => _activeClinic.treatmentIds.contains(t.id)),
+    );
     if (_clinicTreatments.isEmpty && mock.treatments.isNotEmpty) {
       _clinicTreatments.addAll(mock.treatments.take(4));
     }
@@ -566,9 +709,15 @@ class ClinicPortalService extends ChangeNotifier {
       clinicId: _activeClinic.id,
       clinicName: _activeClinic.nameAr,
       totalLeads: _clinicLeads.length,
-      newLeads: _clinicLeads.where((l) => l.status == AppointmentLeadStatus.sent).length,
-      contactedLeads: _clinicLeads.where((l) => l.status == AppointmentLeadStatus.contacted).length,
-      closedLeads: _clinicLeads.where((l) => l.status == AppointmentLeadStatus.closed).length,
+      newLeads: _clinicLeads
+          .where((l) => l.status == AppointmentLeadStatus.sent)
+          .length,
+      contactedLeads: _clinicLeads
+          .where((l) => l.status == AppointmentLeadStatus.contacted)
+          .length,
+      closedLeads: _clinicLeads
+          .where((l) => l.status == AppointmentLeadStatus.closed)
+          .length,
       conversionRate: 25.0,
       whatsappTaps: 12,
       callTaps: 8,
@@ -583,7 +732,11 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   /// Update the status of a consultation lead with live PATCH to backend API
-  Future<void> updateLeadStatus(String leadId, AppointmentLeadStatus newStatus) async {
+  Future<void> updateLeadStatus(
+    String leadId,
+    AppointmentLeadStatus newStatus,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
     final index = _clinicLeads.indexWhere((l) => l.id == leadId);
     if (index == -1) return;
     final old = _clinicLeads[index];
@@ -597,19 +750,32 @@ class ClinicPortalService extends ChangeNotifier {
     }
 
     try {
-      final updated = await _repository.updateLeadStatus(leadId, newStatus);
-      _clinicLeads[index] = updated;
+      final updated = await _inSession(
+        _repository.updateLeadStatus(leadId, newStatus, existingLead: old),
+        sessionEpoch,
+      );
+      final currentIndex = _clinicLeads.indexWhere((lead) => lead.id == leadId);
+      if (currentIndex == -1) return;
+      _clinicLeads[currentIndex] = updated;
 
       // Silently refresh dashboard metrics in background
-      _repository.getDashboard().then((d) {
-        _dashboardData = d;
-        notifyListeners();
-      }).catchError((_) {});
+      _repository
+          .getDashboard()
+          .then((d) {
+            if (sessionEpoch != _sessionEpoch) return;
+            _dashboardData = d;
+            notifyListeners();
+          })
+          .catchError((_) {});
 
       notifyListeners();
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       // Rollback on failure
-      _clinicLeads[index] = old;
+      final currentIndex = _clinicLeads.indexWhere((lead) => lead.id == leadId);
+      if (currentIndex != -1) _clinicLeads[currentIndex] = old;
       notifyListeners();
       rethrow;
     }
@@ -617,6 +783,7 @@ class ClinicPortalService extends ChangeNotifier {
 
   /// Save internal notes for a lead with live POST to backend API
   Future<void> saveInternalNotes(String leadId, String notes) async {
+    final sessionEpoch = _sessionEpoch;
     _internalNotes[leadId] = notes;
     notifyListeners();
 
@@ -625,7 +792,10 @@ class ClinicPortalService extends ChangeNotifier {
     }
 
     try {
-      final createdNote = await _repository.addLeadNote(leadId, notes);
+      final createdNote = await _inSession(
+        _repository.addLeadNote(leadId, notes),
+        sessionEpoch,
+      );
       final index = _clinicLeads.indexWhere((l) => l.id == leadId);
       if (index != -1) {
         final lead = _clinicLeads[index];
@@ -635,6 +805,9 @@ class ClinicPortalService extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       rethrow;
     }
   }
@@ -649,19 +822,24 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<OfferModel> createOffer(Map<String, dynamic> data) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final o = OfferModel.fromJson(data);
       _clinicOffers.insert(0, o);
       notifyListeners();
       return o;
     }
-    final created = await _catalogRepository.createOffer(data);
+    final created = await _inSession(
+      _catalogRepository.createOffer(data),
+      sessionEpoch,
+    );
     _clinicOffers.insert(0, created);
     notifyListeners();
     return created;
   }
 
   Future<OfferModel> updateOffer(String id, Map<String, dynamic> data) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final idx = _clinicOffers.indexWhere((o) => o.id == id);
       if (idx != -1) {
@@ -669,7 +847,9 @@ class ClinicPortalService extends ChangeNotifier {
         final updated = o.copyWith(
           titleEn: data['title_en'],
           titleAr: data['title_ar'],
-          originalPrice: double.tryParse(data['original_price']?.toString() ?? ''),
+          originalPrice: double.tryParse(
+            data['original_price']?.toString() ?? '',
+          ),
           offerPrice: double.tryParse(data['offer_price']?.toString() ?? ''),
           status: data['status'],
           isActive: data['is_active'],
@@ -679,7 +859,10 @@ class ClinicPortalService extends ChangeNotifier {
         return updated;
       }
     }
-    final updated = await _catalogRepository.updateOffer(id, data);
+    final updated = await _inSession(
+      _catalogRepository.updateOffer(id, data),
+      sessionEpoch,
+    );
     final idx = _clinicOffers.indexWhere((o) => o.id == id);
     if (idx != -1) {
       _clinicOffers[idx] = updated;
@@ -689,6 +872,7 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> toggleOfferStatus(String offerId) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicOffers.indexWhere((o) => o.id == offerId);
     if (idx == -1) return;
     final current = _clinicOffers[idx];
@@ -702,10 +886,16 @@ class ClinicPortalService extends ChangeNotifier {
     if (_mockMode) return;
 
     try {
-      final updated = await _catalogRepository.updateOfferStatus(offerId, nextStatus);
+      final updated = await _inSession(
+        _catalogRepository.updateOfferStatus(offerId, nextStatus),
+        sessionEpoch,
+      );
       _clinicOffers[idx] = updated;
       notifyListeners();
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       _clinicOffers[idx] = current;
       notifyListeners();
       rethrow;
@@ -713,14 +903,18 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> deleteOffer(String offerId) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicOffers.indexWhere((o) => o.id == offerId);
     if (idx != -1) {
       final removed = _clinicOffers.removeAt(idx);
       notifyListeners();
       if (_mockMode) return;
       try {
-        await _catalogRepository.deleteOffer(offerId);
+        await _inSession(_catalogRepository.deleteOffer(offerId), sessionEpoch);
       } catch (e) {
+        if (sessionEpoch != _sessionEpoch) {
+          return;
+        }
         _clinicOffers.insert(idx, removed);
         notifyListeners();
         rethrow;
@@ -737,20 +931,30 @@ class ClinicPortalService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<PractitionerModel> createPractitioner(Map<String, dynamic> data) async {
+  Future<PractitionerModel> createPractitioner(
+    Map<String, dynamic> data,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final p = PractitionerModel.fromJson(data);
       _clinicPractitioners.add(p);
       notifyListeners();
       return p;
     }
-    final created = await _catalogRepository.createPractitioner(data);
+    final created = await _inSession(
+      _catalogRepository.createPractitioner(data),
+      sessionEpoch,
+    );
     _clinicPractitioners.add(created);
     notifyListeners();
     return created;
   }
 
-  Future<PractitionerModel> updatePractitioner(String id, Map<String, dynamic> data) async {
+  Future<PractitionerModel> updatePractitioner(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final idx = _clinicPractitioners.indexWhere((p) => p.id == id);
       if (idx != -1) {
@@ -769,7 +973,10 @@ class ClinicPortalService extends ChangeNotifier {
         return updated;
       }
     }
-    final updated = await _catalogRepository.updatePractitioner(id, data);
+    final updated = await _inSession(
+      _catalogRepository.updatePractitioner(id, data),
+      sessionEpoch,
+    );
     final idx = _clinicPractitioners.indexWhere((p) => p.id == id);
     if (idx != -1) {
       _clinicPractitioners[idx] = updated;
@@ -779,14 +986,21 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> deletePractitioner(String id) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicPractitioners.indexWhere((p) => p.id == id);
     if (idx != -1) {
       final removed = _clinicPractitioners.removeAt(idx);
       notifyListeners();
       if (_mockMode) return;
       try {
-        await _catalogRepository.deletePractitioner(id);
+        await _inSession(
+          _catalogRepository.deletePractitioner(id),
+          sessionEpoch,
+        );
       } catch (e) {
+        if (sessionEpoch != _sessionEpoch) {
+          return;
+        }
         _clinicPractitioners.insert(idx, removed);
         notifyListeners();
         rethrow;
@@ -804,19 +1018,27 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<TreatmentModel> createTreatment(Map<String, dynamic> data) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final t = TreatmentModel.fromJson(data);
       _clinicTreatments.add(t);
       notifyListeners();
       return t;
     }
-    final created = await _catalogRepository.createTreatment(data);
+    final created = await _inSession(
+      _catalogRepository.createTreatment(data),
+      sessionEpoch,
+    );
     _clinicTreatments.add(created);
     notifyListeners();
     return created;
   }
 
-  Future<TreatmentModel> updateTreatment(String id, Map<String, dynamic> data) async {
+  Future<TreatmentModel> updateTreatment(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final idx = _clinicTreatments.indexWhere((t) => t.id == id);
       if (idx != -1) {
@@ -835,7 +1057,10 @@ class ClinicPortalService extends ChangeNotifier {
         return updated;
       }
     }
-    final updated = await _catalogRepository.updateTreatment(id, data);
+    final updated = await _inSession(
+      _catalogRepository.updateTreatment(id, data),
+      sessionEpoch,
+    );
     final idx = _clinicTreatments.indexWhere((t) => t.id == id);
     if (idx != -1) {
       _clinicTreatments[idx] = updated;
@@ -845,14 +1070,18 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> deleteTreatment(String id) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicTreatments.indexWhere((t) => t.id == id);
     if (idx != -1) {
       final removed = _clinicTreatments.removeAt(idx);
       notifyListeners();
       if (_mockMode) return;
       try {
-        await _catalogRepository.deleteTreatment(id);
+        await _inSession(_catalogRepository.deleteTreatment(id), sessionEpoch);
       } catch (e) {
+        if (sessionEpoch != _sessionEpoch) {
+          return;
+        }
         _clinicTreatments.insert(idx, removed);
         notifyListeners();
         rethrow;
@@ -870,19 +1099,27 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<ProductModel> createProduct(Map<String, dynamic> data) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final p = ProductModel.fromJson(data);
       _clinicProducts.insert(0, p);
       notifyListeners();
       return p;
     }
-    final created = await _catalogRepository.createProduct(data);
+    final created = await _inSession(
+      _catalogRepository.createProduct(data),
+      sessionEpoch,
+    );
     _clinicProducts.insert(0, created);
     notifyListeners();
     return created;
   }
 
-  Future<ProductModel> updateProduct(String id, Map<String, dynamic> data) async {
+  Future<ProductModel> updateProduct(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final idx = _clinicProducts.indexWhere((p) => p.id == id);
       if (idx != -1) {
@@ -900,14 +1137,18 @@ class ClinicPortalService extends ChangeNotifier {
           status: data['status'] as String? ?? p.status,
           brandNameEn: data['brand_name_en'] as String? ?? p.brandNameEn,
           brandNameAr: data['brand_name_ar'] as String? ?? p.brandNameAr,
-          sponsorCompany: data['sponsor_company'] as String? ?? p.sponsorCompany,
+          sponsorCompany:
+              data['sponsor_company'] as String? ?? p.sponsorCompany,
         );
         _clinicProducts[idx] = updated;
         notifyListeners();
         return updated;
       }
     }
-    final updated = await _catalogRepository.updateProduct(id, data);
+    final updated = await _inSession(
+      _catalogRepository.updateProduct(id, data),
+      sessionEpoch,
+    );
     final idx = _clinicProducts.indexWhere((p) => p.id == id);
     if (idx != -1) {
       _clinicProducts[idx] = updated;
@@ -917,6 +1158,7 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> toggleProductAvailability(String productId) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicProducts.indexWhere((p) => p.id == productId);
     if (idx == -1) return;
     final current = _clinicProducts[idx];
@@ -927,13 +1169,16 @@ class ClinicPortalService extends ChangeNotifier {
     if (_mockMode || productId.startsWith('test-')) return;
 
     try {
-      final updated = await _catalogRepository.updateProduct(
-        productId,
-        {'is_active': nextActive},
+      final updated = await _inSession(
+        _catalogRepository.updateProduct(productId, {'is_active': nextActive}),
+        sessionEpoch,
       );
       _clinicProducts[idx] = updated;
       notifyListeners();
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       _clinicProducts[idx] = current;
       notifyListeners();
       rethrow;
@@ -941,14 +1186,21 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> deleteProduct(String productId) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicProducts.indexWhere((p) => p.id == productId);
     if (idx != -1) {
       final removed = _clinicProducts.removeAt(idx);
       notifyListeners();
       if (_mockMode || productId.startsWith('test-')) return;
       try {
-        await _catalogRepository.deleteProduct(productId);
+        await _inSession(
+          _catalogRepository.deleteProduct(productId),
+          sessionEpoch,
+        );
       } catch (e) {
+        if (sessionEpoch != _sessionEpoch) {
+          return;
+        }
         _clinicProducts.insert(idx, removed);
         notifyListeners();
         rethrow;
@@ -966,41 +1218,55 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<ArticleModel> createArticle(Map<String, dynamic> data) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final a = _enrichArticleAuthor(ArticleModel.fromJson(data));
       _clinicArticles.insert(0, a);
       notifyListeners();
       return a;
     }
-    final created = _enrichArticleAuthor(await _catalogRepository.createArticle(data));
+    final created = _enrichArticleAuthor(
+      await _inSession(_catalogRepository.createArticle(data), sessionEpoch),
+    );
     _clinicArticles.insert(0, created);
     notifyListeners();
     return created;
   }
 
-  Future<ArticleModel> updateArticle(String id, Map<String, dynamic> data) async {
+  Future<ArticleModel> updateArticle(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final idx = _clinicArticles.indexWhere((a) => a.id == id);
       if (idx != -1) {
         final a = _clinicArticles[idx];
-        final updated = _enrichArticleAuthor(a.copyWith(
-          titleEn: data['title_en'] as String? ?? a.titleEn,
-          titleAr: data['title_ar'] as String? ?? a.titleAr,
-          contentEn: data['content_en'] as String? ?? a.contentEn,
-          contentAr: data['content_ar'] as String? ?? a.contentAr,
-          authorDoctorId: data.containsKey('author_practitioner')
-              ? (data['author_practitioner']?.toString() ?? '')
-              : a.authorDoctorId,
-          coverImageUrl: data['cover_image'] as String? ?? a.coverImageUrl,
-          isPublished: data['is_published'] as bool? ?? a.isPublished,
-          status: data['status'] as String? ?? a.status,
-        ));
+        final updated = _enrichArticleAuthor(
+          a.copyWith(
+            titleEn: data['title_en'] as String? ?? a.titleEn,
+            titleAr: data['title_ar'] as String? ?? a.titleAr,
+            contentEn: data['content_en'] as String? ?? a.contentEn,
+            contentAr: data['content_ar'] as String? ?? a.contentAr,
+            authorDoctorId: data.containsKey('author_practitioner')
+                ? (data['author_practitioner']?.toString() ?? '')
+                : a.authorDoctorId,
+            coverImageUrl: data['cover_image'] as String? ?? a.coverImageUrl,
+            isPublished: data['is_published'] as bool? ?? a.isPublished,
+            status: data['status'] as String? ?? a.status,
+          ),
+        );
         _clinicArticles[idx] = updated;
         notifyListeners();
         return updated;
       }
     }
-    final updated = _enrichArticleAuthor(await _catalogRepository.updateArticle(id, data));
+    final updated = _enrichArticleAuthor(
+      await _inSession(
+        _catalogRepository.updateArticle(id, data),
+        sessionEpoch,
+      ),
+    );
     final idx = _clinicArticles.indexWhere((a) => a.id == id);
     if (idx != -1) {
       _clinicArticles[idx] = updated;
@@ -1010,6 +1276,7 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> toggleArticlePublish(String articleId) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicArticles.indexWhere((a) => a.id == articleId);
     if (idx == -1) return;
     final current = _clinicArticles[idx];
@@ -1020,13 +1287,20 @@ class ClinicPortalService extends ChangeNotifier {
     if (_mockMode || articleId.startsWith('test-')) return;
 
     try {
-      final updated = _enrichArticleAuthor(await _catalogRepository.updateArticle(
-        articleId,
-        {'is_published': nextPublished},
-      ));
+      final updated = _enrichArticleAuthor(
+        await _inSession(
+          _catalogRepository.updateArticle(articleId, {
+            'is_published': nextPublished,
+          }),
+          sessionEpoch,
+        ),
+      );
       _clinicArticles[idx] = updated;
       notifyListeners();
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       _clinicArticles[idx] = current;
       notifyListeners();
       rethrow;
@@ -1034,14 +1308,21 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> deleteArticle(String articleId) async {
+    final sessionEpoch = _sessionEpoch;
     final idx = _clinicArticles.indexWhere((a) => a.id == articleId);
     if (idx != -1) {
       final removed = _clinicArticles.removeAt(idx);
       notifyListeners();
       if (_mockMode || articleId.startsWith('test-')) return;
       try {
-        await _catalogRepository.deleteArticle(articleId);
+        await _inSession(
+          _catalogRepository.deleteArticle(articleId),
+          sessionEpoch,
+        );
       } catch (e) {
+        if (sessionEpoch != _sessionEpoch) {
+          return;
+        }
         _clinicArticles.insert(idx, removed);
         notifyListeners();
         rethrow;
@@ -1062,49 +1343,11 @@ class ClinicPortalService extends ChangeNotifier {
     String? googleMapsUrl,
     String? logo,
     String? coverImage,
+    bool clearLogo = false,
+    bool clearCoverImage = false,
   }) async {
-    _activeClinic = ClinicModel(
-      id: _activeClinic.id,
-      nameAr: nameAr,
-      nameEn: nameEn,
-      descriptionAr: descriptionAr,
-      descriptionEn: descriptionEn,
-      coverImageUrl: (_mockMode || (coverImage != null && coverImage.startsWith('http')))
-          ? (coverImage ?? _activeClinic.coverImageUrl)
-          : _activeClinic.coverImageUrl,
-      galleryImages: _activeClinic.galleryImages,
-      logoUrl: (_mockMode || (logo != null && logo.startsWith('http')))
-          ? (logo ?? _activeClinic.logoUrl)
-          : _activeClinic.logoUrl,
-      rating: _activeClinic.rating,
-      reviewCount: _activeClinic.reviewCount,
-      subscriptionTier: _activeClinic.subscriptionTier,
-      licenseAuthority: _activeClinic.licenseAuthority,
-      licenseNumber: _activeClinic.licenseNumber,
-      city: _activeClinic.city,
-      areaAr: addressAr ?? _activeClinic.areaAr,
-      areaEn: addressEn ?? _activeClinic.areaEn,
-      addressAr: addressAr ?? _activeClinic.addressAr,
-      addressEn: addressEn ?? _activeClinic.addressEn,
-      distanceKm: _activeClinic.distanceKm,
-      mainPhone: phone,
-      receptionPhone: phone,
-      whatsapp: whatsapp,
-      googlePlaceId: _activeClinic.googlePlaceId,
-      googleMapsUrl: googleMapsUrl ?? _activeClinic.googleMapsUrl,
-      latitude: _activeClinic.latitude,
-      longitude: _activeClinic.longitude,
-      workingHoursAr: _activeClinic.workingHoursAr,
-      workingHoursEn: _activeClinic.workingHoursEn,
-      branches: _activeClinic.branches,
-      practitionerIds: _activeClinic.practitionerIds,
-      treatmentIds: _activeClinic.treatmentIds,
-      featuredOffers: _activeClinic.featuredOffers,
-    );
-    notifyListeners();
-
-    if (_mockMode) return;
-
+    final sessionEpoch = _sessionEpoch;
+    final old = _activeClinic;
     final payload = <String, dynamic>{
       'name_ar': nameAr,
       'name_en': nameEn,
@@ -1115,20 +1358,40 @@ class ClinicPortalService extends ChangeNotifier {
       'address_ar': ?addressAr,
       'address_en': ?addressEn,
       'google_maps_url': ?googleMapsUrl,
+      if (clearLogo || logo != null) 'logo': clearLogo ? null : logo,
+      if (clearCoverImage || coverImage != null)
+        'cover_image': clearCoverImage ? null : coverImage,
     };
-    if (logo != null && logo.isNotEmpty) payload['logo'] = logo;
-    if (coverImage != null && coverImage.isNotEmpty) payload['cover_image'] = coverImage;
-
-    final updated = await _catalogRepository.updateClinicProfile(payload);
-    final ts = DateTime.now().millisecondsSinceEpoch;
-    String addCacheBuster(String url) {
-      if (url.isEmpty || !url.startsWith('http')) return url;
-      return url.contains('?') ? '$url&v=$ts' : '$url?v=$ts';
+    final updated = _mockMode
+        ? old.copyWith(
+            nameAr: nameAr,
+            nameEn: nameEn,
+            descriptionAr: descriptionAr,
+            descriptionEn: descriptionEn,
+            mainPhone: phone,
+            receptionPhone: phone,
+            whatsapp: whatsapp,
+            addressAr: addressAr,
+            addressEn: addressEn,
+            googleMapsUrl: googleMapsUrl,
+            logoUrl: clearLogo ? '' : logo,
+            coverImageUrl: clearCoverImage ? '' : coverImage,
+          )
+        : await _inSession(
+            _catalogRepository.updateClinicProfile(payload),
+            sessionEpoch,
+          );
+    // Eviction leaves signed URLs byte-for-byte intact, even if the URL is reused.
+    if ((logo != null || clearLogo) && old.logoUrl.isNotEmpty) {
+      PaintingBinding.instance.imageCache.evict(NetworkImage(old.logoUrl));
     }
-    _activeClinic = updated.copyWith(
-      logoUrl: addCacheBuster(updated.logoUrl),
-      coverImageUrl: addCacheBuster(updated.coverImageUrl),
-    );
+    if ((coverImage != null || clearCoverImage) &&
+        old.coverImageUrl.isNotEmpty) {
+      PaintingBinding.instance.imageCache.evict(
+        NetworkImage(old.coverImageUrl),
+      );
+    }
+    _activeClinic = updated;
     _calculateLocalChecklist();
     notifyListeners();
   }
@@ -1138,6 +1401,7 @@ class ClinicPortalService extends ChangeNotifier {
   // -------------------------------------------------------------
 
   Future<void> loadBranches() async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       if (_clinicBranches.isEmpty && _activeClinic.branches.isNotEmpty) {
         _clinicBranches.addAll(_activeClinic.branches);
@@ -1145,11 +1409,17 @@ class ClinicPortalService extends ChangeNotifier {
       return;
     }
     try {
-      final res = await _catalogRepository.getBranches();
+      final res = await _inSession(
+        _catalogRepository.getBranches(),
+        sessionEpoch,
+      );
       _clinicBranches.clear();
       _clinicBranches.addAll(res);
       notifyListeners();
     } catch (_) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       if (_clinicBranches.isEmpty && _activeClinic.branches.isNotEmpty) {
         _clinicBranches.addAll(_activeClinic.branches);
         notifyListeners();
@@ -1158,15 +1428,26 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<ClinicBranch> createBranch(Map<String, dynamic> data) async {
-    final branch = await _catalogRepository.createBranch(data);
+    final sessionEpoch = _sessionEpoch;
+    final branch = await _inSession(
+      _catalogRepository.createBranch(data),
+      sessionEpoch,
+    );
     _clinicBranches.add(branch);
     _calculateLocalChecklist();
     notifyListeners();
     return branch;
   }
 
-  Future<ClinicBranch> updateBranch(String id, Map<String, dynamic> data) async {
-    final branch = await _catalogRepository.updateBranch(id, data);
+  Future<ClinicBranch> updateBranch(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final sessionEpoch = _sessionEpoch;
+    final branch = await _inSession(
+      _catalogRepository.updateBranch(id, data),
+      sessionEpoch,
+    );
     final idx = _clinicBranches.indexWhere((b) => b.id == id);
     if (idx != -1) {
       _clinicBranches[idx] = branch;
@@ -1176,29 +1457,45 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> deleteBranch(String id) async {
-    await _catalogRepository.deleteBranch(id);
+    final sessionEpoch = _sessionEpoch;
+    await _inSession(_catalogRepository.deleteBranch(id), sessionEpoch);
     _clinicBranches.removeWhere((b) => b.id == id);
     _calculateLocalChecklist();
     notifyListeners();
   }
 
   Future<void> loadSetupChecklist() async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       _calculateLocalChecklist();
       return;
     }
     try {
-      _setupChecklist = await _catalogRepository.getSetupChecklist();
+      _setupChecklist = await _inSession(
+        _catalogRepository.getSetupChecklist(),
+        sessionEpoch,
+      );
       notifyListeners();
     } catch (_) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       _calculateLocalChecklist();
     }
   }
 
   void _calculateLocalChecklist() {
-    final hasBranding = _activeClinic.logoUrl.isNotEmpty || _activeClinic.coverImageUrl.isNotEmpty;
-    final hasDetails = _activeClinic.descriptionAr.isNotEmpty || _activeClinic.descriptionEn.isNotEmpty || _activeClinic.nameEn.isNotEmpty;
-    final hasBranch = _clinicBranches.isNotEmpty || _activeClinic.branches.isNotEmpty || _activeClinic.hasMapLocation;
+    final hasBranding =
+        _activeClinic.logoUrl.isNotEmpty ||
+        _activeClinic.coverImageUrl.isNotEmpty;
+    final hasDetails =
+        _activeClinic.descriptionAr.isNotEmpty ||
+        _activeClinic.descriptionEn.isNotEmpty ||
+        _activeClinic.nameEn.isNotEmpty;
+    final hasBranch =
+        _clinicBranches.isNotEmpty ||
+        _activeClinic.branches.isNotEmpty ||
+        _activeClinic.hasMapLocation;
     final hasPractitioner = _clinicPractitioners.isNotEmpty;
     final hasTreatment = _clinicTreatments.isNotEmpty;
 
@@ -1258,12 +1555,22 @@ class ClinicPortalService extends ChangeNotifier {
   }
 
   Future<void> submitProfileForReview() async {
-    final res = await _catalogRepository.submitProfileForReview();
+    final sessionEpoch = _sessionEpoch;
+    final res = await _inSession(
+      _catalogRepository.submitProfileForReview(),
+      sessionEpoch,
+    );
     final newStatus = res['setup_status']?.toString() ?? 'submitted';
     _activeClinic = _activeClinic.copyWith(setupStatus: newStatus);
     try {
-      _setupChecklist = await _catalogRepository.getSetupChecklist();
+      _setupChecklist = await _inSession(
+        _catalogRepository.getSetupChecklist(),
+        sessionEpoch,
+      );
     } catch (_) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       _calculateLocalChecklist();
     }
     notifyListeners();

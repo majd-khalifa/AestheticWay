@@ -1,3 +1,4 @@
+import '../../../core/data/paged_collection.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../appointment_lead/models/appointment_request_model.dart';
@@ -6,11 +7,14 @@ import 'models/clinic_badge_counts_model.dart';
 
 /// Repository for Clinic Partner Leads Management & Telemetry Dashboard
 class ClinicLeadsRepository {
-  static final ClinicLeadsRepository _instance = ClinicLeadsRepository._internal();
-  factory ClinicLeadsRepository() => _instance;
-  ClinicLeadsRepository._internal();
+  static final ClinicLeadsRepository _instance =
+      ClinicLeadsRepository._internal();
+  factory ClinicLeadsRepository({ApiClient? apiClient}) =>
+      apiClient == null ? _instance : ClinicLeadsRepository._custom(apiClient);
+  ClinicLeadsRepository._internal() : _api = ApiClient();
+  ClinicLeadsRepository._custom(this._api);
 
-  final ApiClient _api = ApiClient();
+  final ApiClient _api;
 
   /// Fetch clinic dashboard KPI overview
   Future<ClinicDashboardModel> getDashboard() async {
@@ -23,7 +27,9 @@ class ClinicLeadsRepository {
   Future<ClinicBadgeCountsModel> getBadgeCounts() async {
     final response = await _api.get(ApiConfig.clinicBadges);
     if (response.data is Map<String, dynamic>) {
-      return ClinicBadgeCountsModel.fromJson(response.data as Map<String, dynamic>);
+      return ClinicBadgeCountsModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     }
     if (response.data is Map) {
       return ClinicBadgeCountsModel.fromJson(
@@ -37,10 +43,10 @@ class ClinicLeadsRepository {
   /// Seamlessly supports both paginated envelope ({'results': [...], 'count': N})
   /// and direct list responses.
   Future<List<AppointmentRequestModel>> getLeads({
+    int page = 1,
+    int pageSize = 20,
     String? status,
     String? search,
-    int? page,
-    int? pageSize,
   }) async {
     final queryParams = <String, dynamic>{};
     if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
@@ -49,44 +55,36 @@ class ClinicLeadsRepository {
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }
-    if (page != null && page > 1) {
-      queryParams['page'] = page;
-    }
-    if (pageSize != null && pageSize > 0) {
-      queryParams['page_size'] = pageSize;
-    }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.clinicLeads,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map && rawData.containsKey('results')) {
-      items = (rawData['results'] as List<dynamic>?) ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((item) => AppointmentRequestModel.fromJson(item))
-        .toList();
+    return PageItems<AppointmentRequestModel>.fromResponse(
+      response.data,
+      AppointmentRequestModel.fromJson,
+      page: page,
+    );
   }
 
   /// Fetch single lead detail by ID
   Future<AppointmentRequestModel> getLeadDetail(String id) async {
     final response = await _api.get(ApiConfig.clinicLeadDetail(id));
-    return AppointmentRequestModel.fromJson(response.data as Map<String, dynamic>);
+    return AppointmentRequestModel.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 
   /// Update operational status of a consultation lead
   /// Backend supported values: 'new' | 'contacted' | 'closed'
   Future<AppointmentRequestModel> updateLeadStatus(
     String id,
-    AppointmentLeadStatus newStatus,
-  ) async {
+    AppointmentLeadStatus newStatus, {
+    AppointmentRequestModel? existingLead,
+  }) async {
     String statusStr;
     switch (newStatus) {
       case AppointmentLeadStatus.sent:
@@ -105,7 +103,22 @@ class ClinicLeadsRepository {
       data: {'status': statusStr},
     );
 
-    return AppointmentRequestModel.fromJson(response.data as Map<String, dynamic>);
+    final data = response.data as Map<String, dynamic>;
+    const fullLeadFields = [
+      'id',
+      'patient_name',
+      'patient_phone',
+      'service_name',
+      'created_at',
+    ];
+    if (fullLeadFields.any((field) => !data.containsKey(field))) {
+      final existing = existingLead ?? await getLeadDetail(id);
+      final returnedStatus = data['status'] == null
+          ? newStatus
+          : AppointmentRequestModel.fromJson(data).status;
+      return existing.copyWith(status: returnedStatus);
+    }
+    return AppointmentRequestModel.fromJson(data);
   }
 
   /// Post internal operational note for a lead
@@ -116,5 +129,20 @@ class ClinicLeadsRepository {
     );
 
     return ClinicInternalNote.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<ClinicInternalNote>> getLeadNotes(
+    String id, {
+    int page = 1,
+  }) async {
+    final response = await _api.get(
+      ApiConfig.clinicLeadNotes(id),
+      queryParameters: {'page': page, 'page_size': catalogPageSize},
+    );
+    return PageItems<ClinicInternalNote>.fromResponse(
+      response.data,
+      ClinicInternalNote.fromJson,
+      page: page,
+    );
   }
 }

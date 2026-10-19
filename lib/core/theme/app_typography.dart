@@ -4,22 +4,22 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 /// AESTHETIC WAY Luxury Medical Typography Scale
 abstract class AppTypography {
   static const TextStyle heroTitle = TextStyle(
-    fontSize: 24,
+    fontSize: 28,
     height: 1.3,
-    fontWeight: FontWeight.w800,
-    letterSpacing: -0.3,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
   );
 
   static const TextStyle screenTitle = TextStyle(
-    fontSize: 19,
-    height: 1.35,
+    fontSize: 21,
+    height: 1.5,
     fontWeight: FontWeight.w700,
-    letterSpacing: -0.2,
+    letterSpacing: 0,
   );
 
   static const TextStyle cardTitle = TextStyle(
     fontSize: 15.5,
-    height: 1.35,
+    height: 1.5,
     fontWeight: FontWeight.w700,
   );
 
@@ -30,14 +30,14 @@ abstract class AppTypography {
   );
 
   static const TextStyle bodyMedium = TextStyle(
-    fontSize: 13,
-    height: 1.45,
+    fontSize: 14,
+    height: 1.6,
     fontWeight: FontWeight.w400,
   );
 
   static const TextStyle caption = TextStyle(
-    fontSize: 11.5,
-    height: 1.35,
+    fontSize: 12,
+    height: 1.5,
     fontWeight: FontWeight.w500,
   );
 

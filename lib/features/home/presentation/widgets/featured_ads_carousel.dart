@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
+import 'package:aesthetic_way/core/widgets/viewport_activity.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -27,41 +29,53 @@ class FeaturedAdsCarousel extends StatefulWidget {
   State<FeaturedAdsCarousel> createState() => _FeaturedAdsCarouselState();
 }
 
-class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel> with SingleTickerProviderStateMixin {
+class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
+    with WidgetsBindingObserver {
   final PageController _pageController = PageController(viewportFraction: 0.92);
   int _currentIndex = 0;
   Timer? _autoScrollTimer;
   Timer? _resumeTimer;
   bool _isUserInteracting = false;
-  late AnimationController _sheenController;
+  bool _inViewport = true;
+  final Animation<double> _sheenController =
+      const AlwaysStoppedAnimation<double>(0);
+  bool _tabActive = true;
+  bool _foreground = true;
 
   @override
   void initState() {
     super.initState();
-    _sheenController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    );
+    WidgetsBinding.instance.addObserver(this);
+    _foreground =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    _startAutoScroll();
+  }
 
-    _sheenController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 1400), () {
-          if (mounted) {
-            _sheenController.forward(from: 0.0);
-          }
-        });
-      }
-    });
-    _sheenController.forward();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tabActive =
+        TabActivity.isActive(context) &&
+        (ModalRoute.isCurrentOf(context) ?? true);
+    _startAutoScroll();
+  }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
     _startAutoScroll();
   }
 
   void _startAutoScroll() {
     _autoScrollTimer?.cancel();
-    if (widget.ads.length <= 1) return;
+    if (widget.ads.length <= 1 || !_tabActive || !_foreground || !_inViewport) {
+      return;
+    }
 
-    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 4000), (timer) {
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 4000), (
+      timer,
+    ) {
       if (!_isUserInteracting && mounted && _pageController.hasClients) {
         final nextPage = (_currentIndex + 1) % widget.ads.length;
         _pageController.animateToPage(
@@ -93,7 +107,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel> with SingleTi
   void dispose() {
     _autoScrollTimer?.cancel();
     _resumeTimer?.cancel();
-    _sheenController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
   }
@@ -107,112 +121,128 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel> with SingleTi
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppColors.accentChampagne.withValues(alpha: 0.4),
-                        width: 0.7,
+    return ViewportActivity(
+      onChanged: (visible) {
+        _inViewport = visible;
+        _startAutoScroll();
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentChampagne.withValues(
+                          alpha: isDark ? 0.12 : 0.18,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.accentChampagne.withValues(
+                            alpha: 0.4,
+                          ),
+                          width: 0.7,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        size: 15,
+                        color: AppColors.accentChampagne,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.workspace_premium_rounded,
-                      size: 15,
-                      color: AppColors.accentChampagne,
+                    const SizedBox(width: 8),
+                    Text(
+                      loc.tr('featured_partners'),
+                      style: AppTypography.cardTitle.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+                // Slide indicator pill
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.cardSurfaceHover
+                        : AppColors.lightCardSurfaceHover,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.border(context),
+                      width: 0.7,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    loc.tr('featured_partners'),
-                    style: AppTypography.cardTitle.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                      letterSpacing: 0.2,
+                  child: Text(
+                    '${_currentIndex + 1} / ${widget.ads.length}',
+                    style: AppTypography.caption.copyWith(
+                      color: isDark
+                          ? AppColors.silverSecondary
+                          : AppColors.lightTextSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
-              // Slide indicator pill
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.border(context),
-                    width: 0.7,
-                  ),
                 ),
-                child: Text(
-                  '${_currentIndex + 1} / ${widget.ads.length}',
-                  style: AppTypography.caption.copyWith(
-                    color: isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Carousel Container with Touch Listener
-        NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollStartNotification) {
-              _onUserTouchDown();
-            } else if (notification is ScrollEndNotification) {
-              _onUserTouchUp();
-            }
-            return false;
-          },
-          child: SizedBox(
-            height: 268,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: widget.ads.length,
-              onPageChanged: (idx) {
-                setState(() {
-                  _currentIndex = idx;
-                });
-              },
-              itemBuilder: (context, index) {
-                final clinic = widget.ads[index];
-                return _FeaturedAdCard(
-                  clinic: clinic,
-                  loc: loc,
-                  sheenAnimation: _sheenController,
-                  isActive: _currentIndex == index,
-                  onTap: () => widget.onClinicTap(clinic),
-                  onRequestTap: () => widget.onRequestAppointmentTap(clinic),
-                  onContactTap: () => widget.onContactTap(clinic),
-                );
-              },
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 10),
 
-        // Animated Expanding Dots Indicator
-        if (widget.ads.length > 1)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              widget.ads.length,
-              (index) {
+          // Carousel Container with Touch Listener
+          NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification) {
+                _onUserTouchDown();
+              } else if (notification is ScrollEndNotification) {
+                _onUserTouchUp();
+              }
+              return false;
+            },
+            child: SizedBox(
+              height: 268,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: widget.ads.length,
+                onPageChanged: (idx) {
+                  setState(() {
+                    _currentIndex = idx;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final clinic = widget.ads[index];
+                  return _FeaturedAdCard(
+                    clinic: clinic,
+                    loc: loc,
+                    sheenAnimation: _sheenController,
+                    isActive: _currentIndex == index,
+                    onTap: () => widget.onClinicTap(clinic),
+                    onRequestTap: () => widget.onRequestAppointmentTap(clinic),
+                    onContactTap: () => widget.onContactTap(clinic),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Animated Expanding Dots Indicator
+          if (widget.ads.length > 1)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.ads.length, (index) {
                 final isSelected = _currentIndex == index;
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 260),
@@ -225,12 +255,14 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel> with SingleTi
                     color: isSelected
                         ? AppColors.accentChampagne
                         : (isDark
-                            ? AppColors.silverBorder.withValues(alpha: 0.25)
-                            : AppColors.lightBorder),
+                              ? AppColors.silverBorder.withValues(alpha: 0.25)
+                              : AppColors.lightBorder),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppColors.accentChampagne.withValues(alpha: 0.45),
+                              color: AppColors.accentChampagne.withValues(
+                                alpha: 0.45,
+                              ),
                               blurRadius: 8,
                               spreadRadius: 1,
                             ),
@@ -238,10 +270,10 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel> with SingleTi
                         : null,
                   ),
                 );
-              },
+              }),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -296,30 +328,38 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isVip
-                  ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.6 : 0.8)
+                  ? AppColors.accentChampagne.withValues(
+                      alpha: isDark ? 0.6 : 0.8,
+                    )
                   : (isDark
-                      ? AppColors.silverBorder.withValues(alpha: 0.22)
-                      : AppColors.lightBorder),
+                        ? AppColors.silverBorder.withValues(alpha: 0.22)
+                        : AppColors.lightBorder),
               width: isVip ? 1.0 : 0.8,
             ),
             boxShadow: isDark
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: _isPressed ? 0.28 : 0.48),
+                      color: Colors.black.withValues(
+                        alpha: _isPressed ? 0.28 : 0.48,
+                      ),
                       blurRadius: _isPressed ? 10 : 22,
                       offset: Offset(0, _isPressed ? 3 : 8),
                       spreadRadius: _isPressed ? -3 : -1,
                     ),
                     if (isVip)
                       BoxShadow(
-                        color: AppColors.accentChampagne.withValues(alpha: 0.16),
+                        color: AppColors.accentChampagne.withValues(
+                          alpha: 0.16,
+                        ),
                         blurRadius: 20,
                         spreadRadius: 1,
                       ),
                   ]
                 : [
                     BoxShadow(
-                      color: const Color(0xFF0F172A).withValues(alpha: _isPressed ? 0.05 : 0.09),
+                      color: const Color(
+                        0xFF0F172A,
+                      ).withValues(alpha: _isPressed ? 0.05 : 0.09),
                       blurRadius: _isPressed ? 8 : 18,
                       offset: Offset(0, _isPressed ? 2 : 6),
                       spreadRadius: _isPressed ? -2 : 0,
@@ -348,7 +388,9 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                           FeaturedAdSlideMedia(
                             imageUrl: clinic.coverImageUrl,
                             fallbackLogoUrl: clinic.logoUrl,
-                            videoUrl: clinic.hasVideoAd ? clinic.videoUrl : null,
+                            videoUrl: clinic.hasVideoAd
+                                ? clinic.videoUrl
+                                : null,
                             isActive: widget.isActive,
                           ),
                           // Deep 3-Stop Gradient for Maximum Typography Readability
@@ -360,7 +402,9 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                 colors: [
                                   Colors.black.withValues(alpha: 0.5),
                                   Colors.transparent,
-                                  const Color(0xFF050811).withValues(alpha: 0.96),
+                                  const Color(
+                                    0xFF050811,
+                                  ).withValues(alpha: 0.96),
                                 ],
                                 stops: const [0.0, 0.38, 1.0],
                               ),
@@ -384,12 +428,17 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                               right: 10,
                               child: Container(
                                 key: const Key('featured_ad_video_badge'),
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.65),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: AppColors.accentChampagne.withValues(alpha: 0.5),
+                                    color: AppColors.accentChampagne.withValues(
+                                      alpha: 0.5,
+                                    ),
                                     width: 0.7,
                                   ),
                                 ),
@@ -440,7 +489,11 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                if ((loc.isArabic ? clinic.areaAr : clinic.areaEn).trim().isNotEmpty) ...[
+                                if ((loc.isArabic
+                                        ? clinic.areaAr
+                                        : clinic.areaEn)
+                                    .trim()
+                                    .isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
@@ -452,7 +505,9 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          loc.isArabic ? clinic.areaAr : clinic.areaEn,
+                                          loc.isArabic
+                                              ? clinic.areaAr
+                                              : clinic.areaEn,
                                           style: AppTypography.caption.copyWith(
                                             color: Colors.white70,
                                             fontSize: 11,
@@ -474,9 +529,14 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
 
                     // Bottom Action Bar: Telegram-style Single Primary + Secondary Contact Button
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 9,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.cardSurfaceSubtle : AppColors.lightCardSurfaceSubtle,
+                        color: isDark
+                            ? AppColors.cardSurfaceSubtle
+                            : AppColors.lightCardSurfaceSubtle,
                         border: Border(
                           top: BorderSide(
                             color: AppColors.border(context),
@@ -492,11 +552,15 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                             icon: Icon(
                               Icons.headset_mic_outlined,
                               size: 18,
-                              color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverSecondary
+                                  : AppColors.lightTextPrimary,
                             ),
                             tooltip: loc.tr('contact_btn'),
                             style: IconButton.styleFrom(
-                              backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              backgroundColor: isDark
+                                  ? AppColors.cardSurfaceHover
+                                  : AppColors.lightCardSurfaceHover,
                               padding: const EdgeInsets.all(8),
                               visualDensity: VisualDensity.compact,
                               shape: RoundedRectangleBorder(
@@ -518,20 +582,28 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                 icon: Icon(
                                   Icons.calendar_month_outlined,
                                   size: 15,
-                                  color: isDark ? AppColors.backgroundDeep : Colors.white,
+                                  color: isDark
+                                      ? AppColors.backgroundDeep
+                                      : Colors.white,
                                 ),
                                 label: Text(
                                   loc.tr('request_appointment'),
                                   style: AppTypography.button.copyWith(
-                                    color: isDark ? AppColors.backgroundDeep : Colors.white,
+                                    color: isDark
+                                        ? AppColors.backgroundDeep
+                                        : Colors.white,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13,
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  backgroundColor: isDark
+                                      ? AppColors.silverPrimary
+                                      : AppColors.lightTextPrimary,
                                   elevation: 2,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -561,7 +633,9 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                                 gradient: LinearGradient(
                                   colors: [
                                     Colors.transparent,
-                                    (isVip ? AppColors.accentChampagne : AppColors.silverPrimary)
+                                    (isVip
+                                            ? AppColors.accentChampagne
+                                            : AppColors.silverPrimary)
                                         .withValues(alpha: 0.07),
                                     Colors.transparent,
                                   ],
@@ -606,129 +680,161 @@ class FeaturedAdSlideMedia extends StatefulWidget {
   State<FeaturedAdSlideMedia> createState() => _FeaturedAdSlideMediaState();
 }
 
-class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia> {
+class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
+    with WidgetsBindingObserver {
   VideoPlayerController? _controller;
   bool _isVideoInitialized = false;
   bool _hasVideoError = false;
+  bool _visible = false;
+  bool _tabActive = true;
+  bool _foreground = true;
+  bool _seeking = false;
+  bool get _canPlay =>
+      mounted && widget.isActive && _visible && _tabActive && _foreground;
 
   @override
   void initState() {
     super.initState();
-    _initVideoIfNeeded();
+    WidgetsBinding.instance.addObserver(this);
+    _foreground =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tabActive =
+        TabActivity.isActive(context) &&
+        (ModalRoute.isCurrentOf(context) ?? true);
+    _syncPlayback();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    _syncPlayback();
   }
 
   @override
   void didUpdateWidget(covariant FeaturedAdSlideMedia oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.videoUrl != widget.videoUrl) {
-      _disposeController();
-      _initVideoIfNeeded();
-    } else if (oldWidget.isActive != widget.isActive &&
-        _isVideoInitialized &&
-        !_hasVideoError &&
-        _controller != null) {
-      if (widget.isActive) {
-        _controller!.play();
-      } else {
-        _controller!.pause();
+    if (oldWidget.videoUrl != widget.videoUrl) _disposeController();
+    _syncPlayback();
+  }
+
+  void _syncPlayback() {
+    if (!_canPlay) {
+      if (_controller != null) {
+        _disposeController();
+        if (mounted) setState(() {});
       }
+      return;
+    }
+    if (_controller == null && !_hasVideoError) {
+      _initVideoIfNeeded();
     }
   }
 
   Future<void> _initVideoIfNeeded() async {
-    final resolvedVideo = resolveNetworkImageUrl(widget.videoUrl);
-    if (resolvedVideo == null) return;
-
+    final resolved = resolveNetworkImageUrl(widget.videoUrl);
+    if (resolved == null || !_canPlay || _controller != null) return;
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(resolved),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false),
+    );
+    _controller = controller;
+    controller.addListener(_onVideoTick);
     try {
-      final controller = VideoPlayerController.networkUrl(
-        Uri.parse(resolvedVideo),
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
-      _controller = controller;
-      controller.addListener(_onVideoTick);
       await controller.initialize();
-      if (!mounted) {
-        await controller.dispose();
-        return;
-      }
-      await controller.setVolume(0.0); // Always muted per spec
+      if (!mounted || !identical(_controller, controller)) return;
+      await controller.setVolume(0);
       await controller.setLooping(true);
-      if (widget.isActive) {
-        await controller.play();
-      }
-      setState(() {
-        _isVideoInitialized = true;
-        _hasVideoError = false;
-      });
-    } catch (_) {
-      if (mounted) {
+      if (!_canPlay || !identical(_controller, controller)) return;
+      await controller.play();
+      if (mounted && identical(_controller, controller)) {
         setState(() {
-          _isVideoInitialized = false;
-          _hasVideoError = true;
+          _isVideoInitialized = true;
+          _hasVideoError = false;
         });
+      }
+    } catch (_) {
+      if (mounted && identical(_controller, controller)) {
+        _disposeController();
+        setState(() => _hasVideoError = true);
       }
     }
   }
 
   void _onVideoTick() {
-    final c = _controller;
-    if (c == null || !mounted) return;
-    if (c.value.hasError && !_hasVideoError) {
-      setState(() {
-        _hasVideoError = true;
-        _isVideoInitialized = false;
-      });
+    final controller = _controller;
+    if (controller == null || !mounted) return;
+    if (controller.value.hasError && !_hasVideoError) {
+      _disposeController();
+      setState(() => _hasVideoError = true);
       return;
     }
-    // Enforce 15-second maximum loop window
-    if (c.value.isInitialized &&
-        c.value.position >= FeaturedAdSlideMedia.maxVideoDuration) {
-      c.seekTo(Duration.zero);
+    if (_canPlay &&
+        controller.value.isInitialized &&
+        !_seeking &&
+        controller.value.position >= FeaturedAdSlideMedia.maxVideoDuration) {
+      _seeking = true;
+      controller
+          .seekTo(Duration.zero)
+          .catchError((_) {})
+          .whenComplete(() => _seeking = false);
     }
   }
 
   void _disposeController() {
-    final c = _controller;
+    final controller = _controller;
     _controller = null;
     _isVideoInitialized = false;
     _hasVideoError = false;
-    if (c != null) {
-      c.removeListener(_onVideoTick);
-      c.dispose();
+    if (controller != null) {
+      controller.removeListener(_onVideoTick);
+      // Stop first, then release the codec. Late initialize completions are ignored.
+      unawaited(controller.pause().catchError((_) {}));
+      unawaited(controller.dispose().catchError((_) {}));
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _disposeController();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final fallbackImage = LuxuryImage(
+    Widget media = LuxuryImage(
       imageUrl: widget.imageUrl,
       fallbackLogoUrl: widget.fallbackLogoUrl,
       fit: BoxFit.cover,
       placeholderIcon: Icons.local_hospital_outlined,
       iconSize: 42,
     );
-
-    if (!_isVideoInitialized || _hasVideoError || _controller == null) {
-      return fallbackImage;
-    }
-
-    final size = _controller!.value.size;
-    return ClipRect(
-      child: FittedBox(
-        fit: BoxFit.cover,
-        clipBehavior: Clip.hardEdge,
-        child: SizedBox(
-          width: size.width > 0 ? size.width : 16,
-          height: size.height > 0 ? size.height : 9,
-          child: VideoPlayer(_controller!),
+    if (_isVideoInitialized && !_hasVideoError && _controller != null) {
+      final size = _controller!.value.size;
+      media = ClipRect(
+        child: FittedBox(
+          fit: BoxFit.cover,
+          clipBehavior: Clip.hardEdge,
+          child: SizedBox(
+            width: size.width > 0 ? size.width : 16,
+            height: size.height > 0 ? size.height : 9,
+            child: VideoPlayer(_controller!),
+          ),
         ),
-      ),
+      );
+    }
+    return ViewportActivity(
+      onChanged: (visible) {
+        _visible = visible;
+        _syncPlayback();
+      },
+      child: media,
     );
   }
 }

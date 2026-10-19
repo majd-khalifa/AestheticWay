@@ -1,3 +1,4 @@
+import '../../../core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
@@ -6,7 +7,8 @@ import 'package:aesthetic_way/features/products/models/product_model.dart';
 class ProductsRepository {
   final ApiClient _apiClient;
 
-  ProductsRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  ProductsRepository({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   /// Fetches active products from `GET /api/v1/products/`
   Future<List<ProductModel>> getProducts({
@@ -25,33 +27,18 @@ class ProductsRepository {
       queryParams['search'] = search.trim();
     }
 
-    if (page >= 1) {
-      queryParams['page'] = page;
-    }
-
-    if (pageSize > 0) {
-      queryParams['page_size'] = pageSize;
-    }
-
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _apiClient.get(
       ApiConfig.products,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final data = response.data;
-    List<dynamic> list;
-    if (data is Map<String, dynamic> && data.containsKey('results')) {
-      list = data['results'] as List<dynamic>? ?? [];
-    } else if (data is List) {
-      list = data;
-    } else {
-      list = [];
-    }
-
-    return list
-        .whereType<Map<String, dynamic>>()
-        .map((m) => ProductModel.fromJson(m))
-        .toList();
+    return PageItems<ProductModel>.fromResponse(
+      response.data,
+      ProductModel.fromJson,
+      page: page,
+    );
   }
 
   /// Fetches single product detail by UUID from `GET /api/v1/products/<id>/`

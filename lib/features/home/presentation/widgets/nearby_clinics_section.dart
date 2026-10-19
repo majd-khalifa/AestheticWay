@@ -76,7 +76,7 @@ class NearbyClinicsSection extends StatelessWidget {
                 label: Text(
                   loc.tr('map_view'),
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.accentChampagne,
+                    color: AppColors.goldText(context),
                     fontWeight: FontWeight.w600,
                     fontSize: 11.5,
                   ),

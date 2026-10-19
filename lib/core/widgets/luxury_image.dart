@@ -32,13 +32,19 @@ bool isValidNetworkImageUrl(String? url) {
 
 /// Computes RAM-safe decode width in physical pixels based on device pixel ratio.
 /// Capped at a sensible maximum (e.g. 1080px for banners, 400px for thumbnails) to prevent memory bloat.
-int? computeSafeCacheWidth(BuildContext context, double? targetWidth, double? targetHeight) {
+int? computeSafeCacheWidth(
+  BuildContext context,
+  double? targetWidth,
+  double? targetHeight,
+) {
   try {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     double effectiveWidth = 400;
     if (targetWidth != null && targetWidth.isFinite && targetWidth > 0) {
       effectiveWidth = targetWidth;
-    } else if (targetHeight != null && targetHeight.isFinite && targetHeight > 0) {
+    } else if (targetHeight != null &&
+        targetHeight.isFinite &&
+        targetHeight > 0) {
       effectiveWidth = targetHeight * 1.4;
     }
     final pixelWidth = (effectiveWidth * dpr).round();
@@ -46,6 +52,12 @@ int? computeSafeCacheWidth(BuildContext context, double? targetWidth, double? ta
   } catch (_) {
     return 600;
   }
+}
+
+/// Shared app budget; active image streams still need bounded decode dimensions.
+void configureImageCacheBudget() {
+  PaintingBinding.instance.imageCache.maximumSize = 120;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024;
 }
 
 /// Bulletproof Luxury Image widget with Smart Brand/Clinic Logo Fallbacks & RAM-Safe Image Decoding
@@ -78,11 +90,15 @@ class LuxuryImage extends StatelessWidget {
     final safeCacheWidth = computeSafeCacheWidth(context, width, height);
 
     Widget buildBrandEmblemFallback() {
-      final shortestSide = (width != null && width!.isFinite && height != null && height!.isFinite)
+      final shortestSide =
+          (width != null &&
+              width!.isFinite &&
+              height != null &&
+              height!.isFinite)
           ? (width! < height! ? width! : height!)
           : (height != null && height!.isFinite
-              ? height!
-              : (width != null && width!.isFinite ? width! : 120.0));
+                ? height!
+                : (width != null && width!.isFinite ? width! : 120.0));
       final emblemPadding = (shortestSide * 0.20).clamp(8.0, 28.0);
       final emblemBadgeSize = (shortestSide * 0.72).clamp(32.0, 140.0);
 
@@ -133,11 +149,15 @@ class LuxuryImage extends StatelessWidget {
     }
 
     Widget buildClinicLogoFallback(String resolvedLogoUrl) {
-      final shortestSide = (width != null && width!.isFinite && height != null && height!.isFinite)
+      final shortestSide =
+          (width != null &&
+              width!.isFinite &&
+              height != null &&
+              height!.isFinite)
           ? (width! < height! ? width! : height!)
           : (height != null && height!.isFinite
-              ? height!
-              : (width != null && width!.isFinite ? width! : 120.0));
+                ? height!
+                : (width != null && width!.isFinite ? width! : 120.0));
       final logoPadding = (shortestSide * 0.16).clamp(8.0, 28.0);
       final logoBadgeSize = (shortestSide * 0.75).clamp(34.0, 145.0);
 
@@ -174,6 +194,10 @@ class LuxuryImage extends StatelessWidget {
             ),
             child: Image.network(
               resolvedLogoUrl,
+              cacheWidth:
+                  (logoBadgeSize * MediaQuery.devicePixelRatioOf(context))
+                      .round()
+                      .clamp(60, 400),
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
               errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
@@ -211,10 +235,7 @@ class LuxuryImage extends StatelessWidget {
     );
 
     if (borderRadius != null) {
-      image = ClipRRect(
-        borderRadius: borderRadius!,
-        child: image,
-      );
+      image = ClipRRect(borderRadius: borderRadius!, child: image);
     }
 
     return image;
@@ -286,6 +307,7 @@ class LuxuryAvatar extends StatelessWidget {
         padding: EdgeInsets.all(logoPadding),
         child: Image.network(
           resolvedLogo,
+          cacheWidth: safeCacheWidth,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
           errorBuilder: (_, _, _) => buildBrandEmblemFallback(),

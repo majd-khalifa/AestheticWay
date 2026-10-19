@@ -41,7 +41,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
 
   Future<void> _loadDetails() async {
     try {
-      final detail = await _treatmentsRepository.getTreatmentDetail(widget.treatment.id);
+      final detail = await _treatmentsRepository.getTreatmentDetail(
+        widget.treatment.id,
+      );
       if (detail != null && mounted) {
         setState(() {
           _treatment = detail;
@@ -53,7 +55,8 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
       final clinics = await _clinicsRepository.getClinics();
       if (!mounted) return;
       final matched = clinics.where((c) {
-        return c.id == _treatment.clinicId || c.treatmentIds.contains(_treatment.id);
+        return c.id == _treatment.clinicId ||
+            c.treatmentIds.contains(_treatment.id);
       }).toList();
 
       setState(() {
@@ -110,7 +113,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         LuxuryPageRoute(
           page: AppointmentRequestScreen(
             clinic: clinic,
-            preselectedServiceName: LocaleService().isArabic ? _treatment.nameAr : _treatment.nameEn,
+            preselectedServiceName: LocaleService().isArabic
+                ? _treatment.nameAr
+                : _treatment.nameEn,
           ),
         ),
       );
@@ -122,7 +127,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final primaryClinic = _resolvePrimaryClinic();
-    final clinicsToShow = _availableClinics.isNotEmpty ? _availableClinics : [primaryClinic];
+    final clinicsToShow = _availableClinics.isNotEmpty
+        ? _availableClinics
+        : [primaryClinic];
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
@@ -131,12 +138,20 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         title: Text(
           loc.isArabic ? _treatment.nameAr : _treatment.nameEn,
           style: AppTypography.screenTitle.copyWith(
-            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
             fontSize: 15.5,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -162,15 +177,22 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                    color: AppColors.accentChampagne.withValues(
+                      alpha: isDark ? 0.15 : 0.2,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    loc.isArabic ? _treatment.categoryAr : _treatment.categoryEn,
-                    style: const TextStyle(
-                      color: AppColors.accentChampagne,
+                    loc.isArabic
+                        ? _treatment.categoryAr
+                        : _treatment.categoryEn,
+                    style: TextStyle(
+                      color: AppColors.goldText(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                     ),
@@ -182,12 +204,17 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  (loc.isArabic ? _treatment.descriptionAr : _treatment.descriptionEn) ?? '',
+                  (loc.isArabic
+                          ? _treatment.descriptionAr
+                          : _treatment.descriptionEn) ??
+                      '',
                   style: AppTypography.bodyMedium.copyWith(
                     fontSize: 13,
                     color: AppColors.subtext(context),
@@ -203,14 +230,18 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
           Builder(
             builder: (context) {
               final durationVal = _treatment.formattedDuration(loc.isArabic);
-              final downtimeVal = (loc.isArabic
-                      ? _treatment.downtimeText
-                      : (_treatment.downtimeTextEn ?? _treatment.downtimeText))
-                  .trim();
-              final targetAreaVal = (loc.isArabic
-                      ? _treatment.targetAreaAr
-                      : (_treatment.targetAreaEn ?? _treatment.targetAreaAr))
-                  .trim();
+              final downtimeVal =
+                  (loc.isArabic
+                          ? _treatment.downtimeText
+                          : (_treatment.downtimeTextEn ??
+                                _treatment.downtimeText))
+                      .trim();
+              final targetAreaVal =
+                  (loc.isArabic
+                          ? _treatment.targetAreaAr
+                          : (_treatment.targetAreaEn ??
+                                _treatment.targetAreaAr))
+                      .trim();
               final priceVal = _treatment.price != null && _treatment.price! > 0
                   ? '${_treatment.price!.toInt()} ${loc.tr("currency_aed")}'
                   : '';
@@ -230,7 +261,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                 rows.add(
                   _SpecRow(
                     icon: Icons.sell_outlined,
-                    label: loc.isArabic ? 'السعر الاسترشادي' : 'Estimated Price',
+                    label: loc.isArabic
+                        ? 'السعر الاسترشادي'
+                        : 'Estimated Price',
                     value: priceVal,
                   ),
                 );
@@ -270,7 +303,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
 
           // Available in Clinics Section
           Text(
-            loc.isArabic ? 'العيادات المعتمدة الموفرة للإجراء' : 'Accredited Clinics Providing this Procedure',
+            loc.isArabic
+                ? 'العيادات المعتمدة الموفرة للإجراء'
+                : 'Accredited Clinics Providing this Procedure',
             style: AppTypography.cardTitle.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -282,67 +317,86 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(
-                child: CircularProgressIndicator(color: AppColors.accentChampagne),
+                child: CircularProgressIndicator(
+                  color: AppColors.accentChampagne,
+                ),
               ),
             )
           else
             ...(clinicsToShow.map((clinic) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: LuxuryCard(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        clinic.coverImageUrl,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: LuxuryCard(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          clinic.coverImageUrl,
                           width: 50,
                           height: 50,
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                            style: TextStyle(
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            width: 50,
+                            height: 50,
+                            color: isDark
+                                ? AppColors.cardSurfaceHover
+                                : AppColors.lightCardSurfaceHover,
+                            child: const Icon(
+                              Icons.apartment_rounded,
+                              color: AppColors.accentChampagne,
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                            style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
-                          ),
-                        ],
+                          cacheWidth: computeSafeCacheWidth(context, 400, null),
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.accentChampagne),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
-                        );
-                      },
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                              style: TextStyle(
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
+                              style: TextStyle(
+                                color: AppColors.mutedText(context),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: AppColors.accentChampagne,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            LuxuryPageRoute(
+                              page: ClinicProfileScreen(clinic: clinic),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          })),
+              );
+            })),
 
           const SizedBox(height: 16),
 
@@ -366,7 +420,11 @@ class _SpecRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _SpecRow({required this.icon, required this.label, required this.value});
+  const _SpecRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -383,7 +441,9 @@ class _SpecRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
             fontWeight: FontWeight.w700,
             fontSize: 12.5,
           ),

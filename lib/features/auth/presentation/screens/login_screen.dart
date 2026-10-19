@@ -49,7 +49,9 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    final input = _isPhoneLogin ? _phoneController.text.trim() : _emailController.text.trim();
+    final input = _isPhoneLogin
+        ? _phoneController.text.trim()
+        : _emailController.text.trim();
     final password = _passwordController.text;
 
     try {
@@ -72,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final role = authResponse.user.role;
-
 
       Widget targetScreen;
       if (role == 'super_admin') {
@@ -98,21 +99,13 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      showAppSnackBar(
-        context,
-        e.toString(),
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
     }
   }
 
@@ -129,7 +122,10 @@ class _LoginScreenState extends State<LoginScreen> {
           body: SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -137,9 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Official Logo (Prominent Auth Sizing)
-                      const Center(
-                        child: AppBrandLogo.auth(),
-                      ),
+                      const Center(child: AppBrandLogo.auth()),
                       const SizedBox(height: 24),
 
                       // Welcome Headers
@@ -149,7 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: AppTypography.heroTitle.copyWith(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.silverPrimary
+                                : AppColors.lightTextPrimary,
                           ),
                         ),
                       ),
@@ -171,10 +167,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         margin: const EdgeInsets.only(bottom: 16),
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          color: isDark
+                              ? AppColors.cardSurfaceHover
+                              : AppColors.lightCardSurfaceHover,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.border(context).withValues(alpha: 0.6),
+                            color: AppColors.border(
+                              context,
+                            ).withValues(alpha: 0.6),
                             width: 0.8,
                           ),
                         ),
@@ -182,21 +182,28 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => setState(() => _isPhoneLogin = true),
+                                onTap: () =>
+                                    setState(() => _isPhoneLogin = true),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: _isPhoneLogin
-                                        ? (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy)
+                                        ? (isDark
+                                              ? AppColors.silverPrimary
+                                              : AppColors.primarySoftNavy)
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(9),
                                     boxShadow: _isPhoneLogin
                                         ? [
                                             BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.15),
+                                              color: Colors.black.withValues(
+                                                alpha: 0.15,
+                                              ),
                                               blurRadius: 4,
                                               offset: const Offset(0, 2),
-                                            )
+                                            ),
                                           ]
                                         : null,
                                   ),
@@ -207,18 +214,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Icons.phone_iphone_rounded,
                                         size: 15,
                                         color: _isPhoneLogin
-                                            ? (isDark ? AppColors.backgroundDeep : Colors.white)
+                                            ? (isDark
+                                                  ? AppColors.backgroundDeep
+                                                  : Colors.white)
                                             : AppColors.mutedText(context),
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        loc.isArabic ? 'رقم الهاتف' : 'Phone Number',
-                                        style: TextStyle(
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.w700,
-                                          color: _isPhoneLogin
-                                              ? (isDark ? AppColors.backgroundDeep : Colors.white)
-                                              : AppColors.mutedText(context),
+                                      Flexible(
+                                        child: Text(
+                                          loc.isArabic
+                                              ? 'رقم الهاتف'
+                                              : 'Phone Number',
+                                          style: TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: _isPhoneLogin
+                                                ? (isDark
+                                                      ? AppColors.backgroundDeep
+                                                      : Colors.white)
+                                                : AppColors.mutedText(context),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -228,21 +243,28 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => setState(() => _isPhoneLogin = false),
+                                onTap: () =>
+                                    setState(() => _isPhoneLogin = false),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: !_isPhoneLogin
-                                        ? (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy)
+                                        ? (isDark
+                                              ? AppColors.silverPrimary
+                                              : AppColors.primarySoftNavy)
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(9),
                                     boxShadow: !_isPhoneLogin
                                         ? [
                                             BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.15),
+                                              color: Colors.black.withValues(
+                                                alpha: 0.15,
+                                              ),
                                               blurRadius: 4,
                                               offset: const Offset(0, 2),
-                                            )
+                                            ),
                                           ]
                                         : null,
                                   ),
@@ -253,18 +275,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Icons.email_outlined,
                                         size: 15,
                                         color: !_isPhoneLogin
-                                            ? (isDark ? AppColors.backgroundDeep : Colors.white)
+                                            ? (isDark
+                                                  ? AppColors.backgroundDeep
+                                                  : Colors.white)
                                             : AppColors.mutedText(context),
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        loc.isArabic ? 'البريد الإلكتروني' : 'Email Address',
-                                        style: TextStyle(
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.w700,
-                                          color: !_isPhoneLogin
-                                              ? (isDark ? AppColors.backgroundDeep : Colors.white)
-                                              : AppColors.mutedText(context),
+                                      Flexible(
+                                        child: Text(
+                                          loc.isArabic
+                                              ? 'البريد الإلكتروني'
+                                              : 'Email Address',
+                                          style: TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: !_isPhoneLogin
+                                                ? (isDark
+                                                      ? AppColors.backgroundDeep
+                                                      : Colors.white)
+                                                : AppColors.mutedText(context),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -286,7 +316,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               LuxuryPhoneInputField(
                                 controller: _phoneController,
                                 isRequired: true,
-                                labelText: loc.isArabic ? 'رقم الهاتف' : 'Phone Number',
+                                labelText: loc.isArabic
+                                    ? 'رقم الهاتف'
+                                    : 'Phone Number',
                               )
                             else
                               TextFormField(
@@ -295,40 +327,65 @@ class _LoginScreenState extends State<LoginScreen> {
                                 textDirection: TextDirection.ltr,
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
-                                  color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                  color: isDark
+                                      ? AppColors.textPrimary
+                                      : AppColors.lightTextPrimary,
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 decoration: InputDecoration(
-                                  labelText: loc.isArabic ? 'البريد الإلكتروني' : 'Email Address',
+                                  labelText: loc.isArabic
+                                      ? 'البريد الإلكتروني'
+                                      : 'Email Address',
                                   hintText: 'name@example.com',
                                   hintStyle: TextStyle(
-                                    color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                    color: AppColors.text(
+                                      context,
+                                    ).withValues(alpha: 0.68),
                                     fontSize: 13,
                                     fontWeight: FontWeight.w400,
                                   ),
-                                  labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                  prefixIcon: Icon(Icons.email_outlined, color: AppColors.mutedText(context), size: 19),
+                                  labelStyle: TextStyle(
+                                    color: AppColors.mutedText(context),
+                                    fontSize: 12.5,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.email_outlined,
+                                    color: AppColors.mutedText(context),
+                                    size: 19,
+                                  ),
                                   filled: true,
-                                  fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                  fillColor: isDark
+                                      ? AppColors.cardSurfaceHover
+                                      : AppColors.lightCardSurfaceHover,
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                    borderSide: BorderSide(
+                                      color: AppColors.border(context),
+                                      width: 0.8,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
-                                      color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                      color: isDark
+                                          ? AppColors.silverPrimary
+                                          : AppColors.primarySoftNavy,
                                       width: 1.4,
                                     ),
                                   ),
                                 ),
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
-                                    return loc.isArabic ? 'يرجى إدخال البريد الإلكتروني' : 'Email is required';
+                                    return loc.isArabic
+                                        ? 'يرجى إدخال البريد الإلكتروني'
+                                        : 'Email is required';
                                   }
-                                  if (!val.contains('@') || !val.contains('.')) {
-                                    return loc.isArabic ? 'صيغة بريد غير صحيحة' : 'Invalid email format';
+                                  if (!val.contains('@') ||
+                                      !val.contains('.')) {
+                                    return loc.isArabic
+                                        ? 'صيغة بريد غير صحيحة'
+                                        : 'Invalid email format';
                                   }
                                   return null;
                                 },
@@ -342,7 +399,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               textDirection: TextDirection.ltr,
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.textPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -350,15 +409,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                 labelText: loc.tr('password_label'),
                                 hintText: loc.tr('password_hint'),
                                 hintStyle: TextStyle(
-                                  color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                  color: AppColors.text(
+                                    context,
+                                  ).withValues(alpha: 0.68),
                                   fontSize: 13,
                                   fontWeight: FontWeight.w400,
                                 ),
-                                labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
+                                labelStyle: TextStyle(
+                                  color: AppColors.mutedText(context),
+                                  fontSize: 12.5,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: AppColors.mutedText(context),
+                                  size: 19,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
                                     color: AppColors.mutedText(context),
                                     size: 18,
                                   ),
@@ -369,15 +439,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                 ),
                                 filled: true,
-                                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                fillColor: isDark
+                                    ? AppColors.cardSurfaceHover
+                                    : AppColors.lightCardSurfaceHover,
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                  borderSide: BorderSide(
+                                    color: AppColors.border(context),
+                                    width: 0.8,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                    color: isDark
+                                        ? AppColors.silverPrimary
+                                        : AppColors.primarySoftNavy,
                                     width: 1.4,
                                   ),
                                 ),
@@ -393,12 +470,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             // Forgot Password Link
                             Align(
-                              alignment: loc.isArabic ? Alignment.centerLeft : Alignment.centerRight,
+                              alignment: loc.isArabic
+                                  ? Alignment.centerLeft
+                                  : Alignment.centerRight,
                               child: TextButton(
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    LuxuryPageRoute(page: const ForgotPasswordScreen()),
+                                    LuxuryPageRoute(
+                                      page: const ForgotPasswordScreen(),
+                                    ),
                                   );
                                 },
                                 style: TextButton.styleFrom(
@@ -408,7 +489,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   loc.tr('forgot_password_link'),
                                   style: AppTypography.caption.copyWith(
-                                    color: AppColors.accentChampagne,
+                                    color: AppColors.goldText(context),
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                   ),
@@ -432,12 +513,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 14),
 
                       // Register Link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             loc.tr('dont_have_account'),
-                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.mutedText(context),
+                            ),
                           ),
                           const SizedBox(width: 4),
                           GestureDetector(
@@ -450,7 +534,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               loc.tr('create_account_link'),
                               style: AppTypography.caption.copyWith(
-                                color: AppColors.accentChampagne,
+                                color: AppColors.goldText(context),
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

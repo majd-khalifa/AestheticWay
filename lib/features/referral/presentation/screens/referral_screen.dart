@@ -292,7 +292,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                         child: Text(
                                           inviteUrl,
                                           style: AppTypography.caption.copyWith(
-                                            color: AppColors.accentChampagne,
+                                            color: AppColors.goldText(context),
                                             fontWeight: FontWeight.w800,
                                             fontSize: 13,
                                             letterSpacing: 0.3,
@@ -319,7 +319,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                               Text(
                                                 loc.isArabic ? 'نسخ الرابط' : 'Copy Link',
                                                 style: AppTypography.caption.copyWith(
-                                                  color: AppColors.accentChampagne,
+                                                  color: AppColors.goldText(context),
                                                   fontWeight: FontWeight.w800,
                                                   fontSize: 11.5,
                                                 ),
@@ -456,7 +456,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                                 style: AppTypography.screenTitle.copyWith(
                                                   fontSize: 19,
                                                   fontWeight: FontWeight.w900,
-                                                  color: AppColors.accentChampagne,
+                                                  color: AppColors.goldText(context),
                                                 ),
                                               ),
                                               const SizedBox(width: 3),
@@ -594,7 +594,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                     Text(
                                       '${(progressRatio * 100).toInt()}%',
                                       style: AppTypography.caption.copyWith(
-                                        color: AppColors.accentChampagne,
+                                        color: AppColors.goldText(context),
                                         fontWeight: FontWeight.w800,
                                         fontSize: 12,
                                       ),

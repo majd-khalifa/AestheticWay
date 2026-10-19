@@ -11,7 +11,7 @@ import 'package:aesthetic_way/features/appointment_lead/models/appointment_reque
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_lead_detail_screen.dart';
 
 /// Super Admin Tab 1: Global Platform Dashboard with Key KPIs, Counters & Live Activity Stream
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   final VoidCallback onNavigateToClinics;
   final VoidCallback onNavigateToLeads;
   final VoidCallback onNavigateToAnalytics;
@@ -24,6 +24,19 @@ class AdminDashboardScreen extends StatelessWidget {
   });
 
   @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) AdminPortalService().loadOverview();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final adminService = AdminPortalService();
@@ -34,7 +47,9 @@ class AdminDashboardScreen extends StatelessWidget {
       builder: (context, _) {
         final recentLeads = adminService.allLeads.take(4).toList();
 
-        if (adminService.isLoading && adminService.clinics.isEmpty && adminService.allLeads.isEmpty) {
+        if (adminService.isLoading &&
+            adminService.clinics.isEmpty &&
+            adminService.allLeads.isEmpty) {
           return Scaffold(
             backgroundColor: AppColors.bg(context),
             body: const Center(
@@ -46,7 +61,9 @@ class AdminDashboardScreen extends StatelessWidget {
           );
         }
 
-        if (adminService.errorMessage != null && adminService.clinics.isEmpty && adminService.allLeads.isEmpty) {
+        if (adminService.errorMessage != null &&
+            adminService.clinics.isEmpty &&
+            adminService.allLeads.isEmpty) {
           return Scaffold(
             backgroundColor: AppColors.bg(context),
             body: Center(
@@ -55,23 +72,33 @@ class AdminDashboardScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.amber, size: 48),
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.amber,
+                      size: 48,
+                    ),
                     const SizedBox(height: 12),
                     Text(
-                      loc.isArabic ? 'تعذر تحميل بيانات الإدارة' : 'Failed to load admin data',
+                      loc.isArabic
+                          ? 'تعذر تحميل بيانات الإدارة'
+                          : 'Failed to load admin data',
                       style: AppTypography.cardTitle.copyWith(
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       adminService.errorMessage!,
-                      style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.mutedText(context),
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      onPressed: () => adminService.loadAllData(refresh: true),
+                      onPressed: () => adminService.loadOverview(refresh: true),
                       icon: const Icon(Icons.refresh_rounded, size: 16),
                       label: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
                       style: ElevatedButton.styleFrom(
@@ -89,9 +116,11 @@ class AdminDashboardScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppColors.bg(context),
           body: RefreshIndicator(
-            onRefresh: () => adminService.loadAllData(refresh: true),
+            onRefresh: () => adminService.loadOverview(refresh: true),
             color: AppColors.accentChampagne,
-            backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+            backgroundColor: isDark
+                ? AppColors.cardSurface
+                : AppColors.lightCardSurface,
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               children: [
@@ -100,251 +129,304 @@ class AdminDashboardScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 18),
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.amber,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             adminService.errorMessage!,
-                            style: AppTypography.caption.copyWith(color: Colors.amber),
+                            style: AppTypography.caption.copyWith(
+                              color: Colors.amber,
+                            ),
                           ),
                         ),
                         TextButton(
-                          onPressed: () => adminService.loadAllData(refresh: true),
-                          child: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                          onPressed: () =>
+                              adminService.loadOverview(refresh: true),
+                          child: Text(
+                            loc.isArabic ? 'إعادة المحاولة' : 'Retry',
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
                 ],
-            // Top Welcome Card
-            LuxuryCard(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: AppColors.accentChampagne.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                    ),
-                    child: const Icon(Icons.shield_outlined, color: AppColors.accentChampagne, size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          loc.isArabic ? 'لوحة القيادة والمتابعة المركزية' : 'Platform Operations & Metrics',
-                          style: AppTypography.cardTitle.copyWith(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                // Top Welcome Card
+                LuxuryCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: AppColors.accentChampagne.withValues(
+                            alpha: 0.15,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.accentChampagne.withValues(
+                              alpha: 0.4,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          loc.isArabic ? 'Aesthetic Way — دولة الإمارات' : 'Aesthetic Way — UAE Market',
-                          style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11.5),
+                        child: const Icon(
+                          Icons.shield_outlined,
+                          color: AppColors.accentChampagne,
+                          size: 24,
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.isArabic
+                                  ? 'لوحة القيادة والمتابعة المركزية'
+                                  : 'Platform Operations & Metrics',
+                              style: AppTypography.cardTitle.copyWith(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              loc.isArabic
+                                  ? 'Aesthetic Way — دولة الإمارات'
+                                  : 'Aesthetic Way — UAE Market',
+                              style: AppTypography.caption.copyWith(
+                                color: AppColors.mutedText(context),
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Key Metrics Grid (3 Rows x 2 Columns strictly from real dashboard API)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AdminKpiCard(
+                        title: loc.tr('admin_total_events'),
+                        value: NumberFormat(
+                          '#,###',
+                        ).format(adminService.dashboard.totalAnalyticsEvents),
+                        subtitle:
+                            '${NumberFormat('#,###').format(adminService.dashboard.totalPatients)} ${loc.tr('admin_registered_patients')}',
+                        icon: Icons.insights_rounded,
+                        isGold: true,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _AdminKpiCard(
+                        title: loc.tr('admin_active_clinics'),
+                        value: '${adminService.dashboard.activeClinics}',
+                        subtitle:
+                            '${adminService.dashboard.totalClinics} ${loc.isArabic ? "مسجلة بالمنصة" : "Registered"}',
+                        icon: Icons.apartment_rounded,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AdminKpiCard(
+                        title: loc.tr('admin_total_leads'),
+                        value: '${adminService.dashboard.totalLeads}',
+                        subtitle:
+                            '${adminService.dashboard.conversionPercentage}% ${loc.tr('admin_closure_rate')}',
+                        icon: Icons.mark_email_read_rounded,
+                        isGold: true,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _AdminKpiCard(
+                        title: loc.tr('admin_contacted_leads'),
+                        value: '${adminService.dashboard.scheduledLeads}',
+                        subtitle:
+                            '${adminService.dashboard.completedLeads} ${loc.tr('admin_completed_leads')}',
+                        icon: Icons.support_agent_rounded,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AdminKpiCard(
+                        title: loc.tr('admin_registered_patients'),
+                        value: NumberFormat(
+                          '#,###',
+                        ).format(adminService.dashboard.totalPatients),
+                        subtitle:
+                            '${adminService.dashboard.totalReferrals} ${loc.isArabic ? "دعوة إحالة" : "Referrals"}',
+                        icon: Icons.people_outline_rounded,
+                        iconColor: const Color(0xFF3B82F6),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _AdminKpiCard(
+                        title: loc.tr('admin_active_offers_kpi'),
+                        value: '${adminService.dashboard.totalOffers}',
+                        subtitle:
+                            '${adminService.dashboard.featuredClinics} ${loc.isArabic ? "عيادة مميزة / VIP" : "Featured Clinics"}',
+                        icon: Icons.local_offer_outlined,
+                        iconColor: const Color(0xFF10B981),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-            // Key Metrics Grid (3 Rows x 2 Columns strictly from real dashboard API)
-            Row(
-              children: [
-                Expanded(
-                  child: _AdminKpiCard(
-                    title: loc.tr('admin_total_events'),
-                    value: NumberFormat('#,###').format(adminService.dashboard.totalAnalyticsEvents),
-                    subtitle: '${NumberFormat('#,###').format(adminService.dashboard.totalPatients)} ${loc.tr('admin_registered_patients')}',
-                    icon: Icons.insights_rounded,
-                    isGold: true,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _AdminKpiCard(
-                    title: loc.tr('admin_active_clinics'),
-                    value: '${adminService.dashboard.activeClinics}',
-                    subtitle: '${adminService.dashboard.totalClinics} ${loc.isArabic ? "مسجلة بالمنصة" : "Registered"}',
-                    icon: Icons.apartment_rounded,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _AdminKpiCard(
-                    title: loc.tr('admin_total_leads'),
-                    value: '${adminService.dashboard.totalLeads}',
-                    subtitle: '${adminService.dashboard.conversionPercentage}% ${loc.tr('admin_closure_rate')}',
-                    icon: Icons.mark_email_read_rounded,
-                    isGold: true,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _AdminKpiCard(
-                    title: loc.tr('admin_contacted_leads'),
-                    value: '${adminService.dashboard.scheduledLeads}',
-                    subtitle: '${adminService.dashboard.completedLeads} ${loc.tr('admin_completed_leads')}',
-                    icon: Icons.support_agent_rounded,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _AdminKpiCard(
-                    title: loc.tr('admin_registered_patients'),
-                    value: NumberFormat('#,###').format(adminService.dashboard.totalPatients),
-                    subtitle: '${adminService.dashboard.totalReferrals} ${loc.isArabic ? "دعوة إحالة" : "Referrals"}',
-                    icon: Icons.people_outline_rounded,
-                    iconColor: const Color(0xFF3B82F6),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _AdminKpiCard(
-                    title: loc.tr('admin_active_offers_kpi'),
-                    value: '${adminService.dashboard.totalOffers}',
-                    subtitle: '${adminService.dashboard.featuredClinics} ${loc.isArabic ? "عيادة مميزة / VIP" : "Featured Clinics"}',
-                    icon: Icons.local_offer_outlined,
-                    iconColor: const Color(0xFF10B981),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Quick Shortcuts Row
-            Text(
-              loc.tr('clinic_quick_actions'),
-              style: AppTypography.cardTitle.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _AdminShortcutBtn(
-                    label: loc.tr('admin_nav_clinics'),
-                    icon: Icons.apartment_rounded,
-                    onTap: onNavigateToClinics,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _AdminShortcutBtn(
-                    label: loc.tr('admin_nav_leads'),
-                    icon: Icons.mark_email_read_rounded,
-                    onTap: onNavigateToLeads,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _AdminShortcutBtn(
-                    label: loc.tr('admin_nav_analytics'),
-                    icon: Icons.analytics_rounded,
-                    onTap: onNavigateToAnalytics,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Recent Live Activity Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+                // Quick Shortcuts Row
                 Text(
-                  loc.tr('admin_recent_activity'),
+                  loc.tr('clinic_quick_actions'),
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
-                TextButton(
-                  onPressed: onNavigateToLeads,
-                  child: Text(
-                    loc.isArabic ? 'عرض الكل' : 'View All',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.accentChampagne,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            ...recentLeads.map((lead) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _AdminLeadStreamTile(
-                  lead: lead,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      LuxuryPageRoute(page: AdminLeadDetailScreen(lead: lead)),
-                    );
-                  },
-                ),
-              );
-            }),
-
-            const SizedBox(height: 16),
-
-            // Regulatory Disclaimer Notice
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border(context), width: 0.8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.verified_user_outlined, color: AppColors.accentChampagne, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      loc.tr('admin_lead_monitoring_note'),
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.mutedText(context),
-                        fontSize: 11,
-                        height: 1.45,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AdminShortcutBtn(
+                        label: loc.tr('admin_nav_clinics'),
+                        icon: Icons.apartment_rounded,
+                        onTap: widget.onNavigateToClinics,
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AdminShortcutBtn(
+                        label: loc.tr('admin_nav_leads'),
+                        icon: Icons.mark_email_read_rounded,
+                        onTap: widget.onNavigateToLeads,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AdminShortcutBtn(
+                        label: loc.tr('admin_nav_analytics'),
+                        icon: Icons.analytics_rounded,
+                        onTap: widget.onNavigateToAnalytics,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Recent Live Activity Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      loc.tr('admin_recent_activity'),
+                      style: AppTypography.cardTitle.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: widget.onNavigateToLeads,
+                      child: Text(
+                        loc.isArabic ? 'عرض الكل' : 'View All',
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.goldText(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+
+                ...recentLeads.map((lead) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _AdminLeadStreamTile(
+                      lead: lead,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          LuxuryPageRoute(
+                            page: AdminLeadDetailScreen(lead: lead),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 16),
+
+                // Regulatory Disclaimer Notice
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.cardSurfaceHover
+                        : AppColors.lightCardSurfaceHover,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.border(context),
+                      width: 0.8,
+                    ),
                   ),
-                ],
-              ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.verified_user_outlined,
+                        color: AppColors.accentChampagne,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          loc.tr('admin_lead_monitoring_note'),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.mutedText(context),
+                            fontSize: 11,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  },
-);
   }
 }
 
@@ -392,7 +474,11 @@ class _AdminKpiCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 18,
-                color: iconColor ?? (isGold ? AppColors.accentChampagne : AppColors.mutedText(context)),
+                color:
+                    iconColor ??
+                    (isGold
+                        ? AppColors.accentChampagne
+                        : AppColors.mutedText(context)),
               ),
             ],
           ),
@@ -403,8 +489,10 @@ class _AdminKpiCard extends StatelessWidget {
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: isGold
-                  ? AppColors.accentChampagne
-                  : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
+                  ? AppColors.goldText(context)
+                  : (isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary),
             ),
           ),
           const SizedBox(height: 4),
@@ -444,7 +532,9 @@ class _AdminShortcutBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurface,
+          color: isDark
+              ? AppColors.cardSurfaceHover
+              : AppColors.lightCardSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.border(context), width: 0.8),
         ),
@@ -455,7 +545,9 @@ class _AdminShortcutBtn extends StatelessWidget {
             Text(
               label,
               style: AppTypography.caption.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
               ),
@@ -504,8 +596,14 @@ class _AdminLeadStreamTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-            child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne, size: 16),
+            backgroundColor: isDark
+                ? AppColors.cardSurfaceHover
+                : AppColors.lightCardSurfaceHover,
+            child: const Icon(
+              Icons.apartment_rounded,
+              color: AppColors.accentChampagne,
+              size: 16,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -517,7 +615,9 @@ class _AdminLeadStreamTile extends StatelessWidget {
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

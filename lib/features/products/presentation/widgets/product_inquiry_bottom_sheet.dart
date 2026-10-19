@@ -117,7 +117,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
     final payload = <String, dynamic>{
       'clinic': clinicId,
       'product': widget.product.id,
-      'lead_type': 'product',
+      'lead_type': 'product_inquiry',
       'service_name': productName,
       'patient_name': _nameController.text.trim(),
       'patient_phone': formattedPhone,
@@ -145,15 +145,13 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
         branchNameEn: '',
         serviceNameAr: widget.product.nameAr,
         serviceNameEn: widget.product.nameEn,
-        preferredDate: DateTime.now(),
-        preferredTimeWindow: PreferredTimeWindow.evening,
         patientFullName: _nameController.text.trim(),
         patientPhone: formattedPhone,
         notes: _notesController.text.trim(),
         consentAccepted: true,
         status: AppointmentLeadStatus.sent,
         createdAt: result.createdAt,
-        leadType: 'product',
+        leadType: 'product_inquiry',
       );
 
       final navigator = Navigator.of(context);
@@ -327,8 +325,8 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                                 const SizedBox(height: 4),
                                 Text(
                                   '${widget.product.price.toInt()} ${loc.tr("currency_aed")}',
-                                  style: const TextStyle(
-                                    color: AppColors.accentChampagne,
+                                  style: TextStyle(
+                                    color: AppColors.goldText(context),
                                     fontWeight: FontWeight.w800,
                                     fontSize: 13,
                                   ),
@@ -378,7 +376,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                       labelText: loc.tr('full_name'),
                       hintText: loc.isArabic ? 'الاسم الكامل كما تود أن تناديك العيادة' : 'Your full name',
                       hintStyle: TextStyle(
-                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                        color: AppColors.text(context).withValues(alpha: 0.68),
                         fontSize: 12.5,
                         fontWeight: FontWeight.w400,
                       ),
@@ -422,7 +420,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                           ? 'اكتب استفسارك حول توفر المنتج أو طريقة الاستخدام...'
                           : 'Write your question about product availability or usage...',
                       hintStyle: TextStyle(
-                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                        color: AppColors.text(context).withValues(alpha: 0.68),
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                       ),

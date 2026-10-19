@@ -72,11 +72,12 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
     try {
       final XFile? file = await _picker.pickImage(
         source: source,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 82,
       );
 
+      if (!mounted) return;
       if (file != null) {
         setState(() {
           _localPath = file.path;
@@ -126,7 +127,9 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                 style: AppTypography.cardTitle.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -137,12 +140,18 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                     color: AppColors.accentChampagne.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.photo_library_rounded, color: AppColors.accentChampagne, size: 20),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: AppColors.accentChampagne,
+                    size: 20,
+                  ),
                 ),
                 title: Text(
                   loc.isArabic ? 'اختيار من معرض الصور' : 'Choose from Gallery',
                   style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.textPrimary
+                        : AppColors.lightTextPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -159,12 +168,18 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                     color: AppColors.accentChampagne.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.camera_alt_rounded, color: AppColors.accentChampagne, size: 20),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.accentChampagne,
+                    size: 20,
+                  ),
                 ),
                 title: Text(
                   loc.isArabic ? 'التقاط صورة بالكاميرا' : 'Take a Photo',
                   style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.textPrimary
+                        : AppColors.lightTextPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -183,7 +198,11 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                       color: AppColors.errorRed.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.delete_outline_rounded, color: AppColors.errorRed, size: 20),
+                    child: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.errorRed,
+                      size: 20,
+                    ),
                   ),
                   title: Text(
                     loc.isArabic ? 'حذف الصورة' : 'Remove Photo',
@@ -223,15 +242,20 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
             Text(
               widget.label,
               style: AppTypography.caption.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
               ),
             ),
             if (widget.isRequired)
-              const Text(
+              Text(
                 ' *',
-                style: TextStyle(color: AppColors.accentChampagne, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.goldText(context),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
           ],
         ),
@@ -242,9 +266,13 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
           onTap: () => _showPickerOptions(context),
           child: Container(
             height: widget.height,
-            width: widget.isCircular ? widget.height : (widget.width ?? double.infinity),
+            width: widget.isCircular
+                ? widget.height
+                : (widget.width ?? double.infinity),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+              color: isDark
+                  ? AppColors.cardSurfaceHover
+                  : AppColors.lightCardSurfaceHover,
               borderRadius: radius,
               border: Border.all(
                 color: _hasImage
@@ -260,16 +288,16 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                       fit: StackFit.expand,
                       children: [
                         // Image Rendering
-                        if (_localPath != null && _localPath!.isNotEmpty && File(_localPath!).existsSync())
+                        if (_localPath != null &&
+                            _localPath!.isNotEmpty &&
+                            File(_localPath!).existsSync())
                           Image.file(
                             File(_localPath!),
+                            cacheWidth: 480,
                             fit: BoxFit.cover,
                           )
                         else if (_remoteUrl != null && _remoteUrl!.isNotEmpty)
-                          LuxuryImage(
-                            imageUrl: _remoteUrl!,
-                            fit: BoxFit.cover,
-                          ),
+                          LuxuryImage(imageUrl: _remoteUrl!, fit: BoxFit.cover),
 
                         // Overlay action bar
                         Positioned(
@@ -319,7 +347,9 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
+                            color: AppColors.accentChampagne.withValues(
+                              alpha: isDark ? 0.12 : 0.18,
+                            ),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -330,16 +360,22 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          loc.isArabic ? 'اضغط لاختيار صورة' : 'Tap to upload photo',
+                          loc.isArabic
+                              ? 'اضغط لاختيار صورة'
+                              : 'Tap to upload photo',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.silverPrimary
+                                : AppColors.lightTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          loc.isArabic ? 'كاميرا أو استوديو (PNG, JPG)' : 'Camera or Gallery (PNG, JPG)',
+                          loc.isArabic
+                              ? 'كاميرا أو استوديو (PNG, JPG)'
+                              : 'Camera or Gallery (PNG, JPG)',
                           style: TextStyle(
                             fontSize: 10,
                             color: AppColors.mutedText(context),
@@ -355,7 +391,10 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
           const SizedBox(height: 4),
           Text(
             widget.helperText!,
-            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 10.5),
+            style: AppTypography.caption.copyWith(
+              color: AppColors.mutedText(context),
+              fontSize: 10.5,
+            ),
           ),
         ],
       ],

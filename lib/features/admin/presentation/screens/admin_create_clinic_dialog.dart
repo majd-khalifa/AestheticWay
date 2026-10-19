@@ -8,7 +8,6 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/widgets/ltr_text_field.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
-import 'package:aesthetic_way/core/services/media_upload_service.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
@@ -138,33 +137,8 @@ class _AdminCreateClinicDialogState extends State<AdminCreateClinicDialog> {
       },
     };
 
-    if (_logoPath != null && _logoPath!.isNotEmpty) {
-      try {
-        final res = await MediaUploadService().uploadImage(
-          filePath: _logoPath!,
-          mediaType: 'clinic_logo',
-        );
-        if (res['url'] != null) {
-          payload['logo'] = res['url'];
-        }
-      } catch (_) {
-        payload['logo'] = _logoPath;
-      }
-    }
-
-    if (_coverPath != null && _coverPath!.isNotEmpty) {
-      try {
-        final res = await MediaUploadService().uploadImage(
-          filePath: _coverPath!,
-          mediaType: 'clinic_cover',
-        );
-        if (res['url'] != null) {
-          payload['cover_image'] = res['url'];
-        }
-      } catch (_) {
-        payload['cover_image'] = _coverPath;
-      }
-    }
+    if (_logoPath != null) payload['logo'] = _logoPath;
+    if (_coverPath != null) payload['cover_image'] = _coverPath;
 
     try {
       final res = await AdminPortalService().createClinic(payload);
@@ -287,7 +261,7 @@ Portal: Mobile App (Clinic Partner Portal)
                       Expanded(
                         child: Text(
                           actualPassword,
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.accentChampagne, fontSize: 13),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.goldText(context), fontSize: 13),
                         ),
                       ),
                     ],
@@ -316,7 +290,7 @@ Portal: Mobile App (Clinic Partner Portal)
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               loc.isArabic ? 'إغلاق' : 'Done',
-              style: const TextStyle(color: AppColors.accentChampagne, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppColors.goldText(context), fontWeight: FontWeight.bold),
             ),
           ),
         ],

@@ -96,8 +96,8 @@ class LuxuryEmptyState extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         actionLabel!,
-                        style: const TextStyle(
-                          color: AppColors.accentChampagne,
+                        style: TextStyle(
+                          color: AppColors.goldText(context),
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),

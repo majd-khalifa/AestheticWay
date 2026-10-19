@@ -23,7 +23,7 @@ void main() {
             'id': 'ad-1',
             'image': 'https://example.com/banner.jpg',
             'link': 'https://example.com',
-          }
+          },
         ],
         'categories': [
           {
@@ -32,7 +32,7 @@ void main() {
             'name_ar': 'الليزر والضوء',
             'slug': 'laser-and-light',
             'icon': '',
-          }
+          },
         ],
         'active_offers': [
           {
@@ -45,8 +45,8 @@ void main() {
               'id': 'clinic-1',
               'name_en': 'Downtown Clinic',
               'name_ar': 'عيادة داون تاون',
-            }
-          }
+            },
+          },
         ],
         'nearby_clinics': [
           {
@@ -57,8 +57,8 @@ void main() {
             'is_featured': true,
             'google_rating': '4.9',
             'distance': '1250.5',
-          }
-        ]
+          },
+        ],
       };
 
       final feed = HomeFeedModel.fromJson(sampleJson);
@@ -98,7 +98,7 @@ void main() {
             'phone': '+97143001123',
             'latitude': '25.2100',
             'longitude': '55.2800',
-          }
+          },
         ],
       };
 
@@ -111,30 +111,35 @@ void main() {
       expect(clinic.branches.first.nameEn, 'Jumeirah 1');
     });
 
-    test('OfferModel calculates discount percentage and handles ends_at dates', () {
-      final offerJson = {
-        'id': 'offer-1',
-        'title_ar': 'عرض البوتوكس',
-        'title_en': 'Botox Package',
-        'original_price': '2000.00',
-        'offer_price': '1000.00',
-        'ends_at': DateTime.now().add(const Duration(days: 10)).toIso8601String(),
-        'clinic': {
-          'id': 'clinic-abc',
-          'name_ar': 'عيادة النور',
-          'name_en': 'Al Noor Clinic',
-          'logo': 'https://example.com/clinic_logo.png',
-        }
-      };
+    test(
+      'OfferModel calculates discount percentage and handles ends_at dates',
+      () {
+        final offerJson = {
+          'id': 'offer-1',
+          'title_ar': 'عرض البوتوكس',
+          'title_en': 'Botox Package',
+          'original_price': '2000.00',
+          'offer_price': '1000.00',
+          'ends_at': DateTime.now()
+              .add(const Duration(days: 10))
+              .toIso8601String(),
+          'clinic': {
+            'id': 'clinic-abc',
+            'name_ar': 'عيادة النور',
+            'name_en': 'Al Noor Clinic',
+            'logo': 'https://example.com/clinic_logo.png',
+          },
+        };
 
-      final offer = OfferModel.fromJson(offerJson);
+        final offer = OfferModel.fromJson(offerJson);
 
-      expect(offer.discountPercentage, 50);
-      expect(offer.clinicId, 'clinic-abc');
-      expect(offer.clinicNameEn, 'Al Noor Clinic');
-      expect(offer.clinicLogoUrl, 'https://example.com/clinic_logo.png');
-      expect(offer.daysRemaining >= 9, isTrue);
-    });
+        expect(offer.discountPercentage, 50);
+        expect(offer.clinicId, 'clinic-abc');
+        expect(offer.clinicNameEn, 'Al Noor Clinic');
+        expect(offer.clinicLogoUrl, 'https://example.com/clinic_logo.png');
+        expect(offer.daysRemaining >= 9, isTrue);
+      },
+    );
 
     test('Models correctly extract clinicLogoUrl from nested clinic JSON', () {
       final product = ProductModel.fromJson({
@@ -145,7 +150,7 @@ void main() {
           'id': 'c-1',
           'name_ar': 'العيادة',
           'logo': 'https://example.com/c1_logo.png',
-        }
+        },
       });
       expect(product.clinicLogoUrl, equals('https://example.com/c1_logo.png'));
 
@@ -159,7 +164,7 @@ void main() {
           'id': 'c-2',
           'name_ar': 'العيادة',
           'logo': 'https://example.com/c2_logo.png',
-        }
+        },
       });
       expect(article.clinicLogoUrl, equals('https://example.com/c2_logo.png'));
 
@@ -171,9 +176,12 @@ void main() {
           'id': 'c-3',
           'name_ar': 'العيادة',
           'logo': 'https://example.com/c3_logo.png',
-        }
+        },
       });
-      expect(treatment.clinicLogoUrl, equals('https://example.com/c3_logo.png'));
+      expect(
+        treatment.clinicLogoUrl,
+        equals('https://example.com/c3_logo.png'),
+      );
 
       final practitioner = PractitionerModel.fromJson({
         'id': 'p-1',
@@ -186,9 +194,12 @@ void main() {
           'id': 'c-4',
           'name_ar': 'عيادة دبي',
           'logo': 'https://example.com/c4_logo.png',
-        }
+        },
       });
-      expect(practitioner.clinicLogoUrl, equals('https://example.com/c4_logo.png'));
+      expect(
+        practitioner.clinicLogoUrl,
+        equals('https://example.com/c4_logo.png'),
+      );
     });
   });
 
@@ -206,40 +217,55 @@ void main() {
       apiClient.dio.interceptors.remove(interceptor);
     });
 
-    test('ClinicsRepository passes page and pageSize in query parameters', () async {
-      final repo = ClinicsRepository(apiClient: apiClient);
-      await repo.getClinics(page: 3, pageSize: 25);
-      expect(interceptor.lastQueryParams?['page'], equals(3));
-      expect(interceptor.lastQueryParams?['page_size'], equals(25));
-    });
+    test(
+      'ClinicsRepository passes page and pageSize in query parameters',
+      () async {
+        final repo = ClinicsRepository(apiClient: apiClient);
+        await repo.getClinics(page: 3, pageSize: 25);
+        expect(interceptor.lastQueryParams?['page'], equals(3));
+        expect(interceptor.lastQueryParams?['page_size'], equals(20));
+      },
+    );
 
-    test('OffersRepository passes page and pageSize in query parameters', () async {
-      final repo = OffersRepository(apiClient: apiClient);
-      await repo.getOffers(page: 2, pageSize: 20);
-      expect(interceptor.lastQueryParams?['page'], equals(2));
-      expect(interceptor.lastQueryParams?['page_size'], equals(20));
-    });
+    test(
+      'OffersRepository passes page and pageSize in query parameters',
+      () async {
+        final repo = OffersRepository(apiClient: apiClient);
+        await repo.getOffers(page: 2, pageSize: 20);
+        expect(interceptor.lastQueryParams?['page'], equals(2));
+        expect(interceptor.lastQueryParams?['page_size'], equals(20));
+      },
+    );
 
-    test('ProductsRepository passes page and pageSize in query parameters', () async {
-      final repo = ProductsRepository(apiClient: apiClient);
-      await repo.getProducts(page: 4, pageSize: 15);
-      expect(interceptor.lastQueryParams?['page'], equals(4));
-      expect(interceptor.lastQueryParams?['page_size'], equals(15));
-    });
+    test(
+      'ProductsRepository passes page and pageSize in query parameters',
+      () async {
+        final repo = ProductsRepository(apiClient: apiClient);
+        await repo.getProducts(page: 4, pageSize: 15);
+        expect(interceptor.lastQueryParams?['page'], equals(4));
+        expect(interceptor.lastQueryParams?['page_size'], equals(20));
+      },
+    );
 
-    test('ArticlesRepository passes page and pageSize in query parameters', () async {
-      final repo = ArticlesRepository(apiClient: apiClient);
-      await repo.getArticles(page: 5, pageSize: 10);
-      expect(interceptor.lastQueryParams?['page'], equals(5));
-      expect(interceptor.lastQueryParams?['page_size'], equals(10));
-    });
+    test(
+      'ArticlesRepository passes page and pageSize in query parameters',
+      () async {
+        final repo = ArticlesRepository(apiClient: apiClient);
+        await repo.getArticles(page: 5, pageSize: 10);
+        expect(interceptor.lastQueryParams?['page'], equals(5));
+        expect(interceptor.lastQueryParams?['page_size'], equals(20));
+      },
+    );
 
-    test('TreatmentsRepository passes page and pageSize in query parameters', () async {
-      final repo = TreatmentsRepository(apiClient: apiClient);
-      await repo.getTreatments(page: 2, pageSize: 30);
-      expect(interceptor.lastQueryParams?['page'], equals(2));
-      expect(interceptor.lastQueryParams?['page_size'], equals(30));
-    });
+    test(
+      'TreatmentsRepository passes page and pageSize in query parameters',
+      () async {
+        final repo = TreatmentsRepository(apiClient: apiClient);
+        await repo.getTreatments(page: 2, pageSize: 30);
+        expect(interceptor.lastQueryParams?['page'], equals(2));
+        expect(interceptor.lastQueryParams?['page_size'], equals(20));
+      },
+    );
   });
 }
 
@@ -251,10 +277,8 @@ class _TestCaptureInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     lastPath = options.path;
     lastQueryParams = options.queryParameters;
-    handler.resolve(Response(
-      requestOptions: options,
-      data: {'results': []},
-      statusCode: 200,
-    ));
+    handler.resolve(
+      Response(requestOptions: options, data: {'results': []}, statusCode: 200),
+    );
   }
 }

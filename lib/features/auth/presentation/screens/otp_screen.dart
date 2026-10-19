@@ -323,7 +323,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.accentChampagne,
+                        color: AppColors.goldText(context),
                         letterSpacing: 1.1,
                       ),
                     ),
@@ -418,7 +418,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       ? 'تلميح: كود التحقق مطبوع في Terminal السيرفر (SMS_PROVIDER=console)'
                                       : 'Dev Hint: OTP code is printed in the Django server terminal',
                                   style: AppTypography.caption.copyWith(
-                                    color: AppColors.accentChampagne,
+                                    color: AppColors.goldText(context),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -455,7 +455,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             label: Text(
                               loc.tr('resend_code'),
                               style: AppTypography.caption.copyWith(
-                                color: AppColors.accentChampagne,
+                                color: AppColors.goldText(context),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),

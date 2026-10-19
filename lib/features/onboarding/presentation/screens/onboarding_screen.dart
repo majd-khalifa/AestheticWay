@@ -236,7 +236,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               child: Text(
                                 item.badgeText,
                                 style: AppTypography.badge.copyWith(
-                                  color: AppColors.accentChampagne,
+                                  color: AppColors.goldText(context),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                 ),

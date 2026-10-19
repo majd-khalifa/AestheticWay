@@ -155,7 +155,7 @@ class AdminSettingsScreen extends StatelessWidget {
                       onPressed: () => loc.toggleLanguage(),
                       child: Text(
                         loc.tr('switch_language'),
-                        style: const TextStyle(color: AppColors.accentChampagne, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: AppColors.goldText(context), fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],

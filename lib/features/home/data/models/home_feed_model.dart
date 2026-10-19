@@ -68,18 +68,22 @@ class HomeFeedModel {
 
     return HomeFeedModel(
       featuredAds: adsRaw
+          .take(10)
           .whereType<Map<String, dynamic>>()
           .map((m) => FeaturedAdApiModel.fromJson(m))
           .toList(),
       categories: catsRaw
+          .take(8)
           .whereType<Map<String, dynamic>>()
           .map((m) => CategoryApiModel.fromJson(m))
           .toList(),
       activeOffers: offersRaw
+          .take(10)
           .whereType<Map<String, dynamic>>()
           .map((m) => OfferModel.fromJson(m))
           .toList(),
       nearbyClinics: clinicsRaw
+          .take(10)
           .whereType<Map<String, dynamic>>()
           .map((m) => ClinicModel.fromJson(m))
           .toList(),

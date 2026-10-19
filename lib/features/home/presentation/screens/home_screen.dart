@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:aesthetic_way/core/data/single_flight.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -48,6 +50,26 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
+  final _feedFlights = SingleFlight();
+  int _feedRequestId = 0;
+  Timer? _cityDebounce, _searchDebounce;
+  void _cityChanged(String city) {
+    _cityDebounce?.cancel();
+    ++_feedRequestId;
+    setState(() {
+      _selectedCity = city;
+      _isLoading = true;
+    });
+    _cityDebounce = Timer(const Duration(milliseconds: 350), _loadFeed);
+  }
+
+  void _searchChanged(String text) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) setState(() => _searchQuery = text.trim());
+    });
+  }
+
   HomeFeedModel? _feed;
   bool _isLoading = true;
   String? _errorMessage;
@@ -60,26 +82,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    ++_feedRequestId;
+    _cityDebounce?.cancel();
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _loadFeed() async {
+    final city = _selectedCity;
+    final requestId = ++_feedRequestId;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final feed = await _homeRepository.getHomeFeed(city: _selectedCity);
-      if (mounted) {
+      final feed = await _feedFlights.run(
+        city,
+        () => _homeRepository.getHomeFeed(city: city),
+      );
+      if (mounted && requestId == _feedRequestId) {
         setState(() {
           _feed = feed;
           _isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && requestId == _feedRequestId) {
         setState(() {
           _errorMessage = e.toString();
           _isLoading = false;
@@ -91,9 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToClinicProfile(ClinicModel clinic) {
     Navigator.push(
       context,
-      LuxuryPageRoute(
-        page: ClinicProfileScreen(clinic: clinic),
-      ),
+      LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
     );
   }
 
@@ -109,9 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Navigator.push(
       context,
-      LuxuryPageRoute(
-        page: AppointmentRequestScreen(clinic: clinic),
-      ),
+      LuxuryPageRoute(page: AppointmentRequestScreen(clinic: clinic)),
     );
   }
 
@@ -120,7 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleOfferTap(OfferModel offer) async {
-    final existingClinic = _feed?.nearbyClinics.where((c) => c.id == offer.clinicId).firstOrNull;
+    final existingClinic = _feed?.nearbyClinics
+        .where((c) => c.id == offer.clinicId)
+        .firstOrNull;
     if (existingClinic != null) {
       _navigateToClinicProfile(existingClinic);
       return;
@@ -174,16 +202,34 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(context, LuxuryPageRoute(page: const OffersScreen()));
         break;
       case 'treatments':
-        Navigator.push(context, LuxuryPageRoute(page: const TreatmentsScreen()));
+        Navigator.push(
+          context,
+          LuxuryPageRoute(page: const TreatmentsScreen()),
+        );
         break;
       case 'doctors':
-        Navigator.push(context, LuxuryPageRoute(page: const PractitionersScreen(initialRoleFilter: 'doctors')));
+        Navigator.push(
+          context,
+          LuxuryPageRoute(
+            page: const PractitionersScreen(initialRoleFilter: 'doctors'),
+          ),
+        );
         break;
       case 'skin_experts':
-        Navigator.push(context, LuxuryPageRoute(page: const PractitionersScreen(initialRoleFilter: 'skin_experts')));
+        Navigator.push(
+          context,
+          LuxuryPageRoute(
+            page: const PractitionersScreen(initialRoleFilter: 'skin_experts'),
+          ),
+        );
         break;
       case 'surgery':
-        Navigator.push(context, LuxuryPageRoute(page: const TreatmentsScreen(initialCategory: 'Plastic Surgery')));
+        Navigator.push(
+          context,
+          LuxuryPageRoute(
+            page: const TreatmentsScreen(initialCategory: 'Plastic Surgery'),
+          ),
+        );
         break;
       case 'products':
         Navigator.push(context, LuxuryPageRoute(page: const ProductsScreen()));
@@ -199,9 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             LuxuryPageRoute(
-              page: ClinicsListScreen(
-                initialCity: _selectedCity,
-              ),
+              page: ClinicsListScreen(initialCity: _selectedCity),
             ),
           );
         }
@@ -257,20 +301,11 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: HomeHeader(
               selectedCity: _selectedCity,
-              onCityChanged: (city) {
-                setState(() {
-                  _selectedCity = city;
-                });
-                _loadFeed();
-              },
+              onCityChanged: _cityChanged,
             ),
           ),
-          SliverToBoxAdapter(
-            child: _buildSearchBar(context, loc),
-          ),
-          const SliverToBoxAdapter(
-            child: HomeFeedSkeleton(),
-          ),
+          SliverToBoxAdapter(child: _buildSearchBar(context, loc)),
+          const SliverToBoxAdapter(child: HomeFeedSkeleton()),
         ],
       );
     }
@@ -283,19 +318,12 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: HomeHeader(
               selectedCity: _selectedCity,
-              onCityChanged: (city) {
-                setState(() {
-                  _selectedCity = city;
-                });
-                _loadFeed();
-              },
+              onCityChanged: _cityChanged,
             ),
           ),
           SliverFillRemaining(
             hasScrollBody: false,
-            child: LuxuryErrorView(
-              onRetry: _loadFeed,
-            ),
+            child: LuxuryErrorView(onRetry: _loadFeed),
           ),
         ],
       );
@@ -306,7 +334,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final allClinics = feed.nearbyClinics;
 
     // Carousel: Featured/VIP clinics first
-    List<ClinicModel> topAds = allClinics.where((c) => c.isEligibleForTopCarousel).toList();
+    List<ClinicModel> topAds = allClinics
+        .where((c) => c.isEligibleForTopCarousel)
+        .toList();
     if (topAds.isEmpty && allClinics.isNotEmpty) {
       topAds = allClinics.take(3).toList();
     }
@@ -353,19 +383,12 @@ class _HomeScreenState extends State<HomeScreen> {
         SliverToBoxAdapter(
           child: HomeHeader(
             selectedCity: _selectedCity,
-            onCityChanged: (city) {
-              setState(() {
-                _selectedCity = city;
-              });
-              _loadFeed();
-            },
+            onCityChanged: _cityChanged,
           ),
         ),
 
         // 2. Search Bar + Filter Trigger
-        SliverToBoxAdapter(
-          child: _buildSearchBar(context, loc),
-        ),
+        SliverToBoxAdapter(child: _buildSearchBar(context, loc)),
 
         const SliverToBoxAdapter(child: SizedBox(height: 6)),
 
@@ -384,9 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // 4. Categories Quick Access Grid (8 Official Categories)
         SliverToBoxAdapter(
-          child: CategoryGrid(
-            onCategorySelected: _handleCategoryTap,
-          ),
+          child: CategoryGrid(onCategorySelected: _handleCategoryTap),
         ),
 
         const SliverToBoxAdapter(child: SizedBox(height: 18)),
@@ -400,7 +421,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-        if (offersList.isNotEmpty) const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        if (offersList.isNotEmpty)
+          const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
         // 6. Nearby Verified Clinics Section
         if (nearbyList.isNotEmpty)
@@ -418,7 +440,9 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: LuxuryEmptyState(
               icon: Icons.apartment_rounded,
-              title: loc.isArabic ? 'لا توجد عيادات متاحة حالياً' : 'No clinics available right now',
+              title: loc.isArabic
+                  ? 'لا توجد عيادات متاحة حالياً'
+                  : 'No clinics available right now',
               subtitle: loc.isArabic
                   ? 'سيتم إضافة عيادات وأطباء جدد قريباً في هذا النطاق الجغرافي'
                   : 'New clinics and doctors will be listed soon in this area',
@@ -428,9 +452,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
         // Extra bottom spacing to float cleanly above bottom nav bar
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 100),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
     );
   }
@@ -453,23 +475,31 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: TextField(
                 controller: _searchController,
-                style: TextStyle(color: AppColors.text(context), fontSize: 13.5),
-                onChanged: (val) {
-                  setState(() {
-                    _searchQuery = val.trim();
-                  });
-                },
+                style: TextStyle(
+                  color: AppColors.text(context),
+                  fontSize: 13.5,
+                ),
+                onChanged: _searchChanged,
                 decoration: InputDecoration(
                   hintText: loc.tr('search_hint'),
                   hintStyle: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.mutedText(context),
+                    color: AppColors.text(context),
                     fontSize: 12,
                   ),
-                  prefixIcon: Icon(Icons.search, color: AppColors.subtext(context), size: 18),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: AppColors.subtext(context),
+                    size: 18,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear, size: 16, color: AppColors.mutedText(context)),
+                          icon: Icon(
+                            Icons.clear,
+                            size: 16,
+                            color: AppColors.mutedText(context),
+                          ),
                           onPressed: () {
+                            _searchDebounce?.cancel();
                             _searchController.clear();
                             setState(() {
                               _searchQuery = '';
@@ -501,7 +531,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               child: const Center(
-                child: Icon(Icons.tune_rounded, size: 18, color: AppColors.accentChampagne),
+                child: Icon(
+                  Icons.tune_rounded,
+                  size: 18,
+                  color: AppColors.accentChampagne,
+                ),
               ),
             ),
           ),

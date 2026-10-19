@@ -1,12 +1,13 @@
+import '../../../core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
-import 'package:aesthetic_way/features/clinics/models/review_model.dart';
 
 class ClinicsRepository {
   final ApiClient _apiClient;
 
-  ClinicsRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  ClinicsRepository({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   /// Fetches paginated clinics list with optional filters
   Future<List<ClinicModel>> getClinics({
@@ -23,9 +24,12 @@ class ClinicsRepository {
     if (city != null && city.isNotEmpty) {
       final normalizedCity = city.trim().toLowerCase();
       if (normalizedCity != 'all' && normalizedCity != 'الكل') {
-        if (normalizedCity.contains('dubai') || normalizedCity.contains('دبي')) {
+        if (normalizedCity.contains('dubai') ||
+            normalizedCity.contains('دبي')) {
           queryParams['city'] = 'dubai';
-        } else if (normalizedCity.contains('abu dhabi') || normalizedCity.contains('أبوظبي') || normalizedCity.contains('ابوظبي')) {
+        } else if (normalizedCity.contains('abu dhabi') ||
+            normalizedCity.contains('أبوظبي') ||
+            normalizedCity.contains('ابوظبي')) {
           queryParams['city'] = 'abu dhabi';
         } else {
           queryParams['city'] = city.trim();
@@ -46,33 +50,18 @@ class ClinicsRepository {
       queryParams['longitude'] = longitude;
     }
 
-    if (page >= 1) {
-      queryParams['page'] = page;
-    }
-
-    if (pageSize > 0) {
-      queryParams['page_size'] = pageSize;
-    }
-
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _apiClient.get(
       ApiConfig.clinics,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final data = response.data;
-    List<dynamic> list;
-    if (data is Map<String, dynamic> && data.containsKey('results')) {
-      list = data['results'] as List<dynamic>? ?? [];
-    } else if (data is List) {
-      list = data;
-    } else {
-      list = [];
-    }
-
-    return list
-        .whereType<Map<String, dynamic>>()
-        .map((m) => ClinicModel.fromJson(m))
-        .toList();
+    return PageItems<ClinicModel>.fromResponse(
+      response.data,
+      ClinicModel.fromJson,
+      page: page,
+    );
   }
 
   /// Fetches detailed clinic profile by UUID or slug
@@ -84,29 +73,23 @@ class ClinicsRepository {
     return ClinicModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Fetches approved patient reviews for a clinic
-  Future<List<ReviewModel>> getClinicReviews(String clinicId) async {
-    final cleanId = clinicId.trim();
-    if (cleanId.isEmpty) return [];
-
-    try {
-      final response = await _apiClient.get(ApiConfig.clinicReviews(cleanId));
-      final data = response.data;
-      List<dynamic> items = [];
-      if (data is Map<String, dynamic> && data.containsKey('results')) {
-        items = data['results'] as List<dynamic>? ?? [];
-      } else if (data is List) {
-        items = data;
-      }
-
-      return items
-          .whereType<Map<String, dynamic>>()
-          .map((m) => ReviewModel.fromJson(m, defaultClinicId: cleanId))
-          .toList();
-    } catch (_) {
-      // Graceful fallback when database is empty or reviews table is unpopulated
-      return [];
-    }
+  Future<List<ClinicBranch>> getBranches(
+    String clinicId, {
+    int page = 1,
+    String? search,
+  }) async {
+    final response = await _apiClient.get(
+      '${ApiConfig.clinics}$clinicId/branches/',
+      queryParameters: {
+        'page': page,
+        'page_size': catalogPageSize,
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
+    return PageItems<ClinicBranch>.fromResponse(
+      response.data,
+      ClinicBranch.fromJson,
+      page: page,
+    );
   }
 }
-

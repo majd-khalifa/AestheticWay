@@ -11,6 +11,12 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
+      bottomSheetTheme: const BottomSheetThemeData(
+        showDragHandle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.backgroundDeep,
       primaryColor: AppColors.silverPrimary,
@@ -68,7 +74,9 @@ class AppTheme {
           TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
         },
       ),
-      dialogTheme: const DialogThemeData(backgroundColor: AppColors.cardSurface),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: AppColors.cardSurface,
+      ),
       colorScheme: const ColorScheme.dark(
         primary: AppColors.silverPrimary,
         onPrimary: AppColors.backgroundDeep,
@@ -103,11 +111,16 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.cardSurface,
         hintStyle: AppTypography.bodyMedium.copyWith(
-          color: AppColors.silverMuted.withValues(alpha: 0.45),
+          color: AppColors.textPrimary.withValues(alpha: 0.68),
           fontWeight: FontWeight.w400,
         ),
-        labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.silverPrimary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.silverPrimary,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: AppColors.borderSubtle),
@@ -118,7 +131,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.silverPrimary, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.silverPrimary,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -140,7 +156,10 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: AppColors.silverBorder.withValues(alpha: 0.3), width: 0.8),
+          side: BorderSide(
+            color: AppColors.silverBorder.withValues(alpha: 0.3),
+            width: 0.8,
+          ),
         ),
       ),
     );
@@ -152,6 +171,12 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      bottomSheetTheme: const BottomSheetThemeData(
+        showDragHandle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.lightBackground,
       primaryColor: AppColors.primarySoftNavy,
@@ -162,10 +187,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(
-            color: AppColors.lightBorder,
-            width: 0.8,
-          ),
+          side: const BorderSide(color: AppColors.lightBorder, width: 0.8),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -188,10 +210,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.lightTextPrimary,
-          side: const BorderSide(
-            color: AppColors.lightBorder,
-            width: 0.9,
-          ),
+          side: const BorderSide(color: AppColors.lightBorder, width: 0.9),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -210,7 +229,9 @@ class AppTheme {
           TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
         },
       ),
-      dialogTheme: const DialogThemeData(backgroundColor: AppColors.lightCardSurface),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: AppColors.lightCardSurface,
+      ),
       colorScheme: const ColorScheme.light(
         primary: AppColors.lightTextPrimary,
         onPrimary: Colors.white,
@@ -227,7 +248,9 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
-        titleTextStyle: AppTypography.screenTitle.copyWith(color: AppColors.lightTextPrimary),
+        titleTextStyle: AppTypography.screenTitle.copyWith(
+          color: AppColors.lightTextPrimary,
+        ),
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
@@ -245,11 +268,16 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.lightCardSurface,
         hintStyle: AppTypography.bodyMedium.copyWith(
-          color: AppColors.lightTextMuted.withValues(alpha: 0.45),
+          color: AppColors.lightTextPrimary.withValues(alpha: 0.68),
           fontWeight: FontWeight.w400,
         ),
-        labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextPrimary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.lightTextPrimary,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.lightBorder),
@@ -260,7 +288,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primarySoftNavy, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.primarySoftNavy,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

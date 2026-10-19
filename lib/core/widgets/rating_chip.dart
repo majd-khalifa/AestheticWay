@@ -41,13 +41,10 @@ class RatingChip extends StatelessWidget {
         ),
       ),
       child: Row(
+        textDirection: TextDirection.ltr,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.star_rounded,
-            size: 13,
-            color: AppColors.starGold,
-          ),
+          const Icon(Icons.star_rounded, size: 13, color: AppColors.starGold),
           const SizedBox(width: 3),
           Text(
             rating.toStringAsFixed(1),
@@ -57,12 +54,24 @@ class RatingChip extends StatelessWidget {
               fontSize: isCompact ? 10.5 : 11.5,
             ),
           ),
+          if (showGoogleSource) ...[
+            const SizedBox(width: 5),
+            Text(
+              'Google',
+              style: AppTypography.caption.copyWith(
+                fontSize: isCompact ? 9 : 10,
+                color: AppColors.subtext(context),
+              ),
+            ),
+          ],
           if (reviewCount != null && reviewCount! > 0) ...[
             const SizedBox(width: 3),
             Text(
               '($reviewCount)',
               style: AppTypography.caption.copyWith(
-                color: isDark ? AppColors.silverMuted : AppColors.lightTextMuted,
+                color: isDark
+                    ? AppColors.silverMuted
+                    : AppColors.lightTextMuted,
                 fontSize: isCompact ? 9 : 10,
               ),
             ),
