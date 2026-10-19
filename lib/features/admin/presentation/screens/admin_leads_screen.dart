@@ -1,3 +1,7 @@
+import '../../../../core/widgets/paged_entity_picker.dart';
+import '../../data/admin_repository.dart';
+import '../../models/admin_clinic_model.dart';
+import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -20,8 +24,51 @@ class AdminLeadsScreen extends StatefulWidget {
 
 class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
   String? _selectedClinicId;
+  String? _selectedClinicName;
   int _selectedStatusIndex = 0; // 0: All, 1: New, 2: Contacted, 3: Closed
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) AdminPortalService().loadCollection('leads');
+    });
+  }
+
+  Future<void> _chooseClinic() async {
+    final locale = LocaleService();
+    final result = await showPagedEntityPicker<AdminClinicModel>(
+      context,
+      title: locale.tr('admin_filter_all_clinics'),
+      hint: locale.tr('admin_clinic_search_hint'),
+      clearLabel: locale.tr('admin_filter_all_clinics'),
+      selectedKey: _selectedClinicId,
+      keyOf: (clinic) => clinic.id,
+      labelOf: (clinic) => locale.isArabic ? clinic.nameAr : clinic.nameEn,
+      loader: (page, search) =>
+          AdminRepository().getClinics(page: page, search: search),
+    );
+    if (!mounted || result == null) return;
+    setState(() {
+      _selectedClinicId = result.value?.id;
+      _selectedClinicName = result.value == null
+          ? null
+          : (locale.isArabic ? result.value!.nameAr : result.value!.nameEn);
+    });
+    _queryChanged();
+  }
+
+  void _queryChanged() => AdminPortalService().searchCollection('leads', {
+    'search': _searchQuery,
+    'clinic': _selectedClinicId,
+    'status': switch (_selectedStatusIndex) {
+      1 => 'new',
+      2 => 'contacted',
+      3 => 'closed',
+      _ => null,
+    },
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +91,15 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
 
         if (_searchQuery.trim().isNotEmpty) {
           final q = _searchQuery.toLowerCase();
-          leads = leads.where((l) =>
-              l.patientFullName.toLowerCase().contains(q) ||
-              l.patientPhone.contains(q) ||
-              l.serviceNameAr.toLowerCase().contains(q) ||
-              l.clinicNameAr.toLowerCase().contains(q)).toList();
+          leads = leads
+              .where(
+                (l) =>
+                    l.patientFullName.toLowerCase().contains(q) ||
+                    l.patientPhone.contains(q) ||
+                    l.serviceNameAr.toLowerCase().contains(q) ||
+                    l.clinicNameAr.toLowerCase().contains(q),
+              )
+              .toList();
         }
 
         final statusTabs = [
@@ -60,202 +111,257 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
 
         return Scaffold(
           backgroundColor: AppColors.bg(context),
-          body: Column(
-            children: [
-              // Supervision Notice Banner
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.16),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4), width: 0.8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.shield_outlined, color: AppColors.accentChampagne, size: 16),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          loc.tr('admin_lead_monitoring_banner'),
-                          style: TextStyle(
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
+          body: PagedScrollBoundary(
+            onLoadMore: () => adminService.loadMore('leads'),
+            child: Column(
+              children: [
+                // Supervision Notice Banner
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentChampagne.withValues(
+                        alpha: isDark ? 0.12 : 0.16,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.accentChampagne.withValues(alpha: 0.4),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.shield_outlined,
+                          color: AppColors.accentChampagne,
+                          size: 16,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Search Input
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: TextField(
-                  style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: loc.isArabic ? 'بحث بالاسم، العيادة، الخدمة، أو الهاتف...' : 'Search by name, clinic, service or phone...',
-                    hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
-                    prefixIcon: Icon(Icons.search_rounded, size: 18, color: AppColors.mutedText(context)),
-                    filled: true,
-                    fillColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.4),
-                    ),
-                  ),
-                  onChanged: (val) {
-                    setState(() {
-                      _searchQuery = val;
-                    });
-                  },
-                ),
-              ),
-
-              // Clinic Filter Dropdown Selector
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border(context), width: 0.8),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String?>(
-                      value: _selectedClinicId,
-                      isExpanded: true,
-                      dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                      hint: Row(
-                        children: [
-                          const Icon(Icons.apartment_rounded, size: 16, color: AppColors.accentChampagne),
-                          const SizedBox(width: 8),
-                          Text(
-                            loc.tr('admin_filter_all_clinics'),
-                            style: TextStyle(
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
+                        const SizedBox(width: 8),
+                        Expanded(
                           child: Text(
-                            loc.tr('admin_filter_all_clinics'),
-                            style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 12.5),
+                            loc.tr('admin_lead_monitoring_banner'),
+                            style: TextStyle(
+                              color: isDark
+                                  ? AppColors.silverPrimary
+                                  : AppColors.lightTextPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
-                        ...adminService.clinics.map((c) {
-                          return DropdownMenuItem<String?>(
-                            value: c.id,
-                            child: Text(
-                              loc.isArabic ? c.nameAr : c.nameEn,
-                              style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 12.5),
-                            ),
-                          );
-                        }),
                       ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedClinicId = val;
-                        });
-                      },
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 6),
 
-              // Status Filter Tabs
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(
-                  children: List.generate(statusTabs.length, (index) {
-                    final isSelected = _selectedStatusIndex == index;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: ChoiceChip(
-                        label: Text(
-                          statusTabs[index],
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                            color: isSelected ? AppColors.backgroundDeep : AppColors.mutedText(context),
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: AppColors.accentChampagne,
-                        backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurface,
-                        side: BorderSide(
-                          color: isSelected ? AppColors.accentChampagne : AppColors.border(context),
+                // Search Input
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.textPrimary
+                          : AppColors.lightTextPrimary,
+                      fontSize: 13,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: loc.isArabic
+                          ? 'بحث بالاسم، العيادة، الخدمة، أو الهاتف...'
+                          : 'Search by name, clinic, service or phone...',
+                      hintStyle: TextStyle(
+                        color: AppColors.text(context),
+                        fontSize: 12,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: AppColors.mutedText(context),
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.cardSurface
+                          : AppColors.lightCardSurface,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: AppColors.border(context),
                           width: 0.8,
                         ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        onSelected: (_) {
-                          setState(() {
-                            _selectedStatusIndex = index;
-                          });
-                        },
                       ),
-                    );
-                  }),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppColors.accentChampagne,
+                          width: 1.4,
+                        ),
+                      ),
+                    ),
+                    onChanged: (val) {
+                      setState(() {
+                        _searchQuery = val;
+                      });
+                      _queryChanged();
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
 
-              // Leads Stream
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () => adminService.loadLeads(),
-                  color: AppColors.accentChampagne,
-                  backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                  child: leads.isEmpty
-                      ? ListView(
-                          children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                            Center(
-                              child: Text(
-                                loc.tr('clinic_no_leads'),
-                                style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
-                              ),
+                // Clinic Filter Dropdown Selector
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.cardSurfaceHover
+                          : AppColors.lightCardSurface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.border(context),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: TextButton.icon(
+                      onPressed: _chooseClinic,
+                      icon: const Icon(Icons.apartment_outlined, size: 18),
+                      label: Text(
+                        _selectedClinicName ??
+                            loc.tr('admin_filter_all_clinics'),
+                      ),
+                      style: TextButton.styleFrom(
+                        alignment: AlignmentDirectional.centerStart,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                // Status Filter Tabs
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    children: List.generate(statusTabs.length, (index) {
+                      final isSelected = _selectedStatusIndex == index;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ChoiceChip(
+                          label: Text(
+                            statusTabs[index],
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.backgroundDeep
+                                  : AppColors.mutedText(context),
                             ),
-                          ],
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                          itemCount: leads.length,
-                          itemBuilder: (context, index) {
-                            final lead = leads[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _AdminLeadRegistryCard(
-                                lead: lead,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    LuxuryPageRoute(page: AdminLeadDetailScreen(lead: lead)),
-                                  );
-                                },
-                              ),
-                            );
+                          ),
+                          selected: isSelected,
+                          selectedColor: AppColors.accentChampagne,
+                          backgroundColor: isDark
+                              ? AppColors.cardSurfaceHover
+                              : AppColors.lightCardSurface,
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.accentChampagne
+                                : AppColors.border(context),
+                            width: 0.8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedStatusIndex = index;
+                            });
+                            _queryChanged();
                           },
                         ),
+                      );
+                    }),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+
+                // Leads Stream
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () => adminService.loadLeads(),
+                    color: AppColors.accentChampagne,
+                    backgroundColor: isDark
+                        ? AppColors.cardSurface
+                        : AppColors.lightCardSurface,
+                    child: leads.isEmpty
+                        ? ListView(
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.2,
+                              ),
+                              Center(
+                                child: Text(
+                                  loc.tr('clinic_no_leads'),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.mutedText(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                            itemCount: leads.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index >= leads.length) {
+                                return PaginationFooter(
+                                  loading: adminService
+                                      .collection('leads')
+                                      .isLoadingMore,
+                                  hasMore: adminService
+                                      .collection('leads')
+                                      .hasMore,
+                                  error: adminService.collection('leads').error,
+                                  onLoadMore: () =>
+                                      adminService.loadMore('leads'),
+                                );
+                              }
+
+                              final lead = leads[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: _AdminLeadRegistryCard(
+                                  lead: lead,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      LuxuryPageRoute(
+                                        page: AdminLeadDetailScreen(lead: lead),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -299,7 +405,11 @@ class _AdminLeadRegistryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.apartment_rounded, size: 16, color: AppColors.accentChampagne),
+              const Icon(
+                Icons.apartment_rounded,
+                size: 16,
+                color: AppColors.accentChampagne,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -307,7 +417,9 @@ class _AdminLeadRegistryCard extends StatelessWidget {
                   style: AppTypography.cardTitle.copyWith(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -346,7 +458,9 @@ class _AdminLeadRegistryCard extends StatelessWidget {
                       style: AppTypography.bodyMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -366,13 +480,16 @@ class _AdminLeadRegistryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    DateFormat('yyyy/MM/dd').format(lead.preferredDate),
-                    style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11),
+                    DateFormat('yyyy/MM/dd').format(lead.createdAt),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.mutedText(context),
+                      fontSize: 11,
+                    ),
                   ),
                   Text(
                     lead.referenceCode,
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.accentChampagne,
+                      color: AppColors.goldText(context),
                       fontWeight: FontWeight.w700,
                       fontSize: 10.5,
                     ),

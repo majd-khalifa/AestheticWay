@@ -1,9 +1,10 @@
-import 'dart:io';
+import '../../../core/data/paged_collection.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/services/media_upload_service.dart';
+import '../../../core/services/media_payload_builder.dart';
 import '../../articles/models/article_model.dart';
 import '../../clinics/models/clinic_model.dart';
 import '../../offers/models/offer_model.dart';
@@ -15,8 +16,12 @@ import 'models/clinic_setup_checklist_model.dart';
 
 /// Repository for Clinic Partner Catalog Management (Practitioners, Treatments, Offers, Products, Articles, Categories)
 class ClinicCatalogRepository {
-  static final ClinicCatalogRepository _instance = ClinicCatalogRepository._internal();
-  factory ClinicCatalogRepository({ApiClient? apiClient, MediaUploadService? mediaUploadService}) {
+  static final ClinicCatalogRepository _instance =
+      ClinicCatalogRepository._internal();
+  factory ClinicCatalogRepository({
+    ApiClient? apiClient,
+    MediaUploadService? mediaUploadService,
+  }) {
     if (apiClient != null || mediaUploadService != null) {
       final client = apiClient ?? ApiClient();
       return ClinicCatalogRepository._custom(
@@ -27,8 +32,8 @@ class ClinicCatalogRepository {
     return _instance;
   }
   ClinicCatalogRepository._internal()
-      : _api = ApiClient(),
-        _mediaUpload = MediaUploadService();
+    : _api = ApiClient(),
+      _mediaUpload = MediaUploadService();
   ClinicCatalogRepository._custom(this._api, this._mediaUpload);
 
   final ApiClient _api;
@@ -42,34 +47,31 @@ class ClinicCatalogRepository {
     required String mediaType,
   }) async {
     final payload = Map<String, dynamic>.from(data);
-    final rawVal = payload[imageKey]?.toString();
-
-    if (rawVal != null &&
-        rawVal.isNotEmpty &&
-        !rawVal.startsWith('http') &&
-        File(rawVal).existsSync()) {
-      try {
-        final uploadResult = await _mediaUpload.uploadImage(
-          filePath: rawVal,
-          mediaType: mediaType,
+    if (!payload.containsKey(imageKey)) return payload;
+    final rawVal = payload[imageKey];
+    if (rawVal == null || rawVal == '') {
+      // Clear both representations so a legacy URL cannot resurrect the image.
+      payload[imageKey] = null;
+      payload['media_asset'] = null;
+    } else if (rawVal is MultipartFile) {
+      return payload;
+    } else if (!_isRemoteUrl(rawVal.toString())) {
+      final uploadResult = await _mediaUpload.uploadImage(
+        filePath: rawVal.toString(),
+        mediaType: mediaType,
+      );
+      final assetId = uploadResult['id']?.toString();
+      final assetUrl = uploadResult['url']?.toString();
+      if (assetId == null ||
+          assetId.isEmpty ||
+          assetUrl == null ||
+          !_isRemoteUrl(assetUrl)) {
+        throw const ApiException(
+          message: 'The image upload response is missing its asset ID or URL.',
         );
-        final assetId = uploadResult['id']?.toString();
-        final assetUrl = uploadResult['url']?.toString();
-
-        if (assetId != null && assetId.isNotEmpty) {
-          payload['media_asset'] = assetId;
-        }
-        if (assetUrl != null && assetUrl.isNotEmpty) {
-          payload[imageKey] = assetUrl;
-        } else {
-          payload.remove(imageKey);
-        }
-      } catch (e) {
-        debugPrint('[ClinicCatalogRepository] Media upload failed for $imageKey: $e');
-        payload.remove(imageKey);
       }
-    } else if (rawVal != null && (rawVal.isEmpty || !rawVal.startsWith('http'))) {
-      payload.remove(imageKey);
+      payload['media_asset'] = assetId;
+      payload[imageKey] = assetUrl;
     }
 
     return payload;
@@ -78,85 +80,51 @@ class ClinicCatalogRepository {
   Future<dynamic> _buildPayload(
     Map<String, dynamic> data, {
     required List<String> fileKeys,
-  }) async {
-    final mapCopy = Map<String, dynamic>.from(data);
-    bool hasLocalFiles = false;
-    final Map<String, File> localFiles = {};
+  }) => MediaPayloadBuilder(_mediaUpload).build(data, fileKeys: fileKeys);
 
-    for (final key in fileKeys) {
-      final val = mapCopy[key]?.toString();
-      if (val != null && val.isNotEmpty && !val.startsWith('http')) {
-        final f = File(val);
-        if (f.existsSync()) {
-          hasLocalFiles = true;
-          localFiles[key] = f;
-        } else {
-          mapCopy.remove(key);
-        }
-      } else {
-        // null, empty, or existing remote URL -> omit so Django keeps existing image
-        mapCopy.remove(key);
-      }
-    }
-
-    if (hasLocalFiles) {
-      final formDataMap = <String, dynamic>{};
-      for (final entry in mapCopy.entries) {
-        if (localFiles.containsKey(entry.key)) {
-          final f = localFiles[entry.key]!;
-          formDataMap[entry.key] = await MultipartFile.fromFile(
-            f.path,
-            filename: f.path.split(RegExp(r'[\\/]')).last,
-          );
-        } else {
-          formDataMap[entry.key] = entry.value;
-        }
-      }
-      for (final entry in localFiles.entries) {
-        if (!formDataMap.containsKey(entry.key)) {
-          formDataMap[entry.key] = await MultipartFile.fromFile(
-            entry.value.path,
-            filename: entry.value.path.split(RegExp(r'[\\/]')).last,
-          );
-        }
-      }
-      return FormData.fromMap(formDataMap);
-    } else {
-      return mapCopy;
-    }
+  static bool _isRemoteUrl(String value) {
+    final uri = Uri.tryParse(value);
+    return uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty;
   }
 
+  dynamic _catalogPayload(Map<String, dynamic> payload) =>
+      payload.values.any((value) => value is MultipartFile)
+      ? FormData.fromMap(payload)
+      : payload;
 
   // -------------------------------------------------------------
   // PRACTITIONERS
   // -------------------------------------------------------------
 
-  Future<List<PractitionerModel>> getPractitioners({String? search}) async {
+  Future<List<PractitionerModel>> getPractitioners({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.clinicPractitioners,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => PractitionerModel.fromJson(m))
-        .toList();
+    return PageItems<PractitionerModel>.fromResponse(
+      response.data,
+      PractitionerModel.fromJson,
+      page: page,
+    );
   }
 
-  Future<PractitionerModel> createPractitioner(Map<String, dynamic> data) async {
+  Future<PractitionerModel> createPractitioner(
+    Map<String, dynamic> data,
+  ) async {
     final payload = await _resolveMediaAssetPayload(
       data,
       imageKey: 'avatar',
@@ -164,12 +132,15 @@ class ClinicCatalogRepository {
     );
     final response = await _api.post(
       ApiConfig.clinicPractitioners,
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return PractitionerModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<PractitionerModel> updatePractitioner(String id, Map<String, dynamic> data) async {
+  Future<PractitionerModel> updatePractitioner(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final payload = await _resolveMediaAssetPayload(
       data,
       imageKey: 'avatar',
@@ -177,7 +148,7 @@ class ClinicCatalogRepository {
     );
     final response = await _api.patch(
       ApiConfig.clinicPractitionerDetail(id),
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return PractitionerModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -190,35 +161,40 @@ class ClinicCatalogRepository {
   // TREATMENTS
   // -------------------------------------------------------------
 
-  Future<List<TreatmentModel>> getTreatments({String? search}) async {
+  Future<List<TreatmentModel>> getTreatments({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+    String? category,
+  }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }
 
+    if (category != null && category.isNotEmpty) {
+      queryParams['category'] = category;
+    }
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.clinicTreatments,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => TreatmentModel.fromJson(m))
-        .toList();
+    return PageItems<TreatmentModel>.fromResponse(
+      response.data,
+      TreatmentModel.fromJson,
+      page: page,
+    );
   }
 
   Future<TreatmentModel> createTreatment(Map<String, dynamic> data) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized['category'] == null || sanitized['category'].toString().trim().isEmpty) {
-      if (sanitized['category_id'] != null && sanitized['category_id'].toString().trim().isNotEmpty) {
+    if (sanitized['category'] == null ||
+        sanitized['category'].toString().trim().isEmpty) {
+      if (sanitized['category_id'] != null &&
+          sanitized['category_id'].toString().trim().isNotEmpty) {
         sanitized['category'] = sanitized['category_id'];
       } else {
         try {
@@ -232,7 +208,9 @@ class ClinicCatalogRepository {
     if (sanitized['category'] != null) {
       sanitized['category_id'] = sanitized['category'];
     }
-    if (sanitized['practitioners'] == null || (sanitized['practitioners'] is List && (sanitized['practitioners'] as List).isEmpty)) {
+    if (sanitized['practitioners'] == null ||
+        (sanitized['practitioners'] is List &&
+            (sanitized['practitioners'] as List).isEmpty)) {
       sanitized['practitioners'] = <String>[];
     }
     sanitized.remove('duration_minutes');
@@ -244,12 +222,17 @@ class ClinicCatalogRepository {
     return TreatmentModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<TreatmentModel> updateTreatment(String id, Map<String, dynamic> data) async {
+  Future<TreatmentModel> updateTreatment(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final sanitized = Map<String, dynamic>.from(data);
     if (sanitized['category'] != null) {
       sanitized['category_id'] = sanitized['category'];
     }
-    if (sanitized['practitioners'] == null || (sanitized['practitioners'] is List && (sanitized['practitioners'] as List).isEmpty)) {
+    if (sanitized['practitioners'] == null ||
+        (sanitized['practitioners'] is List &&
+            (sanitized['practitioners'] as List).isEmpty)) {
       sanitized['practitioners'] = <String>[];
     }
     sanitized.remove('duration_minutes');
@@ -269,29 +252,28 @@ class ClinicCatalogRepository {
   // OFFERS
   // -------------------------------------------------------------
 
-  Future<List<OfferModel>> getOffers({String? search}) async {
+  Future<List<OfferModel>> getOffers({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.clinicOffers,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => OfferModel.fromJson(m))
-        .toList();
+    return PageItems<OfferModel>.fromResponse(
+      response.data,
+      OfferModel.fromJson,
+      page: page,
+    );
   }
 
   Future<OfferModel> createOffer(Map<String, dynamic> data) async {
@@ -302,7 +284,7 @@ class ClinicCatalogRepository {
     );
     final response = await _api.post(
       ApiConfig.clinicOffers,
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return OfferModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -315,7 +297,7 @@ class ClinicCatalogRepository {
     );
     final response = await _api.patch(
       ApiConfig.clinicOfferDetail(id),
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return OfferModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -323,10 +305,7 @@ class ClinicCatalogRepository {
   Future<OfferModel> updateOfferStatus(String id, String status) async {
     final response = await _api.patch(
       ApiConfig.clinicOfferDetail(id),
-      data: {
-        'status': status,
-        'is_active': status == 'active',
-      },
+      data: {'status': status, 'is_active': status == 'active'},
     );
     return OfferModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -339,35 +318,35 @@ class ClinicCatalogRepository {
   // PRODUCTS
   // -------------------------------------------------------------
 
-  Future<List<ProductModel>> getProducts({String? search}) async {
+  Future<List<ProductModel>> getProducts({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.clinicProducts,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => ProductModel.fromJson(m))
-        .toList();
+    return PageItems<ProductModel>.fromResponse(
+      response.data,
+      ProductModel.fromJson,
+      page: page,
+    );
   }
 
   Future<ProductModel> createProduct(Map<String, dynamic> data) async {
     final sanitized = Map<String, dynamic>.from(data);
     if (sanitized.containsKey('price') &&
-        (sanitized['price'] == null || sanitized['price'].toString().trim().isEmpty)) {
+        (sanitized['price'] == null ||
+            sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
     final payload = await _resolveMediaAssetPayload(
@@ -377,15 +356,19 @@ class ClinicCatalogRepository {
     );
     final response = await _api.post(
       ApiConfig.clinicProducts,
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return ProductModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<ProductModel> updateProduct(String id, Map<String, dynamic> data) async {
+  Future<ProductModel> updateProduct(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final sanitized = Map<String, dynamic>.from(data);
     if (sanitized.containsKey('price') &&
-        (sanitized['price'] == null || sanitized['price'].toString().trim().isEmpty)) {
+        (sanitized['price'] == null ||
+            sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
     final payload = await _resolveMediaAssetPayload(
@@ -395,7 +378,7 @@ class ClinicCatalogRepository {
     );
     final response = await _api.patch(
       ApiConfig.clinicProductDetail(id),
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return ProductModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -408,29 +391,28 @@ class ClinicCatalogRepository {
   // ARTICLES
   // -------------------------------------------------------------
 
-  Future<List<ArticleModel>> getArticles({String? search}) async {
+  Future<List<ArticleModel>> getArticles({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
     final queryParams = <String, dynamic>{};
     if (search != null && search.trim().isNotEmpty) {
       queryParams['search'] = search.trim();
     }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.clinicArticles,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => ArticleModel.fromJson(m))
-        .toList();
+    return PageItems<ArticleModel>.fromResponse(
+      response.data,
+      ArticleModel.fromJson,
+      page: page,
+    );
   }
 
   Future<ArticleModel> createArticle(Map<String, dynamic> data) async {
@@ -446,12 +428,15 @@ class ClinicCatalogRepository {
     );
     final response = await _api.post(
       ApiConfig.clinicArticles,
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return ArticleModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<ArticleModel> updateArticle(String id, Map<String, dynamic> data) async {
+  Future<ArticleModel> updateArticle(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final sanitized = Map<String, dynamic>.from(data);
     if (sanitized['cover_image'] == null && sanitized['image'] != null) {
       sanitized['cover_image'] = sanitized['image'];
@@ -464,7 +449,7 @@ class ClinicCatalogRepository {
     );
     final response = await _api.patch(
       ApiConfig.clinicArticleDetail(id),
-      data: payload,
+      data: _catalogPayload(payload),
     );
     return ArticleModel.fromJson(response.data as Map<String, dynamic>);
   }
@@ -477,30 +462,18 @@ class ClinicCatalogRepository {
   // CATEGORIES (for treatment categorization)
   // -------------------------------------------------------------
 
-  Future<List<CategoryModel>> getCategories() async {
+  Future<List<CategoryModel>> getCategories({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
     final response = await _api.get(ApiConfig.categories);
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic>) {
-      if (rawData.containsKey('results') && rawData['results'] is List) {
-        items = rawData['results'] as List<dynamic>;
-      } else if (rawData.containsKey('data')) {
-        final d = rawData['data'];
-        if (d is List) {
-          items = d;
-        } else if (d is Map && d.containsKey('results') && d['results'] is List) {
-          items = d['results'] as List<dynamic>;
-        }
-      }
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => CategoryModel.fromJson(m))
-        .toList();
+    return PageItems<CategoryModel>.fromResponse(
+      response.data,
+      CategoryModel.fromJson,
+      page: page,
+    );
   }
 
   // -------------------------------------------------------------
@@ -510,7 +483,9 @@ class ClinicCatalogRepository {
   Future<ClinicModel> getClinicProfile() async {
     final response = await _api.get(ApiConfig.clinicProfile);
     final body = response.data;
-    final rawData = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final rawData = body is Map<String, dynamic>
+        ? (body['data'] ?? body)
+        : body;
     return ClinicModel.fromJson(rawData as Map<String, dynamic>);
   }
 
@@ -525,7 +500,9 @@ class ClinicCatalogRepository {
       data: requestData,
     );
     final body = response.data;
-    final rawData = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final rawData = body is Map<String, dynamic>
+        ? (body['data'] ?? body)
+        : body;
     return ClinicModel.fromJson(rawData as Map<String, dynamic>);
   }
 
@@ -533,39 +510,42 @@ class ClinicCatalogRepository {
   // CLINIC BRANCHES (CRUD /api/v1/clinic-portal/branches/)
   // -------------------------------------------------------------
 
-  Future<List<ClinicBranch>> getBranches() async {
-    final response = await _api.get(ApiConfig.clinicBranches);
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((m) => ClinicBranch.fromJson(m))
-        .toList();
+  Future<List<ClinicBranch>> getBranches({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _api.get(
+      ApiConfig.clinicBranches,
+      queryParameters: {'page': page, 'page_size': catalogPageSize},
+    );
+    return PageItems<ClinicBranch>.fromResponse(
+      response.data,
+      ClinicBranch.fromJson,
+      page: page,
+    );
   }
 
   Future<ClinicBranch> createBranch(Map<String, dynamic> data) async {
-    final response = await _api.post(
-      ApiConfig.clinicBranches,
-      data: data,
-    );
+    final response = await _api.post(ApiConfig.clinicBranches, data: data);
     final body = response.data;
-    final rawData = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final rawData = body is Map<String, dynamic>
+        ? (body['data'] ?? body)
+        : body;
     return ClinicBranch.fromJson(rawData as Map<String, dynamic>);
   }
 
-  Future<ClinicBranch> updateBranch(String id, Map<String, dynamic> data) async {
+  Future<ClinicBranch> updateBranch(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final response = await _api.patch(
       ApiConfig.clinicBranchDetail(id),
       data: data,
     );
     final body = response.data;
-    final rawData = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final rawData = body is Map<String, dynamic>
+        ? (body['data'] ?? body)
+        : body;
     return ClinicBranch.fromJson(rawData as Map<String, dynamic>);
   }
 
@@ -580,15 +560,14 @@ class ClinicCatalogRepository {
   Future<ClinicSetupChecklistModel> getSetupChecklist() async {
     final response = await _api.get(ApiConfig.clinicSetupChecklist);
     final body = response.data;
-    final rawData = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final rawData = body is Map<String, dynamic>
+        ? (body['data'] ?? body)
+        : body;
     return ClinicSetupChecklistModel.fromJson(rawData as Map<String, dynamic>);
   }
 
   Future<Map<String, dynamic>> submitProfileForReview() async {
-    final response = await _api.post(
-      ApiConfig.clinicSubmitForReview,
-      data: {},
-    );
+    final response = await _api.post(ApiConfig.clinicSubmitForReview, data: {});
     return response.data as Map<String, dynamic>? ?? {};
   }
 }

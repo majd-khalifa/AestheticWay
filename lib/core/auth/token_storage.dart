@@ -12,6 +12,28 @@ class TokenStorage {
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
+  Future<void>? _writeTail;
+  Future<void>? _initializing;
+  bool _initialized = false;
+
+  // Persist credential changes in their invocation order, including logout.
+  Future<void> _persist(Future<void> Function() task) {
+    final pending = _writeTail;
+    late final Future<void> next;
+    next = (pending == null ? task() : pending.then((_) => task()))
+        .catchError((Object _) {})
+        .whenComplete(() {
+          if (identical(_writeTail, next)) _writeTail = null;
+        });
+    _writeTail = next;
+    return next;
+  }
+
+  int _sessionEpoch = 0;
+  int _credentialVersion = 0;
+  int get sessionEpoch => _sessionEpoch;
+  int get credentialVersion => _credentialVersion;
+
   // In-memory cache for fast synchronous access
   String? _cachedAccessToken;
   String? _cachedRefreshToken;
@@ -22,25 +44,38 @@ class TokenStorage {
   static const String _keyUserData = 'aw_user_data';
 
   /// Initialize and load tokens from secure storage into memory
-  Future<void> init() async {
+  Future<void> init() {
+    return _initializing ??= _readInitial();
+  }
+
+  Future<void> _readInitial() async {
+    final version = _credentialVersion;
+    final epoch = _sessionEpoch;
     try {
-      _cachedAccessToken = await _storage.read(key: _keyAccessToken);
-      _cachedRefreshToken = await _storage.read(key: _keyRefreshToken);
-      final rawUser = await _storage.read(key: _keyUserData);
-      if (rawUser != null && rawUser.isNotEmpty) {
-        _cachedUserData = jsonDecode(rawUser) as Map<String, dynamic>;
-      }
+      await _writeTail;
+      final values = await Future.wait([
+        _storage.read(key: _keyAccessToken),
+        _storage.read(key: _keyRefreshToken),
+        _storage.read(key: _keyUserData),
+      ]);
+      if (version != _credentialVersion || epoch != _sessionEpoch) return;
+      _cachedAccessToken = values[0];
+      _cachedRefreshToken = values[1];
+      final rawUser = values[2];
+      _cachedUserData = rawUser != null && rawUser.isNotEmpty
+          ? jsonDecode(rawUser) as Map<String, dynamic>
+          : null;
     } catch (_) {
-      // Fallback in case of platform storage issue
+      /* A locked keychain leaves the session unauthenticated. */
+    } finally {
+      _initialized = true;
+      _initializing = null;
     }
   }
 
   /// Get current access token
   Future<String?> getAccessToken() async {
-    if (_cachedAccessToken != null) return _cachedAccessToken;
-    try {
-      _cachedAccessToken = await _storage.read(key: _keyAccessToken);
-    } catch (_) {}
+    if (!_initialized) await init();
     return _cachedAccessToken;
   }
 
@@ -49,10 +84,7 @@ class TokenStorage {
 
   /// Get current refresh token
   Future<String?> getRefreshToken() async {
-    if (_cachedRefreshToken != null) return _cachedRefreshToken;
-    try {
-      _cachedRefreshToken = await _storage.read(key: _keyRefreshToken);
-    } catch (_) {}
+    if (!_initialized) await init();
     return _cachedRefreshToken;
   }
 
@@ -63,21 +95,27 @@ class TokenStorage {
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
-  }) async {
+  }) {
+    _initialized = true;
+    _credentialVersion++;
     _cachedAccessToken = accessToken;
     _cachedRefreshToken = refreshToken;
-    try {
+    return _persist(() async {
       await _storage.write(key: _keyAccessToken, value: accessToken);
       await _storage.write(key: _keyRefreshToken, value: refreshToken);
-    } catch (_) {}
+    });
   }
 
   /// Save user profile data
-  Future<void> saveUser(Map<String, dynamic> userJson) async {
-    _cachedUserData = userJson;
-    try {
-      await _storage.write(key: _keyUserData, value: jsonEncode(userJson));
-    } catch (_) {}
+  Future<void> saveUser(Map<String, dynamic> userJson) {
+    _initialized = true;
+    if (_cachedUserData?['id'] != userJson['id'] ||
+        _cachedUserData?['phone'] != userJson['phone']) {
+      _sessionEpoch++;
+    }
+    _cachedUserData = Map.of(userJson);
+    final encoded = jsonEncode(userJson);
+    return _persist(() => _storage.write(key: _keyUserData, value: encoded));
   }
 
   /// Get cached user data
@@ -93,14 +131,17 @@ class TokenStorage {
   }
 
   /// Clear all stored tokens and user data (Logout)
-  Future<void> clear() async {
+  Future<void> clear() {
+    _initialized = true;
+    _sessionEpoch++;
+    _credentialVersion++;
     _cachedAccessToken = null;
     _cachedRefreshToken = null;
     _cachedUserData = null;
-    try {
+    return _persist(() async {
       await _storage.delete(key: _keyAccessToken);
       await _storage.delete(key: _keyRefreshToken);
       await _storage.delete(key: _keyUserData);
-    } catch (_) {}
+    });
   }
 }

@@ -1,4 +1,5 @@
-import 'dart:async';
+import 'package:aesthetic_way/core/data/paged_collection.dart';
+import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -7,7 +8,6 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
-import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
 import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/features/articles/data/articles_repository.dart';
@@ -34,21 +34,30 @@ class ArticlesScreen extends StatefulWidget {
 class _ArticlesScreenState extends State<ArticlesScreen> {
   late final ArticlesRepository _repository;
   final ScrollController _scrollController = ScrollController();
-  final List<ArticleModel> _articles = [];
-  bool _isLoading = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  int _currentPage = 1;
-  String? _errorMessage;
+  late final PagedCollection<ArticleModel> _paging;
+  List<ArticleModel> get _articles => _paging.items;
+  bool get _isLoading => _paging.isLoading;
+  String? get _errorMessage => _paging.items.isEmpty ? _paging.error : null;
+  void _pageChanged() {
+    if (mounted) setState(() {});
+  }
 
-  String _selectedCategory = 'all';
   String _searchQuery = '';
-  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? ArticlesRepository();
+    _paging = PagedCollection<ArticleModel>(
+      loader: (page, q) => _repository.getArticles(
+        clinicId: widget.clinicId,
+        practitionerId: widget.practitionerId,
+        search: q['search'] as String?,
+        page: page,
+        pageSize: 20,
+      ),
+      keyOf: (item) => item.id,
+    )..addListener(_pageChanged);
     _scrollController.addListener(_onScroll);
     _loadArticles();
   }
@@ -57,7 +66,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _debounce?.cancel();
+    _paging.dispose();
     super.dispose();
   }
 
@@ -70,92 +79,14 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
     }
   }
 
-  Future<void> _loadArticles({bool showLoading = true}) async {
-    if (showLoading && mounted) {
-      setState(() {
-        _isLoading = true;
-        _isLoadingMore = false;
-        _hasMore = true;
-        _currentPage = 1;
-        _errorMessage = null;
-      });
-    }
+  Future<void> _loadArticles({bool showLoading = true}) =>
+      _paging.refresh(query: {'search': _searchQuery});
 
-    try {
-      final items = await _repository.getArticles(
-        clinicId: widget.clinicId,
-        practitionerId: widget.practitionerId,
-        search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        page: 1,
-        pageSize: 20,
-      );
-      if (mounted) {
-        setState(() {
-          _articles
-            ..clear()
-            ..addAll(items);
-          _isLoading = false;
-          _errorMessage = null;
-          if (items.length < 20) {
-            _hasMore = false;
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = e.toString();
-        });
-      }
-    }
-  }
+  Future<void> _loadMoreArticles() => _paging.loadMore();
 
-  Future<void> _loadMoreArticles() async {
-    if (_isLoadingMore || !_hasMore || _isLoading) return;
-
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    try {
-      final nextPage = _currentPage + 1;
-      final items = await _repository.getArticles(
-        clinicId: widget.clinicId,
-        practitionerId: widget.practitionerId,
-        search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        page: nextPage,
-        pageSize: 20,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _currentPage = nextPage;
-        _isLoadingMore = false;
-        if (items.length < 20) {
-          _hasMore = false;
-        }
-        _articles.addAll(items);
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _isLoadingMore = false;
-        });
-      }
-    }
-  }
-
-  void _onSearchChanged(String val) {
-    final trimmed = val.trim();
-    if (_searchQuery == trimmed) return;
-    setState(() {
-      _searchQuery = trimmed;
-    });
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      _loadArticles(showLoading: false);
-    });
+  void _onSearchChanged(String value) {
+    _searchQuery = value.trim();
+    _paging.search({'search': _searchQuery});
   }
 
   @override
@@ -163,58 +94,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
-    final categories = [
-      {'id': 'all', 'label': loc.tr('article_category_all')},
-      {'id': 'injectables', 'label': loc.tr('article_category_injectables')},
-      {'id': 'laser', 'label': loc.tr('article_category_laser')},
-      {'id': 'glow', 'label': loc.tr('article_category_glow')},
-      {'id': 'surgery', 'label': loc.tr('article_category_surgery')},
-    ];
-
-    final filteredArticles = _articles.where((a) {
-      if (_selectedCategory != 'all') {
-        final combinedAr = '${a.categoryAr} ${a.titleAr} ${a.contentAr}';
-        final combinedEn = '${a.categoryEn} ${a.titleEn} ${a.contentEn}'.toLowerCase();
-        if (_selectedCategory == 'injectables' &&
-            !combinedAr.contains('فيلر') &&
-            !combinedAr.contains('بوتوكس') &&
-            !combinedAr.contains('حقن') &&
-            !combinedEn.contains('filler') &&
-            !combinedEn.contains('botox') &&
-            !combinedEn.contains('inject')) {
-          return false;
-        }
-        if (_selectedCategory == 'laser' &&
-            !combinedAr.contains('ليزر') &&
-            !combinedEn.contains('laser')) {
-          return false;
-        }
-        if (_selectedCategory == 'glow' &&
-            !combinedAr.contains('نضارة') &&
-            !combinedAr.contains('بشرة') &&
-            !combinedEn.contains('glow') &&
-            !combinedEn.contains('skin') &&
-            !combinedEn.contains('hyaluronic')) {
-          return false;
-        }
-        if (_selectedCategory == 'surgery' &&
-            !combinedAr.contains('جراحة') &&
-            !combinedEn.contains('surgery')) {
-          return false;
-        }
-      }
-
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        return a.titleAr.toLowerCase().contains(q) ||
-            a.titleEn.toLowerCase().contains(q) ||
-            a.summaryAr.toLowerCase().contains(q) ||
-            a.summaryEn.toLowerCase().contains(q) ||
-            a.authorDoctorNameAr.toLowerCase().contains(q) ||
-            a.authorDoctorNameEn.toLowerCase().contains(q);
-      }
-      return true;
-    }).toList();
+    final filteredArticles = _articles;
 
     return ListenableBuilder(
       listenable: loc,
@@ -226,98 +106,82 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             title: Text(
               loc.tr('category_articles_title'),
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontSize: 16,
               ),
             ),
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 size: 18,
               ),
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          body: Column(
-            children: [
-              // Search Input
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Container(
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface(context),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.border(context), width: 0.8),
-                  ),
-                  child: TextField(
-                    style: TextStyle(color: AppColors.text(context), fontSize: 13.5),
-                    onChanged: _onSearchChanged,
-                    decoration: InputDecoration(
-                      hintText: loc.isArabic
-                          ? 'ابحث في المقالات، النصائح، الأطباء...'
-                          : 'Search articles, advice, doctors...',
-                      hintStyle: TextStyle(
-                        color: AppColors.mutedText(context).withValues(alpha: 0.45),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
+          body: PagedScrollBoundary(
+            onLoadMore: _paging.loadMore,
+            child: Column(
+              children: [
+                // Search Input
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface(context),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.border(context),
+                        width: 0.8,
                       ),
-                      prefixIcon: Icon(Icons.search_rounded, color: AppColors.mutedText(context), size: 18),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    child: TextField(
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontSize: 13.5,
+                      ),
+                      onChanged: _onSearchChanged,
+                      decoration: InputDecoration(
+                        hintText: loc.isArabic
+                            ? 'ابحث في المقالات، النصائح، الأطباء...'
+                            : 'Search articles, advice, doctors...',
+                        hintStyle: TextStyle(
+                          color: AppColors.text(
+                            context,
+                          ).withValues(alpha: 0.68),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: AppColors.mutedText(context),
+                          size: 18,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Category Filter Tabs
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(
-                  children: categories.map((cat) {
-                    final isSelected = _selectedCategory == cat['id'];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(
-                          cat['label']!,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                            color: isSelected ? AppColors.backgroundDeep : AppColors.mutedText(context),
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: AppColors.accentChampagne,
-                        backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                        side: BorderSide(
-                          color: isSelected ? AppColors.accentChampagne : AppColors.border(context),
-                          width: 0.8,
-                        ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                        onSelected: (_) {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            _selectedCategory = cat['id']!;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 6),
+                const SizedBox(height: 6),
 
-              // Articles List
-              Expanded(
-                child: LuxuryRefreshIndicator(
-                  onRefresh: () => _loadArticles(showLoading: false),
-                  child: _buildBody(context, loc, isDark, filteredArticles),
+                // Articles List
+                Expanded(
+                  child: LuxuryRefreshIndicator(
+                    onRefresh: () => _loadArticles(showLoading: false),
+                    child: _buildBody(context, loc, isDark, filteredArticles),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -345,21 +209,31 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 42),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.redAccent,
+                    size: 42,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     _errorMessage!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 13),
+                    style: TextStyle(
+                      color: AppColors.mutedText(context),
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextButton.icon(
                     onPressed: _loadArticles,
-                    icon: const Icon(Icons.refresh_rounded, color: AppColors.accentChampagne),
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: AppColors.accentChampagne,
+                    ),
                     label: Text(
                       loc.isArabic ? 'إعادة المحاولة' : 'Retry',
-                      style: const TextStyle(
-                        color: AppColors.accentChampagne,
+                      style: TextStyle(
+                        color: AppColors.goldText(context),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -381,7 +255,9 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.10),
             LuxuryEmptyState(
               icon: Icons.article_outlined,
-              title: loc.isArabic ? 'لا توجد مقالات طبية حالياً' : 'No medical articles or guides',
+              title: loc.isArabic
+                  ? 'لا توجد مقالات طبية حالياً'
+                  : 'No medical articles or guides',
               subtitle: loc.isArabic
                   ? 'سيتم نشر نصائح تجميلية وأدلة طبية موثقة قريباً'
                   : 'Verified aesthetic guides and articles will be published soon',
@@ -397,31 +273,30 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: filteredArticles.length + (_isLoadingMore ? 1 : 0),
+      itemCount: filteredArticles.length + 1,
       itemBuilder: (context, index) {
-        if (index == filteredArticles.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.accentChampagne,
-                ),
-              ),
-            ),
+        if (index >= filteredArticles.length) {
+          return PaginationFooter(
+            loading: _paging.isLoadingMore,
+            hasMore: _paging.hasMore,
+            error: _paging.error,
+            onLoadMore: _paging.loadMore,
           );
         }
         final article = filteredArticles[index];
-        final categoryLabel = loc.isArabic ? article.categoryAr : article.categoryEn;
-        final authorName = loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn;
+        final categoryLabel = loc.isArabic
+            ? article.categoryAr
+            : article.categoryEn;
+        final authorName = loc.isArabic
+            ? article.authorDoctorNameAr
+            : article.authorDoctorNameEn;
         final displayAuthor = authorName.isNotEmpty
             ? authorName
             : (loc.isArabic
-                ? (article.clinicNameAr.isNotEmpty ? article.clinicNameAr : 'أستيتك واي')
-                : (article.clinicNameEn ?? 'Aesthetic Way'));
+                  ? (article.clinicNameAr.isNotEmpty
+                        ? article.clinicNameAr
+                        : 'أستيتك واي')
+                  : (article.clinicNameEn ?? 'Aesthetic Way'));
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 14),
@@ -441,7 +316,9 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                   fallbackLogoUrl: article.clinicLogoUrl,
                   height: 150,
                   width: double.infinity,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   placeholderIcon: Icons.article_outlined,
                   iconSize: 36,
                 ),
@@ -454,15 +331,20 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                         children: [
                           if (categoryLabel.isNotEmpty)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                                color: AppColors.accentChampagne.withValues(
+                                  alpha: isDark ? 0.15 : 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 categoryLabel,
-                                style: const TextStyle(
-                                  color: AppColors.accentChampagne,
+                                style: TextStyle(
+                                  color: AppColors.goldText(context),
                                   fontWeight: FontWeight.w800,
                                   fontSize: 10.5,
                                 ),
@@ -470,8 +352,13 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                             ),
                           const Spacer(),
                           Text(
-                            DateFormat('yyyy/MM/dd').format(article.publishedAt),
-                            style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                            DateFormat(
+                              'yyyy/MM/dd',
+                            ).format(article.publishedAt),
+                            style: TextStyle(
+                              color: AppColors.mutedText(context),
+                              fontSize: 10.5,
+                            ),
                           ),
                         ],
                       ),
@@ -479,7 +366,9 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                       Text(
                         loc.isArabic ? article.titleAr : article.titleEn,
                         style: TextStyle(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                           fontWeight: FontWeight.w800,
                           fontSize: 14.5,
                         ),
@@ -503,21 +392,30 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                           if (article.authorDoctorAvatar.isNotEmpty)
                             CircleAvatar(
                               radius: 12,
-                              backgroundImage: NetworkImage(article.authorDoctorAvatar),
+                              backgroundImage: ResizeImage(
+                                NetworkImage(article.authorDoctorAvatar),
+                                width: computeSafeCacheWidth(context, 40, 40),
+                              ),
                               backgroundColor: AppColors.cardSurfaceHover,
                             )
                           else
                             const CircleAvatar(
                               radius: 12,
                               backgroundColor: AppColors.cardSurfaceHover,
-                              child: Icon(Icons.person_rounded, size: 14, color: AppColors.accentChampagne),
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 14,
+                                color: AppColors.accentChampagne,
+                              ),
                             ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               displayAuthor,
                               style: TextStyle(
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 11.5,
                               ),
@@ -525,7 +423,11 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.accentChampagne),
+                          const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 12,
+                            color: AppColors.accentChampagne,
+                          ),
                         ],
                       ),
                     ],

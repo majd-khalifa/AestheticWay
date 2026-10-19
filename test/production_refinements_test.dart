@@ -113,7 +113,7 @@ void main() {
   });
 
   group('ProductInquiryBottomSheet & MyRequestsScreen Tests', () {
-    testWidgets('ProductInquiryBottomSheet hides appointment fields and submits lead_type=product', (tester) async {
+    testWidgets('ProductInquiryBottomSheet hides appointment fields and submits lead_type=product_inquiry', (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1400));
       LocaleService().setLanguage(AppLanguage.arabic);
       final fakeRepo = _FakeLeadsRepository();
@@ -163,7 +163,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(fakeRepo.lastSubmittedPayload, isNotNull);
-      expect(fakeRepo.lastSubmittedPayload!['lead_type'], 'product');
+      expect(fakeRepo.lastSubmittedPayload!['lead_type'], 'product_inquiry');
       expect(fakeRepo.lastSubmittedPayload!['product'], product.id);
       expect(fakeRepo.lastSubmittedPayload!['clinic'], testClinic.id);
     });

@@ -87,7 +87,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         context,
         response.message.isNotEmpty
             ? response.message
-            : (loc.isArabic ? 'تم إنشاء الحساب، يرجى تأكيد رمز التحقق' : 'Account created, please verify OTP'),
+            : (loc.isArabic
+                  ? 'تم إنشاء الحساب، يرجى تأكيد رمز التحقق'
+                  : 'Account created, please verify OTP'),
         type: AppSnackBarType.success,
       );
 
@@ -117,22 +119,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _serverFieldErrors.clear();
         }
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
         _serverErrorMessage = e.toString();
       });
-      showAppSnackBar(
-        context,
-        e.toString(),
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
     }
   }
 
@@ -151,13 +145,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
             title: Text(
               loc.tr('register_title'),
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 size: 18,
               ),
               onPressed: () => Navigator.pop(context),
@@ -172,9 +170,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Header Logo (Prominent Auth Sizing)
-                    const Center(
-                      child: AppBrandLogo.auth(),
-                    ),
+                    const Center(child: AppBrandLogo.auth()),
                     const SizedBox(height: 20),
 
                     // Subtitle
@@ -199,31 +195,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextFormField(
                             controller: _nameController,
                             style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.textPrimary
+                                  : AppColors.lightTextPrimary,
                               fontSize: 13.5,
                               fontWeight: FontWeight.w500,
                             ),
                             onChanged: (_) {
                               if (_serverFieldErrors.containsKey('full_name')) {
-                                setState(() => _serverFieldErrors.remove('full_name'));
+                                setState(
+                                  () => _serverFieldErrors.remove('full_name'),
+                                );
                               }
                             },
                             decoration: InputDecoration(
                               labelText: loc.tr('full_name'),
                               hintText: loc.tr('name_hint'),
                               hintStyle: TextStyle(
-                                color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                color: AppColors.text(
+                                  context,
+                                ).withValues(alpha: 0.68),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
                               ),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.badge_outlined, color: AppColors.mutedText(context), size: 19),
+                              labelStyle: TextStyle(
+                                color: AppColors.mutedText(context),
+                                fontSize: 12.5,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.badge_outlined,
+                                color: AppColors.mutedText(context),
+                                size: 19,
+                              ),
                               filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              fillColor: isDark
+                                  ? AppColors.cardSurfaceHover
+                                  : AppColors.lightCardSurfaceHover,
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: _serverFieldErrors.containsKey('full_name')
+                                  color:
+                                      _serverFieldErrors.containsKey(
+                                        'full_name',
+                                      )
                                       ? AppColors.errorRed
                                       : AppColors.border(context),
                                   width: 0.8,
@@ -232,9 +246,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: _serverFieldErrors.containsKey('full_name')
+                                  color:
+                                      _serverFieldErrors.containsKey(
+                                        'full_name',
+                                      )
                                       ? AppColors.errorRed
-                                      : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
+                                      : (isDark
+                                            ? AppColors.silverPrimary
+                                            : AppColors.primarySoftNavy),
                                   width: 1.4,
                                 ),
                               ),
@@ -248,10 +267,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           if (_serverFieldErrors.containsKey('full_name'))
                             Padding(
-                              padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                              padding: const EdgeInsets.only(
+                                top: 4,
+                                right: 6,
+                                left: 6,
+                              ),
                               child: Text(
                                 _serverFieldErrors['full_name']!,
-                                style: const TextStyle(color: AppColors.errorRed, fontSize: 11.5),
+                                style: const TextStyle(
+                                  color: AppColors.errorRed,
+                                  fontSize: 11.5,
+                                ),
                               ),
                             ),
                           const SizedBox(height: 14),
@@ -265,13 +291,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 isRequired: true,
                                 onChanged: (_) {
                                   if (_serverFieldErrors.containsKey('phone')) {
-                                    setState(() => _serverFieldErrors.remove('phone'));
+                                    setState(
+                                      () => _serverFieldErrors.remove('phone'),
+                                    );
                                   }
                                 },
                               ),
                               if (_serverFieldErrors.containsKey('phone'))
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  padding: const EdgeInsets.only(
+                                    top: 4,
+                                    right: 6,
+                                    left: 6,
+                                  ),
                                   child: Text(
                                     _serverFieldErrors['phone']!,
                                     style: const TextStyle(
@@ -297,30 +329,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   textDirection: TextDirection.ltr,
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
-                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.textPrimary
+                                        : AppColors.lightTextPrimary,
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w500,
                                   ),
                                   onChanged: (_) {
-                                    if (_serverFieldErrors.containsKey('email')) {
-                                      setState(() => _serverFieldErrors.remove('email'));
+                                    if (_serverFieldErrors.containsKey(
+                                      'email',
+                                    )) {
+                                      setState(
+                                        () =>
+                                            _serverFieldErrors.remove('email'),
+                                      );
                                     }
                                   },
                                   decoration: InputDecoration(
                                     labelText: loc.tr('email_address'),
                                     hintText: 'name@example.com',
                                     hintStyle: TextStyle(
-                                      color: AppColors.mutedText(context).withValues(alpha: 0.5),
+                                      color: AppColors.text(
+                                        context,
+                                      ).withValues(alpha: 0.5),
                                       fontSize: 13,
                                     ),
-                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                    prefixIcon: Icon(Icons.email_outlined, color: AppColors.mutedText(context), size: 19),
+                                    labelStyle: TextStyle(
+                                      color: AppColors.mutedText(context),
+                                      fontSize: 12.5,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
+                                      color: AppColors.mutedText(context),
+                                      size: 19,
+                                    ),
                                     filled: true,
-                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    fillColor: isDark
+                                        ? AppColors.cardSurfaceHover
+                                        : AppColors.lightCardSurfaceHover,
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('email')
+                                        color:
+                                            _serverFieldErrors.containsKey(
+                                              'email',
+                                            )
                                             ? AppColors.errorRed
                                             : AppColors.border(context),
                                         width: 0.8,
@@ -329,9 +382,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('email')
+                                        color:
+                                            _serverFieldErrors.containsKey(
+                                              'email',
+                                            )
                                             ? AppColors.errorRed
-                                            : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
+                                            : (isDark
+                                                  ? AppColors.silverPrimary
+                                                  : AppColors.primarySoftNavy),
                                         width: 1.4,
                                       ),
                                     ),
@@ -340,7 +398,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     if (val == null || val.trim().isEmpty) {
                                       return null; // email optional in backend
                                     }
-                                    if (!val.contains('@') || !val.contains('.')) {
+                                    if (!val.contains('@') ||
+                                        !val.contains('.')) {
                                       return loc.tr('val_email_invalid');
                                     }
                                     return null;
@@ -349,7 +408,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               if (_serverFieldErrors.containsKey('email'))
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  padding: const EdgeInsets.only(
+                                    top: 4,
+                                    right: 6,
+                                    left: 6,
+                                  ),
                                   child: Text(
                                     _serverFieldErrors['email']!,
                                     style: const TextStyle(
@@ -375,28 +438,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   textDirection: TextDirection.ltr,
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
-                                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.textPrimary
+                                        : AppColors.lightTextPrimary,
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w500,
                                   ),
                                   onChanged: (_) {
-                                    if (_serverFieldErrors.containsKey('password')) {
-                                      setState(() => _serverFieldErrors.remove('password'));
+                                    if (_serverFieldErrors.containsKey(
+                                      'password',
+                                    )) {
+                                      setState(
+                                        () => _serverFieldErrors.remove(
+                                          'password',
+                                        ),
+                                      );
                                     }
                                   },
                                   decoration: InputDecoration(
                                     labelText: loc.tr('password_label'),
-                                    hintText: loc.isArabic ? 'أدخل كلمة المرور (8 أحرف على الأقل)' : 'At least 8 characters',
+                                    hintText: loc.isArabic
+                                        ? 'أدخل كلمة المرور (8 أحرف على الأقل)'
+                                        : 'At least 8 characters',
                                     hintStyle: TextStyle(
-                                      color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                      color: AppColors.text(
+                                        context,
+                                      ).withValues(alpha: 0.68),
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w400,
                                     ),
-                                    labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                    prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
+                                    labelStyle: TextStyle(
+                                      color: AppColors.mutedText(context),
+                                      fontSize: 12.5,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline_rounded,
+                                      color: AppColors.mutedText(context),
+                                      size: 19,
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
-                                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                        _obscurePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
                                         color: AppColors.mutedText(context),
                                         size: 18,
                                       ),
@@ -407,11 +491,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       },
                                     ),
                                     filled: true,
-                                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                    fillColor: isDark
+                                        ? AppColors.cardSurfaceHover
+                                        : AppColors.lightCardSurfaceHover,
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('password')
+                                        color:
+                                            _serverFieldErrors.containsKey(
+                                              'password',
+                                            )
                                             ? AppColors.errorRed
                                             : AppColors.border(context),
                                         width: 0.8,
@@ -420,16 +509,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: _serverFieldErrors.containsKey('password')
+                                        color:
+                                            _serverFieldErrors.containsKey(
+                                              'password',
+                                            )
                                             ? AppColors.errorRed
-                                            : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy),
+                                            : (isDark
+                                                  ? AppColors.silverPrimary
+                                                  : AppColors.primarySoftNavy),
                                         width: 1.4,
                                       ),
                                     ),
                                   ),
                                   validator: (val) {
                                     if (val == null || val.trim().isEmpty) {
-                                      return loc.isArabic ? 'كلمة المرور مطلوبة' : 'Password is required';
+                                      return loc.isArabic
+                                          ? 'كلمة المرور مطلوبة'
+                                          : 'Password is required';
                                     }
                                     if (val.length < 8) {
                                       return loc.tr('val_password_short');
@@ -440,7 +536,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               if (_serverFieldErrors.containsKey('password'))
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 4, right: 6, left: 6),
+                                  padding: const EdgeInsets.only(
+                                    top: 4,
+                                    right: 6,
+                                    left: 6,
+                                  ),
                                   child: Text(
                                     _serverFieldErrors['password']!,
                                     style: const TextStyle(
@@ -463,7 +563,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               textDirection: TextDirection.ltr,
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.textPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -471,41 +573,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 labelText: loc.tr('confirm_password_label'),
                                 hintText: '••••••••',
                                 hintStyle: TextStyle(
-                                  color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                                  color: AppColors.text(
+                                    context,
+                                  ).withValues(alpha: 0.68),
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w400,
                                 ),
-                                labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                                prefixIcon: Icon(Icons.lock_reset_rounded, color: AppColors.mutedText(context), size: 19),
+                                labelStyle: TextStyle(
+                                  color: AppColors.mutedText(context),
+                                  fontSize: 12.5,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.lock_reset_rounded,
+                                  color: AppColors.mutedText(context),
+                                  size: 19,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                    _obscureConfirmPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
                                     color: AppColors.mutedText(context),
                                     size: 18,
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword;
                                     });
                                   },
                                 ),
                                 filled: true,
-                                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                                fillColor: isDark
+                                    ? AppColors.cardSurfaceHover
+                                    : AppColors.lightCardSurfaceHover,
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                  borderSide: BorderSide(
+                                    color: AppColors.border(context),
+                                    width: 0.8,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                    color: isDark
+                                        ? AppColors.silverPrimary
+                                        : AppColors.primarySoftNavy,
                                     width: 1.4,
                                   ),
                                 ),
                               ),
                               validator: (val) {
                                 if (val == null || val.isEmpty) {
-                                  return loc.isArabic ? 'يرجى تأكيد كلمة المرور' : 'Please confirm password';
+                                  return loc.isArabic
+                                      ? 'يرجى تأكيد كلمة المرور'
+                                      : 'Please confirm password';
                                 }
                                 if (val != _passwordController.text) {
                                   return loc.tr('val_password_mismatch');
@@ -533,8 +656,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Checkbox(
                             value: _agreedToTerms,
                             activeColor: AppColors.accentChampagne,
-                            checkColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                            side: BorderSide(color: AppColors.border(context), width: 1.2),
+                            checkColor: isDark
+                                ? AppColors.backgroundDeep
+                                : Colors.white,
+                            side: BorderSide(
+                              color: AppColors.border(context),
+                              width: 1.2,
+                            ),
                             onChanged: (val) {
                               setState(() {
                                 _agreedToTerms = val ?? false;
@@ -609,12 +737,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 16),
 
                     // Already Have Account Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           loc.tr('already_have_account'),
-                          style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.mutedText(context),
+                          ),
                         ),
                         const SizedBox(width: 4),
                         GestureDetector(
@@ -622,7 +753,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Text(
                             loc.tr('sign_in_link'),
                             style: AppTypography.caption.copyWith(
-                              color: AppColors.accentChampagne,
+                              color: AppColors.goldText(context),
                               fontWeight: FontWeight.w700,
                             ),
                           ),

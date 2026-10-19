@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -22,7 +23,8 @@ class ClinicMainNavScreen extends StatefulWidget {
 
 class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
   late int _currentIndex;
-  final GlobalKey<ClinicProfileScreenState> _profileKey = GlobalKey<ClinicProfileScreenState>();
+  final GlobalKey<ClinicProfileScreenState> _profileKey =
+      GlobalKey<ClinicProfileScreenState>();
   DateTime? _lastBackPressTime;
 
   @override
@@ -53,11 +55,14 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
       return;
     }
     final now = DateTime.now();
-    if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+    if (_lastBackPressTime == null ||
+        now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
       _lastBackPressTime = now;
       showAppSnackBar(
         context,
-        loc.isArabic ? 'اضغط مرة أخرى للخروج من التطبيق' : 'Press back again to exit',
+        loc.isArabic
+            ? 'اضغط مرة أخرى للخروج من التطبيق'
+            : 'Press back again to exit',
         type: AppSnackBarType.info,
       );
       return;
@@ -71,20 +76,20 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
     final clinicService = ClinicPortalService();
     final isDark = AppColors.isDark(context);
 
-    final screens = [
-      ClinicDashboardScreen(
+    final screens = <WidgetBuilder>[
+      (context) => ClinicDashboardScreen(
         onNavigateToLeads: () => _onTabSelected(1),
         onNavigateToOffers: () => _onTabSelected(2),
         onNavigateToProfile: () => _onTabSelected(3),
         onNavigateToSection: _navigateToProfileSection,
       ),
-      const ClinicLeadsScreen(),
-      const ClinicOffersScreen(),
-      ClinicProfileScreen(key: _profileKey),
+      (context) => const ClinicLeadsScreen(),
+      (context) => const ClinicOffersScreen(),
+      (context) => ClinicProfileScreen(key: _profileKey),
     ];
 
     return ListenableBuilder(
-      listenable: Listenable.merge([loc, clinicService]),
+      listenable: Listenable.merge([loc, clinicService.navigationBadge]),
       builder: (context, _) {
         final newLeadsCount = clinicService.newLeadsCount;
 
@@ -96,101 +101,102 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
           },
           child: Scaffold(
             backgroundColor: AppColors.bg(context),
-          body: IndexedStack(
-            index: _currentIndex,
-            children: screens,
-          ),
-          bottomNavigationBar: SafeArea(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF080D1A).withValues(alpha: 0.96)
-                    : Colors.white.withValues(alpha: 0.96),
-                borderRadius: BorderRadius.circular(34),
-                border: Border.all(
-                  color: AppColors.border(context),
-                  width: 0.85,
+            body: LazyTabStack(index: _currentIndex, builders: screens),
+            bottomNavigationBar: SafeArea(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF080D1A).withValues(alpha: 0.96)
+                      : Colors.white.withValues(alpha: 0.96),
+                  borderRadius: BorderRadius.circular(34),
+                  border: Border.all(
+                    color: AppColors.border(context),
+                    width: 0.85,
+                  ),
+                  boxShadow: isDark
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            blurRadius: 28,
+                            offset: const Offset(0, 10),
+                            spreadRadius: 2,
+                          ),
+                          BoxShadow(
+                            color: AppColors.silverPrimary.withValues(
+                              alpha: 0.04,
+                            ),
+                            blurRadius: 1,
+                            spreadRadius: 0.5,
+                            offset: const Offset(0, -0.5),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF0F172A,
+                            ).withValues(alpha: 0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                            spreadRadius: 1,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 2,
+                            spreadRadius: 0.5,
+                            offset: const Offset(0, -0.5),
+                          ),
+                        ],
                 ),
-                boxShadow: isDark
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          blurRadius: 28,
-                          offset: const Offset(0, 10),
-                          spreadRadius: 2,
-                        ),
-                        BoxShadow(
-                          color: AppColors.silverPrimary.withValues(alpha: 0.04),
-                          blurRadius: 1,
-                          spreadRadius: 0.5,
-                          offset: const Offset(0, -0.5),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: const Color(0xFF0F172A).withValues(alpha: 0.08),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                          spreadRadius: 1,
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 2,
-                          spreadRadius: 0.5,
-                          offset: const Offset(0, -0.5),
-                        ),
-                      ],
-              ),
-              // Enforce strictly visual Left-to-Right: [ Home | Leads | Offers | Profile ]
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _ClinicFloatingNavItem(
-                      index: 0,
-                      selectedIndex: _currentIndex,
-                      icon: Icons.dashboard_outlined,
-                      activeIcon: Icons.dashboard_rounded,
-                      label: loc.tr('clinic_nav_dashboard'),
-                      onTap: () => _onTabSelected(0),
-                    ),
-                    _ClinicFloatingNavItem(
-                      index: 1,
-                      selectedIndex: _currentIndex,
-                      icon: Icons.mark_email_unread_outlined,
-                      activeIcon: Icons.mark_email_read_rounded,
-                      label: loc.tr('clinic_nav_leads'),
-                      badgeCount: newLeadsCount,
-                      onTap: () => _onTabSelected(1),
-                    ),
-                    _ClinicFloatingNavItem(
-                      index: 2,
-                      selectedIndex: _currentIndex,
-                      icon: Icons.local_offer_outlined,
-                      activeIcon: Icons.local_offer_rounded,
-                      label: loc.tr('clinic_nav_offers'),
-                      onTap: () => _onTabSelected(2),
-                    ),
-                    _ClinicFloatingNavItem(
-                      index: 3,
-                      selectedIndex: _currentIndex,
-                      icon: Icons.storefront_outlined,
-                      activeIcon: Icons.storefront_rounded,
-                      label: loc.tr('clinic_nav_profile'),
-                      onTap: () => _onTabSelected(3),
-                    ),
-                  ],
+                // Enforce strictly visual Left-to-Right: [ Home | Leads | Offers | Profile ]
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _ClinicFloatingNavItem(
+                        index: 0,
+                        selectedIndex: _currentIndex,
+                        icon: Icons.dashboard_outlined,
+                        activeIcon: Icons.dashboard_rounded,
+                        label: loc.tr('clinic_nav_dashboard'),
+                        onTap: () => _onTabSelected(0),
+                      ),
+                      _ClinicFloatingNavItem(
+                        index: 1,
+                        selectedIndex: _currentIndex,
+                        icon: Icons.mark_email_unread_outlined,
+                        activeIcon: Icons.mark_email_read_rounded,
+                        label: loc.tr('clinic_nav_leads'),
+                        badgeCount: newLeadsCount,
+                        onTap: () => _onTabSelected(1),
+                      ),
+                      _ClinicFloatingNavItem(
+                        index: 2,
+                        selectedIndex: _currentIndex,
+                        icon: Icons.local_offer_outlined,
+                        activeIcon: Icons.local_offer_rounded,
+                        label: loc.tr('clinic_nav_offers'),
+                        onTap: () => _onTabSelected(2),
+                      ),
+                      _ClinicFloatingNavItem(
+                        index: 3,
+                        selectedIndex: _currentIndex,
+                        icon: Icons.storefront_outlined,
+                        activeIcon: Icons.storefront_rounded,
+                        label: loc.tr('clinic_nav_profile'),
+                        onTap: () => _onTabSelected(3),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
   }
 }
 
@@ -248,19 +254,25 @@ class _ClinicFloatingNavItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2)
+                ? AppColors.accentChampagne.withValues(
+                    alpha: isDark ? 0.15 : 0.2,
+                  )
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(24),
             border: isSelected
                 ? Border.all(
-                    color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.45 : 0.65),
+                    color: AppColors.accentChampagne.withValues(
+                      alpha: isDark ? 0.45 : 0.65,
+                    ),
                     width: 0.85,
                   )
                 : null,
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.2),
+                      color: AppColors.accentChampagne.withValues(
+                        alpha: isDark ? 0.12 : 0.2,
+                      ),
                       blurRadius: 10,
                       spreadRadius: 0.5,
                     ),
@@ -282,8 +294,10 @@ class _ClinicFloatingNavItem extends StatelessWidget {
                   fontSize: 10.5,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                   color: isSelected
-                      ? AppColors.accentChampagne
-                      : (isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary),
+                      ? AppColors.goldText(context)
+                      : (isDark
+                            ? AppColors.silverSecondary
+                            : AppColors.lightTextSecondary),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

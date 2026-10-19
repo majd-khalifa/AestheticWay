@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
-import 'package:aesthetic_way/core/widgets/license_badge.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/theme/theme_service.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -104,19 +103,6 @@ void main() {
       expect(find.text('طبيب'), findsOneWidget);
       expect(find.text('ممرض مرخص'), findsOneWidget);
       expect(find.text('أخصائي مرخص'), findsOneWidget);
-    });
-
-    testWidgets('LicenseBadge renders compliant verified text without regulator names', (WidgetTester tester) async {
-      LocaleService().setLanguage(AppLanguage.arabic);
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: LicenseBadge(licenseNumber: 'LIC-FL-009824'),
-          ),
-        ),
-      );
-
-      expect(find.text('ترخيص معتمد: LIC-FL-009824'), findsOneWidget);
     });
 
     testWidgets('AppointmentRequestScreen renders cleanly in Dark and Light modes without raw keys', (WidgetTester tester) async {

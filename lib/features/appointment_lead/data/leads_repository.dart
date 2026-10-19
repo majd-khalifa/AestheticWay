@@ -1,3 +1,4 @@
+import '../../../core/data/paged_collection.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +31,8 @@ class LeadSubmitResult {
     return LeadSubmitResult(
       success: json['success'] == true,
       leadReference: json['lead_reference']?.toString() ?? '',
-      confirmationMessage: json['confirmation_message']?.toString() ??
+      confirmationMessage:
+          json['confirmation_message']?.toString() ??
           'Your request has been sent and the clinic will contact you',
       createdAt: dt,
     );
@@ -48,41 +50,43 @@ class LeadsRepository {
 
   final ApiClient _apiClient;
 
-  LeadsRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  LeadsRepository({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   /// Submits an appointment request (lead) to the backend
   Future<LeadSubmitResult> createLead(Map<String, dynamic> payload) async {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      final isRealClinicUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
-          .hasMatch(payload['clinic']?.toString() ?? '');
+      final isRealClinicUuid = RegExp(
+        r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+      ).hasMatch(payload['clinic']?.toString() ?? '');
       if (!isRealClinicUuid) {
         notifyLeadsUpdated();
         return LeadSubmitResult(
           success: true,
           leadReference: '#REQ-12345',
-          confirmationMessage: 'Your request has been sent and the clinic will contact you',
+          confirmationMessage:
+              'Your request has been sent and the clinic will contact you',
           createdAt: DateTime.now(),
         );
       }
     }
 
     try {
-      final response = await _apiClient.post(
-        ApiConfig.leads,
-        data: payload,
-      );
+      final response = await _apiClient.post(ApiConfig.leads, data: payload);
 
       final data = response.data as Map<String, dynamic>;
       final result = LeadSubmitResult.fromJson(data);
       notifyLeadsUpdated();
       return result;
     } on ApiException catch (e) {
-      if (Platform.environment.containsKey('FLUTTER_TEST') && e.errorCode == 'CONNECTION_ERROR') {
+      if (Platform.environment.containsKey('FLUTTER_TEST') &&
+          e.errorCode == 'CONNECTION_ERROR') {
         notifyLeadsUpdated();
         return LeadSubmitResult(
           success: true,
           leadReference: '#REQ-12345',
-          confirmationMessage: 'Your request has been sent and the clinic will contact you',
+          confirmationMessage:
+              'Your request has been sent and the clinic will contact you',
           createdAt: DateTime.now(),
         );
       }
@@ -97,7 +101,10 @@ class LeadsRepository {
         }
         final error = map['error'];
         if (error is Map && error['message'] != null) {
-          throw ApiException(message: error['message'].toString(), statusCode: res.statusCode);
+          throw ApiException(
+            message: error['message'].toString(),
+            statusCode: res.statusCode,
+          );
         }
       }
       throw ApiException(
@@ -110,7 +117,10 @@ class LeadsRepository {
   }
 
   /// Retrieves the list of personal appointment requests (leads) for the authenticated patient
-  Future<List<AppointmentRequestModel>> getMyLeads({String? status, int page = 1}) async {
+  Future<List<AppointmentRequestModel>> getMyLeads({
+    String? status,
+    int page = 1,
+  }) async {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       return [];
     }
@@ -119,9 +129,8 @@ class LeadsRepository {
     if (status != null && status.isNotEmpty) {
       queryParams['status'] = status;
     }
-    if (page > 1) {
-      queryParams['page'] = page;
-    }
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
 
     try {
       final response = await _apiClient.get(
@@ -129,22 +138,14 @@ class LeadsRepository {
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
-      final data = response.data;
-      List<dynamic> list;
-      if (data is Map<String, dynamic> && data.containsKey('results')) {
-        list = data['results'] as List<dynamic>? ?? [];
-      } else if (data is List) {
-        list = data;
-      } else {
-        list = [];
-      }
-
-      return list
-          .whereType<Map<String, dynamic>>()
-          .map((m) => AppointmentRequestModel.fromJson(m))
-          .toList();
+      return PageItems<AppointmentRequestModel>.fromResponse(
+        response.data,
+        AppointmentRequestModel.fromJson,
+        page: page,
+      );
     } on ApiException catch (e) {
-      if (Platform.environment.containsKey('FLUTTER_TEST') && e.errorCode == 'CONNECTION_ERROR') {
+      if (Platform.environment.containsKey('FLUTTER_TEST') &&
+          e.errorCode == 'CONNECTION_ERROR') {
         return [];
       }
       rethrow;
@@ -157,7 +158,9 @@ class LeadsRepository {
     final endpoint = ApiConfig.leadDetail(cleanId);
 
     final response = await _apiClient.get(endpoint);
-    return AppointmentRequestModel.fromJson(response.data as Map<String, dynamic>);
+    return AppointmentRequestModel.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 
   /// Returns total count of leads submitted by the patient

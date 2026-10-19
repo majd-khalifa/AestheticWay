@@ -27,9 +27,12 @@ class ArticleDetailScreen extends StatelessWidget {
   });
 
   PractitionerModel? _resolveAuthorPractitioner() {
-    if (article.authorDoctorNameEn.isNotEmpty || article.authorDoctorNameAr.isNotEmpty) {
+    if (article.authorDoctorNameEn.isNotEmpty ||
+        article.authorDoctorNameAr.isNotEmpty) {
       return PractitionerModel(
-        id: article.authorDoctorId.isNotEmpty ? article.authorDoctorId : 'doc-id',
+        id: article.authorDoctorId.isNotEmpty
+            ? article.authorDoctorId
+            : 'doc-id',
         nameAr: article.authorDoctorNameAr.isNotEmpty
             ? article.authorDoctorNameAr
             : article.authorDoctorNameEn,
@@ -70,7 +73,8 @@ class ArticleDetailScreen extends StatelessWidget {
       } catch (_) {}
     }
 
-    if (article.clinicNameAr.isNotEmpty || (article.clinicNameEn?.isNotEmpty ?? false)) {
+    if (article.clinicNameAr.isNotEmpty ||
+        (article.clinicNameEn?.isNotEmpty ?? false)) {
       return ClinicModel(
         id: article.clinicId.isNotEmpty ? article.clinicId : 'clinic-id',
         nameAr: article.clinicNameAr.isNotEmpty
@@ -158,13 +162,19 @@ class ArticleDetailScreen extends StatelessWidget {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final doctor = _resolveAuthorPractitioner();
-    final categoryLabel = loc.isArabic ? article.categoryAr : article.categoryEn;
-    final authorName = loc.isArabic ? article.authorDoctorNameAr : article.authorDoctorNameEn;
+    final categoryLabel = loc.isArabic
+        ? article.categoryAr
+        : article.categoryEn;
+    final authorName = loc.isArabic
+        ? article.authorDoctorNameAr
+        : article.authorDoctorNameEn;
     final displayAuthor = authorName.isNotEmpty
         ? authorName
         : (loc.isArabic
-            ? (article.clinicNameAr.isNotEmpty ? article.clinicNameAr : 'أستيتك واي')
-            : (article.clinicNameEn ?? 'Aesthetic Way'));
+              ? (article.clinicNameAr.isNotEmpty
+                    ? article.clinicNameAr
+                    : 'أستيتك واي')
+              : (article.clinicNameEn ?? 'Aesthetic Way'));
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
@@ -173,14 +183,18 @@ class ArticleDetailScreen extends StatelessWidget {
         title: Text(
           loc.tr('category_articles_title'),
           style: AppTypography.screenTitle.copyWith(
-            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
             fontSize: 15.5,
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
             size: 18,
           ),
           onPressed: () => Navigator.pop(context),
@@ -206,15 +220,20 @@ class ArticleDetailScreen extends StatelessWidget {
             children: [
               if (categoryLabel.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                    color: AppColors.accentChampagne.withValues(
+                      alpha: isDark ? 0.15 : 0.2,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     categoryLabel,
-                    style: const TextStyle(
-                      color: AppColors.accentChampagne,
+                    style: TextStyle(
+                      color: AppColors.goldText(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                     ),
@@ -223,11 +242,18 @@ class ArticleDetailScreen extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  const Icon(Icons.schedule_rounded, size: 14, color: AppColors.accentChampagne),
+                  const Icon(
+                    Icons.schedule_rounded,
+                    size: 14,
+                    color: AppColors.accentChampagne,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     loc.tr('article_read_time'),
-                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 11),
+                    style: TextStyle(
+                      color: AppColors.mutedText(context),
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -241,7 +267,9 @@ class ArticleDetailScreen extends StatelessWidget {
             style: AppTypography.screenTitle.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w900,
-              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.silverPrimary
+                  : AppColors.lightTextPrimary,
               height: 1.4,
             ),
           ),
@@ -253,7 +281,9 @@ class ArticleDetailScreen extends StatelessWidget {
               if (doctor != null) {
                 Navigator.push(
                   context,
-                  LuxuryPageRoute(page: PractitionerProfileScreen(practitioner: doctor)),
+                  LuxuryPageRoute(
+                    page: PractitionerProfileScreen(practitioner: doctor),
+                  ),
                 );
               }
             },
@@ -270,9 +300,15 @@ class ArticleDetailScreen extends StatelessWidget {
                     errorBuilder: (_, _, _) => Container(
                       width: 50,
                       height: 50,
-                      color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                      child: const Icon(Icons.person_rounded, color: AppColors.accentChampagne),
+                      color: isDark
+                          ? AppColors.cardSurfaceHover
+                          : AppColors.lightCardSurfaceHover,
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.accentChampagne,
+                      ),
                     ),
+                    cacheWidth: computeSafeCacheWidth(context, 400, null),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -284,14 +320,19 @@ class ArticleDetailScreen extends StatelessWidget {
                         children: [
                           Text(
                             loc.tr('article_author_by'),
-                            style: TextStyle(color: AppColors.mutedText(context), fontSize: 10.5),
+                            style: TextStyle(
+                              color: AppColors.mutedText(context),
+                              fontSize: 10.5,
+                            ),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               displayAuthor,
                               style: TextStyle(
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 13,
                               ),
@@ -301,12 +342,15 @@ class ArticleDetailScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (article.clinicNameAr.isNotEmpty || (article.clinicNameEn?.isNotEmpty ?? false)) ...[
+                      if (article.clinicNameAr.isNotEmpty ||
+                          (article.clinicNameEn?.isNotEmpty ?? false)) ...[
                         const SizedBox(height: 2),
                         Text(
-                          loc.isArabic ? article.clinicNameAr : (article.clinicNameEn ?? article.clinicNameAr),
-                          style: const TextStyle(
-                            color: AppColors.accentChampagne,
+                          loc.isArabic
+                              ? article.clinicNameAr
+                              : (article.clinicNameEn ?? article.clinicNameAr),
+                          style: TextStyle(
+                            color: AppColors.goldText(context),
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
@@ -317,7 +361,10 @@ class ArticleDetailScreen extends StatelessWidget {
                 ),
                 Text(
                   DateFormat('yyyy/MM/dd').format(article.publishedAt),
-                  style: TextStyle(color: AppColors.mutedText(context), fontSize: 10),
+                  style: TextStyle(
+                    color: AppColors.mutedText(context),
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),
@@ -335,7 +382,9 @@ class ArticleDetailScreen extends StatelessWidget {
                   style: AppTypography.bodyLarge.copyWith(
                     fontSize: 14,
                     height: 1.8,
-                    color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverSecondary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
               ],

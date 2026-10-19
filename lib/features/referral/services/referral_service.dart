@@ -1,3 +1,5 @@
+import '../../../core/data/single_flight.dart';
+import '../../../core/auth/session_changed_exception.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/referral_repository.dart';
@@ -55,8 +57,12 @@ class ReferralService extends ChangeNotifier {
     _repository = repository;
   }
 
-  @visibleForTesting
-  void resetTestingState() {
+  int _sessionEpoch = 0;
+
+  /// Discard all account-scoped state and invalidate outstanding requests.
+  void clearSession({bool notify = true}) {
+    _statusFlights.clear();
+    _sessionEpoch++;
     _mockMode = false;
     _hasLoadedFromApi = false;
     _isLoading = false;
@@ -65,6 +71,23 @@ class ReferralService extends ChangeNotifier {
     _fallbackBonusPoints = 0;
     _fallbackConsumedPoints = 0;
     _issuedCodes.clear();
+    _fallbackReferralCode = '';
+    _fallbackSuccessfulInvites = 0;
+    if (notify) notifyListeners();
+  }
+
+  @visibleForTesting
+  void resetTestingState() => clearSession(notify: false);
+
+  Future<T> _inSession<T>(Future<T> future, int epoch) async {
+    try {
+      final result = await future;
+      if (epoch != _sessionEpoch) throw const SessionChangedException();
+      return result;
+    } catch (_) {
+      if (epoch != _sessionEpoch) throw const SessionChangedException();
+      rethrow;
+    }
   }
 
   String get userReferralCode => _statusModel?.referralCode.isNotEmpty == true
@@ -78,7 +101,8 @@ class ReferralService extends ChangeNotifier {
     return 'https://aestheticway.ae/invite/$userReferralCode';
   }
 
-  int get successfulInvites => _statusModel?.successfulInvitesCount ?? _fallbackSuccessfulInvites;
+  int get successfulInvites =>
+      _statusModel?.successfulInvitesCount ?? _fallbackSuccessfulInvites;
 
   int get currentPoints {
     if (_statusModel != null) {
@@ -145,7 +169,8 @@ class ReferralService extends ChangeNotifier {
     }
   }
 
-  bool get canCollectDiscountCode => _statusModel?.canCollectCode ?? (currentPoints >= 500);
+  bool get canCollectDiscountCode =>
+      _statusModel?.canCollectCode ?? (currentPoints >= 500);
 
   List<ReferralDiscountCode> get userCodes {
     if (_statusModel != null && _statusModel!.discountCodes.isNotEmpty) {
@@ -154,7 +179,8 @@ class ReferralService extends ChangeNotifier {
     return _issuedCodes.where((c) => c.userId == 'current_user').toList();
   }
 
-  List<ReferralDiscountCode> get allPlatformCodes => List.unmodifiable(_issuedCodes);
+  List<ReferralDiscountCode> get allPlatformCodes =>
+      List.unmodifiable(_issuedCodes);
 
   bool isMilestoneAwarded(int requiredInvites) {
     if (_statusModel != null) {
@@ -230,7 +256,11 @@ class ReferralService extends ChangeNotifier {
   }
 
   /// Fetch live referral status from backend API
-  Future<void> loadReferralStatus({bool refresh = false}) async {
+  final _statusFlights = SingleFlight();
+  Future<void> loadReferralStatus({bool refresh = false}) =>
+      _statusFlights.run('status', () => _loadReferralStatus(refresh: refresh));
+  Future<void> _loadReferralStatus({bool refresh = false}) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) return;
     if (!refresh && _hasLoadedFromApi && _statusModel != null) return;
 
@@ -239,20 +269,31 @@ class ReferralService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final status = await _repository.getMyReferralStatus();
+      final status = await _inSession(
+        _repository.getMyReferralStatus(),
+        sessionEpoch,
+      );
       _statusModel = status;
       _hasLoadedFromApi = true;
       _errorMessage = null;
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        return;
+      }
       _errorMessage = e.toString();
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (sessionEpoch == _sessionEpoch) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
   /// Collect / Redeem 500 points for a 15% Discount Code
-  Future<ReferralDiscountCode> collectDiscountCode({String userName = 'سارة المنصوري'}) async {
+  Future<ReferralDiscountCode> collectDiscountCode({
+    String userName = 'سارة المنصوري',
+  }) async {
+    final sessionEpoch = _sessionEpoch;
     if (_mockMode) {
       final randomSuffix = (1000 + Random().nextInt(9000)).toString();
       final newCode = 'AW-15-$randomSuffix';
@@ -278,19 +319,30 @@ class ReferralService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _repository.collectDiscountCode();
+      final result = await _inSession(
+        _repository.collectDiscountCode(),
+        sessionEpoch,
+      );
 
       // Refetch live status to sync ledger & codes accurately
       try {
-        final refreshedStatus = await _repository.getMyReferralStatus();
+        final refreshedStatus = await _inSession(
+          _repository.getMyReferralStatus(),
+          sessionEpoch,
+        );
         _statusModel = refreshedStatus;
       } catch (_) {
+        if (sessionEpoch != _sessionEpoch) {
+          rethrow;
+        }
         if (_statusModel != null) {
           final newCodeObj = ReferralDiscountCode(
             code: result.code,
             status: ReferralCodeStatus.available,
             createdAt: DateTime.now(),
-            expiresAt: result.expiresAt ?? DateTime.now().add(const Duration(days: 90)),
+            expiresAt:
+                result.expiresAt ??
+                DateTime.now().add(const Duration(days: 90)),
           );
           _statusModel = PatientReferralStatusModel(
             referralCode: _statusModel!.referralCode,
@@ -310,7 +362,8 @@ class ReferralService extends ChangeNotifier {
         code: result.code,
         status: ReferralCodeStatus.available,
         createdAt: DateTime.now(),
-        expiresAt: result.expiresAt ?? DateTime.now().add(const Duration(days: 90)),
+        expiresAt:
+            result.expiresAt ?? DateTime.now().add(const Duration(days: 90)),
       );
 
       _issuedCodes.insert(0, collectedCodeObj);
@@ -318,12 +371,17 @@ class ReferralService extends ChangeNotifier {
       notifyListeners();
       return collectedCodeObj;
     } catch (e) {
+      if (sessionEpoch != _sessionEpoch) {
+        rethrow;
+      }
       _errorMessage = e.toString();
       notifyListeners();
       rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (sessionEpoch == _sessionEpoch) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -334,7 +392,9 @@ class ReferralService extends ChangeNotifier {
       return _issuedCodes.firstWhere((c) => c.code.toUpperCase() == clean);
     } catch (_) {
       try {
-        return _statusModel?.discountCodes.firstWhere((c) => c.code.toUpperCase() == clean);
+        return _statusModel?.discountCodes.firstWhere(
+          (c) => c.code.toUpperCase() == clean,
+        );
       } catch (_) {
         return null;
       }
@@ -343,13 +403,17 @@ class ReferralService extends ChangeNotifier {
 
   /// Verify discount code via Live Clinic Portal API (or mock mode in tests)
   Future<ReferralDiscountCode?> verifyClinicCodeLive(String rawCode) async {
+    final sessionEpoch = _sessionEpoch;
     final clean = rawCode.trim().toUpperCase();
     if (_mockMode) {
       return verifyCode(clean);
     }
 
     try {
-      final res = await _repository.verifyClinicDiscountCode(clean);
+      final res = await _inSession(
+        _repository.verifyClinicDiscountCode(clean),
+        sessionEpoch,
+      );
       final isValid = res['is_valid'] == true;
       final statusStr = res['status']?.toString().toLowerCase() ?? '';
       final codeStr = res['code']?.toString() ?? clean;
@@ -359,20 +423,31 @@ class ReferralService extends ChangeNotifier {
 
       final status = (isValid || statusStr == 'available')
           ? ReferralCodeStatus.available
-          : (statusStr == 'expired' ? ReferralCodeStatus.expired : ReferralCodeStatus.used);
+          : (statusStr == 'expired'
+                ? ReferralCodeStatus.expired
+                : ReferralCodeStatus.used);
 
       final verifiedCode = ReferralDiscountCode(
         code: codeStr,
         discountPercent: 15.0,
         status: status,
         userId: res['user_id']?.toString() ?? 'patient',
-        userName: res['patient_name']?.toString() ?? res['user_name']?.toString() ?? 'مريض معتمد',
-        createdAt: DateTime.tryParse(res['created_at']?.toString() ?? '') ?? DateTime.now(),
-        expiresAt: DateTime.tryParse(res['expires_at']?.toString() ?? '') ?? DateTime.now().add(const Duration(days: 60)),
+        userName:
+            res['patient_name']?.toString() ??
+            res['user_name']?.toString() ??
+            'مريض معتمد',
+        createdAt:
+            DateTime.tryParse(res['created_at']?.toString() ?? '') ??
+            DateTime.now(),
+        expiresAt:
+            DateTime.tryParse(res['expires_at']?.toString() ?? '') ??
+            DateTime.now().add(const Duration(days: 60)),
         usedClinicName: res['redeemed_clinic']?.toString(),
       );
 
-      final existingIdx = _issuedCodes.indexWhere((c) => c.code.toUpperCase() == clean);
+      final existingIdx = _issuedCodes.indexWhere(
+        (c) => c.code.toUpperCase() == clean,
+      );
       if (existingIdx != -1) {
         _issuedCodes[existingIdx] = verifiedCode;
       } else {
@@ -381,6 +456,9 @@ class ReferralService extends ChangeNotifier {
       notifyListeners();
       return verifiedCode;
     } catch (_) {
+      if (sessionEpoch != _sessionEpoch) {
+        return null;
+      }
       return verifyCode(clean);
     }
   }
@@ -415,17 +493,27 @@ class ReferralService extends ChangeNotifier {
     required String clinicId,
     required String clinicName,
   }) async {
+    final sessionEpoch = _sessionEpoch;
     final clean = code.trim().toUpperCase();
     if (_mockMode) {
-      return redeemCode(code: clean, clinicId: clinicId, clinicName: clinicName);
+      return redeemCode(
+        code: clean,
+        clinicId: clinicId,
+        clinicName: clinicName,
+      );
     }
 
     try {
-      final res = await _repository.redeemClinicDiscountCode(clean);
+      final res = await _inSession(
+        _repository.redeemClinicDiscountCode(clean),
+        sessionEpoch,
+      );
       final success = res['success'] == true;
       if (success) {
         final redeemedClinic = res['redeemed_clinic']?.toString() ?? clinicName;
-        final index = _issuedCodes.indexWhere((c) => c.code.toUpperCase() == clean);
+        final index = _issuedCodes.indexWhere(
+          (c) => c.code.toUpperCase() == clean,
+        );
         if (index != -1) {
           _issuedCodes[index] = _issuedCodes[index].copyWith(
             status: ReferralCodeStatus.used,
@@ -455,6 +543,9 @@ class ReferralService extends ChangeNotifier {
       }
       return false;
     } catch (_) {
+      if (sessionEpoch != _sessionEpoch) {
+        return false;
+      }
       return false;
     }
   }

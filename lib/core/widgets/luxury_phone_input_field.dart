@@ -598,7 +598,7 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
                             ? 'ابحث باسم الدولة أو رمز الاتصال...'
                             : 'Search country name or dial code...',
                         hintStyle: TextStyle(
-                          color: AppColors.mutedText(sheetCtx).withValues(alpha: 0.45),
+                          color: AppColors.text(sheetCtx).withValues(alpha: 0.68),
                           fontSize: 12.5,
                           fontWeight: FontWeight.w400,
                         ),
@@ -669,7 +669,7 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
                                   loc.isArabic ? country.nameAr : country.nameEn,
                                   style: TextStyle(
                                     color: isSelected
-                                        ? AppColors.accentChampagne
+                                        ? AppColors.goldText(context)
                                         : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
                                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                     fontSize: 13.5,
@@ -681,7 +681,7 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
                                     country.dialCode,
                                     style: TextStyle(
                                       color: isSelected
-                                          ? AppColors.accentChampagne
+                                          ? AppColors.goldText(context)
                                           : AppColors.mutedText(sheetCtx),
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13,
@@ -748,7 +748,7 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
           labelText: effectiveLabel,
           hintText: effectiveHint,
           hintStyle: TextStyle(
-            color: AppColors.mutedText(context).withValues(alpha: 0.45),
+            color: AppColors.text(context).withValues(alpha: 0.68),
             fontSize: 13,
             fontWeight: FontWeight.w400,
             letterSpacing: 0.5,

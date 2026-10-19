@@ -1,3 +1,7 @@
+import 'package:aesthetic_way/core/data/paged_collection.dart';
+import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
+import '../../../treatments/models/category_model.dart';
+import '../../../treatments/data/treatments_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -5,14 +9,11 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
 
-enum ClinicSortOption {
-  featuredFirst,
-  highestRating,
-  nearestDistance,
-}
+enum ClinicSortOption { featuredFirst, highestRating, nearestDistance }
 
 class ClinicFilterOptions {
-  String selectedCity; // 'الكل' / 'دبي' / 'أبوظبي' or 'All' / 'Dubai' / 'Abu Dhabi'
+  String
+  selectedCity; // 'الكل' / 'دبي' / 'أبوظبي' or 'All' / 'Dubai' / 'Abu Dhabi'
   String? selectedSpecialtyId;
   PractitionerType? selectedPractitionerType;
   ClinicSortOption sortOption;
@@ -33,7 +34,8 @@ class ClinicFilterOptions {
     return ClinicFilterOptions(
       selectedCity: selectedCity ?? this.selectedCity,
       selectedSpecialtyId: selectedSpecialtyId ?? this.selectedSpecialtyId,
-      selectedPractitionerType: selectedPractitionerType ?? this.selectedPractitionerType,
+      selectedPractitionerType:
+          selectedPractitionerType ?? this.selectedPractitionerType,
       sortOption: sortOption ?? this.sortOption,
     );
   }
@@ -67,14 +69,14 @@ class FilterBottomSheet extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? AppColors.backgroundBase : AppColors.lightCardSurface,
+      backgroundColor: isDark
+          ? AppColors.backgroundBase
+          : AppColors.lightCardSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => FilterBottomSheet(
-        initialFilters: currentFilters,
-        onApply: onApply,
-      ),
+      builder: (_) =>
+          FilterBottomSheet(initialFilters: currentFilters, onApply: onApply),
     );
   }
 
@@ -84,6 +86,7 @@ class FilterBottomSheet extends StatefulWidget {
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   late ClinicFilterOptions _filters;
+  String? _categoryLabel;
 
   @override
   void initState() {
@@ -95,17 +98,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
-
-    final specialties = [
-      {'id': null, 'labelAr': 'جميع الخدمات', 'labelEn': 'All Services'},
-      {'id': 'offers', 'labelAr': 'العروض', 'labelEn': 'Offers'},
-      {'id': 'treatments', 'labelAr': 'العلاجات', 'labelEn': 'Treatments'},
-      {'id': 'doctors', 'labelAr': 'الأطباء', 'labelEn': 'Doctors'},
-      {'id': 'skin_experts', 'labelAr': 'خبيرات البشرة', 'labelEn': 'Skin Experts'},
-      {'id': 'surgery', 'labelAr': 'الجراحة التجميلية', 'labelEn': 'Plastic Surgery'},
-      {'id': 'products', 'labelAr': 'المنتجات', 'labelEn': 'Products'},
-      {'id': 'clinics', 'labelAr': 'العيادات', 'labelEn': 'Clinics'},
-    ];
 
     return Container(
       constraints: BoxConstraints(
@@ -122,14 +114,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.tune_rounded, size: 20, color: AppColors.accentChampagne),
+                  const Icon(
+                    Icons.tune_rounded,
+                    size: 20,
+                    color: AppColors.accentChampagne,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     loc.tr('filter_title'),
                     style: AppTypography.cardTitle.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                 ],
@@ -138,11 +136,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 onPressed: () {
                   setState(() {
                     _filters.reset();
+                    _categoryLabel = null;
                   });
                 },
                 child: Text(
                   loc.tr('reset_filters'),
-                  style: TextStyle(color: AppColors.mutedText(context), fontSize: 13),
+                  style: TextStyle(
+                    color: AppColors.mutedText(context),
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
@@ -161,7 +163,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     loc.tr('filter_city'),
                     style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -171,18 +175,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     children: [
                       _FilterChipWidget(
                         label: loc.tr('city_all'),
-                        isSelected: _filters.selectedCity == 'الكل' || _filters.selectedCity == 'All',
-                        onTap: () => setState(() => _filters.selectedCity = 'الكل'),
+                        isSelected:
+                            _filters.selectedCity == 'الكل' ||
+                            _filters.selectedCity == 'All',
+                        onTap: () =>
+                            setState(() => _filters.selectedCity = 'الكل'),
                       ),
                       _FilterChipWidget(
                         label: loc.tr('city_dubai'),
-                        isSelected: _filters.selectedCity == 'دبي' || _filters.selectedCity == 'Dubai',
-                        onTap: () => setState(() => _filters.selectedCity = 'دبي'),
+                        isSelected:
+                            _filters.selectedCity == 'دبي' ||
+                            _filters.selectedCity == 'Dubai',
+                        onTap: () =>
+                            setState(() => _filters.selectedCity = 'دبي'),
                       ),
                       _FilterChipWidget(
                         label: loc.tr('city_abudhabi'),
-                        isSelected: _filters.selectedCity == 'أبوظبي' || _filters.selectedCity == 'Abu Dhabi',
-                        onTap: () => setState(() => _filters.selectedCity = 'أبوظبي'),
+                        isSelected:
+                            _filters.selectedCity == 'أبوظبي' ||
+                            _filters.selectedCity == 'Abu Dhabi',
+                        onTap: () =>
+                            setState(() => _filters.selectedCity = 'أبوظبي'),
                       ),
                     ],
                   ),
@@ -193,55 +206,40 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     loc.tr('filter_specialty'),
                     style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: specialties.map((s) {
-                      final id = s['id'];
-                      final label = loc.isArabic ? s['labelAr']! : s['labelEn']!;
-                      final isSelected = _filters.selectedSpecialtyId == id;
-                      return _FilterChipWidget(
-                        label: label,
-                        isSelected: isSelected,
-                        onTap: () => setState(() => _filters.selectedSpecialtyId = id),
+                  PagedEntityField<CategoryModel>(
+                    label: loc.tr('filter_specialty'),
+                    hint: loc.isArabic
+                        ? 'ابحث عن التصنيف الطبي'
+                        : 'Search medical categories',
+                    value: _filters.selectedSpecialtyId,
+                    valueLabel: _categoryLabel ?? '',
+                    clearLabel: loc.tr('treatment_category_all'),
+                    keyOf: (c) => c.id,
+                    labelOf: (c) => loc.isArabic ? c.nameAr : c.nameEn,
+                    loader: (page, search) async {
+                      final values = await TreatmentsRepository().getCategories(
+                        page: page,
+                        search: search,
                       );
-                    }).toList(),
-                  ),
-
-                  const SizedBox(height: 18),
-                  // 3. Sort Options
-                  Text(
-                    loc.tr('filter_sort'),
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _FilterChipWidget(
-                        label: loc.tr('sort_featured'),
-                        isSelected: _filters.sortOption == ClinicSortOption.featuredFirst,
-                        onTap: () => setState(() => _filters.sortOption = ClinicSortOption.featuredFirst),
-                      ),
-                      _FilterChipWidget(
-                        label: loc.tr('sort_rating'),
-                        isSelected: _filters.sortOption == ClinicSortOption.highestRating,
-                        onTap: () => setState(() => _filters.sortOption = ClinicSortOption.highestRating),
-                      ),
-                      _FilterChipWidget(
-                        label: loc.tr('sort_distance'),
-                        isSelected: _filters.sortOption == ClinicSortOption.nearestDistance,
-                        onTap: () => setState(() => _filters.sortOption = ClinicSortOption.nearestDistance),
-                      ),
-                    ],
+                      return PageItems<CategoryModel>(
+                        values.map(CategoryModel.fromJson),
+                        hasMore: values is PageItems<Map<String, dynamic>>
+                            ? values.hasMore
+                            : values.length == 20,
+                      );
+                    },
+                    onChanged: (c) => setState(() {
+                      _filters.selectedSpecialtyId = c?.id;
+                      _categoryLabel = c == null
+                          ? null
+                          : (loc.isArabic ? c.nameAr : c.nameEn);
+                    }),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -287,12 +285,16 @@ class _FilterChipWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.2 : 0.16)
-              : (isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover),
+              ? AppColors.goldText(
+                  context,
+                ).withValues(alpha: isDark ? 0.2 : 0.16)
+              : (isDark
+                    ? AppColors.cardSurfaceHover
+                    : AppColors.lightCardSurfaceHover),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected
-                ? AppColors.accentChampagne
+                ? AppColors.goldText(context)
                 : AppColors.border(context),
             width: isSelected ? 1.2 : 0.8,
           ),
@@ -301,8 +303,10 @@ class _FilterChipWidget extends StatelessWidget {
           label,
           style: AppTypography.caption.copyWith(
             color: isSelected
-                ? AppColors.accentChampagne
-                : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
+                ? AppColors.goldText(context)
+                : (isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             fontSize: 12,
           ),

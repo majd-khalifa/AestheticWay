@@ -18,29 +18,41 @@ void main() {
   });
 
   group('Super Admin Unit Tests - Service & State', () {
-    test('AdminPortalService initializes global metrics, clinics, leads, and offers', () {
-      final service = AdminPortalService();
-      expect(service.clinics.length, greaterThanOrEqualTo(5));
-      expect(service.allLeads.length, greaterThanOrEqualTo(8));
-      expect(service.allOffers.length, greaterThanOrEqualTo(5));
-      expect(service.activeClinicsCount, greaterThan(0));
-    });
+    test(
+      'AdminPortalService initializes global metrics, clinics, leads, and offers',
+      () {
+        final service = AdminPortalService();
+        expect(service.clinics.length, greaterThanOrEqualTo(5));
+        expect(service.allLeads.length, greaterThanOrEqualTo(8));
+        expect(service.allOffers.length, greaterThanOrEqualTo(5));
+        expect(service.activeClinicsCount, greaterThan(0));
+      },
+    );
 
-    test('AdminPortalService toggles clinic active and suspended status', () async {
-      final service = AdminPortalService();
-      final clinicId = 'kaya-jumeirah';
+    test(
+      'AdminPortalService toggles clinic active and suspended status',
+      () async {
+        final service = AdminPortalService();
+        final clinicId = 'kaya-jumeirah';
 
-      final initialClinic = service.clinics.firstWhere((c) => c.id == clinicId);
-      final initialStatus = initialClinic.isActive;
+        final initialClinic = service.clinics.firstWhere(
+          (c) => c.id == clinicId,
+        );
+        final initialStatus = initialClinic.isActive;
 
-      await service.toggleClinicStatus(clinicId);
-      final toggledClinic = service.clinics.firstWhere((c) => c.id == clinicId);
-      expect(toggledClinic.isActive, equals(!initialStatus));
+        await service.toggleClinicStatus(clinicId);
+        final toggledClinic = service.clinics.firstWhere(
+          (c) => c.id == clinicId,
+        );
+        expect(toggledClinic.isActive, equals(!initialStatus));
 
-      await service.toggleClinicStatus(clinicId);
-      final restoredClinic = service.clinics.firstWhere((c) => c.id == clinicId);
-      expect(restoredClinic.isActive, equals(initialStatus));
-    });
+        await service.toggleClinicStatus(clinicId);
+        final restoredClinic = service.clinics.firstWhere(
+          (c) => c.id == clinicId,
+        );
+        expect(restoredClinic.isActive, equals(initialStatus));
+      },
+    );
 
     test('AdminPortalService toggles offer moderation status', () async {
       final service = AdminPortalService();
@@ -53,21 +65,30 @@ void main() {
       expect(service.isOfferSuspended(offerId), isFalse);
     });
 
-    test('AdminPortalService toggles product and article moderation status', () async {
-      final service = AdminPortalService();
-      if (service.allProducts.isNotEmpty) {
-        final prodId = service.allProducts.first.id;
-        final initialStatus = service.allProducts.first.isPublishedByAdmin;
-        await service.toggleProductModeration(prodId);
-        expect(service.allProducts.first.isPublishedByAdmin, equals(!initialStatus));
-      }
-      if (service.allArticles.isNotEmpty) {
-        final artId = service.allArticles.first.id;
-        final initialStatus = service.allArticles.first.isApprovedByAdmin;
-        await service.toggleArticleModeration(artId);
-        expect(service.allArticles.first.isApprovedByAdmin, equals(!initialStatus));
-      }
-    });
+    test(
+      'AdminPortalService toggles product and article moderation status',
+      () async {
+        final service = AdminPortalService();
+        if (service.allProducts.isNotEmpty) {
+          final prodId = service.allProducts.first.id;
+          final initialStatus = service.allProducts.first.isPublishedByAdmin;
+          await service.toggleProductModeration(prodId);
+          expect(
+            service.allProducts.first.isPublishedByAdmin,
+            equals(!initialStatus),
+          );
+        }
+        if (service.allArticles.isNotEmpty) {
+          final artId = service.allArticles.first.id;
+          final initialStatus = service.allArticles.first.isApprovedByAdmin;
+          await service.toggleArticleModeration(artId);
+          expect(
+            service.allArticles.first.isApprovedByAdmin,
+            equals(!initialStatus),
+          );
+        }
+      },
+    );
 
     test('AdminPortalService filters leads by clinic and status correctly', () {
       final service = AdminPortalService();
@@ -89,45 +110,53 @@ void main() {
   });
 
   group('Super Admin UI Widget Tests', () {
-    testWidgets('AdminMainNavScreen renders all 5 bottom tabs and title cleanly', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const AdminMainNavScreen(),
-        ),
-      );
-
-      expect(find.text('الرئيسية'), findsWidgets);
-      expect(find.text('العيادات'), findsWidgets);
-      expect(find.text('الطلبات'), findsWidgets);
-      expect(find.text('العروض'), findsWidgets);
-      expect(find.text('الإحصائيات'), findsWidgets);
-    });
-
-    testWidgets('AdminDashboardScreen renders all 6 KPI cards and live activity', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: AdminDashboardScreen(
-            onNavigateToClinics: () {},
-            onNavigateToLeads: () {},
-            onNavigateToAnalytics: () {},
+    testWidgets(
+      'AdminMainNavScreen renders all 5 bottom tabs and title cleanly',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1600));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const AdminMainNavScreen(),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('إجمالي الأحداث المسجلة'), findsOneWidget);
-      expect(find.text('العيادات الشريكة'), findsOneWidget);
-      expect(find.text('إجمالي طلبات الاستشارة'), findsOneWidget);
-      expect(find.text('طلبات تم التواصل معها'), findsOneWidget);
-      expect(find.text('المرضى المسجلين'), findsOneWidget);
-      expect(find.text('العروض النشطة'), findsOneWidget);
-      expect(find.text('سجل النشاط المباشر في المنصة'), findsOneWidget);
-    });
+        expect(find.text('الرئيسية'), findsWidgets);
+        expect(find.text('العيادات'), findsWidgets);
+        expect(find.text('الطلبات'), findsWidgets);
+        expect(find.text('العروض'), findsWidgets);
+        expect(find.text('الإحصائيات'), findsWidgets);
+      },
+    );
 
-    testWidgets('AdminClinicsScreen renders clinics list and search bar', (WidgetTester tester) async {
+    testWidgets(
+      'AdminDashboardScreen renders all 6 KPI cards and live activity',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1600));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: AdminDashboardScreen(
+              onNavigateToClinics: () {},
+              onNavigateToLeads: () {},
+              onNavigateToAnalytics: () {},
+            ),
+          ),
+        );
+
+        expect(find.text('إجمالي الأحداث المسجلة'), findsOneWidget);
+        expect(find.text('العيادات الشريكة'), findsOneWidget);
+        expect(find.text('إجمالي طلبات الاستشارة'), findsOneWidget);
+        expect(find.text('طلبات تم التواصل معها'), findsOneWidget);
+        expect(find.text('المرضى المسجلين'), findsOneWidget);
+        expect(find.text('العروض النشطة'), findsOneWidget);
+        expect(find.text('سجل النشاط المباشر في المنصة'), findsOneWidget);
+      },
+    );
+
+    testWidgets('AdminClinicsScreen renders clinics list and search bar', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));
       await tester.pumpWidget(
         MaterialApp(
@@ -141,26 +170,32 @@ void main() {
       expect(find.byType(Switch), findsWidgets);
     });
 
-    testWidgets('AdminLeadsScreen renders clinic dropdown selector and leads', (WidgetTester tester) async {
+    testWidgets(
+      'AdminLeadsScreen renders searchable clinic selector and leads',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1600));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const AdminLeadsScreen(),
+          ),
+        );
+
+        expect(
+          find.text(LocaleService().tr('admin_filter_all_clinics')),
+          findsOneWidget,
+        );
+        expect(find.byType(TextButton), findsWidgets);
+        expect(find.byType(ChoiceChip), findsWidgets);
+      },
+    );
+
+    testWidgets('AdminOffersScreen renders moderation controls', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const AdminLeadsScreen(),
-        ),
-      );
-
-      expect(find.byType(DropdownButton<String?>), findsOneWidget);
-      expect(find.byType(ChoiceChip), findsWidgets);
-    });
-
-    testWidgets('AdminOffersScreen renders moderation controls', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 1600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const AdminOffersScreen(),
-        ),
+        MaterialApp(theme: AppTheme.darkTheme, home: const AdminOffersScreen()),
       );
 
       expect(find.text('العروض'), findsWidgets);
@@ -169,39 +204,51 @@ void main() {
       expect(find.byType(Switch), findsWidgets);
     });
 
-    testWidgets('AdminAnalyticsScreen renders detailed clinic engagement breakdown', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 2000));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: const AdminAnalyticsScreen(),
-        ),
-      );
+    testWidgets(
+      'AdminAnalyticsScreen renders detailed clinic engagement breakdown',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 2000));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: const AdminAnalyticsScreen(),
+          ),
+        );
 
-      expect(find.text('التحليلات ومعدلات تفاعل المرضى مع العيادات'), findsOneWidget);
-      expect(find.text('مشاهدات العيادات'), findsWidgets);
-      expect(find.text('واتساب'), findsWidgets);
-      expect(find.text('اتصال'), findsWidgets);
-      expect(find.text('نقرات الخرائط'), findsWidgets);
-      expect(find.text('طلبات الاستشارة'), findsWidgets);
-    });
+        expect(
+          find.text('التحليلات ومعدلات تفاعل المرضى مع العيادات'),
+          findsOneWidget,
+        );
+        expect(find.text('مشاهدات العيادات'), findsWidgets);
+        expect(find.text('واتساب'), findsWidgets);
+        expect(find.text('اتصال'), findsWidgets);
+        expect(find.text('نقرات الخرائط'), findsWidgets);
+        expect(find.text('طلبات الاستشارة'), findsWidgets);
+      },
+    );
 
-    testWidgets('AdminLeadDetailScreen renders supervision monitoring banner and no clinic note editors', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 2000));
-      final testLead = AdminPortalService().allLeads.first;
+    testWidgets(
+      'AdminLeadDetailScreen renders supervision monitoring banner and no clinic note editors',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 2000));
+        final testLead = AdminPortalService().allLeads.first;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.darkTheme,
-          home: AdminLeadDetailScreen(lead: testLead),
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: AdminLeadDetailScreen(lead: testLead),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('للمراقبة فقط — إدارة التواصل تتم من حساب العيادة'), findsOneWidget);
-      expect(find.text(testLead.patientFullName), findsOneWidget);
-      expect(find.text('ملاحظات العيادة الداخلية'), findsNothing);
-      expect(find.text('تغيير حالة الطلب'), findsNothing);
-    });
+        expect(
+          find.text('للمراقبة فقط — إدارة التواصل تتم من حساب العيادة'),
+          findsOneWidget,
+        );
+        expect(find.text(testLead.patientFullName), findsOneWidget);
+        expect(find.text('ملاحظات العيادة الداخلية'), findsNothing);
+        expect(find.text('تغيير حالة الطلب'), findsNothing);
+      },
+    );
   });
 }

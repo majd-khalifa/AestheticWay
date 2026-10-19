@@ -29,7 +29,6 @@ class AdminLeadModel {
   String get serviceNameAr => serviceName;
   String get serviceNameEn => serviceName;
   String get branchNameAr => branchNameEn.isNotEmpty ? branchNameEn : clinicCity;
-  DateTime get preferredDate => createdAt;
 
   AppointmentLeadStatus get leadStatus {
     switch (status.toLowerCase()) {

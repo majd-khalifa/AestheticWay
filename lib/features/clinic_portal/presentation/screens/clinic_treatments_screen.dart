@@ -1,3 +1,7 @@
+import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
+import '../../data/clinic_catalog_repository.dart';
+import '../../../treatments/models/category_model.dart';
+import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -27,7 +31,8 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ClinicPortalService().loadCatalogData();
+      ClinicPortalService().loadCollection('treatments');
+      ClinicPortalService().getOrFetchCategories();
     });
   }
 
@@ -46,27 +51,39 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
     final isEditing = existing != null;
     final clinicService = ClinicPortalService();
 
-    final nameEnController = TextEditingController(text: existing?.nameEn ?? '');
-    final nameArController = TextEditingController(text: existing?.nameAr ?? '');
-    final priceController = TextEditingController(
-      text: existing?.price != null ? existing!.price!.toInt().toString() : '750',
+    final nameEnController = TextEditingController(
+      text: existing?.nameEn ?? '',
     );
-    final descEnController = TextEditingController(text: existing?.descriptionEn ?? '');
-    final descArController = TextEditingController(text: existing?.descriptionAr ?? '');
+    final nameArController = TextEditingController(
+      text: existing?.nameAr ?? '',
+    );
+    final priceController = TextEditingController(
+      text: existing?.price != null
+          ? existing!.price!.toInt().toString()
+          : '750',
+    );
+    final descEnController = TextEditingController(
+      text: existing?.descriptionEn ?? '',
+    );
+    final descArController = TextEditingController(
+      text: existing?.descriptionAr ?? '',
+    );
 
     if (clinicService.categories.isEmpty) {
       clinicService.getOrFetchCategories();
     }
     final categories = clinicService.categories;
     String? chosenCategoryId = existing?.categoryId;
-    if (chosenCategoryId != null && !categories.any((c) => c.id == chosenCategoryId)) {
-      chosenCategoryId = null;
-    }
+    String? chosenCategoryLabel = existing == null
+        ? null
+        : (loc.isArabic ? existing.categoryAr : existing.categoryEn);
     if (chosenCategoryId == null && categories.isNotEmpty) {
       chosenCategoryId = categories.first.id;
     }
 
-    final selectedPractitioners = List<String>.from(existing?.practitionerIds ?? []);
+    final selectedPractitioners = List<String>.from(
+      existing?.practitionerIds ?? [],
+    );
     final isDark = AppColors.isDark(context);
 
     String? modalErrorMessage;
@@ -88,9 +105,15 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                 top: 20,
               ),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.backgroundDeep : AppColors.lightCardSurface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border(top: BorderSide(color: AppColors.border(ctx), width: 0.8)),
+                color: isDark
+                    ? AppColors.backgroundDeep
+                    : AppColors.lightCardSurface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                border: Border(
+                  top: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                ),
               ),
               child: Form(
                 key: formKey,
@@ -101,7 +124,9 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: AppColors.mutedText(ctx).withValues(alpha: 0.4),
+                          color: AppColors.mutedText(
+                            ctx,
+                          ).withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -109,20 +134,31 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                     const SizedBox(height: 16),
                     Text(
                       isEditing
-                          ? (loc.isArabic ? 'تعديل الإجراء / الخدمة' : 'Edit Treatment')
-                          : (loc.isArabic ? 'إضافة إجراء تجميلي جديد' : 'Add Treatment / Service'),
+                          ? (loc.isArabic
+                                ? 'تعديل الإجراء / الخدمة'
+                                : 'Edit Treatment')
+                          : (loc.isArabic
+                                ? 'إضافة إجراء تجميلي جديد'
+                                : 'Add Treatment / Service'),
                       style: AppTypography.cardTitle.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     if (modalErrorMessage != null) ...[
                       const SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
+                          color: Colors.red.withValues(
+                            alpha: isDark ? 0.2 : 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: Colors.redAccent.withValues(alpha: 0.6),
@@ -132,7 +168,11 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: Colors.redAccent,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -149,7 +189,11 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                               visualDensity: VisualDensity.compact,
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                size: 16,
+                                color: Colors.redAccent,
+                              ),
                               onPressed: () {
                                 setModalState(() => modalErrorMessage = null);
                               },
@@ -161,119 +205,127 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                     const SizedBox(height: 14),
 
                     // Category Selector
-                    if (categories.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.border(ctx), width: 0.8),
-                        ),
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentChampagne),
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              loc.isArabic
-                                  ? 'جارٍ مزامنة التصنيفات الطبية...'
-                                  : 'Syncing medical categories...',
-                              style: TextStyle(
-                                color: isDark ? AppColors.silverMuted : AppColors.lightTextSecondary,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      DropdownButtonFormField<String>(
-                        initialValue: categories.any((cat) => cat.id == chosenCategoryId) ? chosenCategoryId : null,
-                        dropdownColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                        decoration: InputDecoration(
-                          labelText: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
-                          hintText: loc.isArabic ? 'اختر التصنيف الطبي' : 'Select Category',
-                          filled: true,
-                          fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          prefixIcon: const Icon(Icons.category_outlined, color: AppColors.accentChampagne, size: 18),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
-                          ),
-                        ),
-                        items: categories.map((cat) {
-                          return DropdownMenuItem(
-                            value: cat.id,
-                            child: Text(
-                              loc.isArabic ? cat.nameAr : cat.nameEn,
-                              style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            setModalState(() {
-                              chosenCategoryId = v;
-                              modalErrorMessage = null;
-                            });
-                          }
-                        },
-                        validator: (v) => v == null ? loc.tr('clinic_validation_required') : null,
-                      ),
+                    PagedEntityField<CategoryModel>(
+                      label: loc.isArabic ? 'التصنيف الطبي *' : 'Category *',
+                      hint: loc.isArabic
+                          ? 'ابحث عن التصنيف الطبي'
+                          : 'Search medical categories',
+                      value: chosenCategoryId,
+                      valueLabel:
+                          chosenCategoryLabel ??
+                          categories
+                              .where((c) => c.id == chosenCategoryId)
+                              .map((c) => loc.isArabic ? c.nameAr : c.nameEn)
+                              .firstOrNull ??
+                          '',
+                      keyOf: (c) => c.id,
+                      labelOf: (c) => loc.isArabic ? c.nameAr : c.nameEn,
+                      loader: (page, search) => ClinicCatalogRepository()
+                          .getCategories(page: page, search: search),
+                      validator: (v) => v == null
+                          ? loc.tr('clinic_validation_required')
+                          : null,
+                      onChanged: (c) => setModalState(() {
+                        chosenCategoryId = c?.id;
+                        chosenCategoryLabel = c == null
+                            ? null
+                            : (loc.isArabic ? c.nameAr : c.nameEn);
+                        modalErrorMessage = null;
+                      }),
+                    ),
                     const SizedBox(height: 10),
 
                     // Name EN & Name AR
                     LtrTextFormField(
                       controller: nameEnController,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'اسم الإجراء بالإنجليزية *' : 'Treatment Name (English) *',
+                        labelText: loc.isArabic
+                            ? 'اسم الإجراء بالإنجليزية *'
+                            : 'Treatment Name (English) *',
                         hintText: 'e.g. HydraFacial Deluxe',
                         filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        fillColor: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          borderSide: BorderSide(
+                            color: AppColors.border(ctx),
+                            width: 0.8,
+                          ),
                         ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: nameArController,
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'اسم الإجراء بالعربية *' : 'Treatment Name (Arabic) *',
+                        labelText: loc.isArabic
+                            ? 'اسم الإجراء بالعربية *'
+                            : 'Treatment Name (Arabic) *',
                         hintText: 'مثال: هيدرافاشيال ديلوكس',
                         filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        fillColor: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          borderSide: BorderSide(
+                            color: AppColors.border(ctx),
+                            width: 0.8,
+                          ),
                         ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
                     ),
                     const SizedBox(height: 10),
 
                     // Price (AED)
                     LtrTextFormField(
                       controller: priceController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'السعر التقديري (درهم إماراتي)' : 'Estimated Price (AED)',
+                        labelText: loc.isArabic
+                            ? 'السعر التقديري (درهم إماراتي)'
+                            : 'Estimated Price (AED)',
                         hintText: 'e.g. 750',
                         filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        fillColor: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          borderSide: BorderSide(
+                            color: AppColors.border(ctx),
+                            width: 0.8,
+                          ),
                         ),
                       ),
                     ),
@@ -283,15 +335,28 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                     LtrTextFormField(
                       controller: descEnController,
                       maxLines: 2,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'الوصف الطبي بالإنجليزية' : 'Description (English)',
-                        hintText: 'e.g. Deep cleansing and active serum infusion.',
+                        labelText: loc.isArabic
+                            ? 'الوصف الطبي بالإنجليزية'
+                            : 'Description (English)',
+                        hintText:
+                            'e.g. Deep cleansing and active serum infusion.',
                         filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        fillColor: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          borderSide: BorderSide(
+                            color: AppColors.border(ctx),
+                            width: 0.8,
+                          ),
                         ),
                       ),
                     ),
@@ -301,15 +366,28 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       maxLines: 2,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.lightTextPrimary,
+                        fontSize: 13,
+                      ),
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'الوصف الطبي بالعربية' : 'Description (Arabic)',
-                        hintText: 'مثال: تنظيف عميق للبشرة وتغذية بالسيروم الفعال.',
+                        labelText: loc.isArabic
+                            ? 'الوصف الطبي بالعربية'
+                            : 'Description (Arabic)',
+                        hintText:
+                            'مثال: تنظيف عميق للبشرة وتغذية بالسيروم الفعال.',
                         filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        fillColor: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(ctx), width: 0.8),
+                          borderSide: BorderSide(
+                            color: AppColors.border(ctx),
+                            width: 0.8,
+                          ),
                         ),
                       ),
                     ),
@@ -318,10 +396,14 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                     // Practitioner Assignment Multi-Select
                     if (clinicService.clinicPractitioners.isNotEmpty) ...[
                       Text(
-                        loc.isArabic ? 'تعيين الأطباء / الممارسين لهذا الإجراء:' : 'Assign Practitioners:',
+                        loc.isArabic
+                            ? 'تعيين الأطباء / الممارسين لهذا الإجراء:'
+                            : 'Assign Practitioners:',
                         style: AppTypography.cardTitle.copyWith(
                           fontSize: 13,
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -329,23 +411,37 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                         spacing: 8,
                         runSpacing: 6,
                         children: clinicService.clinicPractitioners.map((p) {
-                          final isSelected = selectedPractitioners.contains(p.id);
+                          final isSelected = selectedPractitioners.contains(
+                            p.id,
+                          );
                           return FilterChip(
                             label: Text(
                               loc.isArabic ? p.nameAr : p.nameEn,
                               style: TextStyle(
                                 color: isSelected
-                                    ? (isDark ? AppColors.accentChampagne : AppColors.backgroundDeep)
-                                    : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    ? (isDark
+                                          ? AppColors.goldText(context)
+                                          : AppColors.backgroundDeep)
+                                    : (isDark
+                                          ? AppColors.silverPrimary
+                                          : AppColors.lightTextPrimary),
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                                 fontSize: 12,
                               ),
                             ),
                             selected: isSelected,
                             selectedColor: isDark
-                                ? AppColors.accentChampagne.withValues(alpha: 0.25)
-                                : AppColors.accentChampagne.withValues(alpha: 0.35),
-                            checkmarkColor: isDark ? AppColors.accentChampagne : AppColors.backgroundDeep,
+                                ? AppColors.accentChampagne.withValues(
+                                    alpha: 0.25,
+                                  )
+                                : AppColors.accentChampagne.withValues(
+                                    alpha: 0.35,
+                                  ),
+                            checkmarkColor: isDark
+                                ? AppColors.accentChampagne
+                                : AppColors.backgroundDeep,
                             onSelected: (selected) {
                               setModalState(() {
                                 if (selected) {
@@ -363,7 +459,9 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
 
                     SilverButton(
                       label: isEditing
-                          ? (loc.isArabic ? 'حفظ التعديلات' : 'Update Treatment')
+                          ? (loc.isArabic
+                                ? 'حفظ التعديلات'
+                                : 'Update Treatment')
                           : (loc.isArabic ? 'إضافة الإجراء' : 'Save Treatment'),
                       icon: Icons.check_circle_outline,
                       isFullWidth: true,
@@ -387,7 +485,8 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                                 'category': chosenCategoryId,
                                 'category_id': chosenCategoryId,
                                 'name_en': nameEnController.text.trim(),
-                                'name_ar': nameArController.text.trim().isNotEmpty
+                                'name_ar':
+                                    nameArController.text.trim().isNotEmpty
                                     ? nameArController.text.trim()
                                     : nameEnController.text.trim(),
                                 'description_en': descEnController.text.trim(),
@@ -395,7 +494,11 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                                 'status': 'active',
                                 'is_active': true,
                                 if (priceController.text.trim().isNotEmpty)
-                                  'price': double.tryParse(priceController.text.trim()) ?? 0.0,
+                                  'price':
+                                      double.tryParse(
+                                        priceController.text.trim(),
+                                      ) ??
+                                      0.0,
                                 'practitioners': selectedPractitioners,
                               };
 
@@ -403,7 +506,10 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
 
                               try {
                                 if (isEditing) {
-                                  await clinicService.updateTreatment(existing.id, data);
+                                  await clinicService.updateTreatment(
+                                    existing.id,
+                                    data,
+                                  );
                                 } else {
                                   await clinicService.createTreatment(data);
                                 }
@@ -412,8 +518,12 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                                   showAppSnackBar(
                                     context,
                                     isEditing
-                                        ? (loc.isArabic ? 'تم تحديث الإجراء بنجاح' : 'Treatment updated successfully')
-                                        : (loc.isArabic ? 'تمت إضافة الإجراء بنجاح' : 'Treatment added successfully'),
+                                        ? (loc.isArabic
+                                              ? 'تم تحديث الإجراء بنجاح'
+                                              : 'Treatment updated successfully')
+                                        : (loc.isArabic
+                                              ? 'تمت إضافة الإجراء بنجاح'
+                                              : 'Treatment added successfully'),
                                     type: AppSnackBarType.success,
                                   );
                                 }
@@ -422,9 +532,13 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                                 if (e is ApiException) {
                                   cleanMsg = e.message;
                                 } else {
-                                  cleanMsg = ApiException.sanitizeRegulatoryCompliance(
-                                    e.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', ''),
-                                  );
+                                  cleanMsg =
+                                      ApiException.sanitizeRegulatoryCompliance(
+                                        e
+                                            .toString()
+                                            .replaceFirst('Exception: ', '')
+                                            .replaceFirst('ApiException: ', ''),
+                                      );
                                 }
                                 setModalState(() {
                                   modalErrorMessage = cleanMsg;
@@ -444,22 +558,32 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
     );
   }
 
-  void _confirmDelete(BuildContext context, LocaleService loc, TreatmentModel t) {
+  void _confirmDelete(
+    BuildContext context,
+    LocaleService loc,
+    TreatmentModel t,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.isDark(context) ? AppColors.cardSurface : Colors.white,
+        backgroundColor: AppColors.isDark(context)
+            ? AppColors.cardSurface
+            : Colors.white,
         title: Text(
           loc.isArabic ? 'حذف الإجراء الطبي' : 'Delete Treatment',
           style: AppTypography.cardTitle.copyWith(
-            color: AppColors.isDark(context) ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            color: AppColors.isDark(context)
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
           ),
         ),
         content: Text(
           loc.isArabic
               ? 'هل أنت متأكد من حذف "${t.nameAr}" من قائمة الخدمات؟'
               : 'Are you sure you want to delete "${t.nameEn}" from services?',
-          style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.mutedText(context),
+          ),
         ),
         actions: [
           TextButton(
@@ -467,7 +591,9 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
             child: Text(loc.isArabic ? 'إلغاء' : 'Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.errorRed),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.errorRed,
+            ),
             onPressed: () async {
               Navigator.pop(ctx);
               try {
@@ -481,16 +607,28 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+                  showAppSnackBar(
+                    context,
+                    e.toString(),
+                    type: AppSnackBarType.error,
+                  );
                 }
               }
             },
-            child: Text(loc.isArabic ? 'حذف' : 'Delete', style: const TextStyle(color: Colors.white)),
+            child: Text(
+              loc.isArabic ? 'حذف' : 'Delete',
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
+
+  void _queryChanged() => ClinicPortalService().searchCollection('treatments', {
+    'search': _searchQuery,
+    'category': _selectedCategoryId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +641,9 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
       builder: (context, _) {
         final all = clinicService.clinicTreatments;
         final filtered = all.where((t) {
-          final matchesCategory = _selectedCategoryId == null || t.categoryId == _selectedCategoryId;
+          final matchesCategory =
+              _selectedCategoryId == null ||
+              t.categoryId == _selectedCategoryId;
           if (!matchesCategory) return false;
           if (_searchQuery.isEmpty) return true;
           final q = _searchQuery.toLowerCase();
@@ -518,236 +658,389 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
           appBar: AppBar(
             backgroundColor: AppColors.bg(context),
             title: Text(
-              loc.isArabic ? 'إدارة الخدمات والعلاجات' : 'Treatments & Services',
+              loc.isArabic
+                  ? 'إدارة الخدمات والعلاجات'
+                  : 'Treatments & Services',
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontSize: 16,
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.accentChampagne),
+                icon: const Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: AppColors.accentChampagne,
+                ),
                 tooltip: loc.isArabic ? 'إضافة إجراء' : 'Add Treatment',
                 onPressed: () => _showTreatmentFormDialog(context, loc),
               ),
             ],
           ),
-          body: Column(
-            children: [
-              // Search input
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: TextField(
-                  controller: _searchController,
-                  style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
-                    fontSize: 13,
+          body: PagedScrollBoundary(
+            onLoadMore: () => clinicService.loadMore('treatments'),
+            child: Column(
+              children: [
+                // Search input
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                  decoration: InputDecoration(
-                    hintText: loc.isArabic ? 'بحث عن علاج أو إجراء تجميلي...' : 'Search treatment or procedure...',
-                    hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
-                    prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.accentChampagne),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.textPrimary
+                          : AppColors.lightTextPrimary,
+                      fontSize: 13,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.4),
-                    ),
-                  ),
-                  onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                ),
-              ),
-
-              // Categories Filter Chips
-              if (clinicService.categories.isNotEmpty)
-                SizedBox(
-                  height: 38,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: FilterChip(
-                          label: Text(
-                            loc.isArabic ? 'الكل' : 'All',
-                            style: TextStyle(
-                              color: _selectedCategoryId == null
-                                  ? (isDark ? AppColors.accentChampagne : AppColors.backgroundDeep)
-                                  : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                              fontWeight: _selectedCategoryId == null ? FontWeight.w700 : FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                          ),
-                          selected: _selectedCategoryId == null,
-                          selectedColor: isDark
-                              ? AppColors.accentChampagne.withValues(alpha: 0.25)
-                              : AppColors.accentChampagne.withValues(alpha: 0.35),
-                          checkmarkColor: isDark ? AppColors.accentChampagne : AppColors.backgroundDeep,
-                          onSelected: (_) => setState(() => _selectedCategoryId = null),
+                    decoration: InputDecoration(
+                      hintText: loc.isArabic
+                          ? 'بحث عن علاج أو إجراء تجميلي...'
+                          : 'Search treatment or procedure...',
+                      hintStyle: TextStyle(
+                        color: AppColors.text(context),
+                        fontSize: 12,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        size: 20,
+                        color: AppColors.accentChampagne,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.cardSurfaceHover
+                          : AppColors.lightCardSurfaceHover,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: AppColors.border(context),
+                          width: 0.8,
                         ),
                       ),
-                      ...clinicService.categories.map((cat) {
-                        final isSel = _selectedCategoryId == cat.id;
-                        return Padding(
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppColors.accentChampagne,
+                          width: 1.4,
+                        ),
+                      ),
+                    ),
+                    onChanged: (val) {
+                      setState(() => _searchQuery = val.trim());
+                      _queryChanged();
+                    },
+                  ),
+                ),
+
+                // Categories Filter Chips
+                if (clinicService.categories.isNotEmpty)
+                  SizedBox(
+                    height: 38,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        Padding(
                           padding: const EdgeInsets.only(right: 6),
                           child: FilterChip(
                             label: Text(
-                              loc.isArabic ? cat.nameAr : cat.nameEn,
+                              loc.isArabic ? 'الكل' : 'All',
                               style: TextStyle(
-                                color: isSel
-                                    ? (isDark ? AppColors.accentChampagne : AppColors.backgroundDeep)
-                                    : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                                fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
+                                color: _selectedCategoryId == null
+                                    ? (isDark
+                                          ? AppColors.goldText(context)
+                                          : AppColors.backgroundDeep)
+                                    : (isDark
+                                          ? AppColors.silverPrimary
+                                          : AppColors.lightTextPrimary),
+                                fontWeight: _selectedCategoryId == null
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                                 fontSize: 12,
                               ),
                             ),
-                            selected: isSel,
+                            selected: _selectedCategoryId == null,
                             selectedColor: isDark
-                                ? AppColors.accentChampagne.withValues(alpha: 0.25)
-                                : AppColors.accentChampagne.withValues(alpha: 0.35),
-                            checkmarkColor: isDark ? AppColors.accentChampagne : AppColors.backgroundDeep,
-                            onSelected: (_) => setState(() => _selectedCategoryId = isSel ? null : cat.id),
+                                ? AppColors.accentChampagne.withValues(
+                                    alpha: 0.25,
+                                  )
+                                : AppColors.accentChampagne.withValues(
+                                    alpha: 0.35,
+                                  ),
+                            checkmarkColor: isDark
+                                ? AppColors.accentChampagne
+                                : AppColors.backgroundDeep,
+                            onSelected: (_) {
+                              setState(() => _selectedCategoryId = null);
+                              _queryChanged();
+                            },
                           ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-
-              const SizedBox(height: 6),
-
-              // Content List
-              Expanded(
-                child: RefreshIndicator(
-                  color: AppColors.accentChampagne,
-                  onRefresh: () => clinicService.loadCatalogData(refresh: true),
-                  child: filtered.isEmpty
-                      ? ListView(
-                          children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.25),
-                            Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.spa_outlined, size: 48, color: AppColors.mutedText(context)),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    loc.isArabic ? 'لا توجد خدمات مطابقة' : 'No treatments found',
-                                    style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(context)),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  SilverButton(
-                                    label: loc.isArabic ? 'إضافة إجراء جديد' : 'Add Treatment',
-                                    icon: Icons.add,
-                                    height: 38,
-                                    onPressed: () => _showTreatmentFormDialog(context, loc),
-                                  ),
-                                ],
+                        ),
+                        ...clinicService.categories.map((cat) {
+                          final isSel = _selectedCategoryId == cat.id;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: FilterChip(
+                              label: Text(
+                                loc.isArabic ? cat.nameAr : cat.nameEn,
+                                style: TextStyle(
+                                  color: isSel
+                                      ? (isDark
+                                            ? AppColors.goldText(context)
+                                            : AppColors.backgroundDeep)
+                                      : (isDark
+                                            ? AppColors.silverPrimary
+                                            : AppColors.lightTextPrimary),
+                                  fontWeight: isSel
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  fontSize: 12,
+                                ),
                               ),
+                              selected: isSel,
+                              selectedColor: isDark
+                                  ? AppColors.accentChampagne.withValues(
+                                      alpha: 0.25,
+                                    )
+                                  : AppColors.accentChampagne.withValues(
+                                      alpha: 0.35,
+                                    ),
+                              checkmarkColor: isDark
+                                  ? AppColors.accentChampagne
+                                  : AppColors.backgroundDeep,
+                              onSelected: (_) {
+                                setState(
+                                  () => _selectedCategoryId = isSel
+                                      ? null
+                                      : cat.id,
+                                );
+                                _queryChanged();
+                              },
                             ),
-                          ],
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          itemCount: filtered.length,
-                          itemBuilder: (context, index) {
-                            final t = filtered[index];
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
 
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: LuxuryCard(
-                                padding: const EdgeInsets.all(14),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 6),
+
+                // Content List
+                Expanded(
+                  child: RefreshIndicator(
+                    color: AppColors.accentChampagne,
+                    onRefresh: () => clinicService.loadCollection(
+                      'treatments',
+                      refresh: true,
+                    ),
+                    child: filtered.isEmpty
+                        ? ListView(
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.25,
+                              ),
+                              Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: const Icon(Icons.spa_rounded, color: AppColors.accentChampagne, size: 22),
+                                    Icon(
+                                      Icons.spa_outlined,
+                                      size: 48,
+                                      color: AppColors.mutedText(context),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            loc.isArabic ? t.nameAr : t.nameEn,
-                                            style: AppTypography.cardTitle.copyWith(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            loc.isArabic ? t.categoryAr : t.categoryEn,
-                                            style: AppTypography.caption.copyWith(
-                                              color: AppColors.mutedText(context),
-                                              fontSize: 11.5,
-                                            ),
-                                          ),
-                                          if (t.price != null && t.price! > 0) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '${t.price!.toInt()} ${loc.tr('currency_aed')}',
-                                              style: AppTypography.caption.copyWith(
-                                                color: AppColors.accentChampagne,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      loc.isArabic
+                                          ? 'لا توجد خدمات مطابقة'
+                                          : 'No treatments found',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: AppColors.mutedText(context),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(
-                                            Icons.edit_outlined,
-                                            size: 18,
-                                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextSecondary,
-                                          ),
-                                          tooltip: loc.isArabic ? 'تعديل' : 'Edit',
-                                          onPressed: () => _showTreatmentFormDialog(context, loc, existing: t),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.errorRed),
-                                          tooltip: loc.isArabic ? 'حذف' : 'Delete',
-                                          onPressed: () => _confirmDelete(context, loc, t),
-                                        ),
-                                      ],
+                                    const SizedBox(height: 16),
+                                    SilverButton(
+                                      label: loc.isArabic
+                                          ? 'إضافة إجراء جديد'
+                                          : 'Add Treatment',
+                                      icon: Icons.add,
+                                      height: 38,
+                                      onPressed: () => _showTreatmentFormDialog(
+                                        context,
+                                        loc,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                            ],
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            itemCount: filtered.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index >= filtered.length) {
+                                return PaginationFooter(
+                                  loading: clinicService
+                                      .collection('treatments')
+                                      .isLoadingMore,
+                                  hasMore: clinicService
+                                      .collection('treatments')
+                                      .hasMore,
+                                  error: clinicService
+                                      .collection('treatments')
+                                      .error,
+                                  onLoadMore: () =>
+                                      clinicService.loadMore('treatments'),
+                                );
+                              }
+
+                              final t = filtered[index];
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: LuxuryCard(
+                                  padding: const EdgeInsets.all(14),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.accentChampagne
+                                              .withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.spa_rounded,
+                                          color: AppColors.accentChampagne,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              loc.isArabic
+                                                  ? t.nameAr
+                                                  : t.nameEn,
+                                              style: AppTypography.cardTitle
+                                                  .copyWith(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isDark
+                                                        ? AppColors
+                                                              .silverPrimary
+                                                        : AppColors
+                                                              .lightTextPrimary,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              loc.isArabic
+                                                  ? t.categoryAr
+                                                  : t.categoryEn,
+                                              style: AppTypography.caption
+                                                  .copyWith(
+                                                    color: AppColors.mutedText(
+                                                      context,
+                                                    ),
+                                                    fontSize: 11.5,
+                                                  ),
+                                            ),
+                                            if (t.price != null &&
+                                                t.price! > 0) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${t.price!.toInt()} ${loc.tr('currency_aed')}',
+                                                style: AppTypography.caption
+                                                    .copyWith(
+                                                      color: AppColors.goldText(
+                                                        context,
+                                                      ),
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 12,
+                                                    ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.edit_outlined,
+                                              size: 18,
+                                              color: isDark
+                                                  ? AppColors.silverPrimary
+                                                  : AppColors
+                                                        .lightTextSecondary,
+                                            ),
+                                            tooltip: loc.isArabic
+                                                ? 'تعديل'
+                                                : 'Edit',
+                                            onPressed: () =>
+                                                _showTreatmentFormDialog(
+                                                  context,
+                                                  loc,
+                                                  existing: t,
+                                                ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.delete_outline_rounded,
+                                              size: 18,
+                                              color: AppColors.errorRed,
+                                            ),
+                                            tooltip: loc.isArabic
+                                                ? 'حذف'
+                                                : 'Delete',
+                                            onPressed: () =>
+                                                _confirmDelete(context, loc, t),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _showTreatmentFormDialog(context, loc),
@@ -756,7 +1049,10 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
             icon: const Icon(Icons.add_rounded),
             label: Text(
               loc.isArabic ? 'إضافة إجراء' : 'Add Treatment',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12.5,
+              ),
             ),
           ),
         );

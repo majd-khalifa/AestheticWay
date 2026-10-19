@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/remote_catalog_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -25,12 +26,15 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
   late TextEditingController _notesController;
   bool _isUpdatingStatus = false;
   bool _isSavingNotes = false;
+  int _noteRevision = 0;
 
   @override
   void initState() {
     super.initState();
     _currentStatus = widget.lead.status;
-    final existingNotes = ClinicPortalService().getInternalNotes(widget.lead.id);
+    final existingNotes = ClinicPortalService().getInternalNotes(
+      widget.lead.id,
+    );
     _notesController = TextEditingController(text: existingNotes);
   }
 
@@ -46,21 +50,30 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
     final loc = LocaleService();
 
     // Guard: warn clinic staff if closing an untouched lead
-    if (_currentStatus == AppointmentLeadStatus.sent && newStatus == AppointmentLeadStatus.closed) {
+    if (_currentStatus == AppointmentLeadStatus.sent &&
+        newStatus == AppointmentLeadStatus.closed) {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.surface(ctx),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
-            loc.isArabic ? 'إغلاق الطلب دون تواصل؟' : 'Close without contacting?',
-            style: AppTypography.cardTitle.copyWith(fontWeight: FontWeight.bold),
+            loc.isArabic
+                ? 'إغلاق الطلب دون تواصل؟'
+                : 'Close without contacting?',
+            style: AppTypography.cardTitle.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Text(
             loc.isArabic
                 ? 'لم يتم تسجيل التواصل مع المريض بعد. هل أنت متأكد من إغلاق هذا الطلب مباشرة؟'
                 : 'Patient contact has not been logged yet. Are you sure you want to close this lead directly?',
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.mutedText(ctx)),
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.mutedText(ctx),
+            ),
           ),
           actions: [
             TextButton(
@@ -72,7 +85,9 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFEF4444),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: Text(loc.isArabic ? 'إغلاق الطلب' : 'Close Lead'),
             ),
@@ -145,6 +160,7 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
       if (mounted) {
         setState(() {
           _isSavingNotes = false;
+          _noteRevision++;
         });
       }
     }
@@ -154,19 +170,6 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
-
-    String timeWindowText;
-    switch (widget.lead.preferredTimeWindow) {
-      case PreferredTimeWindow.morning:
-        timeWindowText = loc.tr('time_morning');
-        break;
-      case PreferredTimeWindow.afternoon:
-        timeWindowText = loc.tr('time_afternoon');
-        break;
-      case PreferredTimeWindow.evening:
-        timeWindowText = loc.tr('time_evening');
-        break;
-    }
 
     return ListenableBuilder(
       listenable: loc,
@@ -178,14 +181,18 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
             title: Text(
               '${loc.tr('clinic_nav_leads')} • ${widget.lead.referenceCode}',
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontSize: 15,
               ),
             ),
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 size: 18,
               ),
               onPressed: () => Navigator.pop(context),
@@ -204,11 +211,15 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                       children: [
                         CircleAvatar(
                           radius: 26,
-                          backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          backgroundColor: isDark
+                              ? AppColors.cardSurfaceHover
+                              : AppColors.lightCardSurfaceHover,
                           child: Icon(
                             Icons.person_rounded,
                             size: 28,
-                            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.silverPrimary
+                                : AppColors.lightTextPrimary,
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -221,7 +232,9 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                                 style: AppTypography.cardTitle.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w800,
-                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  color: isDark
+                                      ? AppColors.silverPrimary
+                                      : AppColors.lightTextPrimary,
                                 ),
                               ),
                               const SizedBox(height: 3),
@@ -229,7 +242,7 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                                 widget.lead.patientPhone,
                                 style: AppTypography.bodyMedium.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.accentChampagne,
+                                  color: AppColors.goldText(context),
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -249,7 +262,9 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                             icon: Icons.phone_rounded,
                             height: 42,
                             onPressed: () {
-                              ContactLauncher.makePhoneCall(widget.lead.patientPhone);
+                              ContactLauncher.makePhoneCall(
+                                widget.lead.patientPhone,
+                              );
                             },
                           ),
                         ),
@@ -257,16 +272,28 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              ContactLauncher.openWhatsApp(phoneNumber: widget.lead.patientPhone);
+                              ContactLauncher.openWhatsApp(
+                                phoneNumber: widget.lead.patientPhone,
+                              );
                             },
-                            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: Colors.white),
+                            icon: const Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                             label: Text(
                               loc.tr('clinic_lead_whatsapp'),
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Colors.white),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12.5,
+                                color: Colors.white,
+                              ),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF10B981),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 10),
                             ),
                           ),
@@ -289,7 +316,9 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -315,16 +344,20 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                     const Divider(height: 16),
                     _DetailRow(
                       icon: Icons.calendar_today_outlined,
-                      label: loc.tr('date_label'),
-                      value: '${DateFormat('yyyy/MM/dd').format(widget.lead.preferredDate)} ($timeWindowText)',
+                      label: loc.tr('submitted_at'),
+                      value: DateFormat(
+                        'yyyy/MM/dd',
+                      ).format(widget.lead.createdAt),
                     ),
                     const Divider(height: 16),
                     _DetailRow(
                       icon: Icons.source_outlined,
                       label: loc.tr('ref_number'),
-                      value: '${widget.lead.referenceCode} • ${loc.tr('clinic_lead_source')}',
+                      value:
+                          '${widget.lead.referenceCode} • ${loc.tr('clinic_lead_source')}',
                     ),
-                    if (widget.lead.notes != null && widget.lead.notes!.isNotEmpty) ...[
+                    if (widget.lead.notes != null &&
+                        widget.lead.notes!.isNotEmpty) ...[
                       const Divider(height: 16),
                       _DetailRow(
                         icon: Icons.notes_outlined,
@@ -348,7 +381,9 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -356,23 +391,35 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                       children: [
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_new'),
-                          isSelected: _currentStatus == AppointmentLeadStatus.sent,
+                          isSelected:
+                              _currentStatus == AppointmentLeadStatus.sent,
                           color: const Color(0xFFF59E0B),
-                          onTap: _isUpdatingStatus ? null : () => _updateStatus(AppointmentLeadStatus.sent),
+                          onTap: _isUpdatingStatus
+                              ? null
+                              : () => _updateStatus(AppointmentLeadStatus.sent),
                         ),
                         const SizedBox(width: 8),
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_contacted'),
-                          isSelected: _currentStatus == AppointmentLeadStatus.contacted,
+                          isSelected:
+                              _currentStatus == AppointmentLeadStatus.contacted,
                           color: const Color(0xFF3B82F6),
-                          onTap: _isUpdatingStatus ? null : () => _updateStatus(AppointmentLeadStatus.contacted),
+                          onTap: _isUpdatingStatus
+                              ? null
+                              : () => _updateStatus(
+                                  AppointmentLeadStatus.contacted,
+                                ),
                         ),
                         const SizedBox(width: 8),
                         _StatusSelectChip(
                           label: loc.tr('clinic_lead_status_closed'),
-                          isSelected: _currentStatus == AppointmentLeadStatus.closed,
+                          isSelected:
+                              _currentStatus == AppointmentLeadStatus.closed,
                           color: const Color(0xFF10B981),
-                          onTap: _isUpdatingStatus ? null : () => _updateStatus(AppointmentLeadStatus.closed),
+                          onTap: _isUpdatingStatus
+                              ? null
+                              : () =>
+                                    _updateStatus(AppointmentLeadStatus.closed),
                         ),
                       ],
                     ),
@@ -399,80 +446,113 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
-                    if (widget.lead.internalNotes.isNotEmpty) ...[
+                    ...[
                       const SizedBox(height: 10),
-                      ...widget.lead.internalNotes.map((n) => Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.border(context), width: 0.6),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  n.authorName,
-                                  style: const TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.accentChampagne,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat('MM/dd HH:mm').format(n.createdAt),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: AppColors.mutedText(context),
-                                  ),
-                                ),
-                              ],
+                      RemoteCatalogPreview<ClinicInternalNote>(
+                        key: ValueKey('${widget.lead.id}:$_noteRevision'),
+                        keyOf: (n) => n.id,
+                        loader: (page) => ClinicPortalService()
+                            .getLeadNotesPage(widget.lead, page),
+                        itemBuilder: (context, n) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.cardSurface
+                                : AppColors.lightCardSurface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppColors.border(context),
+                              width: 0.6,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              n.note,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    n.authorName,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.goldText(context),
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat(
+                                      'MM/dd HH:mm',
+                                    ).format(n.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: AppColors.mutedText(context),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+                              Text(
+                                n.note,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.textPrimary
+                                      : AppColors.lightTextPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      )),
+                      ),
                     ],
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: _notesController,
                       maxLines: 3,
                       style: TextStyle(
-                        color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.lightTextPrimary,
                         fontSize: 13,
                       ),
                       decoration: InputDecoration(
                         hintText: loc.tr('clinic_internal_notes_hint'),
-                        hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
+                        hintStyle: TextStyle(
+                          color: AppColors.text(context),
+                          fontSize: 12,
+                        ),
                         filled: true,
-                        fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        fillColor: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                          borderSide: BorderSide(
+                            color: AppColors.border(context),
+                            width: 0.8,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.4),
+                          borderSide: const BorderSide(
+                            color: AppColors.accentChampagne,
+                            width: 1.4,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Align(
-                      alignment: loc.isArabic ? Alignment.centerLeft : Alignment.centerRight,
+                      alignment: loc.isArabic
+                          ? Alignment.centerLeft
+                          : Alignment.centerRight,
                       child: SilverButton(
                         label: loc.tr('clinic_save_notes'),
                         icon: Icons.save_outlined,
@@ -517,7 +597,10 @@ class _DetailRow extends StatelessWidget {
           width: 90,
           child: Text(
             label,
-            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 12),
+            style: AppTypography.caption.copyWith(
+              color: AppColors.mutedText(context),
+              fontSize: 12,
+            ),
           ),
         ),
         Expanded(
@@ -526,7 +609,9 @@ class _DetailRow extends StatelessWidget {
             style: AppTypography.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
               fontSize: 12.5,
-              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.silverPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
         ),
@@ -559,7 +644,11 @@ class _StatusSelectChip extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 9),
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.22) : (isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover),
+            color: isSelected
+                ? color.withValues(alpha: 0.22)
+                : (isDark
+                      ? AppColors.cardSurfaceHover
+                      : AppColors.lightCardSurfaceHover),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected ? color : AppColors.border(context),

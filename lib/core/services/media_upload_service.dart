@@ -10,14 +10,15 @@ class MediaUploadService {
   static final MediaUploadService _instance = MediaUploadService._internal();
   factory MediaUploadService({ApiClient? client}) {
     if (client != null) {
-      _instance._client = client;
+      return MediaUploadService._custom(client);
     }
     return _instance;
   }
 
-  MediaUploadService._internal();
+  MediaUploadService._internal() : _client = ApiClient();
+  MediaUploadService._custom(this._client);
 
-  ApiClient _client = ApiClient();
+  final ApiClient _client;
 
   /// Uploads a local file to the secure backend media service using multipart/form-data.
   ///

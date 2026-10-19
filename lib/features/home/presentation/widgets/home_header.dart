@@ -187,7 +187,7 @@ class _CityOptionTile extends StatelessWidget {
               title,
               style: TextStyle(
                 color: isSelected
-                    ? AppColors.accentChampagne
+                    ? AppColors.goldText(context)
                     : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,

@@ -110,8 +110,8 @@ class AppointmentRequestModel {
   final String? practitionerNameAr;
   final String? practitionerNameEn;
   final PractitionerType? practitionerType;
-  final DateTime preferredDate;
-  final PreferredTimeWindow preferredTimeWindow;
+  final DateTime? preferredDate;
+  final PreferredTimeWindow? preferredTimeWindow;
   final String patientFullName;
   final String patientPhone;
   final String? notes;
@@ -123,6 +123,7 @@ class AppointmentRequestModel {
   final String? offerId;
   final String? offerTitleAr;
   final String? offerTitleEn;
+  final bool hasNotesDirectory;
   final List<ClinicInternalNote> internalNotes;
 
   const AppointmentRequestModel({
@@ -143,8 +144,8 @@ class AppointmentRequestModel {
     this.practitionerNameAr,
     this.practitionerNameEn,
     this.practitionerType,
-    required this.preferredDate,
-    required this.preferredTimeWindow,
+    this.preferredDate,
+    this.preferredTimeWindow,
     required this.patientFullName,
     required this.patientPhone,
     this.notes,
@@ -156,6 +157,7 @@ class AppointmentRequestModel {
     this.offerId,
     this.offerTitleAr,
     this.offerTitleEn,
+    this.hasNotesDirectory = false,
     this.internalNotes = const [],
   });
 
@@ -178,8 +180,10 @@ class AppointmentRequestModel {
     }
 
     // 2. Preferred time window: 'morning', 'afternoon', 'evening'
-    final rawWindow = (json['preferred_time_window'] ?? '').toString().toLowerCase();
-    PreferredTimeWindow timeWindow;
+    final rawWindow = (json['preferred_time_window'] ?? '')
+        .toString()
+        .toLowerCase();
+    PreferredTimeWindow? timeWindow;
     switch (rawWindow) {
       case 'morning':
         timeWindow = PreferredTimeWindow.morning;
@@ -188,32 +192,55 @@ class AppointmentRequestModel {
         timeWindow = PreferredTimeWindow.afternoon;
         break;
       case 'evening':
-      default:
         timeWindow = PreferredTimeWindow.evening;
+        break;
+      default:
+        timeWindow = null;
         break;
     }
 
     // 3. Summaries extraction
     final clinicSummary = json['clinic_summary'] as Map<String, dynamic>?;
     final branchSummary = json['branch_summary'] as Map<String, dynamic>?;
-    final practitionerSummary = json['practitioner_summary'] as Map<String, dynamic>?;
+    final practitionerSummary =
+        json['practitioner_summary'] as Map<String, dynamic>?;
     final treatmentSummary = json['treatment_summary'] as Map<String, dynamic>?;
     final offerSummary = json['offer_summary'] as Map<String, dynamic>?;
     final productSummary = json['product_summary'] as Map<String, dynamic>?;
 
-    final clinicId = json['clinic']?.toString() ?? clinicSummary?['id']?.toString() ?? '';
-    final clinicNameAr = clinicSummary?['name_ar']?.toString() ?? json['clinic_name_ar']?.toString() ?? 'عيادة تجميلية';
-    final clinicNameEn = clinicSummary?['name_en']?.toString() ?? json['clinic_name_en']?.toString() ?? json['clinic_name']?.toString() ?? 'Aesthetic Clinic';
+    final clinicId =
+        json['clinic']?.toString() ?? clinicSummary?['id']?.toString() ?? '';
+    final clinicNameAr =
+        clinicSummary?['name_ar']?.toString() ??
+        json['clinic_name_ar']?.toString() ??
+        'عيادة تجميلية';
+    final clinicNameEn =
+        clinicSummary?['name_en']?.toString() ??
+        json['clinic_name_en']?.toString() ??
+        json['clinic_name']?.toString() ??
+        'Aesthetic Clinic';
 
-    final branchNameAr = branchSummary?['name_ar']?.toString() ?? json['branch_name_ar']?.toString() ?? 'الفرع الرئيسي';
-    final branchNameEn = branchSummary?['name_en']?.toString() ?? json['branch_name_en']?.toString() ?? 'Main Branch';
+    final branchNameAr =
+        branchSummary?['name_ar']?.toString() ??
+        json['branch_name_ar']?.toString() ??
+        'الفرع الرئيسي';
+    final branchNameEn =
+        branchSummary?['name_en']?.toString() ??
+        json['branch_name_en']?.toString() ??
+        'Main Branch';
 
     // Service / Product / Offer name
     String serviceNameAr = json['service_name']?.toString() ?? '';
     String? serviceNameEn = json['service_name_en']?.toString();
     if (productSummary != null) {
-      serviceNameAr = productSummary['name_ar']?.toString() ?? productSummary['name_en']?.toString() ?? serviceNameAr;
-      serviceNameEn = productSummary['name_en']?.toString() ?? productSummary['name_ar']?.toString() ?? serviceNameEn;
+      serviceNameAr =
+          productSummary['name_ar']?.toString() ??
+          productSummary['name_en']?.toString() ??
+          serviceNameAr;
+      serviceNameEn =
+          productSummary['name_en']?.toString() ??
+          productSummary['name_ar']?.toString() ??
+          serviceNameEn;
     } else if (treatmentSummary != null) {
       serviceNameAr = treatmentSummary['name_ar']?.toString() ?? serviceNameAr;
       serviceNameEn = treatmentSummary['name_en']?.toString() ?? serviceNameEn;
@@ -222,17 +249,28 @@ class AppointmentRequestModel {
       serviceNameEn = offerSummary['title_en']?.toString() ?? serviceNameEn;
     }
     if (serviceNameAr.isEmpty) {
-      serviceNameAr = json['lead_type']?.toString() == 'product'
+      serviceNameAr =
+          (json['lead_type']?.toString() == 'product' ||
+              json['lead_type']?.toString() == 'product_inquiry')
           ? 'استفسار عن منتج طبي'
           : 'استشارة تجميلية وجلدية عامة';
     }
 
     // Practitioner summary
-    String? practitionerId = json['practitioner']?.toString() ?? practitionerSummary?['id']?.toString();
-    String? practitionerNameAr = practitionerSummary?['name_ar']?.toString() ?? json['practitioner_name_ar']?.toString();
-    String? practitionerNameEn = practitionerSummary?['name_en']?.toString() ?? json['practitioner_name_en']?.toString();
+    String? practitionerId =
+        json['practitioner']?.toString() ??
+        practitionerSummary?['id']?.toString();
+    String? practitionerNameAr =
+        practitionerSummary?['name_ar']?.toString() ??
+        json['practitioner_name_ar']?.toString();
+    String? practitionerNameEn =
+        practitionerSummary?['name_en']?.toString() ??
+        json['practitioner_name_en']?.toString();
     PractitionerType? practitionerType;
-    final rawType = (practitionerSummary?['type'] ?? json['practitioner_type'] ?? '').toString().toLowerCase();
+    final rawType =
+        (practitionerSummary?['type'] ?? json['practitioner_type'] ?? '')
+            .toString()
+            .toLowerCase();
     if (rawType.contains('nurse')) {
       practitionerType = PractitionerType.nurse;
     } else if (rawType.contains('licensed')) {
@@ -248,12 +286,9 @@ class AppointmentRequestModel {
       } catch (_) {}
     }
 
-    DateTime preferredDate = DateTime.now().add(const Duration(days: 2));
-    if (json['preferred_date'] != null) {
-      try {
-        preferredDate = DateTime.parse(json['preferred_date'].toString());
-      } catch (_) {}
-    }
+    final preferredDate = DateTime.tryParse(
+      json['preferred_date']?.toString() ?? '',
+    );
 
     return AppointmentRequestModel(
       id: json['id']?.toString() ?? '',
@@ -275,23 +310,31 @@ class AppointmentRequestModel {
       practitionerType: practitionerType,
       preferredDate: preferredDate,
       preferredTimeWindow: timeWindow,
-      patientFullName: json['patient_name']?.toString() ?? json['patient_full_name']?.toString() ?? '',
+      patientFullName:
+          json['patient_name']?.toString() ??
+          json['patient_full_name']?.toString() ??
+          '',
       patientPhone: json['patient_phone']?.toString() ?? '',
       notes: json['notes']?.toString(),
       consentAccepted: json['consent_accepted'] == true,
       status: status,
       createdAt: createdAt,
       leadType: json['lead_type']?.toString(),
-      treatmentId: json['treatment']?.toString() ?? treatmentSummary?['id']?.toString(),
+      treatmentId:
+          json['treatment']?.toString() ?? treatmentSummary?['id']?.toString(),
       offerId: json['offer']?.toString() ?? offerSummary?['id']?.toString(),
       offerTitleAr: offerSummary?['title_ar']?.toString(),
       offerTitleEn: offerSummary?['title_en']?.toString(),
+      hasNotesDirectory: json['notes_directory_url'] != null,
       internalNotes: (json['internal_notes'] as List<dynamic>? ?? [])
           .whereType<Map<String, dynamic>>()
           .map((n) => ClinicInternalNote.fromJson(n))
           .toList(),
     );
   }
+
+  bool get isProductInquiry =>
+      leadType == 'product' || leadType == 'product_inquiry';
 
   AppointmentRequestModel copyWith({
     String? id,
@@ -324,6 +367,7 @@ class AppointmentRequestModel {
     String? offerId,
     String? offerTitleAr,
     String? offerTitleEn,
+    bool? hasNotesDirectory,
     List<ClinicInternalNote>? internalNotes,
   }) {
     return AppointmentRequestModel(
@@ -357,6 +401,7 @@ class AppointmentRequestModel {
       offerId: offerId ?? this.offerId,
       offerTitleAr: offerTitleAr ?? this.offerTitleAr,
       offerTitleEn: offerTitleEn ?? this.offerTitleEn,
+      hasNotesDirectory: hasNotesDirectory ?? this.hasNotesDirectory,
       internalNotes: internalNotes ?? this.internalNotes,
     );
   }
@@ -381,9 +426,12 @@ class AppointmentRequestModel {
     if (notes != null && notes!.trim().isNotEmpty) {
       payload['notes'] = notes!.trim();
     }
-    payload['preferred_time_window'] = preferredTimeWindow.name;
+    payload['preferred_time_window'] = '';
+    // Historical scheduling metadata is never resubmitted by the lead-only UI.
     if (leadType != null && leadType!.isNotEmpty) {
-      payload['lead_type'] = leadType;
+      payload['lead_type'] = leadType == 'product'
+          ? 'product_inquiry'
+          : leadType;
     }
     if (practitionerId != null && practitionerId!.isNotEmpty) {
       payload['practitioner'] = practitionerId;

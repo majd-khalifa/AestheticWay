@@ -237,8 +237,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             icon: const Icon(Icons.arrow_back, size: 15, color: AppColors.accentChampagne),
                             label: Text(
                               loc.isArabic ? 'العودة لتعديل أو إعادة إرسال رمز التحقق' : 'Return to edit or resend verification code',
-                              style: const TextStyle(
-                                color: AppColors.accentChampagne,
+                              style: TextStyle(
+                                color: AppColors.goldText(context),
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),

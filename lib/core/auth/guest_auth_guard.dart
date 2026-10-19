@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import 'token_storage.dart';
+import '../../features/clinic_portal/services/clinic_portal_service.dart';
+import '../../features/admin/services/admin_portal_service.dart';
+import '../../features/referral/services/referral_service.dart';
 
 /// User Authentication State Handler
 class AuthState extends ChangeNotifier {
@@ -61,13 +64,17 @@ class AuthState extends ChangeNotifier {
   }
 
   void logout() {
+    // Also cover forced logout after token refresh fails.
+    ClinicPortalService().clearSession();
+    AdminPortalService().clearSession();
+    ReferralService().clearSession();
     _isLoggedIn = false;
     _userName = '';
     _userPhone = '';
     _userEmail = '';
     _userRole = 'patient';
     _isVerified = false;
-    TokenStorage().clear();
+    _favoriteClinicIds.clear();
     notifyListeners();
   }
 
@@ -114,7 +121,8 @@ class GuestAuthGuard {
     // In mandatory auth mode, if session is ever lost, redirect cleanly to LoginScreen and clear stack
     Navigator.of(context).pushAndRemoveUntil(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const LoginScreen(),
         transitionDuration: const Duration(milliseconds: 400),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -125,4 +133,3 @@ class GuestAuthGuard {
     return false;
   }
 }
-

@@ -1,3 +1,4 @@
+import '../../../core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
@@ -6,7 +7,8 @@ import 'package:aesthetic_way/features/articles/models/article_model.dart';
 class ArticlesRepository {
   final ApiClient _apiClient;
 
-  ArticlesRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  ArticlesRepository({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   /// Fetches published articles from `GET /api/v1/articles/`
   Future<List<ArticleModel>> getArticles({
@@ -30,33 +32,18 @@ class ArticlesRepository {
       queryParams['search'] = search.trim();
     }
 
-    if (page >= 1) {
-      queryParams['page'] = page;
-    }
-
-    if (pageSize > 0) {
-      queryParams['page_size'] = pageSize;
-    }
-
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _apiClient.get(
       ApiConfig.articles,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final data = response.data;
-    List<dynamic> list;
-    if (data is Map<String, dynamic> && data.containsKey('results')) {
-      list = data['results'] as List<dynamic>? ?? [];
-    } else if (data is List) {
-      list = data;
-    } else {
-      list = [];
-    }
-
-    return list
-        .whereType<Map<String, dynamic>>()
-        .map((m) => ArticleModel.fromJson(m))
-        .toList();
+    return PageItems<ArticleModel>.fromResponse(
+      response.data,
+      ArticleModel.fromJson,
+      page: page,
+    );
   }
 
   /// Fetches single article detail by UUID or slug from `GET /api/v1/articles/<id>/`

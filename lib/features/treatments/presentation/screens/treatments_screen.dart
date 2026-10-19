@@ -1,3 +1,6 @@
+import 'package:aesthetic_way/core/widgets/paged_entity_picker.dart';
+import 'package:aesthetic_way/core/data/paged_collection.dart';
+import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -23,102 +26,112 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
   final TreatmentsRepository _repository = TreatmentsRepository();
   late String _selectedCategory;
   String _searchQuery = '';
-  List<TreatmentModel> _treatments = [];
+  late final PagedCollection<TreatmentModel> _paging;
+  List<TreatmentModel> get _treatments => _paging.items;
+  bool get _isLoading => _paging.isLoading;
+  String? get _error => _paging.items.isEmpty ? _paging.error : null;
+  void _pageChanged() {
+    if (mounted) setState(() {});
+  }
+
   List<Map<String, dynamic>> _apiCategories = [];
-  bool _isLoading = true;
-  String? _error;
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = widget.initialCategory ?? 'all';
+    _paging = PagedCollection<TreatmentModel>(
+      loader: (page, q) => _repository.getTreatments(
+        category: q['category'] as String?,
+        search: q['search'] as String?,
+        page: page,
+        pageSize: 20,
+      ),
+      keyOf: (item) => item.id,
+    )..addListener(_pageChanged);
     _loadData();
   }
 
   Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-    try {
-      final results = await Future.wait([
-        _repository.getTreatments(),
-        _repository.getCategories(),
-      ]);
-      if (!mounted) return;
-      setState(() {
-        _treatments = results[0] as List<TreatmentModel>;
-        _apiCategories = results[1] as List<Map<String, dynamic>>;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
+    if (_apiCategories.isEmpty) {
+      try {
+        var categories = await _repository.getCategories();
+        if (!mounted) return;
+        if (_selectedCategory != 'all' && _categoryUuid == null) {
+          var match = categories
+              .where((c) => c['slug'] == _selectedCategory)
+              .firstOrNull;
+          if (match == null) {
+            final matches = await _repository.getCategories(
+              search: _selectedCategory.replaceAll('-', ' '),
+            );
+            match =
+                matches
+                    .where((c) => c['slug'] == _selectedCategory)
+                    .firstOrNull ??
+                matches.firstOrNull;
+            categories = [
+              ...categories,
+              ...matches.where(
+                (m) => !categories.any((c) => c['id'] == m['id']),
+              ),
+            ].take(20).toList();
+          }
+          _selectedCategory = match?['id']?.toString() ?? 'all';
+        }
+        setState(() => _apiCategories = categories);
+      } catch (_) {
+        if (_categoryUuid == null) _selectedCategory = 'all';
+      }
+    }
+    if (mounted) {
+      await _paging.refresh(
+        query: {'search': _searchQuery, 'category': _categoryUuid},
+      );
     }
   }
+
+  void _onSearchChanged(String value) {
+    _searchQuery = value.trim();
+    _paging.search({'search': _searchQuery, 'category': _categoryUuid});
+  }
+
+  @override
+  void dispose() {
+    _paging.dispose();
+    super.dispose();
+  }
+
+  String? get _categoryUuid =>
+      RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(_selectedCategory)
+      ? _selectedCategory
+      : null;
 
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
-    final isPlasticSurgeryOnly = widget.initialCategory != null &&
-        (widget.initialCategory!.toLowerCase().contains('surgery') || widget.initialCategory!.contains('جراحة'));
+    final isPlasticSurgeryOnly =
+        widget.initialCategory != null &&
+        (widget.initialCategory!.toLowerCase().contains('surgery') ||
+            widget.initialCategory!.contains('جراحة'));
 
     final screenTitle = isPlasticSurgeryOnly
         ? loc.tr('category_plastic_surgery_title')
         : loc.tr('category_treatments_title');
 
-    final defaultCategories = [
+    final categories = [
       {'id': 'all', 'label': loc.tr('treatment_category_all')},
-      {'id': 'surgery', 'label': loc.tr('treatment_category_surgery')},
-      {'id': 'injectables', 'label': loc.tr('treatment_category_injectables')},
-      {'id': 'skincare', 'label': loc.tr('treatment_category_skincare')},
-      {'id': 'laser', 'label': loc.tr('treatment_category_laser')},
+      ..._apiCategories.map(
+        (c) => {
+          'id': c['id']?.toString() ?? '',
+          'label':
+              (loc.isArabic ? c['name_ar'] : c['name_en'])?.toString() ?? '',
+        },
+      ),
     ];
-
-    final categories = _apiCategories.isNotEmpty
-        ? [
-            {'id': 'all', 'label': loc.tr('treatment_category_all')},
-            ..._apiCategories.map((c) => {
-                  'id': c['id']?.toString() ?? '',
-                  'label': (loc.isArabic ? c['name_ar'] : c['name_en'])?.toString() ?? '',
-                }),
-          ]
-        : defaultCategories;
-
-    final filteredTreatments = _treatments.where((t) {
-      if (isPlasticSurgeryOnly) {
-        final matchesCat = t.categoryAr.contains('جراحة') || t.categoryEn.toLowerCase().contains('surgery');
-        if (!matchesCat) return false;
-      } else if (_selectedCategory != 'all') {
-        if (t.categoryId == _selectedCategory) {
-          // Exact API category UUID match
-        } else if (_selectedCategory == 'surgery') {
-          if (!t.categoryAr.contains('جراحة') && !t.categoryEn.toLowerCase().contains('surgery')) return false;
-        } else if (_selectedCategory == 'injectables') {
-          if (!t.categoryAr.contains('حقن') && !t.categoryEn.toLowerCase().contains('injectables')) return false;
-        } else if (_selectedCategory == 'skincare') {
-          if (!t.categoryAr.contains('عناية') && !t.categoryEn.toLowerCase().contains('skincare')) return false;
-        } else if (_selectedCategory == 'laser') {
-          if (!t.categoryAr.contains('ليزر') && !t.categoryEn.toLowerCase().contains('laser')) return false;
-        } else {
-          return false;
-        }
-      }
-
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        return t.nameAr.toLowerCase().contains(q) ||
-            t.nameEn.toLowerCase().contains(q) ||
-            t.descriptionAr.toLowerCase().contains(q) ||
-            t.targetAreaAr.toLowerCase().contains(q);
-      }
-      return true;
-    }).toList();
+    final filteredTreatments = _treatments;
 
     return ListenableBuilder(
       listenable: loc,
@@ -130,50 +143,114 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
             title: Text(
               screenTitle,
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontSize: 16,
               ),
             ),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+              icon: Icon(
+                Icons.arrow_back,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
+                size: 18,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          body: Column(
-            children: [
-              // Search Box
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Container(
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface(context),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.border(context), width: 0.8),
-                  ),
-                  child: TextField(
-                    style: TextStyle(color: AppColors.text(context), fontSize: 13.5),
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val.trim();
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: loc.tr('treatments_search_hint'),
-                      hintStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
-                      prefixIcon: Icon(Icons.search_rounded, color: AppColors.mutedText(context), size: 18),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          body: PagedScrollBoundary(
+            onLoadMore: _paging.loadMore,
+            child: Column(
+              children: [
+                // Search Box
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface(context),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.border(context),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: TextField(
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontSize: 13.5,
+                      ),
+                      onChanged: _onSearchChanged,
+                      decoration: InputDecoration(
+                        hintText: loc.tr('treatments_search_hint'),
+                        hintStyle: TextStyle(
+                          color: AppColors.text(context),
+                          fontSize: 12,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: AppColors.mutedText(context),
+                          size: 18,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Category Tabs (Only if not exclusively plastic surgery)
-              if (!isPlasticSurgeryOnly)
+                // Category Tabs (Only if not exclusively plastic surgery)
+                TextButton.icon(
+                  onPressed: () async {
+                    final result =
+                        await showPagedEntityPicker<Map<String, dynamic>>(
+                          context,
+                          title: loc.tr('filter_specialty'),
+                          hint: loc.tr('treatments_search_hint'),
+                          selectedKey: _categoryUuid,
+                          clearLabel: loc.tr('treatment_category_all'),
+                          keyOf: (c) => c['id'].toString(),
+                          labelOf: (c) =>
+                              (loc.isArabic ? c['name_ar'] : c['name_en'])
+                                  .toString(),
+                          loader: (page, search) => _repository.getCategories(
+                            page: page,
+                            search: search,
+                          ),
+                        );
+                    if (mounted && result != null) {
+                      setState(() {
+                        _selectedCategory =
+                            result.value?['id']?.toString() ?? 'all';
+                        if (result.value != null &&
+                            !_apiCategories.any(
+                              (c) => c['id'] == result.value!['id'],
+                            )) {
+                          _apiCategories = [
+                            ..._apiCategories.take(19),
+                            result.value!,
+                          ];
+                        }
+                      });
+                      _paging.search({
+                        'search': _searchQuery,
+                        'category': _categoryUuid,
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.tune_rounded, size: 16),
+                  label: Text(loc.tr('filter_specialty')),
+                ),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Row(
                     children: categories.map((cat) {
                       final isSelected = _selectedCategory == cat['id'];
@@ -184,21 +261,35 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                             cat['label']!,
                             style: TextStyle(
                               fontSize: 11.5,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? AppColors.backgroundDeep : AppColors.text(context),
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? AppColors.backgroundDeep
+                                  : AppColors.text(context),
                             ),
                           ),
                           selected: isSelected,
                           selectedColor: AppColors.accentChampagne,
-                          backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+                          backgroundColor: isDark
+                              ? AppColors.cardSurface
+                              : AppColors.lightCardSurface,
                           side: BorderSide(
-                            color: isSelected ? AppColors.accentChampagne : AppColors.border(context),
+                            color: isSelected
+                                ? AppColors.accentChampagne
+                                : AppColors.border(context),
                             width: 0.8,
                           ),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                           onSelected: (_) {
                             setState(() {
                               _selectedCategory = cat['id']!;
+                            });
+                            _paging.search({
+                              'search': _searchQuery,
+                              'category': _categoryUuid,
                             });
                           },
                         ),
@@ -206,172 +297,276 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                     }).toList(),
                   ),
                 ),
-              const SizedBox(height: 6),
+                const SizedBox(height: 6),
 
-              // Treatments List
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.accentChampagne))
-                    : _error != null
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(_error!, style: TextStyle(color: AppColors.mutedText(context))),
-                                const SizedBox(height: 8),
-                                TextButton(
-                                  onPressed: _loadData,
-                                  child: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
+                // Treatments List
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.accentChampagne,
+                          ),
+                        )
+                      : _error != null
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _error!,
+                                style: TextStyle(
+                                  color: AppColors.mutedText(context),
                                 ),
-                              ],
-                            ),
-                          )
-                        : filteredTreatments.isEmpty
-                            ? RefreshIndicator(
-                                color: AppColors.accentChampagne,
-                                onRefresh: _loadData,
-                                child: ListView(
-                                  children: [
-                                    SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                                      child: LuxuryCard(
-                                        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
-                                        child: Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.all(16),
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.accentChampagne.withValues(alpha: 0.12),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const Icon(Icons.spa_outlined, size: 36, color: AppColors.accentChampagne),
-                                              ),
-                                              const SizedBox(height: 14),
-                                              Text(
-                                                loc.isArabic ? 'لا توجد علاجات متاحة حالياً' : 'No treatments available',
-                                                style: AppTypography.cardTitle.copyWith(
-                                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                loc.isArabic
-                                                    ? 'سيتم إضافة خدمات تجميلية وجلدية جديدة قريباً'
-                                                    : 'New cosmetic and derma treatments will be listed soon',
-                                                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              const SizedBox(height: 16),
-                                              ElevatedButton.icon(
-                                                onPressed: _loadData,
-                                                icon: const Icon(Icons.refresh_rounded, size: 16),
-                                                label: Text(loc.isArabic ? 'تحديث' : 'Refresh'),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                                  foregroundColor: isDark ? AppColors.backgroundDeep : Colors.white,
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                ),
-                                              ),
-                                            ],
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: _loadData,
+                                child: Text(
+                                  loc.isArabic ? 'إعادة المحاولة' : 'Retry',
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : filteredTreatments.isEmpty
+                      ? RefreshIndicator(
+                          color: AppColors.accentChampagne,
+                          onRefresh: _loadData,
+                          child: ListView(
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.15,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: LuxuryCard(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 36,
+                                    horizontal: 20,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.accentChampagne
+                                                .withValues(alpha: 0.12),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.spa_outlined,
+                                            size: 36,
+                                            color: AppColors.accentChampagne,
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : RefreshIndicator(
-                                color: AppColors.accentChampagne,
-                                onRefresh: _loadData,
-                                child: ListView.builder(
-                                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                                  itemCount: filteredTreatments.length,
-                                  itemBuilder: (context, index) {
-                                    final treatment = filteredTreatments[index];
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: LuxuryCard(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            LuxuryPageRoute(page: TreatmentDetailScreen(treatment: treatment)),
-                                          );
-                                        },
-                                        padding: const EdgeInsets.all(12),
-                                        child: Row(
-                                          children: [
-                                            LuxuryImage(
-                                              imageUrl: treatment.imageUrl,
-                                              fallbackLogoUrl: treatment.clinicLogoUrl,
-                                              width: 80,
-                                              height: 80,
-                                              borderRadius: BorderRadius.circular(12),
-                                              placeholderIcon: Icons.medical_services_rounded,
-                                            ),
-                                            const SizedBox(width: 14),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                                    decoration: BoxDecoration(
-                                                      color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
-                                                      borderRadius: BorderRadius.circular(6),
-                                                    ),
-                                                    child: Text(
-                                                      loc.isArabic ? treatment.categoryAr : treatment.categoryEn,
-                                                      style: const TextStyle(
-                                                        color: AppColors.accentChampagne,
-                                                        fontSize: 10,
-                                                        fontWeight: FontWeight.w800,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 6),
-                                                  Text(
-                                                    loc.isArabic ? treatment.nameAr : treatment.nameEn,
-                                                    style: TextStyle(
-                                                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                                      fontWeight: FontWeight.w800,
-                                                      fontSize: 13.5,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                  if (treatment.formattedDuration(loc.isArabic).isNotEmpty) ...[
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      '${loc.tr("duration_label")}: ${treatment.formattedDuration(loc.isArabic)}',
-                                                      style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5, fontWeight: FontWeight.w600),
-                                                    ),
-                                                  ] else if ((loc.isArabic ? treatment.clinicNameAr : treatment.clinicNameEn)?.isNotEmpty == true) ...[
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      (loc.isArabic ? treatment.clinicNameAr : treatment.clinicNameEn)!,
-                                                      style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ],
+                                        const SizedBox(height: 14),
+                                        Text(
+                                          loc.isArabic
+                                              ? 'لا توجد علاجات متاحة حالياً'
+                                              : 'No treatments available',
+                                          style: AppTypography.cardTitle
+                                              .copyWith(
+                                                color: isDark
+                                                    ? AppColors.silverPrimary
+                                                    : AppColors
+                                                          .lightTextPrimary,
+                                                fontWeight: FontWeight.w700,
                                               ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          loc.isArabic
+                                              ? 'سيتم إضافة خدمات تجميلية وجلدية جديدة قريباً'
+                                              : 'New cosmetic and derma treatments will be listed soon',
+                                          style: AppTypography.caption.copyWith(
+                                            color: AppColors.mutedText(context),
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        ElevatedButton.icon(
+                                          onPressed: _loadData,
+                                          icon: const Icon(
+                                            Icons.refresh_rounded,
+                                            size: 16,
+                                          ),
+                                          label: Text(
+                                            loc.isArabic ? 'تحديث' : 'Refresh',
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isDark
+                                                ? AppColors.silverPrimary
+                                                : AppColors.lightTextPrimary,
+                                            foregroundColor: isDark
+                                                ? AppColors.backgroundDeep
+                                                : Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
-                                            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.accentChampagne),
-                                          ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : RefreshIndicator(
+                          color: AppColors.accentChampagne,
+                          onRefresh: _loadData,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                            itemCount: filteredTreatments.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index >= filteredTreatments.length) {
+                                return PaginationFooter(
+                                  loading: _paging.isLoadingMore,
+                                  hasMore: _paging.hasMore,
+                                  error: _paging.error,
+                                  onLoadMore: _paging.loadMore,
+                                );
+                              }
+
+                              final treatment = filteredTreatments[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: LuxuryCard(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      LuxuryPageRoute(
+                                        page: TreatmentDetailScreen(
+                                          treatment: treatment,
                                         ),
                                       ),
                                     );
                                   },
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      LuxuryImage(
+                                        imageUrl: treatment.imageUrl,
+                                        fallbackLogoUrl:
+                                            treatment.clinicLogoUrl,
+                                        width: 80,
+                                        height: 80,
+                                        borderRadius: BorderRadius.circular(12),
+                                        placeholderIcon:
+                                            Icons.medical_services_rounded,
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 3,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.accentChampagne
+                                                    .withValues(
+                                                      alpha: isDark
+                                                          ? 0.12
+                                                          : 0.18,
+                                                    ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                loc.isArabic
+                                                    ? treatment.categoryAr
+                                                    : treatment.categoryEn,
+                                                style: TextStyle(
+                                                  color: AppColors.goldText(
+                                                    context,
+                                                  ),
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              loc.isArabic
+                                                  ? treatment.nameAr
+                                                  : treatment.nameEn,
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? AppColors.silverPrimary
+                                                    : AppColors
+                                                          .lightTextPrimary,
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 13.5,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            if (treatment
+                                                .formattedDuration(loc.isArabic)
+                                                .isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${loc.tr("duration_label")}: ${treatment.formattedDuration(loc.isArabic)}',
+                                                style: TextStyle(
+                                                  color: AppColors.subtext(
+                                                    context,
+                                                  ),
+                                                  fontSize: 11.5,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ] else if ((loc.isArabic
+                                                        ? treatment.clinicNameAr
+                                                        : treatment
+                                                              .clinicNameEn)
+                                                    ?.isNotEmpty ==
+                                                true) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                (loc.isArabic
+                                                    ? treatment.clinicNameAr
+                                                    : treatment.clinicNameEn)!,
+                                                style: TextStyle(
+                                                  color: AppColors.subtext(
+                                                    context,
+                                                  ),
+                                                  fontSize: 11.5,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 14,
+                                        color: AppColors.accentChampagne,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-              ),
-            ],
+                              );
+                            },
+                          ),
+                        ),
+                ),
+              ],
+            ),
           ),
         );
       },

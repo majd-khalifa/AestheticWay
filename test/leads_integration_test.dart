@@ -107,7 +107,7 @@ void main() {
       expect(payload['consent_accepted'], isTrue);
       expect(payload['service_name'], 'جلسة ليزر كانديلا');
       expect(payload['patient_phone'], '+971501234567');
-      expect(payload['preferred_time_window'], 'morning');
+      expect(payload['preferred_time_window'], '');
       expect(payload['notes'], 'يرجى التواصل صباحاً');
     });
 

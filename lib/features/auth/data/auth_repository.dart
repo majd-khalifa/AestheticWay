@@ -1,3 +1,6 @@
+import '../../clinic_portal/services/clinic_portal_service.dart';
+import '../../admin/services/admin_portal_service.dart';
+import '../../referral/services/referral_service.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -31,30 +34,14 @@ class AuthRepository {
   final ApiClient _api;
   final TokenStorage _tokenStorage;
 
-  /// Helper to normalize UAE phone numbers to standard E.164 (+9715XXXXXXXX)
-  /// Accepts formats such as:
-  /// - 501234567 -> +971501234567
-  /// - 0501234567 -> +971501234567
-  /// - 50 123 4567 -> +971501234567
-  /// - +971 50 123 4567 -> +971501234567
-  /// - 971501234567 -> +971501234567
+  /// Preserve international E.164 numbers; assume UAE only for local input.
   static String normalizePhone(String phone) {
-    var cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    if (cleaned.startsWith('+971')) {
-      cleaned = cleaned.substring(4);
-    } else if (cleaned.startsWith('00971')) {
-      cleaned = cleaned.substring(5);
-    } else if (cleaned.startsWith('971')) {
-      cleaned = cleaned.substring(3);
-    } else if (cleaned.startsWith('+')) {
-      cleaned = cleaned.substring(1);
-    }
-
-    while (cleaned.startsWith('0')) {
-      cleaned = cleaned.substring(1);
-    }
-
-    return '+971$cleaned';
+    final value = phone.trim();
+    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (value.startsWith('+')) return '+$digits';
+    if (digits.startsWith('00')) return '+${digits.substring(2)}';
+    if (digits.startsWith('971')) return '+$digits';
+    return '+971${digits.replaceFirst(RegExp(r'^0+'), '')}';
   }
 
   /// Register a new patient account
@@ -220,6 +207,9 @@ class AuthRepository {
 
   /// Logout, deactivate push token, and revoke refresh token on backend
   Future<void> logout() async {
+    ClinicPortalService().clearSession();
+    AdminPortalService().clearSession();
+    ReferralService().clearSession();
     try {
       await DeviceTokenService().deactivateCurrentDevice();
     } catch (_) {}
@@ -236,8 +226,11 @@ class AuthRepository {
         // Ignore backend errors during logout cleanup
       }
     }
-    await _tokenStorage.clear();
-    AuthState().logout();
+    try {
+      await _tokenStorage.clear();
+    } finally {
+      AuthState().logout();
+    }
   }
 
   /// Get current user profile from server (GET /api/v1/auth/me/)

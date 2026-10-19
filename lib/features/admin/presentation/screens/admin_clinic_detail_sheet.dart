@@ -1,3 +1,7 @@
+import 'package:aesthetic_way/core/widgets/remote_catalog_preview.dart';
+import '../../../offers/models/offer_model.dart';
+import 'package:aesthetic_way/core/widgets/luxury_image.dart';
+import '../../../clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,14 +36,17 @@ class AdminClinicDetailSheet extends StatelessWidget {
       builder: (context, _) {
         final metric = adminService.getMetricForClinic(clinic.id);
         final isActive = metric?.isActive ?? true;
-        final clinicOffers = adminService.allOffers.where((o) => o.clinicId == clinic.id).toList();
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.backgroundDeep : AppColors.lightCardSurface,
+            color: isDark
+                ? AppColors.backgroundDeep
+                : AppColors.lightCardSurface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(top: BorderSide(color: AppColors.border(context), width: 0.8)),
+            border: Border(
+              top: BorderSide(color: AppColors.border(context), width: 0.8),
+            ),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -51,7 +58,9 @@ class AdminClinicDetailSheet extends StatelessWidget {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.mutedText(context).withValues(alpha: 0.4),
+                      color: AppColors.mutedText(
+                        context,
+                      ).withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -71,9 +80,15 @@ class AdminClinicDetailSheet extends StatelessWidget {
                         errorBuilder: (_, _, _) => Container(
                           width: 54,
                           height: 54,
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          child: const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne),
+                          color: isDark
+                              ? AppColors.cardSurfaceHover
+                              : AppColors.lightCardSurfaceHover,
+                          child: const Icon(
+                            Icons.apartment_rounded,
+                            color: AppColors.accentChampagne,
+                          ),
                         ),
+                        cacheWidth: computeSafeCacheWidth(context, 400, null),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -86,13 +101,17 @@ class AdminClinicDetailSheet extends StatelessWidget {
                             style: AppTypography.cardTitle.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 3),
                           Text(
                             '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.mutedText(context),
+                            ),
                           ),
                           const SizedBox(height: 4),
                           TierBadge(tier: clinic.subscriptionTier),
@@ -149,7 +168,10 @@ class AdminClinicDetailSheet extends StatelessWidget {
 
                 // Status & Controls Box
                 LuxuryCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -159,16 +181,22 @@ class AdminClinicDetailSheet extends StatelessWidget {
                           Text(
                             loc.tr('admin_toggle_clinic_status'),
                             style: AppTypography.caption.copyWith(
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverPrimary
+                                  : AppColors.lightTextPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            isActive ? loc.tr('admin_clinic_status_active') : loc.tr('admin_clinic_status_suspended'),
+                            isActive
+                                ? loc.tr('admin_clinic_status_active')
+                                : loc.tr('admin_clinic_status_suspended'),
                             style: TextStyle(
-                              color: isActive ? const Color(0xFF10B981) : AppColors.errorRed,
+                              color: isActive
+                                  ? const Color(0xFF10B981)
+                                  : AppColors.errorRed,
                               fontWeight: FontWeight.w700,
                               fontSize: 11,
                             ),
@@ -197,7 +225,9 @@ class AdminClinicDetailSheet extends StatelessWidget {
                     MapsLauncher.openDirections(
                       latitude: clinic.latitude,
                       longitude: clinic.longitude,
-                      destinationTitle: loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                      destinationTitle: loc.isArabic
+                          ? clinic.nameAr
+                          : clinic.nameEn,
                     );
                   },
                 ),
@@ -205,88 +235,140 @@ class AdminClinicDetailSheet extends StatelessWidget {
 
                 // Reset Admin Password
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.lock_reset_rounded, size: 18, color: AppColors.accentChampagne),
+                  icon: const Icon(
+                    Icons.lock_reset_rounded,
+                    size: 18,
+                    color: AppColors.accentChampagne,
+                  ),
                   label: Text(
-                    loc.isArabic ? 'إعادة تعيين كلمة مرور المشرف' : 'Reset Admin Password',
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.accentChampagne),
+                    loc.isArabic
+                        ? 'إعادة تعيين كلمة مرور المشرف'
+                        : 'Reset Admin Password',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: AppColors.goldText(context),
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.accentChampagne, width: 0.8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    side: const BorderSide(
+                      color: AppColors.accentChampagne,
+                      width: 0.8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     minimumSize: const Size.fromHeight(42),
                   ),
-                  onPressed: () => _handleResetPassword(context, loc, adminService),
+                  onPressed: () =>
+                      _handleResetPassword(context, loc, adminService),
                 ),
                 const SizedBox(height: 10),
 
                 // Edit Clinic Details & Branding
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.edit_note_rounded, size: 18, color: AppColors.silverPrimary),
+                  icon: const Icon(
+                    Icons.edit_note_rounded,
+                    size: 18,
+                    color: AppColors.silverPrimary,
+                  ),
                   label: Text(
-                    loc.isArabic ? 'تعديل بيانات وهوية العيادة' : 'Edit Clinic Details & Branding',
+                    loc.isArabic
+                        ? 'تعديل بيانات وهوية العيادة'
+                        : 'Edit Clinic Details & Branding',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppColors.border(context), width: 0.8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    side: BorderSide(
+                      color: AppColors.border(context),
+                      width: 0.8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     minimumSize: const Size.fromHeight(42),
                   ),
-                  onPressed: () => _handleEditClinic(context, loc, adminService),
+                  onPressed: () =>
+                      _handleEditClinic(context, loc, adminService),
                 ),
                 const SizedBox(height: 14),
 
                 // Associated Offers Section
-                if (clinicOffers.isNotEmpty) ...[
+                ...[
                   Text(
-                    '${loc.tr('clinic_nav_offers')} (${clinicOffers.length})',
+                    loc.tr('clinic_nav_offers'),
                     style: AppTypography.cardTitle.copyWith(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...clinicOffers.map((o) {
-                    final isSuspended = adminService.isOfferSuspended(o.id);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.border(context), width: 0.8),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                loc.isArabic ? o.titleAr : o.titleEn,
-                                style: AppTypography.caption.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  RemoteCatalogPreview<OfferModel>(
+                    key: ValueKey(clinic.id),
+                    keyOf: (o) => o.id,
+                    loader: (page) =>
+                        adminService.getClinicOffersPage(clinic.id, page),
+                    itemBuilder: (context, o) {
+                      final isSuspended = adminService.isOfferSuspended(o.id);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.cardSurfaceHover
+                                : AppColors.lightCardSurfaceHover,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.border(context),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  loc.isArabic ? o.titleAr : o.titleEn,
+                                  style: AppTypography.caption.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? AppColors.silverPrimary
+                                        : AppColors.lightTextPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            Text(
-                              isSuspended ? loc.tr('admin_offer_suspended') : loc.tr('admin_offer_active'),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isSuspended ? AppColors.errorRed : const Color(0xFF10B981),
-                                fontWeight: FontWeight.w700,
+                              Text(
+                                isSuspended
+                                    ? loc.tr('admin_offer_suspended')
+                                    : loc.tr('admin_offer_active'),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: isSuspended
+                                      ? AppColors.errorRed
+                                      : const Color(0xFF10B981),
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
                 ],
                 const SizedBox(height: 16),
               ],
@@ -312,16 +394,26 @@ class AdminClinicDetailSheet extends StatelessWidget {
       builder: (dialogCtx) => StatefulBuilder(
         builder: (dialogCtx, setDialogState) => AlertDialog(
           backgroundColor: isDark ? AppColors.cardSurface : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
             children: [
-              const Icon(Icons.lock_reset_rounded, color: AppColors.accentChampagne, size: 22),
+              const Icon(
+                Icons.lock_reset_rounded,
+                color: AppColors.accentChampagne,
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  loc.isArabic ? 'إعادة تعيين كلمة مرور المشرف' : 'Reset Admin Password',
+                  loc.isArabic
+                      ? 'إعادة تعيين كلمة مرور المشرف'
+                      : 'Reset Admin Password',
                   style: AppTypography.cardTitle.copyWith(
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                     fontSize: 15,
                   ),
                 ),
@@ -335,20 +427,33 @@ class AdminClinicDetailSheet extends StatelessWidget {
               if (resetErrorMessage != null) ...[
                 Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.redAccent.withValues(alpha: 0.6)),
+                    border: Border.all(
+                      color: Colors.redAccent.withValues(alpha: 0.6),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 18),
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: Colors.redAccent,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           resetErrorMessage!,
-                          style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -359,16 +464,24 @@ class AdminClinicDetailSheet extends StatelessWidget {
                 loc.isArabic
                     ? 'سيتم توليد كلمة مرور مؤقتة جديدة لمسؤول هذه العيادة وإلغاء صلاحية الجلسات النشطة.'
                     : 'A new temporary password will be generated for the clinic admin and existing active sessions will be invalidated.',
-                style: AppTypography.caption.copyWith(color: AppColors.mutedText(dialogCtx)),
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedText(dialogCtx),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: passwordController,
                 decoration: InputDecoration(
-                  labelText: loc.isArabic ? 'كلمة مرور مخصصة (اختياري)' : 'Custom Password (Optional)',
-                  hintText: loc.isArabic ? 'اتركه فارغاً للتوليد التلقائي' : 'Leave blank to auto-generate',
+                  labelText: loc.isArabic
+                      ? 'كلمة مرور مخصصة (اختياري)'
+                      : 'Custom Password (Optional)',
+                  hintText: loc.isArabic
+                      ? 'اتركه فارغاً للتوليد التلقائي'
+                      : 'Leave blank to auto-generate',
                   prefixIcon: const Icon(Icons.key_rounded, size: 18),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ],
@@ -397,10 +510,15 @@ class AdminClinicDetailSheet extends StatelessWidget {
                         final customPass = passwordController.text.trim();
                         final res = await adminService.resetClinicAdminPassword(
                           clinic.id,
-                          customPassword: customPass.isNotEmpty ? customPass : null,
+                          customPassword: customPass.isNotEmpty
+                              ? customPass
+                              : null,
                         );
-                        final newPass = res['temporary_password']?.toString() ??
-                            (customPass.isNotEmpty ? customPass : 'AW#TempPass123!');
+                        final newPass =
+                            res['temporary_password']?.toString() ??
+                            (customPass.isNotEmpty
+                                ? customPass
+                                : 'AW#TempPass123!');
 
                         if (dialogCtx.mounted) Navigator.pop(dialogCtx);
                         if (context.mounted) {
@@ -412,7 +530,10 @@ class AdminClinicDetailSheet extends StatelessWidget {
                           cleanMsg = e.message;
                         } else {
                           cleanMsg = ApiException.sanitizeRegulatoryCompliance(
-                            e.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', ''),
+                            e
+                                .toString()
+                                .replaceFirst('Exception: ', '')
+                                .replaceFirst('ApiException: ', ''),
                           );
                         }
                         setDialogState(() {
@@ -425,7 +546,10 @@ class AdminClinicDetailSheet extends StatelessWidget {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.black,
+                      ),
                     )
                   : Text(
                       loc.isArabic ? 'تأكيد التعيين' : 'Confirm Reset',
@@ -438,7 +562,11 @@ class AdminClinicDetailSheet extends StatelessWidget {
     );
   }
 
-  void _showNewPasswordModal(BuildContext context, LocaleService loc, String newPassword) {
+  void _showNewPasswordModal(
+    BuildContext context,
+    LocaleService loc,
+    String newPassword,
+  ) {
     final isDark = AppColors.isDark(context);
     showDialog(
       context: context,
@@ -447,12 +575,18 @@ class AdminClinicDetailSheet extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 24),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Color(0xFF10B981),
+              size: 24,
+            ),
             const SizedBox(width: 8),
             Text(
               loc.isArabic ? 'تم تعيين كلمة المرور' : 'Password Reset Complete',
               style: AppTypography.cardTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 fontSize: 15,
               ),
             ),
@@ -466,22 +600,26 @@ class AdminClinicDetailSheet extends StatelessWidget {
               loc.isArabic
                   ? 'تم إنشاء كلمة مرور مؤقتة جديدة بنجاح. يرجى تزويد مشرف العيادة بها:'
                   : 'New temporary password generated successfully. Securely share it with the clinic administrator:',
-              style: AppTypography.caption.copyWith(color: AppColors.mutedText(ctx)),
+              style: AppTypography.caption.copyWith(
+                color: AppColors.mutedText(ctx),
+              ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.backgroundDeep : AppColors.lightCardSurfaceHover,
+                color: isDark
+                    ? AppColors.backgroundDeep
+                    : AppColors.lightCardSurfaceHover,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border(ctx), width: 0.8),
               ),
               child: SelectableText(
                 newPassword,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: AppColors.accentChampagne,
+                  color: AppColors.goldText(context),
                   letterSpacing: 1.1,
                 ),
               ),
@@ -495,7 +633,9 @@ class AdminClinicDetailSheet extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: newPassword));
                 showAppSnackBar(
                   context,
-                  loc.isArabic ? 'تم نسخ كلمة المرور' : 'Password copied to clipboard',
+                  loc.isArabic
+                      ? 'تم نسخ كلمة المرور'
+                      : 'Password copied to clipboard',
                   type: AppSnackBarType.success,
                 );
               },
@@ -507,7 +647,10 @@ class AdminClinicDetailSheet extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               loc.isArabic ? 'إغلاق' : 'Close',
-              style: const TextStyle(color: AppColors.accentChampagne, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: AppColors.goldText(context),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -529,11 +672,13 @@ class AdminClinicDetailSheet extends StatelessWidget {
     final whatsappCtrl = TextEditingController(text: clinic.whatsapp);
 
     String selectedCity = clinic.city.isNotEmpty ? clinic.city : 'Dubai';
-    String selectedTier = clinic.subscriptionTier.name;
+    String selectedTier = clinic.subscriptionTier.apiValue;
     bool isFeatured = clinic.isFeatured;
 
     String? logoPath;
     String? coverPath;
+    bool logoChanged = false;
+    bool coverChanged = false;
     String? modalErrorMessage;
     bool isSubmitting = false;
 
@@ -563,9 +708,18 @@ class AdminClinicDetailSheet extends StatelessWidget {
                 top: 20,
               ),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.backgroundDeep : AppColors.lightCardSurface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border(top: BorderSide(color: AppColors.border(modalCtx), width: 0.8)),
+                color: isDark
+                    ? AppColors.backgroundDeep
+                    : AppColors.lightCardSurface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.border(modalCtx),
+                    width: 0.8,
+                  ),
+                ),
               ),
               child: Form(
                 key: formKey,
@@ -576,26 +730,37 @@ class AdminClinicDetailSheet extends StatelessWidget {
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: AppColors.mutedText(modalCtx).withValues(alpha: 0.4),
+                          color: AppColors.mutedText(
+                            modalCtx,
+                          ).withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      loc.isArabic ? 'تعديل بيانات وهوية العيادة' : 'Edit Clinic Details & Branding',
+                      loc.isArabic
+                          ? 'تعديل بيانات وهوية العيادة'
+                          : 'Edit Clinic Details & Branding',
                       style: AppTypography.cardTitle.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     if (modalErrorMessage != null) ...[
                       const SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
+                          color: Colors.red.withValues(
+                            alpha: isDark ? 0.2 : 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: Colors.redAccent.withValues(alpha: 0.6),
@@ -605,7 +770,11 @@ class AdminClinicDetailSheet extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: Colors.redAccent,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -622,7 +791,11 @@ class AdminClinicDetailSheet extends StatelessWidget {
                               visualDensity: VisualDensity.compact,
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                size: 16,
+                                color: Colors.redAccent,
+                              ),
                               onPressed: () {
                                 setModalState(() => modalErrorMessage = null);
                               },
@@ -639,19 +812,33 @@ class AdminClinicDetailSheet extends StatelessWidget {
                       children: [
                         Expanded(
                           child: LuxuryImagePickerField(
-                            label: loc.isArabic ? 'شعار العيادة' : 'Clinic Logo',
-                            initialUrl: clinic.logo.isNotEmpty ? clinic.logo : null,
+                            label: loc.isArabic
+                                ? 'شعار العيادة'
+                                : 'Clinic Logo',
+                            initialUrl: clinic.logo.isNotEmpty
+                                ? clinic.logo
+                                : null,
                             height: 120,
-                            onImageSelected: (path) => logoPath = path,
+                            onImageSelected: (path) {
+                              logoPath = path;
+                              logoChanged = true;
+                            },
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: LuxuryImagePickerField(
-                            label: loc.isArabic ? 'صورة الغلاف' : 'Cover Banner',
-                            initialUrl: clinic.coverImage.isNotEmpty ? clinic.coverImage : null,
+                            label: loc.isArabic
+                                ? 'صورة الغلاف'
+                                : 'Cover Banner',
+                            initialUrl: clinic.coverImage.isNotEmpty
+                                ? clinic.coverImage
+                                : null,
                             height: 120,
-                            onImageSelected: (path) => coverPath = path,
+                            onImageSelected: (path) {
+                              coverPath = path;
+                              coverChanged = true;
+                            },
                           ),
                         ),
                       ],
@@ -662,16 +849,24 @@ class AdminClinicDetailSheet extends StatelessWidget {
                     LtrTextFormField(
                       controller: nameEnCtrl,
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)',
+                        labelText: loc.isArabic
+                            ? 'اسم العيادة (إنجليزي)'
+                            : 'Clinic Name (English)',
                         hintText: 'e.g. Cosmeceutical Elite Clinic',
                         hintStyle: TextStyle(
-                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          color: AppColors.text(
+                            context,
+                          ).withValues(alpha: 0.68),
                           fontSize: 12.5,
                           fontWeight: FontWeight.w400,
                         ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
@@ -679,23 +874,33 @@ class AdminClinicDetailSheet extends StatelessWidget {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)',
+                        labelText: loc.isArabic
+                            ? 'اسم العيادة (عربي)'
+                            : 'Clinic Name (Arabic)',
                         hintText: 'مثال: عيادة النخبة للتجميل الطبي',
                         hintStyle: TextStyle(
-                          color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                          color: AppColors.text(
+                            context,
+                          ).withValues(alpha: 0.68),
                           fontSize: 12.5,
                           fontWeight: FontWeight.w400,
                         ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? loc.tr('clinic_validation_required') : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? loc.tr('clinic_validation_required')
+                          : null,
                     ),
                     const SizedBox(height: 10),
 
                     // Clinic Phone & WhatsApp with LuxuryPhoneInputField
                     LuxuryPhoneInputField(
                       controller: phoneCtrl,
-                      labelText: loc.isArabic ? 'هاتف العيادة *' : 'Clinic Phone *',
+                      labelText: loc.isArabic
+                          ? 'هاتف العيادة *'
+                          : 'Clinic Phone *',
                       isRequired: true,
                     ),
                     const SizedBox(height: 10),
@@ -708,13 +913,29 @@ class AdminClinicDetailSheet extends StatelessWidget {
 
                     // City Dropdown
                     DropdownButtonFormField<String>(
-                      initialValue: cities.contains(selectedCity) ? selectedCity : cities.first,
-                      dropdownColor: isDark ? AppColors.cardSurface : Colors.white,
+                      initialValue: cities.contains(selectedCity)
+                          ? selectedCity
+                          : cities.first,
+                      dropdownColor: isDark
+                          ? AppColors.cardSurface
+                          : Colors.white,
                       decoration: InputDecoration(
                         labelText: loc.isArabic ? 'المدينة' : 'City',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      items: cities.map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontSize: 13)))).toList(),
+                      items: cities
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                c,
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (val) {
                         if (val != null) {
                           setModalState(() {
@@ -728,14 +949,26 @@ class AdminClinicDetailSheet extends StatelessWidget {
                     // Subscription Tier Dropdown
                     DropdownButtonFormField<String>(
                       initialValue: selectedTier,
-                      dropdownColor: isDark ? AppColors.cardSurface : Colors.white,
+                      dropdownColor: isDark
+                          ? AppColors.cardSurface
+                          : Colors.white,
                       decoration: InputDecoration(
-                        labelText: loc.isArabic ? 'فئة الاشتراك الإعلاني' : 'Subscription Tier',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        labelText: loc.isArabic
+                            ? 'فئة الاشتراك الإعلاني'
+                            : 'Subscription Tier',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'vip', child: Text('VIP Platinum')),
-                        DropdownMenuItem(value: 'featured', child: Text('Featured')),
+                        DropdownMenuItem(
+                          value: 'vip',
+                          child: Text('VIP Platinum'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'featured',
+                          child: Text('Featured'),
+                        ),
                         DropdownMenuItem(value: 'basic', child: Text('Basic')),
                       ],
                       onChanged: (val) {
@@ -754,9 +987,13 @@ class AdminClinicDetailSheet extends StatelessWidget {
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: AppColors.accentChampagne,
                       title: Text(
-                        loc.isArabic ? 'تمييز العيادة في الصفحة الرئيسية' : 'Feature Clinic on Home Page',
+                        loc.isArabic
+                            ? 'تمييز العيادة في الصفحة الرئيسية'
+                            : 'Feature Clinic on Home Page',
                         style: TextStyle(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -778,6 +1015,7 @@ class AdminClinicDetailSheet extends StatelessWidget {
                           : () async {
                               setModalState(() => modalErrorMessage = null);
                               if (!formKey.currentState!.validate()) return;
+                              setModalState(() => isSubmitting = true);
                               final payload = <String, dynamic>{
                                 'name_en': nameEnCtrl.text.trim(),
                                 'name_ar': nameArCtrl.text.trim(),
@@ -789,31 +1027,41 @@ class AdminClinicDetailSheet extends StatelessWidget {
                               };
 
                               try {
-                                if (logoPath != null && logoPath!.isNotEmpty) {
+                                if (logoChanged) {
                                   payload['logo'] = logoPath;
                                 }
 
-                                if (coverPath != null && coverPath!.isNotEmpty) {
+                                if (coverChanged) {
                                   payload['cover_image'] = coverPath;
                                 }
 
-                                await adminService.updateClinic(clinic.id, payload);
+                                await adminService.updateClinic(
+                                  clinic.id,
+                                  payload,
+                                );
                                 if (modalCtx.mounted) Navigator.pop(modalCtx);
                                 if (context.mounted) {
                                   showAppSnackBar(
                                     context,
-                                    loc.isArabic ? 'تم تحديث بيانات العيادة بنجاح' : 'Clinic updated successfully',
+                                    loc.isArabic
+                                        ? 'تم تحديث بيانات العيادة بنجاح'
+                                        : 'Clinic updated successfully',
                                     type: AppSnackBarType.success,
                                   );
                                 }
                               } catch (e) {
+                                if (!modalCtx.mounted) return;
                                 String cleanMsg;
                                 if (e is ApiException) {
                                   cleanMsg = e.message;
                                 } else {
-                                  cleanMsg = ApiException.sanitizeRegulatoryCompliance(
-                                    e.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', ''),
-                                  );
+                                  cleanMsg =
+                                      ApiException.sanitizeRegulatoryCompliance(
+                                        e
+                                            .toString()
+                                            .replaceFirst('Exception: ', '')
+                                            .replaceFirst('ApiException: ', ''),
+                                      );
                                 }
                                 setModalState(() {
                                   modalErrorMessage = cleanMsg;
@@ -856,27 +1104,44 @@ class _AdminMetricBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+        color: isDark
+            ? AppColors.cardSurfaceHover
+            : AppColors.lightCardSurfaceHover,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.border(context), width: 0.8),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: iconColor ?? (isGold ? AppColors.accentChampagne : AppColors.mutedText(context))),
+          Icon(
+            icon,
+            size: 16,
+            color:
+                iconColor ??
+                (isGold
+                    ? AppColors.accentChampagne
+                    : AppColors.mutedText(context)),
+          ),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 10.5),
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.mutedText(context),
+                  fontSize: 10.5,
+                ),
               ),
               Text(
                 value,
                 style: AppTypography.cardTitle.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: isGold ? AppColors.accentChampagne : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
+                  color: isGold
+                      ? AppColors.goldText(context)
+                      : (isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary),
                 ),
               ),
             ],

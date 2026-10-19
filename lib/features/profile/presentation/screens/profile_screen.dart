@@ -279,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   loc.isArabic ? info.workingHoursAr : info.workingHoursEn,
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.accentChampagne,
+                    color: AppColors.goldText(context),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -442,7 +442,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelText: loc.tr('full_name'),
                 hintText: loc.isArabic ? 'مثال: سارة المنصوري' : 'e.g. Sarah Al Mansoori',
                 hintStyle: TextStyle(
-                  color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                  color: AppColors.text(context).withValues(alpha: 0.68),
                   fontSize: 12.5,
                   fontWeight: FontWeight.w400,
                 ),
@@ -484,7 +484,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelText: loc.tr('email_address'),
                 hintText: 'name@example.com',
                 hintStyle: TextStyle(
-                  color: AppColors.mutedText(context).withValues(alpha: 0.45),
+                  color: AppColors.text(context).withValues(alpha: 0.68),
                   fontSize: 12.5,
                   fontWeight: FontWeight.w400,
                 ),
@@ -727,7 +727,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.accentChampagne),
                                     label: Text(
                                       loc.isArabic ? 'إعادة المحاولة' : 'Retry',
-                                      style: const TextStyle(color: AppColors.accentChampagne, fontSize: 12),
+                                      style: TextStyle(color: AppColors.goldText(context), fontSize: 12),
                                     ),
                                   ),
                                 ],
@@ -748,7 +748,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     displayName.isNotEmpty ? displayName.characters.first.toUpperCase() : 'U',
                                     style: AppTypography.heroTitle.copyWith(
                                       fontSize: 22,
-                                      color: AppColors.accentChampagne,
+                                      color: AppColors.goldText(context),
                                     ),
                                   ),
                                 ),
@@ -806,7 +806,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   ? (loc.isArabic ? 'مستخدم موثق' : 'Verified Member')
                                                   : (loc.isArabic ? 'حساب مسجل' : 'Registered Account'),
                                               style: AppTypography.badge.copyWith(
-                                                color: AppColors.accentChampagne,
+                                                color: AppColors.goldText(context),
                                                 fontSize: 10,
                                               ),
                                             ),
@@ -1121,7 +1121,7 @@ class _LanguageSwitchTile extends StatelessWidget {
             child: Text(
               loc.tr('switch_language'),
               style: AppTypography.caption.copyWith(
-                color: AppColors.accentChampagne,
+                color: AppColors.goldText(context),
                 fontWeight: FontWeight.bold,
                 fontSize: 11.5,
               ),

@@ -76,8 +76,6 @@ class ApiConfig {
   static const String homeFeed = 'home/feed/';
   static const String clinics = 'clinics/';
   static String clinicDetail(String id) => 'clinics/$id/';
-  static String clinicReviews(String id) => 'clinics/$id/reviews/';
-  static String clinicReviewSubmit(String id) => 'clinics/$id/reviews/submit/';
   static const String practitioners = 'practitioners/';
   static String practitionerDetail(String id) => 'practitioners/$id/';
   static const String treatments = 'treatments/';

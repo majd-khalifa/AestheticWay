@@ -7,6 +7,14 @@ enum SubscriptionTier {
   basic, // 1 Month: Standard directory listing only
 }
 
+extension SubscriptionTierApiValue on SubscriptionTier {
+  String get apiValue => switch (this) {
+    SubscriptionTier.vipPlatinum => 'vip',
+    SubscriptionTier.featured => 'featured',
+    SubscriptionTier.basic => 'basic',
+  };
+}
+
 /// Clinic Branch representation
 class ClinicBranch {
   final String id;
@@ -125,6 +133,7 @@ class ClinicModel {
   final String? videoUrl;
   final String mediaType; // 'image' | 'video'
   final String setupStatus; // 'draft' | 'submitted' | 'approved' | 'rejected'
+  final bool hasBranchDirectory;
   final List<dynamic>? rawPractitioners;
   final List<dynamic>? rawTreatments;
 
@@ -169,6 +178,7 @@ class ClinicModel {
     this.videoUrl,
     this.mediaType = 'image',
     this.setupStatus = 'approved',
+    this.hasBranchDirectory = false,
     this.rawPractitioners,
     this.rawTreatments,
   });
@@ -177,46 +187,61 @@ class ClinicModel {
     final bool isFeatured = json['is_featured'] == true;
     final branchesRaw = json['branches'] as List<dynamic>?;
     final branchesList = branchesRaw != null
-        ? branchesRaw.map((b) => ClinicBranch.fromJson(b as Map<String, dynamic>)).toList()
+        ? branchesRaw
+              .map((b) => ClinicBranch.fromJson(b as Map<String, dynamic>))
+              .toList()
         : <ClinicBranch>[];
 
-    final cover = ApiConfig.resolveUrl(json['cover_image']?.toString() ?? json['cover_image_url']?.toString());
-    final logo = ApiConfig.resolveUrl(json['logo']?.toString() ?? json['logo_url']?.toString());
+    final cover = ApiConfig.resolveUrl(
+      json['cover_image']?.toString() ?? json['cover_image_url']?.toString(),
+    );
+    final logo = ApiConfig.resolveUrl(
+      json['logo']?.toString() ?? json['logo_url']?.toString(),
+    );
     final rawGallery = json['gallery_images'] as List<dynamic>?;
     final gallery = rawGallery != null && rawGallery.isNotEmpty
-        ? rawGallery.map((e) => ApiConfig.resolveUrl(e.toString())).where((e) => e.isNotEmpty).toList()
+        ? rawGallery
+              .map((e) => ApiConfig.resolveUrl(e.toString()))
+              .where((e) => e.isNotEmpty)
+              .toList()
         : (cover.isNotEmpty ? [cover] : <String>[]);
 
-    final practitionersRaw = json['practitioners'] as List<dynamic>?;
+    final practitionersRaw = (json['practitioners'] as List<dynamic>?)
+        ?.take(6)
+        .toList();
     final practitionerIds = practitionersRaw != null
         ? practitionersRaw
-            .map((p) => (p is Map ? p['id']?.toString() ?? '' : p.toString()))
-            .where((id) => id.isNotEmpty)
-            .toList()
+              .map((p) => (p is Map ? p['id']?.toString() ?? '' : p.toString()))
+              .where((id) => id.isNotEmpty)
+              .toList()
         : <String>[];
 
-    final treatmentsRaw = json['treatments'] as List<dynamic>?;
+    final treatmentsRaw = (json['treatments'] as List<dynamic>?)
+        ?.take(6)
+        .toList();
     final treatmentIds = treatmentsRaw != null
         ? treatmentsRaw
-            .map((t) => (t is Map ? t['id']?.toString() ?? '' : t.toString()))
-            .where((id) => id.isNotEmpty)
-            .toList()
+              .map((t) => (t is Map ? t['id']?.toString() ?? '' : t.toString()))
+              .where((id) => id.isNotEmpty)
+              .toList()
         : <String>[];
 
-    final rawVideoUrl = (json['video_ad_file'] ??
-            json['video_url'] ??
-            json['promo_video_url'] ??
-            json['featured_video_url'] ??
-            json['ad_video_url'])
-        ?.toString()
-        .trim();
+    final rawVideoUrl =
+        (json['video_ad_file'] ??
+                json['video_url'] ??
+                json['promo_video_url'] ??
+                json['featured_video_url'] ??
+                json['ad_video_url'])
+            ?.toString()
+            .trim();
     final resolvedVideoUrl = rawVideoUrl != null && rawVideoUrl.isNotEmpty
         ? ApiConfig.resolveUrl(rawVideoUrl)
         : null;
     final hasVideoUrl = resolvedVideoUrl != null && resolvedVideoUrl.isNotEmpty;
     final rawMediaType = json['media_type']?.toString().trim().toLowerCase();
-    final resolvedMediaType =
-        (rawMediaType == 'video' || hasVideoUrl) ? 'video' : 'image';
+    final resolvedMediaType = (rawMediaType == 'video' || hasVideoUrl)
+        ? 'video'
+        : 'image';
 
     return ClinicModel(
       id: json['id']?.toString() ?? '',
@@ -227,17 +252,20 @@ class ClinicModel {
       coverImageUrl: cover,
       galleryImages: gallery,
       logoUrl: logo,
-      rating: double.tryParse(json['google_rating']?.toString() ?? '') ??
+      rating:
+          double.tryParse(json['google_rating']?.toString() ?? '') ??
           double.tryParse(json['rating']?.toString() ?? '') ??
           0.0,
       reviewCount: (json['google_reviews_count'] is int)
           ? json['google_reviews_count'] as int
           : (json['review_count'] is int)
-              ? json['review_count'] as int
-              : int.tryParse(json['google_reviews_count']?.toString() ?? '') ??
-                  int.tryParse(json['review_count']?.toString() ?? '') ??
-                  0,
-      subscriptionTier: isFeatured ? SubscriptionTier.vipPlatinum : SubscriptionTier.basic,
+          ? json['review_count'] as int
+          : int.tryParse(json['google_reviews_count']?.toString() ?? '') ??
+                int.tryParse(json['review_count']?.toString() ?? '') ??
+                0,
+      subscriptionTier: isFeatured
+          ? SubscriptionTier.vipPlatinum
+          : SubscriptionTier.basic,
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       licenseNumber: json['license_number']?.toString() ?? '',
       city: json['city']?.toString() ?? 'Dubai',
@@ -252,8 +280,10 @@ class ClinicModel {
       googlePlaceId: json['google_place_id']?.toString(),
       latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
       longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
-      workingHoursAr: json['working_hours_ar'] ?? 'من الإثنين إلى السبت: 9:00 ص - 9:00 م',
-      workingHoursEn: json['working_hours_en'] ?? 'Mon - Sat: 9:00 AM - 9:00 PM',
+      workingHoursAr:
+          json['working_hours_ar'] ?? 'من الإثنين إلى السبت: 9:00 ص - 9:00 م',
+      workingHoursEn:
+          json['working_hours_en'] ?? 'Mon - Sat: 9:00 AM - 9:00 PM',
       branches: branchesList,
       practitionerIds: practitionerIds,
       treatmentIds: treatmentIds,
@@ -262,6 +292,7 @@ class ClinicModel {
       videoUrl: hasVideoUrl ? resolvedVideoUrl : null,
       mediaType: resolvedMediaType,
       setupStatus: json['setup_status']?.toString() ?? 'approved',
+      hasBranchDirectory: json['branches_directory_url'] != null,
       rawPractitioners: practitionersRaw,
       rawTreatments: treatmentsRaw,
     );
@@ -331,6 +362,7 @@ class ClinicModel {
     String? videoUrl,
     String? mediaType,
     String? setupStatus,
+    bool? hasBranchDirectory,
     List<dynamic>? rawPractitioners,
     List<dynamic>? rawTreatments,
   }) {
@@ -372,9 +404,9 @@ class ClinicModel {
       videoUrl: videoUrl ?? this.videoUrl,
       mediaType: mediaType ?? this.mediaType,
       setupStatus: setupStatus ?? this.setupStatus,
+      hasBranchDirectory: hasBranchDirectory ?? this.hasBranchDirectory,
       rawPractitioners: rawPractitioners ?? this.rawPractitioners,
       rawTreatments: rawTreatments ?? this.rawTreatments,
     );
   }
 }
-

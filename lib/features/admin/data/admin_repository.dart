@@ -1,5 +1,7 @@
-import 'dart:io';
+import '../../../core/data/paged_collection.dart';
 import 'package:dio/dio.dart';
+import '../../../core/services/media_payload_builder.dart';
+import '../../../core/services/media_upload_service.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../offers/models/offer_model.dart';
@@ -28,50 +30,22 @@ class AdminRepository {
     Map<String, dynamic> data, {
     required List<String> fileKeys,
   }) async {
-    final mapCopy = Map<String, dynamic>.from(data);
-    bool hasLocalFiles = false;
-    final Map<String, File> localFiles = {};
-
-    for (final key in fileKeys) {
-      final val = mapCopy[key]?.toString();
-      if (val != null && val.isNotEmpty && !val.startsWith('http')) {
-        final f = File(val);
-        if (f.existsSync()) {
-          hasLocalFiles = true;
-          localFiles[key] = f;
-        } else {
-          mapCopy.remove(key);
-        }
-      } else {
-        mapCopy.remove(key);
+    final payload = await MediaPayloadBuilder(
+      MediaUploadService(),
+    ).build(data, fileKeys: fileKeys);
+    if (payload is FormData && data['admin_user'] is Map) {
+      // Flat keys are part of the provisioning contract handed off to Ali.
+      payload.fields.removeWhere(
+        (field) => field.key.startsWith('admin_user['),
+      );
+      for (final entry in (data['admin_user'] as Map).entries) {
+        final name = entry.key == 'temporary_password'
+            ? 'admin_temporary_password'
+            : 'admin_${entry.key}';
+        payload.fields.add(MapEntry(name, entry.value?.toString() ?? ''));
       }
     }
-
-    if (hasLocalFiles) {
-      final formDataMap = <String, dynamic>{};
-      for (final entry in mapCopy.entries) {
-        if (localFiles.containsKey(entry.key)) {
-          final f = localFiles[entry.key]!;
-          formDataMap[entry.key] = await MultipartFile.fromFile(
-            f.path,
-            filename: f.path.split(RegExp(r'[\\/]')).last,
-          );
-        } else {
-          formDataMap[entry.key] = entry.value;
-        }
-      }
-      for (final entry in localFiles.entries) {
-        if (!formDataMap.containsKey(entry.key)) {
-          formDataMap[entry.key] = await MultipartFile.fromFile(
-            entry.value.path,
-            filename: entry.value.path.split(RegExp(r'[\\/]')).last,
-          );
-        }
-      }
-      return FormData.fromMap(formDataMap);
-    } else {
-      return mapCopy;
-    }
+    return payload;
   }
 
   // -------------------------------------------------------------
@@ -88,6 +62,8 @@ class AdminRepository {
   // -------------------------------------------------------------
 
   Future<List<AdminClinicModel>> getClinics({
+    int page = 1,
+    int pageSize = 20,
     String? status,
     String? tier,
     String? search,
@@ -103,23 +79,18 @@ class AdminRepository {
       queryParams['search'] = search.trim();
     }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.adminClinics,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((c) => AdminClinicModel.fromJson(c))
-        .toList();
+    return PageItems<AdminClinicModel>.fromResponse(
+      response.data,
+      AdminClinicModel.fromJson,
+      page: page,
+    );
   }
 
   Future<AdminClinicModel> getClinicDetail(String id) async {
@@ -127,7 +98,10 @@ class AdminRepository {
     return AdminClinicModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Map<String, dynamic>> suspendClinic(String id, {String reason = ''}) async {
+  Future<Map<String, dynamic>> suspendClinic(
+    String id, {
+    String reason = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminClinicSuspend(id),
       data: {'reason': reason},
@@ -135,7 +109,10 @@ class AdminRepository {
     return response.data as Map<String, dynamic>? ?? {};
   }
 
-  Future<Map<String, dynamic>> activateClinic(String id, {String reason = ''}) async {
+  Future<Map<String, dynamic>> activateClinic(
+    String id, {
+    String reason = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminClinicActivate(id),
       data: {'reason': reason},
@@ -149,10 +126,7 @@ class AdminRepository {
       data,
       fileKeys: ['logo', 'cover_image', 'video_ad_file'],
     );
-    final response = await _api.post(
-      ApiConfig.adminClinics,
-      data: payload,
-    );
+    final response = await _api.post(ApiConfig.adminClinics, data: payload);
     return response.data as Map<String, dynamic>? ?? {};
   }
 
@@ -178,7 +152,10 @@ class AdminRepository {
   }
 
   /// Update clinic details and settings (`PATCH /api/v1/admin/clinics/{id}/`)
-  Future<AdminClinicModel> updateClinic(String id, Map<String, dynamic> data) async {
+  Future<AdminClinicModel> updateClinic(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final payload = await _buildPayload(
       data,
       fileKeys: ['logo', 'cover_image', 'video_ad_file'],
@@ -195,6 +172,8 @@ class AdminRepository {
   // -------------------------------------------------------------
 
   Future<List<AdminLeadModel>> getLeads({
+    int page = 1,
+    int pageSize = 20,
     String? status,
     String? clinicId,
     String? search,
@@ -210,23 +189,18 @@ class AdminRepository {
       queryParams['search'] = search.trim();
     }
 
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.adminLeads,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((l) => AdminLeadModel.fromJson(l))
-        .toList();
+    return PageItems<AdminLeadModel>.fromResponse(
+      response.data,
+      AdminLeadModel.fromJson,
+      page: page,
+    );
   }
 
   Future<AdminLeadModel> getLeadDetail(String id) async {
@@ -239,8 +213,11 @@ class AdminRepository {
   // -------------------------------------------------------------
 
   Future<List<OfferModel>> getOffers({
+    int page = 1,
+    int pageSize = 20,
     String? status,
     String? clinicId,
+    String? search,
   }) async {
     final queryParams = <String, dynamic>{};
     if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
@@ -250,37 +227,49 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.adminOffers,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((o) => OfferModel.fromJson(o))
-        .toList();
+    return PageItems<OfferModel>.fromResponse(
+      response.data,
+      OfferModel.fromJson,
+      page: page,
+    );
   }
 
-  Future<Map<String, dynamic>> approveOffer(String id, {String notes = ''}) async {
+  Future<Map<String, dynamic>> approveOffer(
+    String id, {
+    String notes = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminOfferApprove(id),
-      data: {'moderation_notes': notes.isNotEmpty ? notes : 'Approved by Super Admin'},
+      data: {
+        'moderation_notes': notes.isNotEmpty
+            ? notes
+            : 'Approved by Super Admin',
+      },
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
 
-  Future<Map<String, dynamic>> suspendOffer(String id, {String notes = ''}) async {
+  Future<Map<String, dynamic>> suspendOffer(
+    String id, {
+    String notes = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminOfferSuspend(id),
-      data: {'moderation_notes': notes.isNotEmpty ? notes : 'Suspended by Super Admin'},
+      data: {
+        'moderation_notes': notes.isNotEmpty
+            ? notes
+            : 'Suspended by Super Admin',
+      },
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
@@ -290,8 +279,11 @@ class AdminRepository {
   // -------------------------------------------------------------
 
   Future<List<ProductModel>> getProducts({
+    int page = 1,
+    int pageSize = 20,
     String? status,
     String? clinicId,
+    String? search,
   }) async {
     final queryParams = <String, dynamic>{};
     if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
@@ -301,37 +293,49 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.adminProducts,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((p) => ProductModel.fromJson(p))
-        .toList();
+    return PageItems<ProductModel>.fromResponse(
+      response.data,
+      ProductModel.fromJson,
+      page: page,
+    );
   }
 
-  Future<Map<String, dynamic>> approveProduct(String id, {String notes = ''}) async {
+  Future<Map<String, dynamic>> approveProduct(
+    String id, {
+    String notes = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminProductApprove(id),
-      data: {'moderation_notes': notes.isNotEmpty ? notes : 'Approved by Super Admin'},
+      data: {
+        'moderation_notes': notes.isNotEmpty
+            ? notes
+            : 'Approved by Super Admin',
+      },
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
 
-  Future<Map<String, dynamic>> suspendProduct(String id, {String notes = ''}) async {
+  Future<Map<String, dynamic>> suspendProduct(
+    String id, {
+    String notes = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminProductSuspend(id),
-      data: {'moderation_notes': notes.isNotEmpty ? notes : 'Suspended by Super Admin'},
+      data: {
+        'moderation_notes': notes.isNotEmpty
+            ? notes
+            : 'Suspended by Super Admin',
+      },
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
@@ -341,8 +345,11 @@ class AdminRepository {
   // -------------------------------------------------------------
 
   Future<List<ArticleModel>> getArticles({
+    int page = 1,
+    int pageSize = 20,
     String? status,
     String? clinicId,
+    String? search,
   }) async {
     final queryParams = <String, dynamic>{};
     if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
@@ -352,37 +359,49 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+    queryParams['page'] = page;
+    queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
       ApiConfig.adminArticles,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    final rawData = response.data;
-    List<dynamic> items = [];
-    if (rawData is Map<String, dynamic> && rawData.containsKey('results')) {
-      items = rawData['results'] as List<dynamic>? ?? [];
-    } else if (rawData is List) {
-      items = rawData;
-    }
-
-    return items
-        .whereType<Map<String, dynamic>>()
-        .map((a) => ArticleModel.fromJson(a))
-        .toList();
+    return PageItems<ArticleModel>.fromResponse(
+      response.data,
+      ArticleModel.fromJson,
+      page: page,
+    );
   }
 
-  Future<Map<String, dynamic>> approveArticle(String id, {String notes = ''}) async {
+  Future<Map<String, dynamic>> approveArticle(
+    String id, {
+    String notes = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminArticleApprove(id),
-      data: {'moderation_notes': notes.isNotEmpty ? notes : 'Approved by Super Admin'},
+      data: {
+        'moderation_notes': notes.isNotEmpty
+            ? notes
+            : 'Approved by Super Admin',
+      },
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
 
-  Future<Map<String, dynamic>> suspendArticle(String id, {String notes = ''}) async {
+  Future<Map<String, dynamic>> suspendArticle(
+    String id, {
+    String notes = '',
+  }) async {
     final response = await _api.post(
       ApiConfig.adminArticleSuspend(id),
-      data: {'moderation_notes': notes.isNotEmpty ? notes : 'Suspended by Super Admin'},
+      data: {
+        'moderation_notes': notes.isNotEmpty
+            ? notes
+            : 'Suspended by Super Admin',
+      },
     );
     return response.data as Map<String, dynamic>? ?? {};
   }
@@ -396,7 +415,9 @@ class AdminRepository {
     String? dateTo,
   }) async {
     final queryParams = <String, dynamic>{};
-    if (dateFrom != null && dateFrom.isNotEmpty) queryParams['date_from'] = dateFrom;
+    if (dateFrom != null && dateFrom.isNotEmpty) {
+      queryParams['date_from'] = dateFrom;
+    }
     if (dateTo != null && dateTo.isNotEmpty) queryParams['date_to'] = dateTo;
 
     final response = await _api.get(
