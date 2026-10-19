@@ -1,33 +1,41 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 
-/// Resolves a full HTTP/HTTPS or relative `/media/...` URL against [ApiConfig.siteOrigin].
-/// Returns `null` if [url] is null, empty, or invalid.
+/// Resolves network/storage URLs without treating assets or device files as HTTP.
 String? resolveNetworkImageUrl(String? url) {
-  if (url == null) return null;
-  final trimmed = url.trim();
-  if (trimmed.isEmpty) return null;
-  final lower = trimmed.toLowerCase();
-  if (lower.startsWith('http://') || lower.startsWith('https://')) {
-    return trimmed;
-  }
-  if (trimmed.startsWith('/')) {
-    return '${ApiConfig.siteOrigin}$trimmed';
-  }
-  if (lower.startsWith('media/')) {
-    return '${ApiConfig.siteOrigin}/$trimmed';
-  }
-  return null;
+  final resolved = ApiConfig.resolveUrl(url);
+  return isValidNetworkImageUrl(resolved) ? resolved : null;
 }
 
-/// Helper to validate network image URLs safely before calling NetworkImage or Image.network
 bool isValidNetworkImageUrl(String? url) {
-  if (url == null) return false;
-  final trimmed = url.trim();
-  if (trimmed.isEmpty) return false;
-  final lower = trimmed.toLowerCase();
-  return lower.startsWith('http://') || lower.startsWith('https://');
+  final uri = Uri.tryParse(url?.trim() ?? '');
+  return uri != null &&
+      uri.host.isNotEmpty &&
+      (uri.scheme.toLowerCase() == 'http' ||
+          uri.scheme.toLowerCase() == 'https');
+}
+
+/// Use the actual source. A valid device/asset path is not a missing image.
+ImageProvider? resolveImageProvider(String? source) {
+  if (source == null || source.trim().isEmpty) return null;
+  final value = source.trim();
+  if (value.startsWith('assets/')) return AssetImage(value);
+  final uri = Uri.tryParse(value);
+  if (uri?.scheme == 'file') {
+    try {
+      return FileImage(File.fromUri(uri!));
+    } on ArgumentError {
+      return null;
+    }
+  }
+  if (uri == null || !uri.hasScheme) {
+    final file = File(value);
+    if (file.existsSync()) return FileImage(file);
+  }
+  final network = resolveNetworkImageUrl(value);
+  return network == null ? null : NetworkImage(network);
 }
 
 /// Computes RAM-safe decode width in physical pixels based on device pixel ratio.
@@ -88,6 +96,7 @@ class LuxuryImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final safeCacheWidth = computeSafeCacheWidth(context, width, height);
+    final primaryProvider = resolveImageProvider(imageUrl);
 
     Widget buildBrandEmblemFallback() {
       final shortestSide =
@@ -148,7 +157,7 @@ class LuxuryImage extends StatelessWidget {
       );
     }
 
-    Widget buildClinicLogoFallback(String resolvedLogoUrl) {
+    Widget buildClinicLogoFallback(ImageProvider logoProvider) {
       final shortestSide =
           (width != null &&
               width!.isFinite &&
@@ -192,15 +201,18 @@ class LuxuryImage extends StatelessWidget {
                 ),
               ],
             ),
-            child: Image.network(
-              resolvedLogoUrl,
-              cacheWidth:
-                  (logoBadgeSize * MediaQuery.devicePixelRatioOf(context))
-                      .round()
-                      .clamp(60, 400),
+            child: Image(
+              image: ResizeImage.resizeIfNeeded(
+                (logoBadgeSize * MediaQuery.devicePixelRatioOf(context))
+                    .round()
+                    .clamp(60, 400),
+                null,
+                logoProvider,
+              ),
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
-              errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
+              errorBuilder: (_, _, _) =>
+                  customPlaceholder ?? buildBrandEmblemFallback(),
             ),
           ),
         ),
@@ -208,16 +220,14 @@ class LuxuryImage extends StatelessWidget {
     }
 
     Widget buildSmartFallback() {
-      if (customPlaceholder != null) return customPlaceholder!;
-      final resolvedLogo = resolveNetworkImageUrl(fallbackLogoUrl);
-      if (resolvedLogo != null && resolvedLogo.isNotEmpty) {
-        return buildClinicLogoFallback(resolvedLogo);
+      final logoProvider = resolveImageProvider(fallbackLogoUrl);
+      if (logoProvider != null && logoProvider != primaryProvider) {
+        return buildClinicLogoFallback(logoProvider);
       }
-      return buildBrandEmblemFallback();
+      return customPlaceholder ?? buildBrandEmblemFallback();
     }
 
-    final resolvedUrl = resolveNetworkImageUrl(imageUrl);
-    if (resolvedUrl == null) {
+    if (primaryProvider == null) {
       Widget fallback = buildSmartFallback();
       if (borderRadius != null) {
         fallback = ClipRRect(borderRadius: borderRadius!, child: fallback);
@@ -225,12 +235,12 @@ class LuxuryImage extends StatelessWidget {
       return fallback;
     }
 
-    Widget image = Image.network(
-      resolvedUrl,
+    Widget image = Image(
+      key: ValueKey(primaryProvider),
+      image: ResizeImage.resizeIfNeeded(safeCacheWidth, null, primaryProvider),
       width: width,
       height: height,
       fit: fit,
-      cacheWidth: safeCacheWidth,
       errorBuilder: (context, error, stackTrace) => buildSmartFallback(),
     );
 
@@ -263,6 +273,7 @@ class LuxuryAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final safeCacheWidth = (radius * 2 * dpr).round().clamp(60, 400);
+    final primaryProvider = resolveImageProvider(imageUrl);
 
     Widget buildBrandEmblemFallback() {
       final emblemPadding = (radius * 2 * 0.20).clamp(6.0, 20.0);
@@ -291,7 +302,7 @@ class LuxuryAvatar extends StatelessWidget {
       );
     }
 
-    Widget buildClinicLogoFallback(String resolvedLogo) {
+    Widget buildClinicLogoFallback(ImageProvider logoProvider) {
       final logoPadding = (radius * 2 * 0.16).clamp(4.0, 16.0);
       return Container(
         width: radius * 2,
@@ -305,9 +316,8 @@ class LuxuryAvatar extends StatelessWidget {
           ),
         ),
         padding: EdgeInsets.all(logoPadding),
-        child: Image.network(
-          resolvedLogo,
-          cacheWidth: safeCacheWidth,
+        child: Image(
+          image: ResizeImage.resizeIfNeeded(safeCacheWidth, null, logoProvider),
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
           errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
@@ -316,25 +326,28 @@ class LuxuryAvatar extends StatelessWidget {
     }
 
     Widget buildFallback() {
-      final resolvedLogo = resolveNetworkImageUrl(fallbackLogoUrl);
-      if (resolvedLogo != null && resolvedLogo.isNotEmpty) {
-        return buildClinicLogoFallback(resolvedLogo);
+      final logoProvider = resolveImageProvider(fallbackLogoUrl);
+      if (logoProvider != null && logoProvider != primaryProvider) {
+        return buildClinicLogoFallback(logoProvider);
       }
       return buildBrandEmblemFallback();
     }
 
-    final resolvedUrl = resolveNetworkImageUrl(imageUrl);
-    if (resolvedUrl == null) {
+    if (primaryProvider == null) {
       return buildFallback();
     }
 
     return ClipOval(
-      child: Image.network(
-        resolvedUrl,
+      child: Image(
+        key: ValueKey(primaryProvider),
+        image: ResizeImage.resizeIfNeeded(
+          safeCacheWidth,
+          null,
+          primaryProvider,
+        ),
         width: radius * 2,
         height: radius * 2,
         fit: BoxFit.cover,
-        cacheWidth: safeCacheWidth,
         errorBuilder: (context, error, stackTrace) => buildFallback(),
       ),
     );

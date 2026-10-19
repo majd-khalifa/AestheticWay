@@ -175,7 +175,9 @@ class PractitionerModel {
     final rawType = json['type']?.toString().toLowerCase() ?? '';
     if (rawType.contains('nurse')) {
       pType = PractitionerType.nurse;
-    } else if (rawType.contains('licensed') || rawType.contains('professional') || rawType.contains('laser')) {
+    } else if (rawType.contains('licensed') ||
+        rawType.contains('professional') ||
+        rawType.contains('laser')) {
       pType = PractitionerType.licensedProfessional;
     }
 
@@ -185,8 +187,12 @@ class PractitionerModel {
     String resolvedClinicNameAr = clinicNameAr.isNotEmpty
         ? clinicNameAr
         : (json['clinic_name_ar']?.toString() ?? '');
-    String? resolvedClinicNameEn = clinicNameEn ?? json['clinic_name_en']?.toString();
-    String? resolvedClinicLogo = ApiConfig.resolveUrl(json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
+    String? resolvedClinicNameEn =
+        clinicNameEn ?? json['clinic_name_en']?.toString();
+    String? resolvedClinicLogo = ApiConfig.firstMediaUrl([
+      json['clinic_logo'],
+      json['clinic_logo_url'],
+    ]);
     if (resolvedClinicLogo.isEmpty) resolvedClinicLogo = null;
 
     if (json['clinic'] is Map<String, dynamic>) {
@@ -196,11 +202,16 @@ class PractitionerModel {
       }
       if (resolvedClinicNameAr.isEmpty) {
         resolvedClinicNameAr =
-            clinicMap['name_ar']?.toString() ?? clinicMap['name_en']?.toString() ?? '';
+            clinicMap['name_ar']?.toString() ??
+            clinicMap['name_en']?.toString() ??
+            '';
       }
       resolvedClinicNameEn ??=
           clinicMap['name_en']?.toString() ?? clinicMap['name_ar']?.toString();
-      final clinicLogoFromMap = ApiConfig.resolveUrl(clinicMap['logo']?.toString() ?? clinicMap['logo_url']?.toString());
+      final clinicLogoFromMap = ApiConfig.firstMediaUrl([
+        clinicMap['logo'],
+        clinicMap['logo_url'],
+      ]);
       if (clinicLogoFromMap.isNotEmpty) {
         resolvedClinicLogo = clinicLogoFromMap;
       }
@@ -235,17 +246,29 @@ class PractitionerModel {
       nameEn: json['name_en'] ?? json['name_ar'] ?? '',
       type: pType,
       specialtyAr: json['speciality_ar'] ?? json['title_ar'] ?? 'تجميل وجلدية',
-      specialtyEn: json['speciality_en'] ?? json['title_en'] ?? 'Aesthetic & Dermatology',
-      classificationAr: json['title_ar'] ?? json['speciality_ar'] ?? 'ممارس معتمد',
-      classificationEn: json['title_en'] ?? json['speciality_en'] ?? 'Certified Practitioner',
+      specialtyEn:
+          json['speciality_en'] ??
+          json['title_en'] ??
+          'Aesthetic & Dermatology',
+      classificationAr:
+          json['title_ar'] ?? json['speciality_ar'] ?? 'ممارس معتمد',
+      classificationEn:
+          json['title_en'] ?? json['speciality_en'] ?? 'Certified Practitioner',
       licenseAuthority: json['license_authority']?.toString() ?? '',
       licenseNumber: json['license_number']?.toString() ?? '',
-      avatarUrl: ApiConfig.resolveUrl(json['avatar_url']?.toString() ?? json['photo_url']?.toString() ?? json['avatar']?.toString() ?? ''),
-      yearsOfExperience: (json['years_of_experience'] ?? json['experience_years']) is int
+      avatarUrl: ApiConfig.firstMediaUrl([
+        json['avatar_url'],
+        json['photo_url'],
+        json['avatar'],
+      ]),
+      yearsOfExperience:
+          (json['years_of_experience'] ?? json['experience_years']) is int
           ? (json['years_of_experience'] ?? json['experience_years']) as int
           : 5,
       rating: double.tryParse(json['rating']?.toString() ?? '') ?? 4.9,
-      reviewCount: json['review_count'] is int ? json['review_count'] as int : 0,
+      reviewCount: json['review_count'] is int
+          ? json['review_count'] as int
+          : 0,
       languages: json['languages'] != null
           ? List<String>.from(json['languages'] as List)
           : const ['العربية', 'English'],

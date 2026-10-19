@@ -15,24 +15,35 @@ import '../models/admin_lead_model.dart';
 /// Repository handling Super Admin API operations across the platform
 class AdminRepository {
   static final AdminRepository _instance = AdminRepository._internal();
-  factory AdminRepository({ApiClient? apiClient}) {
-    if (apiClient != null) {
-      return AdminRepository._custom(apiClient);
+  factory AdminRepository({
+    ApiClient? apiClient,
+    MediaUploadService? mediaUploadService,
+  }) {
+    if (apiClient != null || mediaUploadService != null) {
+      final client = apiClient ?? ApiClient();
+      return AdminRepository._custom(
+        client,
+        mediaUploadService ?? MediaUploadService(client: client),
+      );
     }
     return _instance;
   }
-  AdminRepository._internal() : _api = ApiClient();
-  AdminRepository._custom(this._api);
+  AdminRepository._internal()
+    : _api = ApiClient(),
+      _mediaUpload = MediaUploadService();
+  AdminRepository._custom(this._api, this._mediaUpload);
 
   final ApiClient _api;
+  final MediaUploadService _mediaUpload;
 
   Future<dynamic> _buildPayload(
     Map<String, dynamic> data, {
     required List<String> fileKeys,
+    String? clinicId,
   }) async {
     final payload = await MediaPayloadBuilder(
-      MediaUploadService(),
-    ).build(data, fileKeys: fileKeys);
+      _mediaUpload,
+    ).build(data, fileKeys: fileKeys, clinicId: clinicId);
     if (payload is FormData && data['admin_user'] is Map) {
       // Flat keys are part of the provisioning contract handed off to Ali.
       payload.fields.removeWhere(
@@ -159,6 +170,7 @@ class AdminRepository {
     final payload = await _buildPayload(
       data,
       fileKeys: ['logo', 'cover_image', 'video_ad_file'],
+      clinicId: id,
     );
     final response = await _api.patch(
       ApiConfig.adminClinicDetail(id),

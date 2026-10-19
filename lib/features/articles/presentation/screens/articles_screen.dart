@@ -390,13 +390,10 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                       Row(
                         children: [
                           if (article.authorDoctorAvatar.isNotEmpty)
-                            CircleAvatar(
+                            LuxuryAvatar(
+                              imageUrl: article.authorDoctorAvatar,
                               radius: 12,
-                              backgroundImage: ResizeImage(
-                                NetworkImage(article.authorDoctorAvatar),
-                                width: computeSafeCacheWidth(context, 40, 40),
-                              ),
-                              backgroundColor: AppColors.cardSurfaceHover,
+                              fallbackLogoUrl: article.clinicLogoUrl,
                             )
                           else
                             const CircleAvatar(

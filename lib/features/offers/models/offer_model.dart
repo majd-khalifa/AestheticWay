@@ -100,16 +100,21 @@ class OfferModel {
       'original_price': originalPrice,
       'offer_price': offerPrice,
       'starts_at': (startsAt ?? DateTime.now()).toIso8601String(),
-      'ends_at': (endsAt ?? DateTime.now().add(const Duration(days: 30))).toIso8601String(),
+      'ends_at': (endsAt ?? DateTime.now().add(const Duration(days: 30)))
+          .toIso8601String(),
       'status': status,
       'is_active': isActive,
     };
   }
 
   factory OfferModel.fromJson(Map<String, dynamic> json) {
-    final clinicObj = json['clinic'] is Map<String, dynamic> ? json['clinic'] as Map<String, dynamic> : null;
-    final origPrice = double.tryParse(json['original_price']?.toString() ?? '') ?? 0.0;
-    final offPrice = double.tryParse(json['offer_price']?.toString() ?? '') ?? 0.0;
+    final clinicObj = json['clinic'] is Map<String, dynamic>
+        ? json['clinic'] as Map<String, dynamic>
+        : null;
+    final origPrice =
+        double.tryParse(json['original_price']?.toString() ?? '') ?? 0.0;
+    final offPrice =
+        double.tryParse(json['offer_price']?.toString() ?? '') ?? 0.0;
 
     int discount = 0;
     if (origPrice > 0 && offPrice < origPrice) {
@@ -144,15 +149,13 @@ class OfferModel {
       }
     }
 
-    final rawImg = json['image_url']?.toString() ??
-        json['image']?.toString() ??
-        (clinicObj != null ? (clinicObj['logo']?.toString() ?? clinicObj['logo_url']?.toString()) : null);
-    final img = ApiConfig.resolveUrl(rawImg);
-
-    final rawClinicLogo = clinicObj != null
-        ? (clinicObj['logo']?.toString() ?? clinicObj['logo_url']?.toString())
-        : (json['clinic_logo']?.toString() ?? json['clinic_logo_url']?.toString());
-    final clinicLogo = ApiConfig.resolveUrl(rawClinicLogo);
+    final img = ApiConfig.firstMediaUrl([json['image_url'], json['image']]);
+    final clinicLogo = ApiConfig.firstMediaUrl([
+      clinicObj?['logo'],
+      clinicObj?['logo_url'],
+      json['clinic_logo'],
+      json['clinic_logo_url'],
+    ]);
 
     return OfferModel(
       id: json['id']?.toString() ?? '',

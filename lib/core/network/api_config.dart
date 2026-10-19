@@ -16,21 +16,63 @@ class ApiConfig {
     _customBaseUrl = null;
   }
 
-  /// Resolves relative URLs (e.g. /media/...) against [siteOrigin].
+  /// Media belongs to the configured API host, including local/staging servers.
+  static String get mediaOrigin {
+    final uri = Uri.tryParse(baseUrl);
+    return uri != null &&
+            uri.host.isNotEmpty &&
+            (uri.scheme == 'http' || uri.scheme == 'https')
+        ? uri.origin
+        : siteOrigin;
+  }
+
+  /// Resolve storage paths without decoding or rebuilding signed absolute URLs.
   static String resolveUrl(String? url) {
-    if (url == null) return '';
-    final trimmed = url.trim();
-    if (trimmed.isEmpty) return '';
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      return trimmed;
+    if (url == null || url.trim().isEmpty) return '';
+    final value = url.trim();
+    final uri = Uri.tryParse(value);
+    if (uri != null &&
+        (uri.scheme.toLowerCase() == 'http' ||
+            uri.scheme.toLowerCase() == 'https')) {
+      return value;
     }
-    if (trimmed.startsWith('/')) {
-      return '$siteOrigin$trimmed';
+    if (value.startsWith('//')) {
+      return '${Uri.parse(mediaOrigin).scheme}:$value';
     }
-    if (trimmed.startsWith('media/')) {
-      return '$siteOrigin/$trimmed';
+    if (value.startsWith('/')) return '$mediaOrigin$value';
+    // Assets and file URIs are consumed by the appropriate image provider.
+    if (value.startsWith('assets/') || (uri != null && uri.hasScheme)) {
+      return value;
     }
-    return trimmed;
+    if (value.startsWith('media/')) return '$mediaOrigin/$value';
+    // A bare Django storage name is relative to MEDIA_URL, not /api/v1/.
+    if (value.contains('/') ||
+        RegExp(
+          r'\.(png|jpe?g|webp|gif|avif|heic|bmp|mp4|mov|webm)([?#].*)?$',
+          caseSensitive: false,
+        ).hasMatch(value)) {
+      return '$mediaOrigin/media/${value.startsWith('./') ? value.substring(2) : value}';
+    }
+    return value;
+  }
+
+  /// Null coalescing alone lets an empty serializer alias hide a real image.
+  /// Only actual nonblank strings are media candidates; never stringify maps.
+  static String firstMediaUrl(Iterable<Object?> candidates) {
+    for (final value in candidates) {
+      if (value is! String || value.trim().isEmpty) continue;
+      final source = resolveUrl(value);
+      final uri = Uri.tryParse(source);
+      if (source.startsWith('assets/') ||
+          uri?.scheme == 'file' ||
+          (uri != null &&
+              uri.host.isNotEmpty &&
+              (uri.scheme.toLowerCase() == 'http' ||
+                  uri.scheme.toLowerCase() == 'https'))) {
+        return source;
+      }
+    }
+    return '';
   }
 
   /// Production-first Base URL:

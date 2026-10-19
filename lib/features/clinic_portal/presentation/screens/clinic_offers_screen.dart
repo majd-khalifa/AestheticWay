@@ -223,12 +223,12 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                                             borderRadius: BorderRadius.circular(
                                               10,
                                             ),
-                                            child: Image.network(
-                                              offer.imageUrl,
+                                            child: LuxuryImage(
+                                              imageUrl: offer.imageUrl,
                                               width: 64,
                                               height: 64,
                                               fit: BoxFit.cover,
-                                              errorBuilder: (_, _, _) => Container(
+                                              customPlaceholder: Container(
                                                 width: 64,
                                                 height: 64,
                                                 color: isDark
@@ -240,11 +240,6 @@ class _ClinicOffersScreenState extends State<ClinicOffersScreen> {
                                                   color:
                                                       AppColors.accentChampagne,
                                                 ),
-                                              ),
-                                              cacheWidth: computeSafeCacheWidth(
-                                                context,
-                                                400,
-                                                null,
                                               ),
                                             ),
                                           ),

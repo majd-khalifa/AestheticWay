@@ -97,8 +97,10 @@ class ArticleModel {
       authorDoctorId: authorDoctorId ?? this.authorDoctorId,
       authorDoctorNameAr: authorDoctorNameAr ?? this.authorDoctorNameAr,
       authorDoctorNameEn: authorDoctorNameEn ?? this.authorDoctorNameEn,
-      authorDoctorSpecialtyAr: authorDoctorSpecialtyAr ?? this.authorDoctorSpecialtyAr,
-      authorDoctorSpecialtyEn: authorDoctorSpecialtyEn ?? this.authorDoctorSpecialtyEn,
+      authorDoctorSpecialtyAr:
+          authorDoctorSpecialtyAr ?? this.authorDoctorSpecialtyAr,
+      authorDoctorSpecialtyEn:
+          authorDoctorSpecialtyEn ?? this.authorDoctorSpecialtyEn,
       authorDoctorAvatar: authorDoctorAvatar ?? this.authorDoctorAvatar,
       clinicId: clinicId ?? this.clinicId,
       clinicNameAr: clinicNameAr ?? this.clinicNameAr,
@@ -114,7 +116,9 @@ class ArticleModel {
   }
 
   factory ArticleModel.fromJson(Map<String, dynamic> json) {
-    final clinic = json['clinic'] as Map<String, dynamic>?;
+    final clinic = json['clinic'] is Map<String, dynamic>
+        ? json['clinic'] as Map<String, dynamic>
+        : null;
     final rawAuthor = json['author_practitioner'];
     Map<String, dynamic>? authorMap;
     String authorId = '';
@@ -143,37 +147,44 @@ class ArticleModel {
       slug: json['slug'] as String? ?? '',
       titleAr: titleArVal,
       titleEn: titleEnVal,
-      coverImageUrl: ApiConfig.resolveUrl(
-        json['cover_image_url'] as String? ??
-            json['cover_image'] as String? ??
-            json['image_url'] as String? ??
-            '',
-      ),
+      coverImageUrl: ApiConfig.firstMediaUrl([
+        json['cover_image_url'],
+        json['cover_image'],
+        json['image_url'],
+        json['image'],
+      ]),
       summaryAr: contentArVal,
       summaryEn: contentEnVal,
       contentAr: contentArVal,
       contentEn: contentEnVal,
       authorDoctorId: authorId,
-      authorDoctorNameAr: authorMap?['name_ar'] as String? ??
+      authorDoctorNameAr:
+          authorMap?['name_ar'] as String? ??
           authorMap?['name_en'] as String? ??
           '',
       authorDoctorNameEn: authorMap?['name_en'] as String? ?? '',
-      authorDoctorSpecialtyAr: authorMap?['title_ar'] as String? ??
+      authorDoctorSpecialtyAr:
+          authorMap?['title_ar'] as String? ??
           authorMap?['title_en'] as String? ??
           '',
       authorDoctorSpecialtyEn: authorMap?['title_en'] as String? ?? '',
-      authorDoctorAvatar: ApiConfig.resolveUrl(authorMap?['avatar_url'] as String? ?? ''),
-      clinicId: clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
-      clinicNameAr: clinic?['name_ar'] as String? ??
-          clinic?['name_en'] as String? ??
-          '',
+      authorDoctorAvatar: ApiConfig.firstMediaUrl([
+        authorMap?['avatar_url'],
+        authorMap?['photo_url'],
+        authorMap?['avatar'],
+      ]),
+      clinicId:
+          clinic?['id']?.toString() ?? json['clinic_id']?.toString() ?? '',
+      clinicNameAr:
+          clinic?['name_ar'] as String? ?? clinic?['name_en'] as String? ?? '',
       clinicNameEn: clinic?['name_en'] as String?,
       clinicLogoUrl: () {
-        final raw = clinic?['logo'] as String? ??
-            clinic?['logo_url'] as String? ??
-            json['clinic_logo'] as String? ??
-            json['clinic_logo_url'] as String?;
-        final res = ApiConfig.resolveUrl(raw);
+        final res = ApiConfig.firstMediaUrl([
+          clinic?['logo'],
+          clinic?['logo_url'],
+          json['clinic_logo'],
+          json['clinic_logo_url'],
+        ]);
         return res.isNotEmpty ? res : null;
       }(),
       categoryAr: json['category_ar'] as String? ?? '',
@@ -181,10 +192,13 @@ class ArticleModel {
       publishedAt: json['published_at'] != null
           ? DateTime.tryParse(json['published_at'].toString()) ?? DateTime.now()
           : (json['created_at'] != null
-              ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
-              : DateTime.now()),
+                ? DateTime.tryParse(json['created_at'].toString()) ??
+                      DateTime.now()
+                : DateTime.now()),
       isPublished: isPublishedVal,
-      isApprovedByAdmin: json['status'] != null ? (rawStatus == 'active') : true,
+      isApprovedByAdmin: json['status'] != null
+          ? (rawStatus == 'active')
+          : true,
       status: rawStatus,
     );
   }
