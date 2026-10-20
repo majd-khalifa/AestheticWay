@@ -1,5 +1,7 @@
+import '../auth/session_changed_exception.dart';
+import 'media_file_policy.dart';
+import '../auth/session_snapshot.dart';
 import 'local_media_cache.dart';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../network/api_client.dart';
@@ -34,19 +36,21 @@ class MediaUploadService {
     String? clinicId,
   }) async {
     final cacheEpoch = LocalMediaCache().epoch;
+    final session = SessionSnapshot();
     try {
-      final file = File(filePath);
-      if (!file.existsSync()) {
-        throw ApiException(message: 'Local image file not found at: $filePath');
-      }
-
-      final fileName = filePath.split(RegExp(r'[\\/]')).last;
+      final mime = await MediaFilePolicy.inspect(filePath);
+      final fileName = 'image.${mime.subtype == 'jpeg' ? 'jpg' : mime.subtype}';
       final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath, filename: fileName),
+        'file': await MultipartFile.fromFile(
+          filePath,
+          filename: fileName,
+          contentType: mime,
+        ),
         'media_type': mediaType,
         if (clinicId != null && clinicId.isNotEmpty) 'clinic_id': clinicId,
       });
 
+      session.ensureCurrent();
       final response = await _client.post(
         ApiConfig.mediaUpload,
         data: formData,
@@ -71,8 +75,10 @@ class MediaUploadService {
       throw ApiException.fromDioError(e);
     } catch (e) {
       if (kDebugMode) debugPrint('[media_upload] failed type=${e.runtimeType}');
-      if (e is ApiException) rethrow;
-      throw ApiException(message: e.toString());
+      if (e is ApiException || e is SessionChangedException) rethrow;
+      throw const ApiException(
+        message: 'The image could not be uploaded. Please try again.',
+      );
     }
   }
 }

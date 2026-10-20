@@ -55,6 +55,17 @@ class ApiException implements Exception {
       );
     }
 
+    // Error bodies may echo patient notes, credentials or server tracebacks.
+    // Never retain raw response payloads or expose 5xx/HTML diagnostics.
+    if (statusCode != null && statusCode >= 500) {
+      return ApiException(
+        message: LocaleService().isArabic
+            ? 'تعذر إتمام الطلب حالياً. حاول مجدداً لاحقاً.'
+            : 'The service is temporarily unavailable. Please try again.',
+        statusCode: statusCode,
+        errorCode: 'SERVER_ERROR',
+      );
+    }
     final data = error.response?.data;
     if (data is Map<String, dynamic>) {
       // 1. Standard AW backend format: {"error": {"code": "...", "message": "...", "fields": {...}}}
@@ -134,10 +145,28 @@ class ApiException implements Exception {
     return ApiException(
       message: message,
       statusCode: statusCode,
-      errorCode: errorCode,
+      errorCode:
+          const {
+            'VALIDATION_ERROR',
+            'INVALID_TOKEN',
+            'TOKEN_EXPIRED',
+            'AUTHENTICATION_FAILED',
+            'NOT_AUTHENTICATED',
+            'PERMISSION_DENIED',
+            'THROTTLED',
+            'OTP_INVALID',
+            'OTP_EXPIRED',
+            'OTP_LOCKED',
+            'OTP_RATE_LIMIT',
+            'INVALID_CREDENTIALS',
+            'DUPLICATE_LEAD',
+            'CLINIC_SUSPENDED',
+          }.contains(errorCode)
+          ? errorCode
+          : 'REQUEST_REJECTED',
       fieldErrors: fieldErrors,
-      originalBackendMessage: rawBackendMsg,
-      rawData: data,
+      originalBackendMessage: null,
+      rawData: null,
     );
   }
 
@@ -146,6 +175,10 @@ class ApiException implements Exception {
   ) {
     final result = <String, List<String>>{};
     map.forEach((key, val) {
+      if (_fieldDisplayName(key) ==
+          (LocaleService().isArabic ? 'الحقل' : 'Field')) {
+        return;
+      }
       if (key == 'code' || key == 'message' || key == 'status_code') return;
       if (val is List) {
         final list = val
@@ -177,6 +210,8 @@ class ApiException implements Exception {
   static String _fieldDisplayName(String key) {
     final isArabic = LocaleService().isArabic;
     switch (key.toLowerCase()) {
+      case 'non_field_errors':
+        return isArabic ? 'الطلب' : 'Request';
       case 'phone':
         return isArabic ? 'رقم الهاتف' : 'Phone Number';
       case 'password':
@@ -298,7 +333,7 @@ class ApiException implements Exception {
       case 'subscription_tier':
         return isArabic ? 'باقة الاشتراك' : 'Subscription Tier';
       default:
-        return key;
+        return isArabic ? 'الحقل' : 'Field';
     }
   }
 
@@ -375,7 +410,14 @@ class ApiException implements Exception {
           lower.contains('throttled')) {
         return 'A similar request was recently submitted. Please try again shortly.';
       }
-      return sanitizeRegulatoryCompliance(msg);
+      if (lower.contains('otp') || lower.contains('verification code')) {
+        return 'Please check the verification code and try again.';
+      }
+      if (lower.contains('invalid credentials') ||
+          lower.contains('no active account')) {
+        return 'Unable to sign in. Check your credentials.';
+      }
+      return 'The request could not be accepted. Check the supplied information.';
     }
 
     // OTP errors (422 / 429)
@@ -487,7 +529,7 @@ class ApiException implements Exception {
       return 'هذا العرض غير متاح حالياً أو انتهت صلاحيته';
     }
 
-    return sanitizeRegulatoryCompliance(msg);
+    return 'تعذر قبول الطلب. يرجى التحقق من البيانات المدخلة.';
   }
 
   /// Compliance Sanitizer: Enforces product rule that no regulatory body names (DHA, DOH, MOHAP)

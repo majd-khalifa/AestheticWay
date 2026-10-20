@@ -5,6 +5,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// CI supplies release signing through its secret store; no key or password is
+// committed, and release tasks never fall back to the Android debug certificate.
+val releaseStore = providers.environmentVariable("AW_ANDROID_STORE_FILE").orNull
+val releaseStorePassword = providers.environmentVariable("AW_ANDROID_STORE_PASSWORD").orNull
+val releaseAlias = providers.environmentVariable("AW_ANDROID_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("AW_ANDROID_KEY_PASSWORD").orNull
+val hasReleaseSigning = listOf(releaseStore, releaseStorePassword, releaseAlias, releaseKeyPassword)
+    .all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.aestheticway.aesthetic_way"
     compileSdk = flutter.compileSdkVersion
@@ -30,15 +39,33 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseStore!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+gradle.taskGraph.whenReady {
+    val buildingAppRelease = allTasks.any {
+        it.project.path == ":app" &&
+            (it.name == "assembleRelease" || it.name == "bundleRelease" || it.name == "packageRelease")
+    }
+    if (buildingAppRelease && !hasReleaseSigning) {
+        throw GradleException("Release signing is not configured. Supply the four AW_ANDROID signing variables through CI secrets.")
+    }
 }

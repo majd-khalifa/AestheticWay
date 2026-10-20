@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import '../auth/token_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
@@ -16,15 +17,26 @@ class DeviceTokenService {
   final ApiClient _api = ApiClient();
 
   String? _lastRegisteredToken;
+  int _epoch = 0;
+  Future<void> _writes = Future.value();
+  Future<void> _persist(Future<void> Function() action) =>
+      _writes = _writes.then((_) => action()).catchError((Object _) {});
+  Future<void> clearLocalToken() async {
+    ++_epoch;
+    _lastRegisteredToken = null;
+    await _persist(() => _storage.delete(key: _storageKey));
+  }
 
   /// Returns the currently active cached or persisted device push token
   Future<String?> getSavedToken() async {
     if (_lastRegisteredToken != null && _lastRegisteredToken!.isNotEmpty) {
       return _lastRegisteredToken;
     }
+    final epoch = _epoch;
     try {
-      _lastRegisteredToken = await _storage.read(key: _storageKey);
-      return _lastRegisteredToken;
+      final value = await _storage.read(key: _storageKey);
+      if (epoch == _epoch) _lastRegisteredToken = value;
+      return value;
     } catch (_) {
       return null;
     }
@@ -37,6 +49,8 @@ class DeviceTokenService {
     String? platform,
     String appVersion = '1.0.0',
   }) async {
+    final epoch = TokenStorage().sessionEpoch;
+    final deviceEpoch = _epoch;
     final cleanToken = token.trim();
     if (cleanToken.isEmpty) return false;
 
@@ -52,14 +66,19 @@ class DeviceTokenService {
     try {
       await _api.post(ApiConfig.notificationDevices, data: payload);
 
+      if (epoch != TokenStorage().sessionEpoch || deviceEpoch != _epoch) {
+        return false;
+      }
       _lastRegisteredToken = cleanToken;
       try {
-        await _storage.write(key: _storageKey, value: cleanToken);
+        await _persist(
+          () => _storage.write(key: _storageKey, value: cleanToken),
+        );
       } catch (_) {}
 
       return true;
     } catch (e) {
-      debugPrint('[DeviceTokenService] Failed to register push token: $e');
+      if (kDebugMode) debugPrint('[DeviceTokenService] Registration failed');
       return false;
     }
   }
@@ -76,7 +95,7 @@ class DeviceTokenService {
         ApiConfig.notificationDeviceDeactivate(tokenToDeactivate),
       );
     } catch (e) {
-      debugPrint('[DeviceTokenService] Deactivation notice: $e');
+      if (kDebugMode) debugPrint('[DeviceTokenService] Deactivation failed');
     } finally {
       _lastRegisteredToken = null;
       try {

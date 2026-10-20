@@ -707,15 +707,7 @@ Future<void> showAdminCredentials(
               style: TextStyle(color: AppColors.mutedText(ctx), height: 1.5),
             ),
             const SizedBox(height: 12),
-            SelectableText(
-              password,
-              textDirection: TextDirection.ltr,
-              style: TextStyle(
-                color: AppColors.text(ctx),
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            _TemporarySecret(value: password),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () => Clipboard.setData(
@@ -739,5 +731,44 @@ Future<void> showAdminCredentials(
         ),
       ],
     ),
+  );
+}
+
+class _TemporarySecret extends StatefulWidget {
+  const _TemporarySecret({required this.value});
+  final String value;
+  @override
+  State<_TemporarySecret> createState() => _TemporarySecretState();
+}
+
+class _TemporarySecretState extends State<_TemporarySecret> {
+  bool _revealed = false;
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: _revealed
+            ? SelectableText(widget.value, textDirection: TextDirection.ltr)
+            : Text(
+                '••••••••',
+                semanticsLabel: adminText(
+                  'Temporary password hidden',
+                  'كلمة المرور المؤقتة مخفية',
+                ),
+              ),
+      ),
+      IconButton(
+        onPressed: () => setState(() => _revealed = !_revealed),
+        tooltip: _revealed
+            ? adminText('Hide temporary password', 'إخفاء كلمة المرور المؤقتة')
+            : adminText(
+                'Reveal temporary password',
+                'إظهار كلمة المرور المؤقتة',
+              ),
+        icon: Icon(
+          _revealed ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+        ),
+      ),
+    ],
   );
 }

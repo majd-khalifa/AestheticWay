@@ -1,3 +1,4 @@
+import 'media_file_policy.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import '../network/api_exception.dart';
@@ -65,9 +66,14 @@ class MediaPayloadBuilder {
                 'Please save the media removal before replacing the video.',
           );
         }
+        final mime = await MediaFilePolicy.inspect(
+          path,
+          video: key.contains('video'),
+        );
         mapCopy[key] = await MultipartFile.fromFile(
           path,
-          filename: path.split(RegExp(r'[\\/]')).last,
+          filename: 'upload.${path.split('.').last.toLowerCase()}',
+          contentType: mime,
         );
         hasFiles = true;
       }

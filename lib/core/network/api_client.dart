@@ -1,3 +1,4 @@
+import '../auth/token_storage.dart';
 import 'package:dio/dio.dart';
 import 'api_config.dart';
 import 'api_exception.dart';
@@ -31,6 +32,17 @@ class ApiClient {
     dio.options.baseUrl = ApiConfig.baseUrl;
   }
 
+  Options _sessionOptions(Options? options) {
+    final value = options ?? Options();
+    return value.copyWith(
+      extra: {
+        ...?value.extra,
+        'aw_auth_session':
+            value.extra?['aw_auth_session'] ?? TokenStorage().sessionEpoch,
+      },
+    );
+  }
+
   /// GET request
   Future<Response<T>> get<T>(
     String path, {
@@ -41,7 +53,7 @@ class ApiClient {
       return await dio.get<T>(
         path,
         queryParameters: queryParameters,
-        options: options,
+        options: _sessionOptions(options),
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -60,7 +72,7 @@ class ApiClient {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: _sessionOptions(options),
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -79,7 +91,7 @@ class ApiClient {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: _sessionOptions(options),
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -98,7 +110,7 @@ class ApiClient {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: _sessionOptions(options),
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -117,7 +129,7 @@ class ApiClient {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: _sessionOptions(options),
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
