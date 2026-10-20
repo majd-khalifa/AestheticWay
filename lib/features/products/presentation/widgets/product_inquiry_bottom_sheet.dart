@@ -50,7 +50,8 @@ class ProductInquiryBottomSheet extends StatefulWidget {
   }
 
   @override
-  State<ProductInquiryBottomSheet> createState() => _ProductInquiryBottomSheetState();
+  State<ProductInquiryBottomSheet> createState() =>
+      _ProductInquiryBottomSheetState();
 }
 
 class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
@@ -69,7 +70,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
     super.initState();
     _leadsRepository = widget.leadsRepository ?? LeadsRepository();
     final auth = AuthState();
-    _nameController = TextEditingController(text: auth.isLoggedIn ? auth.userName : '');
+    _nameController = TextEditingController(
+      text: auth.isLoggedIn ? auth.userName : '',
+    );
 
     String initialPhone = '';
     if (auth.isLoggedIn && auth.userPhone.isNotEmpty) {
@@ -109,7 +112,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
     final rawPhone = _phoneController.text.trim();
     final formattedPhone = LuxuryPhoneInputField.normalizeToE164(rawPhone);
 
-    final productName = loc.isArabic ? widget.product.nameAr : widget.product.nameEn;
+    final productName = loc.isArabic
+        ? widget.product.nameAr
+        : widget.product.nameEn;
     final clinicId = widget.product.clinicId.trim().isNotEmpty
         ? widget.product.clinicId.trim()
         : widget.clinic.id;
@@ -122,7 +127,8 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
       'patient_name': _nameController.text.trim(),
       'patient_phone': formattedPhone,
       'consent_accepted': true,
-      if (_notesController.text.trim().isNotEmpty) 'notes': _notesController.text.trim(),
+      if (_notesController.text.trim().isNotEmpty)
+        'notes': _notesController.text.trim(),
     };
 
     try {
@@ -166,28 +172,31 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      final is429 = e.statusCode == 429 ||
+      final is429 =
+          e.statusCode == 429 ||
           e.message.toLowerCase().contains('already submitted') ||
           e.message.toLowerCase().contains('too many requests') ||
           e.message.contains('مؤخراً') ||
           e.message.contains('مؤخرا');
-      final isSuspendedOrInactive = e.statusCode == 403 ||
+      final isSuspendedOrInactive =
+          e.statusCode == 403 ||
           e.statusCode == 404 ||
-          (e.statusCode == 400 && (e.message.toLowerCase().contains('suspended') ||
-              e.message.toLowerCase().contains('inactive') ||
-              e.message.contains('معلقة') ||
-              e.message.contains('غير متاحة') ||
-              e.message.toLowerCase().contains('not found')));
+          (e.statusCode == 400 &&
+              (e.message.toLowerCase().contains('suspended') ||
+                  e.message.toLowerCase().contains('inactive') ||
+                  e.message.contains('معلقة') ||
+                  e.message.contains('غير متاحة') ||
+                  e.message.toLowerCase().contains('not found')));
 
       final friendlyMessage = is429
           ? (loc.isArabic
-              ? 'يرجى الانتظار لحظات قبل إرسال طلب جديد لنفس العيادة'
-              : 'Please wait a moment before submitting another request to this clinic')
+                ? 'يرجى الانتظار لحظات قبل إرسال طلب جديد لنفس العيادة'
+                : 'Please wait a moment before submitting another request to this clinic')
           : isSuspendedOrInactive
-              ? (loc.isArabic
-                  ? 'العيادة غير متاحة حالياً لتلقي الاستفسارات. يرجى اختيار عيادة أخرى'
-                  : 'This clinic is currently unavailable to accept inquiries. Please choose another clinic.')
-              : e.message;
+          ? (loc.isArabic
+                ? 'العيادة غير متاحة حالياً لتلقي الاستفسارات. يرجى اختيار عيادة أخرى'
+                : 'This clinic is currently unavailable to accept inquiries. Please choose another clinic.')
+          : e.message;
 
       setState(() {
         _isSubmitting = false;
@@ -196,11 +205,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
         }
       });
 
-      showAppSnackBar(
-        context,
-        friendlyMessage,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, friendlyMessage, type: AppSnackBarType.error);
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -208,7 +213,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
       });
       showAppSnackBar(
         context,
-        loc.isArabic ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى' : 'Failed to send inquiry. Please try again.',
+        loc.isArabic
+            ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى'
+            : 'Failed to send inquiry. Please try again.',
         type: AppSnackBarType.error,
       );
     }
@@ -219,7 +226,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final clinicName = loc.isArabic ? widget.clinic.nameAr : widget.clinic.nameEn;
+    final clinicName = loc.isArabic
+        ? widget.clinic.nameAr
+        : widget.clinic.nameEn;
 
     return Directionality(
       textDirection: loc.textDirection,
@@ -267,7 +276,11 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close_rounded, color: AppColors.subtext(context), size: 20),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: AppColors.subtext(context),
+                          size: 20,
+                        ),
                         visualDensity: VisualDensity.compact,
                       ),
                     ],
@@ -285,7 +298,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                           width: 64,
                           height: 64,
                           borderRadius: BorderRadius.circular(12),
-                          placeholderIcon: Icons.shopping_bag_outlined,
+                          placeholderIcon: Icons.auto_awesome_outlined,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -293,7 +306,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                loc.isArabic ? widget.product.nameAr : widget.product.nameEn,
+                                loc.isArabic
+                                    ? widget.product.nameAr
+                                    : widget.product.nameEn,
                                 style: AppTypography.cardTitle.copyWith(
                                   fontSize: 14.5,
                                   fontWeight: FontWeight.w800,
@@ -305,7 +320,11 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.storefront_rounded, size: 13, color: AppColors.accentChampagne),
+                                  const Icon(
+                                    Icons.storefront_rounded,
+                                    size: 13,
+                                    color: AppColors.accentChampagne,
+                                  ),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
@@ -347,11 +366,17 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                       decoration: BoxDecoration(
                         color: AppColors.errorRed.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: AppColors.errorRed.withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline_rounded, color: AppColors.errorRed, size: 18),
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            color: AppColors.errorRed,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -371,26 +396,47 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                   // 2. Patient Name Field
                   TextFormField(
                     controller: _nameController,
-                    style: TextStyle(color: AppColors.text(context), fontSize: 13.5, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: AppColors.text(context),
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       labelText: loc.tr('full_name'),
-                      hintText: loc.isArabic ? 'الاسم الكامل كما تود أن تناديك العيادة' : 'Your full name',
+                      hintText: loc.isArabic
+                          ? 'الاسم الكامل كما تود أن تناديك العيادة'
+                          : 'Your full name',
                       hintStyle: TextStyle(
                         color: AppColors.text(context).withValues(alpha: 0.68),
                         fontSize: 12.5,
                         fontWeight: FontWeight.w400,
                       ),
-                      labelStyle: TextStyle(color: AppColors.subtext(context), fontSize: 12.5),
-                      prefixIcon: Icon(Icons.person_outline, color: AppColors.subtext(context), size: 18),
+                      labelStyle: TextStyle(
+                        color: AppColors.subtext(context),
+                        fontSize: 12.5,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.person_outline,
+                        color: AppColors.subtext(context),
+                        size: 18,
+                      ),
                       filled: true,
-                      fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                      fillColor: isDark
+                          ? AppColors.cardSurfaceHover
+                          : AppColors.lightCardSurfaceHover,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                        borderSide: BorderSide(
+                          color: AppColors.border(context),
+                          width: 0.8,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.3),
+                        borderSide: const BorderSide(
+                          color: AppColors.accentChampagne,
+                          width: 1.3,
+                        ),
                       ),
                     ),
                     validator: (val) {
@@ -413,9 +459,14 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                   TextFormField(
                     controller: _notesController,
                     maxLines: 3,
-                    style: TextStyle(color: AppColors.text(context), fontSize: 13.5),
+                    style: TextStyle(
+                      color: AppColors.text(context),
+                      fontSize: 13.5,
+                    ),
                     decoration: InputDecoration(
-                      labelText: loc.isArabic ? 'استفسار أو ملاحظات' : 'Inquiry / Notes',
+                      labelText: loc.isArabic
+                          ? 'استفسار أو ملاحظات'
+                          : 'Inquiry / Notes',
                       hintText: loc.isArabic
                           ? 'اكتب استفسارك حول توفر المنتج أو طريقة الاستخدام...'
                           : 'Write your question about product availability or usage...',
@@ -424,17 +475,28 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                       ),
-                      labelStyle: TextStyle(color: AppColors.subtext(context), fontSize: 12.5),
+                      labelStyle: TextStyle(
+                        color: AppColors.subtext(context),
+                        fontSize: 12.5,
+                      ),
                       alignLabelWithHint: true,
                       filled: true,
-                      fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                      fillColor: isDark
+                          ? AppColors.cardSurfaceHover
+                          : AppColors.lightCardSurfaceHover,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                        borderSide: BorderSide(
+                          color: AppColors.border(context),
+                          width: 0.8,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.accentChampagne, width: 1.3),
+                        borderSide: const BorderSide(
+                          color: AppColors.accentChampagne,
+                          width: 1.3,
+                        ),
                       ),
                     ),
                   ),
@@ -446,11 +508,14 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                       Checkbox(
                         value: _consentAccepted,
                         activeColor: AppColors.accentChampagne,
-                        onChanged: (v) => setState(() => _consentAccepted = v ?? false),
+                        onChanged: (v) =>
+                            setState(() => _consentAccepted = v ?? false),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _consentAccepted = !_consentAccepted),
+                          onTap: () => setState(
+                            () => _consentAccepted = !_consentAccepted,
+                          ),
                           child: Text(
                             loc.isArabic
                                 ? 'أوافق على مشاركة اسمي ورقم هاتفي مع العيادة للتواصل معي بخصوص هذا المنتج'

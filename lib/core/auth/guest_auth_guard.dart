@@ -39,6 +39,11 @@ class AuthState extends ChangeNotifier {
     String role = 'patient',
     bool isVerified = false,
   }) {
+    if (_isLoggedIn && (_userPhone != phone || _userRole != role)) {
+      ClinicPortalService().clearSession();
+      AdminPortalService().clearSession();
+      ReferralService().clearSession();
+    }
     _isLoggedIn = true;
     _userName = name;
     _userPhone = phone;

@@ -50,7 +50,7 @@ class CategoryGrid extends StatelessWidget {
     CategoryItem(
       id: 'products',
       translationKey: 'cat_products',
-      icon: Icons.shopping_bag_outlined,
+      icon: Icons.auto_awesome_outlined,
     ),
     CategoryItem(
       id: 'articles',
@@ -90,7 +90,9 @@ class CategoryGrid extends StatelessWidget {
                 style: AppTypography.cardTitle.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary,
                   letterSpacing: 0.25,
                 ),
               ),
@@ -157,8 +159,8 @@ class _CategoryItemWidgetState extends State<_CategoryItemWidget> {
     final borderColor = _isPressed
         ? AppColors.accentChampagne.withValues(alpha: 0.8)
         : (isDark
-            ? AppColors.silverBorder.withValues(alpha: 0.24)
-            : AppColors.lightBorder);
+              ? AppColors.silverBorder.withValues(alpha: 0.24)
+              : AppColors.lightBorder);
 
     final iconColor = _isPressed
         ? AppColors.accentChampagne
@@ -206,18 +208,16 @@ class _CategoryItemWidgetState extends State<_CategoryItemWidget> {
                       ]
                     : [
                         BoxShadow(
-                          color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                          color: const Color(
+                            0xFF0F172A,
+                          ).withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
                       ],
               ),
               child: Center(
-                child: Icon(
-                  widget.category.icon,
-                  size: 22,
-                  color: iconColor,
-                ),
+                child: Icon(widget.category.icon, size: 22, color: iconColor),
               ),
             ),
             const SizedBox(height: 7),

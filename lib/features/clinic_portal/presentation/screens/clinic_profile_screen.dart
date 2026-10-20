@@ -761,7 +761,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                             : 'Product Name (English) *',
                         hintText: 'e.g. Hyaluronic Acid Serum',
                         prefixIcon: const Icon(
-                          Icons.shopping_bag_outlined,
+                          Icons.auto_awesome_outlined,
                           color: AppColors.accentChampagne,
                           size: 18,
                         ),
@@ -801,7 +801,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                             : 'Product Name (Arabic)',
                         hintText: 'مثال: سيروم حمض الهيالورونيك',
                         prefixIcon: const Icon(
-                          Icons.shopping_bag_outlined,
+                          Icons.auto_awesome_outlined,
                           color: AppColors.accentChampagne,
                           size: 18,
                         ),

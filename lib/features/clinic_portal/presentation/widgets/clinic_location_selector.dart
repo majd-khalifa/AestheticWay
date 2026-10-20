@@ -1,3 +1,4 @@
+import '../../../../core/utils/clinic_location.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -33,15 +34,7 @@ String clinicLocationSummary(
   String city,
   String address, {
   required bool arabic,
-}) {
-  final parts = [
-    city.trim(),
-    address.trim(),
-  ].where((s) => s.isNotEmpty).toList();
-  return parts.isEmpty
-      ? (arabic ? 'دبي، الإمارات' : 'Dubai, UAE')
-      : parts.join(' • ');
-}
+}) => formatClinicLocation(city, address, arabic: arabic);
 
 const _emirates = <String, (String, double, double)>{
   'Dubai': ('دبي', 25.2048, 55.2708),

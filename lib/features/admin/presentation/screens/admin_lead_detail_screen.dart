@@ -1,270 +1,199 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
-import 'package:aesthetic_way/features/admin/models/admin_lead_model.dart';
+import '../../../../core/localization/app_locale.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/luxury_card.dart';
+import '../../models/admin_lead_model.dart';
+import '../../services/admin_portal_service.dart';
+import '../widgets/admin_components.dart';
 
-/// Super Admin Lead Detail Screen — READ-ONLY Supervision View
-/// Ensures strict role separation: Super Admin observes volume & quality without executing clinic operations
-class AdminLeadDetailScreen extends StatelessWidget {
-  final AdminLeadModel lead;
-
+/// Super Admin supervision deliberately exposes no patient workflow actions.
+class AdminLeadDetailScreen extends StatefulWidget {
   const AdminLeadDetailScreen({super.key, required this.lead});
+  final AdminLeadModel lead;
+  @override
+  State<AdminLeadDetailScreen> createState() => _AdminLeadDetailScreenState();
+}
+
+class _AdminLeadDetailScreenState extends State<AdminLeadDetailScreen> {
+  late AdminLeadModel _lead;
+  bool _loading = false;
+  String? _error;
+  @override
+  void initState() {
+    super.initState();
+    _lead = widget.lead;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
+  }
+
+  Future<void> _refresh() async {
+    if (!mounted || AdminPortalService().isMockMode) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final latest = await AdminPortalService().getLeadDetail(_lead.id);
+      if (mounted) setState(() => _lead = latest);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error = adminText(
+            'Could not refresh this request.',
+            'تعذر تحديث بيانات الطلب.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final loc = LocaleService();
-    final isDark = AppColors.isDark(context);
-
-    Color statusColor;
-    String statusText;
-    switch (lead.leadStatus) {
-      case AppointmentLeadStatus.sent:
-        statusColor = const Color(0xFFF59E0B);
-        statusText = loc.tr('clinic_lead_status_new');
-        break;
-      case AppointmentLeadStatus.contacted:
-        statusColor = const Color(0xFF3B82F6);
-        statusText = loc.tr('clinic_lead_status_contacted');
-        break;
-      case AppointmentLeadStatus.closed:
-        statusColor = const Color(0xFF10B981);
-        statusText = loc.tr('clinic_lead_status_closed');
-        break;
-    }
-
+    final l = _lead, ar = LocaleService().isArabic;
     return Scaffold(
       backgroundColor: AppColors.bg(context),
       appBar: AppBar(
-        backgroundColor: AppColors.bg(context),
-        title: Text(
-          loc.tr('admin_lead_inspect_title'),
-          style: AppTypography.screenTitle.copyWith(
-            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-            fontSize: 16,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: Text(LocaleService().tr('admin_lead_inspect_title')),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          // Supervision Mode Notice Banner
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.16),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.45), width: 0.8),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            32 + MediaQuery.paddingOf(context).bottom,
+          ),
+          children: [
+            AdminNotice(
+              message: LocaleService().tr('admin_lead_monitoring_banner'),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.shield_outlined, color: AppColors.accentChampagne, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    loc.tr('admin_lead_monitoring_banner'),
-                    style: AppTypography.caption.copyWith(
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            if (_loading) const LinearProgressIndicator(),
+            if (_error != null)
+              AdminNotice(message: _error!, error: true, onRetry: _refresh),
+            const SizedBox(height: 12),
+            LuxuryCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.referenceCode,
+                    textDirection: TextDirection.ltr,
+                    style: TextStyle(
+                      color: AppColors.goldText(context),
+                      fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      height: 1.45,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Header Status & Reference Card
-          LuxuryCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      lead.referenceCode,
-                      style: AppTypography.cardTitle.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.goldText(context),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-                      ),
-                      child: Text(
-                        statusText,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${loc.isArabic ? "تاريخ إرسال الطلب:" : "Received on:"} ${DateFormat('yyyy/MM/dd – hh:mm a').format(lead.createdAt)}',
-                  style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11.5),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Clinic Destination Card
-          LuxuryCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  loc.isArabic ? 'العيادة المستلمة للطلب' : 'Recipient Clinic',
-                  style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.apartment_rounded, size: 18, color: AppColors.accentChampagne),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        loc.isArabic ? lead.clinicNameAr : (lead.clinicNameEn.isNotEmpty ? lead.clinicNameEn : lead.clinicNameAr),
-                        style: AppTypography.cardTitle.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Padding(
-                  padding: const EdgeInsets.only(right: 28),
-                  child: Text(
-                    loc.isArabic ? lead.branchNameAr : (lead.branchNameEn.isNotEmpty ? lead.branchNameEn : lead.branchNameAr),
-                    style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Patient & Service Details Card (Read-Only)
-          LuxuryCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  loc.tr('contact_info_title'),
-                  style: AppTypography.cardTitle.copyWith(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const Divider(height: 16),
-                _ReadOnlyRow(
-                  icon: Icons.person_outline_rounded,
-                  label: loc.tr('full_name'),
-                  value: lead.patientFullName,
-                ),
-                const SizedBox(height: 10),
-                _ReadOnlyRow(
-                  icon: Icons.phone_outlined,
-                  label: loc.tr('phone_uae'),
-                  value: lead.patientPhone,
-                ),
-                const Divider(height: 20),
-                _ReadOnlyRow(
-                  icon: Icons.medical_services_outlined,
-                  label: loc.isArabic ? 'الخدمة / الباقة المطلوبة' : 'Requested Service',
-                  value: lead.serviceNameAr,
-                ),
-                const SizedBox(height: 10),
-                _ReadOnlyRow(
-                  icon: Icons.calendar_today_outlined,
-                  label: loc.tr('submitted_at'),
-                  value: DateFormat('yyyy/MM/dd').format(lead.createdAt),
-                ),
-
-                if (lead.notes.isNotEmpty) ...[
-                  const Divider(height: 20),
-                  _ReadOnlyRow(
-                    icon: Icons.notes_rounded,
-                    label: loc.tr('notes_opt'),
-                    value: lead.notes,
+                  const SizedBox(height: 12),
+                  AdminStatusBadge(status: l.status),
+                  const SizedBox(height: 12),
+                  _ReadOnlyField(
+                    label: LocaleService().tr('submitted_at'),
+                    value: adminDate(l.createdAt),
+                    ltr: true,
                   ),
                 ],
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-        ],
+            AdminSectionTitle(
+              adminText('Recipient Clinic', 'العيادة المستلمة للطلب'),
+            ),
+            LuxuryCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ReadOnlyField(
+                    label: adminText('Clinic', 'العيادة'),
+                    value: l.localizedClinic(arabic: ar),
+                  ),
+                  if ((ar ? l.branchNameAr : l.branchNameEn).isNotEmpty)
+                    _ReadOnlyField(
+                      label: adminText('Branch', 'الفرع'),
+                      value: ar ? l.branchNameAr : l.branchNameEn,
+                    ),
+                ],
+              ),
+            ),
+            AdminSectionTitle(
+              adminText('Patient & inquiry', 'المريض والاستفسار'),
+            ),
+            LuxuryCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ReadOnlyField(
+                    label: LocaleService().tr('full_name'),
+                    value: l.patientName,
+                  ),
+                  _ReadOnlyField(
+                    label: adminText('Phone', 'رقم الهاتف'),
+                    value: l.patientPhone,
+                    ltr: true,
+                  ),
+                  if (l.patientEmail.isNotEmpty)
+                    _ReadOnlyField(
+                      label: adminText('Email', 'البريد الإلكتروني'),
+                      value: l.patientEmail,
+                      ltr: true,
+                    ),
+                  _ReadOnlyField(
+                    label: adminText('Requested Service', 'الخدمة المطلوبة'),
+                    value: l.localizedService(arabic: ar),
+                  ),
+                  if (l.notes.trim().isNotEmpty)
+                    _ReadOnlyField(
+                      label: LocaleService().tr('notes_opt'),
+                      value: l.notes,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _ReadOnlyRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _ReadOnlyRow({
-    required this.icon,
+class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({
     required this.label,
     required this.value,
+    this.ltr = false,
   });
-
+  final String label, value;
+  final bool ltr;
   @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return Row(
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.mutedText(context)),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTypography.caption.copyWith(color: AppColors.mutedText(context), fontSize: 11),
-            ),
-            const SizedBox(height: 1),
-            Text(
-              value,
-              style: AppTypography.bodyMedium.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-              ),
-            ),
-          ],
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.mutedText(context),
+            fontSize: 12,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value.isEmpty ? '—' : value,
+          textDirection: ltr ? TextDirection.ltr : null,
+          style: TextStyle(
+            color: AppColors.text(context),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            height: 1.6,
+          ),
         ),
       ],
-    );
-  }
+    ),
+  );
 }

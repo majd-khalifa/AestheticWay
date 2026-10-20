@@ -56,7 +56,7 @@ void main() {
 
     test('AdminPortalService toggles offer moderation status', () async {
       final service = AdminPortalService();
-      final offerId = 'adm-off-101';
+      final offerId = service.allOffers.first.id;
 
       expect(service.isOfferSuspended(offerId), isFalse);
       await service.toggleOfferModeration(offerId);
@@ -145,11 +145,11 @@ void main() {
         );
 
         expect(find.text('إجمالي الأحداث المسجلة'), findsOneWidget);
-        expect(find.text('العيادات الشريكة'), findsOneWidget);
+        expect(find.text('العيادات النشطة'), findsOneWidget);
         expect(find.text('إجمالي طلبات الاستشارة'), findsOneWidget);
         expect(find.text('طلبات تم التواصل معها'), findsOneWidget);
         expect(find.text('المرضى المسجلين'), findsOneWidget);
-        expect(find.text('العروض النشطة'), findsOneWidget);
+        expect(find.text('إجمالي العروض'), findsOneWidget);
         expect(find.text('سجل النشاط المباشر في المنصة'), findsOneWidget);
       },
     );

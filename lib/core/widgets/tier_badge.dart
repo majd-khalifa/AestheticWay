@@ -8,22 +8,31 @@ import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 class TierBadge extends StatelessWidget {
   final SubscriptionTier tier;
   final bool isCompact;
+  final bool showBasic;
 
   const TierBadge({
     super.key,
     required this.tier,
     this.isCompact = false,
+    this.showBasic = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (tier == SubscriptionTier.basic) {
+    if (tier == SubscriptionTier.basic && !showBasic) {
       return const SizedBox.shrink();
     }
 
     final loc = LocaleService();
     final isVip = tier == SubscriptionTier.vipPlatinum;
-    final text = isVip ? loc.tr('vip_partner') : loc.tr('featured_badge');
+    final text = tier == SubscriptionTier.basic
+        ? (loc.isArabic ? 'أساسي' : 'Basic')
+        : isVip
+        ? loc.tr('vip_partner')
+        : loc.tr('featured_badge');
+    final foreground = isVip
+        ? AppColors.goldText(context)
+        : AppColors.text(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -31,28 +40,14 @@ class TierBadge extends StatelessWidget {
         vertical: isCompact ? 3.5 : 4.5,
       ),
       decoration: BoxDecoration(
-        color: isVip
-            ? const Color(0xFF241A0B).withValues(alpha: 0.9)
-            : const Color(0xFF131D2D).withValues(alpha: 0.9),
+        color: foreground.withValues(alpha: .08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isVip
-              ? AppColors.vipChampagneGold.withValues(alpha: 0.8)
-              : AppColors.silverPrimary.withValues(alpha: 0.6),
-          width: 0.8,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: foreground.withValues(alpha: .25), width: .8),
       ),
       child: Text(
         text,
         style: AppTypography.badge.copyWith(
-          color: isVip ? const Color(0xFFFFE082) : AppColors.silverPrimary,
+          color: foreground,
           fontSize: isCompact ? 10 : 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.2,

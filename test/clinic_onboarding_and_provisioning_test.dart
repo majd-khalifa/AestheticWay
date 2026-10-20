@@ -18,10 +18,22 @@ void main() {
   group('Clinic Provisioning & Onboarding API Config & Model Tests', () {
     test('ApiConfig contains new onboarding and branch endpoints', () {
       expect(ApiConfig.clinicBranches, equals('clinic-portal/branches/'));
-      expect(ApiConfig.clinicBranchDetail('branch-123'), equals('clinic-portal/branches/branch-123/'));
-      expect(ApiConfig.clinicSetupChecklist, equals('clinic-portal/profile/setup-checklist/'));
-      expect(ApiConfig.clinicSubmitForReview, equals('clinic-portal/profile/submit-for-review/'));
-      expect(ApiConfig.adminClinicResetPassword('clinic-456'), equals('admin/clinics/clinic-456/reset-admin-password/'));
+      expect(
+        ApiConfig.clinicBranchDetail('branch-123'),
+        equals('clinic-portal/branches/branch-123/'),
+      );
+      expect(
+        ApiConfig.clinicSetupChecklist,
+        equals('clinic-portal/profile/setup-checklist/'),
+      );
+      expect(
+        ApiConfig.clinicSubmitForReview,
+        equals('clinic-portal/profile/submit-for-review/'),
+      );
+      expect(
+        ApiConfig.adminClinicResetPassword('clinic-456'),
+        equals('admin/clinics/clinic-456/reset-admin-password/'),
+      );
     });
 
     test('ClinicBranch model parses and serializes correctly', () {
@@ -92,81 +104,87 @@ void main() {
       expect(model.items[1].isCompleted, isFalse);
     });
 
-    test('ClinicModel setupStatus defaults to approved and reflects server response', () {
-      const defaultClinic = ClinicModel(
-        id: 'c1',
-        nameAr: 'عيادة',
-        nameEn: 'Clinic',
-        descriptionAr: '',
-        descriptionEn: '',
-        coverImageUrl: '',
-        galleryImages: [],
-        logoUrl: '',
-        rating: 5.0,
-        reviewCount: 0,
-        subscriptionTier: SubscriptionTier.basic,
-        city: 'Dubai',
-        areaAr: 'دبي',
-        addressAr: 'دبي',
-      );
-      expect(defaultClinic.setupStatus, equals('approved'));
+    test(
+      'ClinicModel setupStatus defaults to approved and reflects server response',
+      () {
+        const defaultClinic = ClinicModel(
+          id: 'c1',
+          nameAr: 'عيادة',
+          nameEn: 'Clinic',
+          descriptionAr: '',
+          descriptionEn: '',
+          coverImageUrl: '',
+          galleryImages: [],
+          logoUrl: '',
+          rating: 5.0,
+          reviewCount: 0,
+          subscriptionTier: SubscriptionTier.basic,
+          city: 'Dubai',
+          areaAr: 'دبي',
+          addressAr: 'دبي',
+        );
+        expect(defaultClinic.setupStatus, equals('approved'));
 
-      final draftClinic = ClinicModel.fromJson({
-        'id': 'c2',
-        'name_en': 'Draft Clinic',
-        'name_ar': 'عيادة مسودة',
-        'city': 'Abu Dhabi',
-        'setup_status': 'draft',
-      });
-      expect(draftClinic.setupStatus, equals('draft'));
-    });
+        final draftClinic = ClinicModel.fromJson({
+          'id': 'c2',
+          'name_en': 'Draft Clinic',
+          'name_ar': 'عيادة مسودة',
+          'city': 'Abu Dhabi',
+          'setup_status': 'draft',
+        });
+        expect(draftClinic.setupStatus, equals('draft'));
+      },
+    );
   });
 
   group('Super Admin Provisioning UI Widget Tests', () {
-    testWidgets('AdminClinicsScreen renders Add Clinic Floating Action Button', (tester) async {
-      AdminPortalService().enableMockMode();
+    testWidgets(
+      'AdminClinicsScreen renders Add Clinic Floating Action Button',
+      (tester) async {
+        AdminPortalService().enableMockMode();
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: AdminClinicsScreen(),
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(const MaterialApp(home: AdminClinicsScreen()));
+        await tester.pumpAndSettle();
 
-      final fabFinder = find.byType(FloatingActionButton);
-      expect(fabFinder, findsOneWidget);
-      expect(find.byIcon(Icons.add_business_rounded), findsOneWidget);
-    });
+        final fabFinder = find.byType(FloatingActionButton);
+        expect(fabFinder, findsOneWidget);
+        expect(find.byIcon(Icons.add_business_rounded), findsOneWidget);
+      },
+    );
 
-    testWidgets('AdminCreateClinicDialog renders clinic & admin inputs with auto-generate password', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+    testWidgets(
+      'AdminCreateClinicDialog renders clinic & admin inputs with auto-generate password',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AdminCreateClinicDialog(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: AdminCreateClinicDialog())),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('1. Clinic Profile & Regulatory'), findsOneWidget);
-      expect(find.text('2. Initial Administrator Credentials'), findsOneWidget);
-      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget); // Auto-generate password button
+        expect(find.text('Clinic identity'), findsOneWidget);
+        expect(find.text('Initial Administrator Credentials'), findsOneWidget);
+        expect(
+          find.byIcon(Icons.refresh_rounded),
+          findsOneWidget,
+        ); // Auto-generate password button
 
-      // Tap Auto-Generate password button
-      await tester.tap(find.byIcon(Icons.refresh_rounded));
-      await tester.pumpAndSettle();
+        // Tap Auto-Generate password button
+        await tester.tap(find.byIcon(Icons.refresh_rounded));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Provision Clinic & Administrator'), findsOneWidget);
-    });
+        expect(find.text('Provision Clinic & Administrator'), findsOneWidget);
+      },
+    );
 
-    testWidgets('AdminClinicDetailSheet renders Reset Admin Password button', (tester) async {
+    testWidgets('AdminClinicDetailSheet renders Reset Admin Password button', (
+      tester,
+    ) async {
       AdminPortalService().enableMockMode();
 
       const testClinic = AdminClinicModel(
@@ -181,9 +199,7 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AdminClinicDetailSheet(clinic: testClinic),
-          ),
+          home: Scaffold(body: AdminClinicDetailSheet(clinic: testClinic)),
         ),
       );
       await tester.pumpAndSettle();
@@ -194,109 +210,118 @@ void main() {
   });
 
   group('Clinic Portal Onboarding & Setup Checklist Widget Tests', () {
-    testWidgets('ClinicSetupChecklistCard displays items and calculates progress', (tester) async {
-      final checklist = ClinicSetupChecklistModel(
-        clinicId: 'clinic-active',
-        setupStatus: 'draft',
-        progressPercentage: 60,
-        isReadyForReview: false,
-        items: const [
-          ClinicSetupChecklistItem(
-            key: 'branding',
-            titleEn: 'Clinic Branding (Logo & Cover)',
-            titleAr: 'الهوية البصرية',
-            isCompleted: true,
-          ),
-          ClinicSetupChecklistItem(
-            key: 'branch',
-            titleEn: 'Main Branch Location & Map',
-            titleAr: 'الفرع الرئيسي',
-            isCompleted: true,
-          ),
-          ClinicSetupChecklistItem(
-            key: 'practitioners',
-            titleEn: 'At least 1 Medical Practitioner',
-            titleAr: 'طبيب واحد على الأقل',
-            isCompleted: false,
-          ),
-          ClinicSetupChecklistItem(
-            key: 'treatments',
-            titleEn: 'At least 1 Treatment Service',
-            titleAr: 'خدمة واحدة على الأقل',
-            isCompleted: false,
-          ),
-        ],
-      );
+    testWidgets(
+      'ClinicSetupChecklistCard displays items and calculates progress',
+      (tester) async {
+        final checklist = ClinicSetupChecklistModel(
+          clinicId: 'clinic-active',
+          setupStatus: 'draft',
+          progressPercentage: 60,
+          isReadyForReview: false,
+          items: const [
+            ClinicSetupChecklistItem(
+              key: 'branding',
+              titleEn: 'Clinic Branding (Logo & Cover)',
+              titleAr: 'الهوية البصرية',
+              isCompleted: true,
+            ),
+            ClinicSetupChecklistItem(
+              key: 'branch',
+              titleEn: 'Main Branch Location & Map',
+              titleAr: 'الفرع الرئيسي',
+              isCompleted: true,
+            ),
+            ClinicSetupChecklistItem(
+              key: 'practitioners',
+              titleEn: 'At least 1 Medical Practitioner',
+              titleAr: 'طبيب واحد على الأقل',
+              isCompleted: false,
+            ),
+            ClinicSetupChecklistItem(
+              key: 'treatments',
+              titleEn: 'At least 1 Treatment Service',
+              titleAr: 'خدمة واحدة على الأقل',
+              isCompleted: false,
+            ),
+          ],
+        );
 
-      const clinic = ClinicModel(
-        id: 'clinic-active',
-        nameAr: 'عيادة تجريبية',
-        nameEn: 'Test Clinic',
-        descriptionAr: '',
-        descriptionEn: '',
-        coverImageUrl: '',
-        galleryImages: [],
-        logoUrl: '',
-        rating: 5.0,
-        reviewCount: 0,
-        subscriptionTier: SubscriptionTier.basic,
-        city: 'Dubai',
-        areaAr: 'دبي',
-        addressAr: 'دبي',
-        setupStatus: 'draft',
-      );
+        const clinic = ClinicModel(
+          id: 'clinic-active',
+          nameAr: 'عيادة تجريبية',
+          nameEn: 'Test Clinic',
+          descriptionAr: '',
+          descriptionEn: '',
+          coverImageUrl: '',
+          galleryImages: [],
+          logoUrl: '',
+          rating: 5.0,
+          reviewCount: 0,
+          subscriptionTier: SubscriptionTier.basic,
+          city: 'Dubai',
+          areaAr: 'دبي',
+          addressAr: 'دبي',
+          setupStatus: 'draft',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ClinicSetupChecklistCard(
-              clinic: clinic,
-              checklist: checklist,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ClinicSetupChecklistCard(
+                clinic: clinic,
+                checklist: checklist,
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Complete Clinic Setup & Verification'), findsOneWidget);
-      expect(find.text('60%'), findsOneWidget);
-      expect(find.text('Clinic Branding (Logo & Cover)'), findsOneWidget);
-      expect(find.text('At least 1 Medical Practitioner'), findsOneWidget);
-      expect(find.text('Submit for Platform Verification'), findsOneWidget);
-    });
+        expect(
+          find.text('Complete Clinic Setup & Verification'),
+          findsOneWidget,
+        );
+        expect(find.text('60%'), findsOneWidget);
+        expect(find.text('Clinic Branding (Logo & Cover)'), findsOneWidget);
+        expect(find.text('At least 1 Medical Practitioner'), findsOneWidget);
+        expect(find.text('Submit for Platform Verification'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ClinicDashboardScreen displays ClinicSetupChecklistCard when setupStatus is draft', (tester) async {
-      const draftClinic = ClinicModel(
-        id: 'clinic-draft-01',
-        nameAr: 'عيادة جديدة',
-        nameEn: 'New Partner Clinic',
-        descriptionAr: '',
-        descriptionEn: '',
-        coverImageUrl: '',
-        galleryImages: [],
-        logoUrl: '',
-        rating: 5.0,
-        reviewCount: 0,
-        subscriptionTier: SubscriptionTier.basic,
-        city: 'Dubai',
-        areaAr: 'دبي',
-        addressAr: 'دبي',
-        setupStatus: 'draft',
-      );
-      ClinicPortalService().enableMockMode(testClinic: draftClinic);
+    testWidgets(
+      'ClinicDashboardScreen displays ClinicSetupChecklistCard when setupStatus is draft',
+      (tester) async {
+        const draftClinic = ClinicModel(
+          id: 'clinic-draft-01',
+          nameAr: 'عيادة جديدة',
+          nameEn: 'New Partner Clinic',
+          descriptionAr: '',
+          descriptionEn: '',
+          coverImageUrl: '',
+          galleryImages: [],
+          logoUrl: '',
+          rating: 5.0,
+          reviewCount: 0,
+          subscriptionTier: SubscriptionTier.basic,
+          city: 'Dubai',
+          areaAr: 'دبي',
+          addressAr: 'دبي',
+          setupStatus: 'draft',
+        );
+        ClinicPortalService().enableMockMode(testClinic: draftClinic);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ClinicDashboardScreen(
-            onNavigateToLeads: () {},
-            onNavigateToOffers: () {},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ClinicDashboardScreen(
+              onNavigateToLeads: () {},
+              onNavigateToOffers: () {},
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // In draft mode, ClinicSetupChecklistCard is present
-      expect(find.byType(ClinicSetupChecklistCard), findsOneWidget);
-    });
+        // In draft mode, ClinicSetupChecklistCard is present
+        expect(find.byType(ClinicSetupChecklistCard), findsOneWidget);
+      },
+    );
   });
 }

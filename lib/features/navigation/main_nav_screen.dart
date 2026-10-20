@@ -183,8 +183,8 @@ class _MainNavScreenState extends State<MainNavScreen> {
                         _FloatingNavItem(
                           index: 2,
                           selectedIndex: _currentIndex,
-                          icon: Icons.shopping_bag_outlined,
-                          activeIcon: Icons.shopping_bag_rounded,
+                          icon: Icons.auto_awesome_outlined,
+                          activeIcon: Icons.auto_awesome_rounded,
                           label: localeService.tr('nav_products'),
                           onTap: () => _onTabTapped(2),
                         ),

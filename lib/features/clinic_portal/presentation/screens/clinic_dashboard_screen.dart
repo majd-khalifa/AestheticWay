@@ -366,7 +366,7 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                                   ? 'المنتجات الطبية'
                                   : 'Skincare Products',
                               count: '${clinicService.activeProductsCount}',
-                              icon: Icons.shopping_bag_outlined,
+                              icon: Icons.auto_awesome_outlined,
                               onTap: () {
                                 if (widget.onNavigateToSection != null) {
                                   widget.onNavigateToSection!('products');

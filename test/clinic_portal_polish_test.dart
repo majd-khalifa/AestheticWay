@@ -137,7 +137,10 @@ void main() {
   );
 
   test('location summary never renders orphan separators', () {
-    expect(clinicLocationSummary('', ' ', arabic: false), 'Dubai, UAE');
+    expect(
+      clinicLocationSummary('', ' ', arabic: false),
+      'Location not provided',
+    );
     expect(clinicLocationSummary('Dubai', '', arabic: false), 'Dubai');
     expect(clinicLocationSummary('', 'Jumeirah', arabic: false), 'Jumeirah');
     expect(

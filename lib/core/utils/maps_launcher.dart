@@ -1,8 +1,43 @@
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:url_launcher/url_launcher.dart';
+import 'clinic_location.dart';
 
 /// Google Maps Deep-Linking Engine
 abstract class MapsLauncher {
+  static Uri? verifiedDirectionsUri({
+    double? latitude,
+    double? longitude,
+    String? googleMapsUrl,
+  }) {
+    final stored = verifiedGoogleMapsUri(googleMapsUrl);
+    if (stored != null) return stored;
+    final point = ClinicCoordinates.parse(latitude, longitude);
+    if (point == null) return null;
+    return Uri.https('www.google.com', '/maps/dir/', {
+      'api': '1',
+      'destination': '${point.latitude},${point.longitude}',
+      'travelmode': 'driving',
+    });
+  }
+
+  static Future<bool> openVerifiedLocation({
+    double? latitude,
+    double? longitude,
+    String? googleMapsUrl,
+  }) async {
+    final uri = verifiedDirectionsUri(
+      latitude: latitude,
+      longitude: longitude,
+      googleMapsUrl: googleMapsUrl,
+    );
+    if (uri == null) return false;
+    try {
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Opens clinic location on Google Maps
   static Future<bool> openMapLocation({
     required double latitude,
@@ -11,7 +46,8 @@ abstract class MapsLauncher {
     String? placeId,
     String? placeName,
   }) async {
-    final hasValidUrl = googleMapsUrl != null &&
+    final hasValidUrl =
+        googleMapsUrl != null &&
         googleMapsUrl.trim().toLowerCase().startsWith('http');
     final hasCoordinates = latitude != 0.0 || longitude != 0.0;
 
@@ -76,7 +112,8 @@ abstract class MapsLauncher {
     String? googleMapsUrl,
     String? destinationTitle,
   }) async {
-    final hasValidUrl = googleMapsUrl != null &&
+    final hasValidUrl =
+        googleMapsUrl != null &&
         googleMapsUrl.trim().toLowerCase().startsWith('http');
     final hasCoordinates = latitude != 0.0 || longitude != 0.0;
 

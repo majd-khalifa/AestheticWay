@@ -19,6 +19,10 @@ class LuxuryImagePickerField extends StatefulWidget {
   final String? helperText;
   final bool isRequired;
   final bool isCircular;
+  final BoxFit fit;
+  final bool compactPlaceholder;
+  final String? mediaCacheKey;
+  final bool enabled;
 
   const LuxuryImagePickerField({
     super.key,
@@ -32,6 +36,10 @@ class LuxuryImagePickerField extends StatefulWidget {
     this.helperText,
     this.isRequired = false,
     this.isCircular = false,
+    this.fit = BoxFit.cover,
+    this.compactPlaceholder = false,
+    this.mediaCacheKey,
+    this.enabled = true,
   });
 
   @override
@@ -77,7 +85,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
         imageQuality: 78,
       );
 
-      if (!mounted) return;
+      if (!mounted || !widget.enabled) return;
       if (file != null) {
         setState(() {
           _localPath = file.path;
@@ -90,6 +98,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
   }
 
   void _clearImage() {
+    if (!widget.enabled) return;
     setState(() {
       _localPath = null;
       _remoteUrl = null;
@@ -98,6 +107,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
   }
 
   void _showPickerOptions(BuildContext context) {
+    if (!widget.enabled) return;
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -265,7 +275,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
 
         // Dropzone / Preview Container
         GestureDetector(
-          onTap: () => _showPickerOptions(context),
+          onTap: widget.enabled ? () => _showPickerOptions(context) : null,
           child: Container(
             height: widget.height,
             width: widget.isCircular
@@ -296,54 +306,38 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
                           Image.file(
                             File(_localPath!),
                             cacheWidth: 480,
-                            fit: BoxFit.cover,
+                            fit: widget.fit,
                           )
                         else if (_remoteUrl != null && _remoteUrl!.isNotEmpty)
-                          LuxuryImage(imageUrl: _remoteUrl!, fit: BoxFit.cover),
+                          LuxuryImage(
+                            imageUrl: _remoteUrl!,
+                            fit: widget.fit,
+                            mediaCacheKey: widget.mediaCacheKey,
+                          ),
 
-                        // Overlay action bar
                         Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Replace button
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.6),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.edit_rounded,
-                                  color: AppColors.accentChampagne,
-                                  size: 16,
-                                ),
+                          top: 4,
+                          right: 4,
+                          child: IconButton.filled(
+                            tooltip: loc.isArabic
+                                ? 'استبدال الصورة أو حذفها'
+                                : 'Replace or remove photo',
+                            onPressed: widget.enabled
+                                ? () => _showPickerOptions(context)
+                                : null,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.black.withValues(
+                                alpha: .65,
                               ),
-                              const SizedBox(width: 6),
-                              // Remove button
-                              GestureDetector(
-                                onTap: _clearImage,
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.6),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close_rounded,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(48, 48),
+                            ),
+                            icon: const Icon(Icons.more_horiz, size: 22),
                           ),
                         ),
                       ],
                     )
-                  : widget.isCircular
+                  : widget.isCircular || widget.compactPlaceholder
                   ? Icon(
                       Icons.add_a_photo_outlined,
                       color: AppColors.goldText(context),

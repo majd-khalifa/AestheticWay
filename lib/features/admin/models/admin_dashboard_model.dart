@@ -44,10 +44,20 @@ class AdminDashboardModel {
     this.featuredClinics = 0,
   });
 
+  int get contactedLeads => leadsByStatus['contacted'] ?? 0;
+  double get closureRate => totalLeads == 0
+      ? 0
+      : ((leadsByStatus['closed'] ?? completedLeads) / totalLeads * 100).clamp(
+          0,
+          100,
+        );
+
   factory AdminDashboardModel.fromJson(Map<String, dynamic> json) {
     Map<String, int> parseCountMap(dynamic raw) {
       if (raw is Map) {
-        return raw.map((k, v) => MapEntry(k.toString(), (v is num) ? v.toInt() : 0));
+        return raw.map(
+          (k, v) => MapEntry(k.toString(), (v is num) ? v.toInt() : 0),
+        );
       }
       return {};
     }
@@ -67,10 +77,13 @@ class AdminDashboardModel {
       completedLeads: (json['completed_leads'] as num?)?.toInt() ?? 0,
       scheduledLeads: (json['scheduled_leads'] as num?)?.toInt() ?? 0,
       leadsByStatus: parseCountMap(json['leads_by_status']),
-      conversionPercentage: (json['conversion_percentage'] as num?)?.toDouble() ?? 0.0,
+      conversionPercentage:
+          (json['conversion_percentage'] as num?)?.toDouble() ?? 0.0,
       totalReferrals: (json['total_referrals'] as num?)?.toInt() ?? 0,
-      totalRedeemedReferralCodes: (json['total_redeemed_referral_codes'] as num?)?.toInt() ?? 0,
-      totalAnalyticsEvents: (json['total_analytics_events'] as num?)?.toInt() ?? 0,
+      totalRedeemedReferralCodes:
+          (json['total_redeemed_referral_codes'] as num?)?.toInt() ?? 0,
+      totalAnalyticsEvents:
+          (json['total_analytics_events'] as num?)?.toInt() ?? 0,
       activeSubscriptionTiers: parseCountMap(json['active_subscription_tiers']),
       featuredClinics: (json['featured_clinics'] as num?)?.toInt() ?? 0,
     );

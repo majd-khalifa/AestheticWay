@@ -257,5 +257,6 @@ class ApiConfig {
   static String adminArticleRestore(String id) => 'admin/articles/$id/restore/';
 
   static const String adminAnalytics = 'admin/analytics/';
+  static const String adminReferralAnalytics = 'admin/analytics/referrals/';
   static const String adminSettings = 'admin/settings/';
 }

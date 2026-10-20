@@ -1,3 +1,6 @@
+import '../../../core/auth/guest_auth_guard.dart';
+import '../../../core/network/api_exception.dart';
+import '../../../core/services/local_media_cache.dart';
 import 'dart:collection';
 import '../../../core/data/single_flight.dart';
 import '../../../core/data/paged_collection.dart';
@@ -34,9 +37,150 @@ class AdminPortalService extends ChangeNotifier {
   AdminDashboardModel _dashboard = const AdminDashboardModel();
   final List<AdminClinicModel> _clinics = [];
   final List<AdminLeadModel> _allLeads = [];
+  final List<AdminLeadModel> _recentLeads = [];
+  String? _recentLeadsError;
+  bool _recentLeadsLoading = false;
+  List<AdminLeadModel> get recentLeads => UnmodifiableListView(
+    _mockMode ? _allLeads.take(4).toList() : _recentLeads,
+  );
+  String? get recentLeadsError => _recentLeadsError;
+  bool get recentLeadsLoading => _recentLeadsLoading;
+
   final List<OfferModel> _allOffers = [];
   AdminAnalyticsModel _analytics = const AdminAnalyticsModel();
   final Set<String> _suspendedOfferIds = {};
+  final Set<String> _pendingWrites = {};
+  final Map<String, String> _writeErrors = {};
+  final Map<String, AdminClinicModel> _clinicDetails = {};
+  final Map<String, String> _detailErrors = {};
+  final Set<String> _detailLoading = {};
+  AdminReferralAnalyticsModel? _referrals;
+  bool _analyticsLoading = false, _referralsLoading = false;
+  String? _analyticsError, _referralsError;
+  bool get isMockMode => _mockMode;
+  bool get canManage =>
+      _mockMode || (AuthState().isLoggedIn && AuthState().isSuperAdmin);
+  bool get overviewLoaded => _overviewLoaded || _mockMode;
+  bool get analyticsLoaded => _analyticsKey != null || _mockMode;
+  bool get analyticsLoading => _analyticsLoading;
+  bool get referralsLoading => _referralsLoading;
+  String? get overviewError => _errorMessage;
+  String? get analyticsError => _analyticsError;
+  String? get referralsError => _referralsError;
+  AdminReferralAnalyticsModel? get referralAnalytics => _referrals;
+  bool isPending(String kind, String id) =>
+      _pendingWrites.contains('$kind:$id');
+  String? writeError(String kind, String id) => _writeErrors['$kind:$id'];
+  AdminClinicModel? clinicDetail(String id) => _clinicDetails[id];
+  String? clinicDetailError(String id) => _detailErrors[id];
+  bool clinicDetailLoading(String id) => _detailLoading.contains(id);
+
+  void _requireManager() {
+    if (!canManage) {
+      throw const ApiException(
+        message: 'Super Admin access is required.',
+        statusCode: 403,
+      );
+    }
+  }
+
+  Future<bool> _confirmedWrite(
+    String key,
+    Future<void> Function() action,
+  ) async {
+    _requireManager();
+    if (!_pendingWrites.add(key)) return false;
+    final epoch = _sessionEpoch;
+    _writeErrors.remove(key);
+    notifyListeners();
+    try {
+      await action();
+      return epoch == _sessionEpoch;
+    } catch (error) {
+      if (epoch == _sessionEpoch) {
+        _writeErrors[key] = error is ApiException
+            ? error.message
+            : 'Could not save changes. Please retry.';
+      }
+      return false;
+    } finally {
+      if (epoch == _sessionEpoch) {
+        _pendingWrites.remove(key);
+        notifyListeners();
+      }
+    }
+  }
+
+  void _commitCollection(String key, VoidCallback change) {
+    final page = _pages[key];
+    if (page == null) {
+      change();
+    } else {
+      page.mutate((_) => change());
+    }
+  }
+
+  void _rememberClinicMedia(
+    String id,
+    Map<String, dynamic> data, {
+    String? logo,
+    String? cover,
+  }) {
+    for (final (field, key, url) in [
+      ('logo', LocalMediaCache.clinicLogo(id), logo),
+      ('cover_image', LocalMediaCache.clinicCover(id), cover),
+    ]) {
+      if (!data.containsKey(field)) continue;
+      final value = data[field];
+      if (value == null || value == '') {
+        LocalMediaCache().remove(key);
+      } else if (value is String) {
+        LocalMediaCache().remember(
+          localPath: value,
+          entityKey: key,
+          remoteUrl: url,
+        );
+      }
+    }
+  }
+
+  Future<void> loadClinicDetail(
+    String id, {
+    bool refresh = false,
+    AdminClinicModel? initial,
+  }) {
+    if (_mockMode) {
+      if (initial != null) _clinicDetails.putIfAbsent(id, () => initial);
+      return Future.value();
+    }
+    if (!refresh && _clinicDetails.containsKey(id)) return Future.value();
+    return _flights.run('clinic-detail:$id', () async {
+      final epoch = _sessionEpoch;
+      _detailLoading.add(id);
+      _detailErrors.remove(id);
+      notifyListeners();
+      try {
+        final detail = await _inSession(_repository.getClinicDetail(id), epoch);
+        if (detail.id != id) {
+          throw const ApiException(
+            message: 'The clinic response could not be verified.',
+          );
+        }
+        _clinicDetails[id] = detail;
+      } catch (error) {
+        if (epoch == _sessionEpoch) {
+          _detailErrors[id] = error is ApiException
+              ? error.message
+              : 'Could not load clinic details.';
+        }
+      } finally {
+        if (epoch == _sessionEpoch) {
+          _detailLoading.remove(id);
+          notifyListeners();
+        }
+      }
+    });
+  }
 
   @visibleForTesting
   void enableMockMode() {
@@ -50,6 +194,7 @@ class AdminPortalService extends ChangeNotifier {
   final Map<String, PagedCollection<dynamic>> _pages = {};
   final SingleFlight _flights = SingleFlight();
   bool _overviewLoaded = false;
+  bool _overviewDirty = false;
   String? _analyticsKey;
 
   PagedCollection<dynamic> collection(String key) {
@@ -150,6 +295,7 @@ class AdminPortalService extends ChangeNotifier {
     }
     _flights.clear();
     _overviewLoaded = false;
+    _overviewDirty = false;
     _analyticsKey = null;
     _mockMode = false;
     _isLoading = false;
@@ -157,11 +303,24 @@ class AdminPortalService extends ChangeNotifier {
     _dashboard = const AdminDashboardModel();
     _replaceItems(_clinics, []);
     _replaceItems(_allLeads, []);
+    _recentLeads.clear();
+    _recentLeadsError = null;
+    _recentLeadsLoading = false;
     _replaceItems(_allOffers, []);
     _replaceItems(_allProducts, []);
     _replaceItems(_allArticles, []);
     _analytics = const AdminAnalyticsModel();
     _suspendedOfferIds.clear();
+    _pendingWrites.clear();
+    _writeErrors.clear();
+    _clinicDetails.clear();
+    _detailErrors.clear();
+    _detailLoading.clear();
+    _referrals = null;
+    _analyticsLoading = false;
+    _referralsLoading = false;
+    _analyticsError = null;
+    _referralsError = null;
     if (notify) notifyListeners();
   }
 
@@ -195,12 +354,12 @@ class AdminPortalService extends ChangeNotifier {
   // Platform Dashboard & KPI Shortcuts (strictly real API, 0 if empty/null)
   int get totalAppOpens => _analytics.appOpens;
   int get activeUsersCount => _dashboard.totalPatients;
-  int get activeClinicsCount => _dashboard.activeClinics > 0
-      ? _dashboard.activeClinics
-      : _clinics.where((c) => c.isActive && !c.isSuspended).length;
+  int get activeClinicsCount => _mockMode
+      ? _clinics.where((c) => c.isActive && !c.isSuspended).length
+      : _dashboard.activeClinics;
   int get totalLeadsCount =>
-      _dashboard.totalLeads > 0 ? _dashboard.totalLeads : _allLeads.length;
-  int get todayLeadsCount => _dashboard.scheduledLeads;
+      _mockMode ? _allLeads.length : _dashboard.totalLeads;
+  int get contactedLeadsCount => _dashboard.contactedLeads;
 
   int get totalWhatsappTaps => _analytics.whatsappTaps;
   int get totalCallTaps => _analytics.callTaps;
@@ -225,7 +384,7 @@ class AdminPortalService extends ChangeNotifier {
     if (_suspendedOfferIds.contains(offerId)) return true;
     try {
       final o = _allOffers.firstWhere((off) => off.id == offerId);
-      return !o.isActive;
+      return o.status == 'suspended';
     } catch (_) {
       return false;
     }
@@ -237,76 +396,99 @@ class AdminPortalService extends ChangeNotifier {
   List<ProductModel> get allProducts => UnmodifiableListView(_allProducts);
   List<ArticleModel> get allArticles => UnmodifiableListView(_allArticles);
 
-  Future<bool> toggleProductModeration(
-    String productId, {
-    String notes = '',
-  }) async {
-    final sessionEpoch = _sessionEpoch;
-    final idx = _allProducts.indexWhere((p) => p.id == productId);
-    if (idx == -1) return false;
-
-    final product = _allProducts[idx];
-    final willSuspend = product.isPublishedByAdmin;
-
-    _allProducts[idx] = product.copyWith(isPublishedByAdmin: !willSuspend);
-    notifyListeners();
-
-    try {
-      if (willSuspend) {
-        await _inSession(
-          _repository.suspendProduct(productId, notes: notes),
-          sessionEpoch,
-        );
-      } else {
-        await _inSession(
-          _repository.approveProduct(productId, notes: notes),
-          sessionEpoch,
-        );
-      }
-      return true;
-    } catch (e) {
-      if (sessionEpoch != _sessionEpoch) {
-        return false;
-      }
-      _errorMessage = e.toString();
-      return true;
-    }
+  Future<bool> toggleProductModeration(String id, {String notes = ''}) {
+    final item = _allProducts.where((p) => p.id == id).firstOrNull;
+    if (item == null || item.status == 'unknown') return Future.value(false);
+    return setContentStatus(
+      'product',
+      id,
+      item.status == 'active' ? 'suspended' : 'active',
+      notes: notes,
+    );
   }
 
-  Future<bool> toggleArticleModeration(
-    String articleId, {
+  Future<bool> toggleArticleModeration(String id, {String notes = ''}) {
+    final item = _allArticles.where((p) => p.id == id).firstOrNull;
+    if (item == null || item.status == 'unknown') return Future.value(false);
+    return setContentStatus(
+      'article',
+      id,
+      item.status == 'active' ? 'suspended' : 'active',
+      notes: notes,
+    );
+  }
+
+  /// A real acknowledged target state; unknown legacy responses never become Active by default.
+  Future<bool> setContentStatus(
+    String kind,
+    String id,
+    String target, {
     String notes = '',
-  }) async {
-    final sessionEpoch = _sessionEpoch;
-    final idx = _allArticles.indexWhere((a) => a.id == articleId);
-    if (idx == -1) return false;
-
-    final article = _allArticles[idx];
-    final willSuspend = article.isApprovedByAdmin;
-
-    _allArticles[idx] = article.copyWith(isApprovedByAdmin: !willSuspend);
-    notifyListeners();
-
-    try {
-      if (willSuspend) {
-        await _inSession(
-          _repository.suspendArticle(articleId, notes: notes),
-          sessionEpoch,
-        );
-      } else {
-        await _inSession(
-          _repository.approveArticle(articleId, notes: notes),
-          sessionEpoch,
-        );
-      }
-      return true;
-    } catch (e) {
-      if (sessionEpoch != _sessionEpoch) {
-        return false;
-      }
-      _errorMessage = e.toString();
-      return true;
+  }) {
+    if (!['offer', 'product', 'article'].contains(kind) ||
+        !['active', 'suspended'].contains(target)) {
+      return Future.value(false);
     }
+    final epoch = _sessionEpoch;
+    return _confirmedWrite('$kind:$id', () async {
+      final Map<String, dynamic> response;
+      if (_mockMode) {
+        response = {'new_status': target};
+      } else {
+        final future = switch ((kind, target)) {
+          ('offer', 'active') => _repository.approveOffer(id, notes: notes),
+          ('offer', _) => _repository.suspendOffer(id, notes: notes),
+          ('product', 'active') => _repository.approveProduct(id, notes: notes),
+          ('product', _) => _repository.suspendProduct(id, notes: notes),
+          ('article', 'active') => _repository.approveArticle(id, notes: notes),
+          _ => _repository.suspendArticle(id, notes: notes),
+        };
+        response = await _inSession(future, epoch);
+      }
+      if (response['new_status'] != target ||
+          (response['id'] != null && '${response['id']}' != id)) {
+        throw const ApiException(
+          message:
+              'The moderation result could not be verified. Refresh before retrying.',
+        );
+      }
+      _commitCollection('${kind}s', () {
+        if (kind == 'offer') {
+          final i = _allOffers.indexWhere((p) => p.id == id);
+          if (i >= 0) {
+            _allOffers[i] = _allOffers[i].copyWith(
+              status: target,
+              isActive: target == 'active',
+            );
+          }
+          if (target == 'suspended') {
+            _suspendedOfferIds.add(id);
+          } else {
+            _suspendedOfferIds.remove(id);
+          }
+        } else if (kind == 'product') {
+          final i = _allProducts.indexWhere((p) => p.id == id);
+          if (i >= 0) {
+            _allProducts[i] = _allProducts[i].copyWith(
+              status: target,
+              isPublishedByAdmin: target == 'active',
+              isAvailable: target == 'active',
+            );
+          }
+        } else {
+          final i = _allArticles.indexWhere((p) => p.id == id);
+          if (i >= 0) {
+            _allArticles[i] = _allArticles[i].copyWith(
+              status: target,
+              isApprovedByAdmin: target == 'active',
+            );
+          }
+        }
+      });
+      if (!_mockMode && _pages['${kind}s']?.query['status'] != null) {
+        await loadCollection('${kind}s', refresh: true);
+      }
+    });
   }
 
   void _populateInitialSeedData() {
@@ -436,11 +618,46 @@ class AdminPortalService extends ChangeNotifier {
   }
 
   Future<void> loadOverview({bool refresh = false}) {
-    if (_mockMode || (_overviewLoaded && !refresh)) return Future.value();
-    return _flights.run('overview', _fetchOverview);
+    if (_mockMode || (_overviewLoaded && !_overviewDirty && !refresh)) {
+      return Future.value();
+    }
+    return _flights.run('overview', () => _fetchOverview(refresh: refresh));
   }
 
-  Future<void> _fetchOverview() async {
+  Future<void> _loadRecentLeads({bool refresh = false}) async {
+    final epoch = _sessionEpoch;
+    _recentLeadsLoading = true;
+    _recentLeadsError = null;
+    try {
+      final query = _pages['leads']?.query ?? {};
+      final unfiltered = query.values.every(
+        (v) => v == null || v == '' || v == 'all',
+      );
+      final List<AdminLeadModel> rows;
+      if (unfiltered) {
+        await _inSession(loadCollection('leads', refresh: refresh), epoch);
+        if (_pages['leads']?.error != null) {
+          throw ApiException(message: _pages['leads']!.error!);
+        }
+        rows = _allLeads;
+      } else {
+        rows = await _inSession(_repository.getLeads(), epoch);
+      }
+      _recentLeads
+        ..clear()
+        ..addAll(rows.take(4));
+    } catch (error) {
+      if (epoch == _sessionEpoch) {
+        _recentLeadsError = error is ApiException
+            ? error.message
+            : 'Could not load recent requests.';
+      }
+    } finally {
+      if (epoch == _sessionEpoch) _recentLeadsLoading = false;
+    }
+  }
+
+  Future<void> _fetchOverview({bool refresh = false}) async {
     final epoch = _sessionEpoch;
     _isLoading = true;
     _errorMessage = null;
@@ -450,7 +667,7 @@ class AdminPortalService extends ChangeNotifier {
         Future.wait([
           _repository.getDashboard(),
           _repository.getAnalytics(),
-          loadCollection('leads'),
+          _loadRecentLeads(refresh: refresh),
         ]),
         epoch,
       );
@@ -458,6 +675,7 @@ class AdminPortalService extends ChangeNotifier {
       _analytics = values[1] as AdminAnalyticsModel;
       _analyticsKey = '|';
       _overviewLoaded = true;
+      _overviewDirty = false;
     } catch (error) {
       if (epoch == _sessionEpoch) _errorMessage = error.toString();
     } finally {
@@ -499,6 +717,9 @@ class AdminPortalService extends ChangeNotifier {
         refresh: true,
         query: {'status': status, 'clinic': clinicId},
       );
+
+  Future<AdminLeadModel> getLeadDetail(String id) =>
+      _inSession(_repository.getLeadDetail(id), _sessionEpoch);
 
   Future<void> loadDashboard() async {
     final sessionEpoch = _sessionEpoch;
@@ -542,21 +763,54 @@ class AdminPortalService extends ChangeNotifier {
     final key = '${dateFrom ?? ""}|${dateTo ?? ""}';
     if (_mockMode || (!refresh && _analyticsKey == key)) return Future.value();
     return _flights.run('analytics:$key', () async {
-      final sessionEpoch = _sessionEpoch;
+      final epoch = _sessionEpoch;
+      _analyticsLoading = true;
+      _analyticsError = null;
+      notifyListeners();
       try {
-        final res = await _inSession(
+        _analytics = await _inSession(
           _repository.getAnalytics(dateFrom: dateFrom, dateTo: dateTo),
-          sessionEpoch,
+          epoch,
         );
-        _analytics = res;
         _analyticsKey = key;
-        notifyListeners();
-      } catch (e) {
-        if (sessionEpoch != _sessionEpoch) {
-          return;
+      } catch (error) {
+        if (epoch == _sessionEpoch) {
+          _analyticsError = error is ApiException
+              ? error.message
+              : 'Could not load analytics.';
         }
-        _errorMessage = e.toString();
-        notifyListeners();
+      } finally {
+        if (epoch == _sessionEpoch) {
+          _analyticsLoading = false;
+          notifyListeners();
+        }
+      }
+    });
+  }
+
+  Future<void> loadReferralAnalytics({bool refresh = false}) {
+    if (_mockMode || (!refresh && _referrals != null)) return Future.value();
+    return _flights.run('referral-analytics', () async {
+      final epoch = _sessionEpoch;
+      _referralsLoading = true;
+      _referralsError = null;
+      notifyListeners();
+      try {
+        _referrals = await _inSession(
+          _repository.getReferralAnalytics(),
+          epoch,
+        );
+      } catch (error) {
+        if (epoch == _sessionEpoch) {
+          _referralsError = error is ApiException
+              ? error.message
+              : 'Could not load referral analytics.';
+        }
+      } finally {
+        if (epoch == _sessionEpoch) {
+          _referralsLoading = false;
+          notifyListeners();
+        }
       }
     });
   }
@@ -565,94 +819,53 @@ class AdminPortalService extends ChangeNotifier {
   // MUTATIONS (STATUS TOGGLES)
   // -------------------------------------------------------------
 
-  /// Toggle clinic active / suspended state via live API with optimistic update
-  Future<bool> toggleClinicStatus(String clinicId, {String reason = ''}) async {
-    final sessionEpoch = _sessionEpoch;
-    final idx = _clinics.indexWhere((c) => c.id == clinicId);
-    if (idx == -1) return false;
-
-    final clinic = _clinics[idx];
-    final willSuspend = clinic.isActive && !clinic.isSuspended;
-
-    // Optimistic local update
-    _clinics[idx] = clinic.copyWith(
-      status: willSuspend ? 'suspended' : 'active',
-      isActive: !willSuspend,
-      moderationNotes: reason,
-    );
-    notifyListeners();
-
-    try {
-      if (willSuspend) {
-        await _inSession(
-          _repository.suspendClinic(
-            clinicId,
-            reason: reason.isNotEmpty ? reason : 'Suspended by Super Admin',
-          ),
-          sessionEpoch,
-        );
-      } else {
-        await _inSession(
-          _repository.activateClinic(
-            clinicId,
-            reason: reason.isNotEmpty ? reason : 'Activated by Super Admin',
-          ),
-          sessionEpoch,
+  Future<bool> toggleClinicStatus(String id, {String reason = ''}) {
+    final clinic =
+        _clinicDetails[id] ?? _clinics.where((c) => c.id == id).firstOrNull;
+    if (clinic == null) return Future.value(false);
+    final target = clinic.isActive && !clinic.isSuspended
+        ? 'suspended'
+        : 'active';
+    final epoch = _sessionEpoch;
+    return _confirmedWrite('clinic:$id', () async {
+      final response = _mockMode
+          ? {'new_status': target}
+          : await _inSession(
+              target == 'active'
+                  ? _repository.activateClinic(id, reason: reason)
+                  : _repository.suspendClinic(id, reason: reason),
+              epoch,
+            );
+      if (response['new_status'] != target ||
+          (response['clinic_id'] != null && '${response['clinic_id']}' != id)) {
+        throw const ApiException(
+          message:
+              'The clinic status result could not be verified. Please refresh.',
         );
       }
-      return true;
-    } catch (e) {
-      if (sessionEpoch != _sessionEpoch) {
-        return false;
-      }
-      _errorMessage = e.toString();
-      return true; // Retain optimistic state in test/offline environments
-    }
+      final updated = clinic.copyWith(
+        status: target,
+        isActive: target == 'active',
+      );
+      _clinicDetails[id] = updated;
+      _commitCollection('clinics', () {
+        final i = _clinics.indexWhere((c) => c.id == id);
+        if (i >= 0) _clinics[i] = updated;
+      });
+      _overviewDirty = true;
+      if (!_mockMode) await loadCollection('clinics', refresh: true);
+    });
   }
 
-  /// Toggle offer active / suspended state via live API with optimistic update
-  Future<bool> toggleOfferModeration(
-    String offerId, {
-    String notes = '',
-  }) async {
-    final sessionEpoch = _sessionEpoch;
-    final idx = _allOffers.indexWhere((o) => o.id == offerId);
-    final currentlySuspended = isOfferSuspended(offerId);
-
-    // Optimistic local update
-    if (currentlySuspended) {
-      _suspendedOfferIds.remove(offerId);
-      if (idx != -1) {
-        _allOffers[idx] = _allOffers[idx].copyWith(isActive: true);
-      }
-    } else {
-      _suspendedOfferIds.add(offerId);
-      if (idx != -1) {
-        _allOffers[idx] = _allOffers[idx].copyWith(isActive: false);
-      }
-    }
-    notifyListeners();
-
-    try {
-      if (currentlySuspended) {
-        await _inSession(
-          _repository.approveOffer(offerId, notes: notes),
-          sessionEpoch,
-        );
-      } else {
-        await _inSession(
-          _repository.suspendOffer(offerId, notes: notes),
-          sessionEpoch,
-        );
-      }
-      return true;
-    } catch (e) {
-      if (sessionEpoch != _sessionEpoch) {
-        return false;
-      }
-      _errorMessage = e.toString();
-      return true;
-    }
+  Future<bool> toggleOfferModeration(String id, {String notes = ''}) {
+    final item = _allOffers.where((p) => p.id == id).firstOrNull;
+    if (item == null || item.status == 'unknown') return Future.value(false);
+    return setContentStatus(
+      'offer',
+      id,
+      item.status == 'active' ? 'suspended' : 'active',
+      notes: notes,
+    );
   }
 
   /// Filter leads by clinic and status (locally or with pre-filtered list)
@@ -672,6 +885,12 @@ class AdminPortalService extends ChangeNotifier {
 
   /// Provision a new clinic and its administrator
   Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {
+    _requireManager();
+    if (!_pendingWrites.add('clinic:create')) {
+      throw const ApiException(
+        message: 'Clinic provisioning is already in progress.',
+      );
+    }
     final sessionEpoch = _sessionEpoch;
     _isLoading = true;
     _errorMessage = null;
@@ -682,16 +901,35 @@ class AdminPortalService extends ChangeNotifier {
         _repository.createClinic(data),
         sessionEpoch,
       );
-      await _inSession(loadClinics(), sessionEpoch);
+      final clinicData = res['clinic'];
+      if (clinicData is! Map ||
+          clinicData['id'] == null ||
+          '${clinicData['id']}'.isEmpty) {
+        throw const ApiException(
+          message:
+              'The server did not return the new clinic ID. Refresh the clinic list before retrying.',
+        );
+      }
+      _rememberClinicMedia(
+        '${clinicData['id']}',
+        data,
+        logo: clinicData['logo']?.toString(),
+        cover: clinicData['cover_image']?.toString(),
+      );
+      _overviewDirty = true;
+      await _inSession(loadCollection('clinics', refresh: true), sessionEpoch);
       return res;
     } catch (e) {
       if (sessionEpoch != _sessionEpoch) {
         rethrow;
       }
-      _errorMessage = e.toString();
+      _writeErrors['clinic:create'] = e is ApiException
+          ? e.message
+          : 'Could not save changes.';
       rethrow;
     } finally {
       if (sessionEpoch == _sessionEpoch) {
+        _pendingWrites.remove('clinic:create');
         _isLoading = false;
         notifyListeners();
       }
@@ -700,21 +938,36 @@ class AdminPortalService extends ChangeNotifier {
 
   /// Reset temporary password for a clinic administrator
   Future<Map<String, dynamic>> resetClinicAdminPassword(
-    String clinicId, {
+    String id, {
     String? customPassword,
   }) async {
-    final sessionEpoch = _sessionEpoch;
-    return await _inSession(
-      _repository.resetClinicAdminPassword(
-        clinicId,
-        customPassword: customPassword,
-      ),
-      sessionEpoch,
-    );
+    _requireManager();
+    if (!_pendingWrites.add('password:$id')) {
+      throw const ApiException(
+        message: 'A password reset is already in progress.',
+      );
+    }
+    final epoch = _sessionEpoch;
+    notifyListeners();
+    try {
+      return await _inSession(
+        _repository.resetClinicAdminPassword(
+          id,
+          customPassword: customPassword,
+        ),
+        epoch,
+      );
+    } finally {
+      if (epoch == _sessionEpoch) {
+        _pendingWrites.remove('password:$id');
+        notifyListeners();
+      }
+    }
   }
 
   /// Archive / Soft-delete a clinic
   Future<void> archiveClinic(String clinicId) async {
+    _requireManager();
     final sessionEpoch = _sessionEpoch;
     await _inSession(_repository.archiveClinic(clinicId), sessionEpoch);
     _clinics.removeWhere((c) => c.id == clinicId);
@@ -726,6 +979,12 @@ class AdminPortalService extends ChangeNotifier {
     String id,
     Map<String, dynamic> data,
   ) async {
+    _requireManager();
+    if (!_pendingWrites.add('clinic:$id')) {
+      throw const ApiException(
+        message: 'This clinic is already being updated.',
+      );
+    }
     final sessionEpoch = _sessionEpoch;
     _isLoading = true;
     _errorMessage = null;
@@ -736,19 +995,44 @@ class AdminPortalService extends ChangeNotifier {
         _repository.updateClinic(id, data),
         sessionEpoch,
       );
-      final idx = _clinics.indexWhere((c) => c.id == id);
-      if (idx != -1) {
-        _clinics[idx] = updated;
+      if (updated.id != id) {
+        throw const ApiException(
+          message: 'The clinic response could not be verified. Please refresh.',
+        );
+      }
+      _rememberClinicMedia(
+        id,
+        data,
+        logo: updated.logo,
+        cover: updated.coverImage,
+      );
+      _clinicDetails[id] = updated;
+      _commitCollection('clinics', () {
+        final idx = _clinics.indexWhere((c) => c.id == id);
+        if (idx >= 0) _clinics[idx] = updated;
+      });
+      _overviewDirty = true;
+      if (_pages['clinics']?.query.values.any(
+            (v) => v != null && v != '' && v != 'all',
+          ) ==
+          true) {
+        await _inSession(
+          loadCollection('clinics', refresh: true),
+          sessionEpoch,
+        );
       }
       return updated;
     } catch (e) {
       if (sessionEpoch != _sessionEpoch) {
         rethrow;
       }
-      _errorMessage = e.toString();
+      _writeErrors['clinic:$id'] = e is ApiException
+          ? e.message
+          : 'Could not save changes.';
       rethrow;
     } finally {
       if (sessionEpoch == _sessionEpoch) {
+        _pendingWrites.remove('clinic:$id');
         _isLoading = false;
         notifyListeners();
       }
