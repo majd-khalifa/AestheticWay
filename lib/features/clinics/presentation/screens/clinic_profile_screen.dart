@@ -1,3 +1,7 @@
+import '../../../../core/widgets/luxury_card.dart';
+import '../../../../core/widgets/patient_media_banner.dart';
+import '../../../practitioners/presentation/widgets/patient_practitioner_card.dart';
+import '../../../offers/presentation/widgets/patient_offer_card.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/auth/guest_auth_guard.dart';
@@ -7,11 +11,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/clinic_location.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/luxury_animations.dart';
-import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/luxury_empty_state.dart';
 import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/pagination_footer.dart';
-import '../../../../core/widgets/practitioner_badge.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../../appointment_lead/presentation/screens/appointment_request_screen.dart';
 import '../../../offers/data/offers_repository.dart';
@@ -109,6 +111,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
           ..clear()
           ..addAll(detail.branches);
       });
+      if (detail.hasBranchDirectory) await _branches.refresh();
     } catch (_) {
       if (mounted) setState(() => _detailFailed = true);
     } finally {
@@ -209,111 +212,154 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
             if (images.isNotEmpty)
-              SizedBox(
-                height: (MediaQuery.sizeOf(context).width * .5).clamp(140, 240),
-                child: PageView(
-                  children: [
-                    for (final image in images)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: LuxuryImage(
-                          imageUrl: image,
-                          fallbackLogoUrl: clinic.logoUrl,
-                          fit: BoxFit.cover,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LuxuryImage(
-                  imageUrl: clinic.logoUrl,
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.contain,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
+              Padding(
+                padding: const EdgeInsets.only(bottom: 18),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 6),
-                      if (clinic.city.isNotEmpty ||
-                          clinic.areaAr.isNotEmpty ||
-                          clinic.areaEn.isNotEmpty)
-                        Text(
-                          formatClinicLocation(
-                            clinic.city,
-                            loc.isArabic ? clinic.areaAr : clinic.areaEn,
-                            arabic: loc.isArabic,
+                      for (final image in images)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 10),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 40,
+                            child: PatientMediaBanner(
+                              source: image,
+                              height: 180,
+                              borderRadius: BorderRadius.circular(22),
+                            ),
                           ),
-                          style: TextStyle(color: AppColors.subtext(context)),
                         ),
-                      GoogleClinicRating(clinic: clinic),
                     ],
                   ),
                 ),
-              ],
-            ),
-            if (_loading) const LinearProgressIndicator(),
-            if (_detailFailed)
-              TextButton.icon(
-                onPressed: _fetchDetails,
-                icon: const Icon(Icons.sync),
-                label: Text(
-                  loc.isArabic
-                      ? 'تعذر تحديث تفاصيل العيادة، حاول مجدداً'
-                      : 'Clinic details could not refresh. Try again',
-                ),
               ),
+            LuxuryCard(
+              padding: const EdgeInsets.all(18),
+              gradient: AppColors.cardGrad(context),
+              isVip: clinic.isEligibleForTopCarousel,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LuxuryImage(
+                        imageUrl: clinic.logoUrl,
+                        width: 78,
+                        height: 78,
+                        fit: BoxFit.contain,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (clinic.isEligibleForTopCarousel)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 7),
+                                child: Text(
+                                  clinic.subscriptionTier ==
+                                          SubscriptionTier.vipPlatinum
+                                      ? 'VIP'
+                                      : (loc.isArabic
+                                            ? 'عيادة مميزة'
+                                            : 'FEATURED CLINIC'),
+                                  style: TextStyle(
+                                    color: AppColors.goldText(context),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            Text(
+                              loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                              style: TextStyle(
+                                fontSize: 23,
+                                height: 1.35,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.text(context),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            if (clinic.city.isNotEmpty ||
+                                clinic.areaAr.isNotEmpty ||
+                                clinic.areaEn.isNotEmpty)
+                              Text(
+                                formatClinicLocation(
+                                  clinic.city,
+                                  loc.isArabic ? clinic.areaAr : clinic.areaEn,
+                                  arabic: loc.isArabic,
+                                ),
+                                style: TextStyle(
+                                  color: AppColors.subtext(context),
+                                ),
+                              ),
+                            GoogleClinicRating(clinic: clinic),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_loading) const LinearProgressIndicator(),
+                  if (_detailFailed)
+                    TextButton.icon(
+                      onPressed: _fetchDetails,
+                      icon: const Icon(Icons.sync),
+                      label: Text(
+                        loc.isArabic
+                            ? 'تعذر تحديث تفاصيل العيادة، حاول مجدداً'
+                            : 'Clinic details could not refresh. Try again',
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  SilverButton(
+                    label: loc.tr('request_consultation'),
+                    icon: Icons.chat_bubble_outline,
+                    isFullWidth: true,
+                    onPressed: isEntityUuid(clinic.id)
+                        ? () => _request()
+                        : null,
+                  ),
+                  if (!isEntityUuid(clinic.id))
+                    Text(
+                      loc.isArabic
+                          ? 'العيادة غير متاحة لاستقبال الطلبات'
+                          : 'This clinic is unavailable for inquiries',
+                    ),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      if (clinic.hasPhone || clinic.hasWhatsapp)
+                        TextButton.icon(
+                          onPressed: () =>
+                              ContactOptionsSheet.show(context, clinic),
+                          icon: const Icon(Icons.phone_outlined),
+                          label: Text(loc.tr('contact_btn')),
+                        ),
+                      if (clinic.mapsUri != null)
+                        TextButton.icon(
+                          onPressed: () async {
+                            try {
+                              await launchUrl(
+                                clinic.mapsUri!,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } catch (_) {
+                              /* Retain profile on missing OS handler. */
+                            }
+                          },
+                          icon: const Icon(Icons.map_outlined),
+                          label: Text(loc.tr('map_google')),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
-            SilverButton(
-              label: loc.tr('request_consultation'),
-              icon: Icons.chat_bubble_outline,
-              isFullWidth: true,
-              onPressed: isEntityUuid(clinic.id) ? () => _request() : null,
-            ),
-            if (!isEntityUuid(clinic.id))
-              Text(
-                loc.isArabic
-                    ? 'العيادة غير متاحة لاستقبال الطلبات'
-                    : 'This clinic is unavailable for inquiries',
-              ),
-            Wrap(
-              spacing: 8,
-              children: [
-                if (clinic.hasPhone || clinic.hasWhatsapp)
-                  TextButton.icon(
-                    onPressed: () => ContactOptionsSheet.show(context, clinic),
-                    icon: const Icon(Icons.phone_outlined),
-                    label: Text(loc.tr('contact_btn')),
-                  ),
-                if (clinic.mapsUri != null)
-                  TextButton.icon(
-                    onPressed: () async {
-                      try {
-                        await launchUrl(
-                          clinic.mapsUri!,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      } catch (_) {
-                        /* Retain profile on missing OS handler. */
-                      }
-                    },
-                    icon: const Icon(Icons.map_outlined),
-                    label: Text(loc.tr('map_google')),
-                  ),
-              ],
-            ),
-            const Divider(height: 32),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -321,60 +367,107 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                   for (var i = 0; i < tabs.length; i++)
                     Padding(
                       padding: const EdgeInsetsDirectional.only(end: 8),
-                      child: ChoiceChip(
-                        label: Text(tabs[i]),
-                        selected: _tab == i,
-                        onSelected: (_) => _select(i),
+                      child: InkWell(
+                        onTap: () => _select(i),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 15,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: _tab == i
+                                    ? AppColors.goldText(context)
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            tabs[i],
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _tab == i
+                                  ? AppColors.goldText(context)
+                                  : AppColors.subtext(context),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            if (_tab == 0) ...[
-              if (description.trim().isNotEmpty)
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: AppColors.text(context),
-                    fontSize: 15,
-                    height: 1.7,
-                  ),
+            if (_tab == 0)
+              LuxuryCard(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (description.trim().isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          loc.isArabic ? 'عن العيادة' : 'About the clinic',
+                          style: TextStyle(
+                            fontFamily: loc.isArabic ? null : 'serif',
+                            fontSize: 23,
+                            color: AppColors.text(context),
+                          ),
+                        ),
+                      ),
+                    if (description.trim().isNotEmpty)
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: AppColors.text(context),
+                          fontSize: 15,
+                          height: 1.7,
+                        ),
+                      ),
+                    if (hours.trim().isNotEmpty)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.access_time),
+                        title: Text(loc.tr('working_hours')),
+                        subtitle: Text(hours),
+                      ),
+                    if (clinic.addressAr.isNotEmpty ||
+                        clinic.addressEn.isNotEmpty)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.location_on_outlined),
+                        title: Text(
+                          loc.isArabic ? clinic.addressAr : clinic.addressEn,
+                        ),
+                      ),
+                    if (!clinic.hasMapLocation)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          loc.isArabic
+                              ? 'موقع الخريطة غير متوفر'
+                              : 'Map location is not available',
+                          style: TextStyle(color: AppColors.subtext(context)),
+                        ),
+                      ),
+                    for (final b in _branches.items)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.domain_outlined),
+                        title: Text(loc.isArabic ? b.nameAr : b.nameEn),
+                        subtitle: Text(
+                          loc.isArabic ? b.addressAr : b.addressEn,
+                        ),
+                      ),
+                    if (clinic.hasBranchDirectory) _footer(_branches),
+                  ],
                 ),
-              if (hours.trim().isNotEmpty)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.access_time),
-                  title: Text(loc.tr('working_hours')),
-                  subtitle: Text(hours),
-                ),
-              if (clinic.addressAr.isNotEmpty || clinic.addressEn.isNotEmpty)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.location_on_outlined),
-                  title: Text(
-                    loc.isArabic ? clinic.addressAr : clinic.addressEn,
-                  ),
-                ),
-              if (!clinic.hasMapLocation)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    loc.isArabic
-                        ? 'موقع الخريطة غير متوفر'
-                        : 'Map location is not available',
-                    style: TextStyle(color: AppColors.subtext(context)),
-                  ),
-                ),
-              for (final b in _branches.items)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.domain_outlined),
-                  title: Text(loc.isArabic ? b.nameAr : b.nameEn),
-                  subtitle: Text(loc.isArabic ? b.addressAr : b.addressEn),
-                ),
-              if (clinic.hasBranchDirectory) _footer(_branches),
-            ],
+              ),
+
             if (_tab == 1) ...[
               ..._state(
                 _staff,
@@ -385,56 +478,15 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
               for (final p in _staff.items)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: LuxuryCard(
+                  child: PatientPractitionerCard(
+                    practitioner: p,
                     onTap: () => Navigator.push(
                       context,
                       LuxuryPageRoute(
                         page: PractitionerProfileScreen(practitioner: p),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            LuxuryImage(
-                              imageUrl: p.avatarUrl,
-                              fallbackLogoUrl: clinic.logoUrl,
-                              width: 56,
-                              height: 56,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  PractitionerBadge(
-                                    type: p.type,
-                                    hasKnownType: p.hasKnownType,
-                                  ),
-                                  Text(
-                                    loc.isArabic ? p.nameAr : p.nameEn,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  Text(
-                                    loc.isArabic
-                                        ? p.specialtyAr
-                                        : p.specialtyEn,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: () => _request(practitioner: p),
-                          child: Text(loc.tr('request_consultation')),
-                        ),
-                      ],
-                    ),
+                    onInquiry: () => _request(practitioner: p),
                   ),
                 ),
               _footer(_staff),
@@ -466,28 +518,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
               for (final o in _offers.items)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: LuxuryCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (o.imageUrl.isNotEmpty)
-                          LuxuryImage(
-                            imageUrl: o.imageUrl,
-                            height: 140,
-                            fit: BoxFit.cover,
-                          ),
-                        const SizedBox(height: 8),
-                        Text(
-                          loc.isArabic ? o.titleAr : o.titleEn,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        TextButton.icon(
-                          onPressed: () => _request(offer: o),
-                          icon: const Icon(Icons.chat_bubble_outline),
-                          label: Text(loc.tr('offer_claim')),
-                        ),
-                      ],
-                    ),
+                  child: PatientOfferCard(
+                    offer: o,
+                    onInquiry: () => _request(offer: o),
                   ),
                 ),
               _footer(_offers),

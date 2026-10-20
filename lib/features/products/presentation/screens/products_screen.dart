@@ -349,16 +349,13 @@ class _ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AspectRatio(
-                aspectRatio: 1.5,
-                child: BrandProductMedia(product: product),
-              ),
+              BrandProductMedia(product: product),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (brand.isNotEmpty) ...[
+                    if (brand.isNotEmpty && product.imageUrl.isNotEmpty) ...[
                       Text(
                         brand,
                         maxLines: 1,
@@ -379,8 +376,32 @@ class _ProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.text(context),
-                        fontSize: 14,
-                        height: 1.5,
+                        fontSize: 18,
+                        height: 1.4,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (product.sponsorCompany?.trim().isNotEmpty == true &&
+                        product.sponsorCompany != brand)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          '${locale.isArabic ? 'برعاية' : 'Presented by'} ${product.sponsorCompany}',
+                          style: TextStyle(
+                            color: AppColors.subtext(context),
+                            fontSize: 11,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    Text(
+                      locale.isArabic
+                          ? 'اكتشف العلامة ←'
+                          : 'Explore the brand →',
+                      style: TextStyle(
+                        color: AppColors.goldText(context),
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

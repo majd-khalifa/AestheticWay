@@ -1,5 +1,7 @@
 # Patient Portal release acceptance checklist
 
+> Visual recovery update: [current presentation, comparison renders and validation](PATIENT_VISUAL_REGRESSION_RECOVERY.md). The original functional corrections below remain applicable; advertisement-only Home presentation has been replaced with the supported subscription-partner path. [Updated bilingual backend handoff](PATIENT_VISUAL_RECOVERY_BACKEND_GAPS_FOR_ALI.md).
+
 2026-10-20. Automated Linux widget tests and synthetic previews support this checklist. **Android release APK and Windows device verification have not been performed.** Use staging fixtures and separate patient/clinic/admin accounts; never attach patient contact details or signed media tokens to bug reports.
 
 ## Preparation

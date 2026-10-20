@@ -330,10 +330,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final feed = _feed!;
     final allClinics = feed.nearbyClinics;
 
-    final sponsoredAds = feed.featuredAds
-        .where((ad) => ad.isSponsored && ad.clinic != null)
-        .toList();
-    final topAds = sponsoredAds.map((ad) => ad.clinic!).toList();
+    final partners = feed.premiumPartners;
+    final topAds = partners.map((partner) => partner.clinic).toList();
     final nearbyList = allClinics;
     final offersList = feed.activeOffers;
 
@@ -358,13 +356,28 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: FeaturedAdsCarousel(
               ads: topAds,
-              placements: sponsoredAds,
+              placements: partners.map((partner) => partner.placement).toList(),
               onClinicTap: _navigateToClinicProfile,
               onRequestAppointmentTap: _handleAppointmentLeadRequest,
               onContactTap: _handleContact,
             ),
           ),
 
+        if (feed.partnerDirectoryUnavailable)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextButton.icon(
+                onPressed: _loadFeed,
+                icon: const Icon(Icons.refresh),
+                label: Text(
+                  loc.isArabic
+                      ? 'تعذر تحميل العيادات الشريكة، حاول مجدداً'
+                      : 'Partner clinics could not load. Try again',
+                ),
+              ),
+            ),
+          ),
         const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
         // 4. Categories Quick Access Grid (8 Official Categories)
@@ -414,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
         // Extra bottom spacing to float cleanly above bottom nav bar
-        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
   }

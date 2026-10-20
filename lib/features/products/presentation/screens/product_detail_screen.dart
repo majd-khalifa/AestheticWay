@@ -100,12 +100,9 @@ class ProductDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
         children: [
-          AspectRatio(
-            aspectRatio: 1.05,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BrandProductMedia(product: product, hero: true),
-            ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BrandProductMedia(product: product, hero: true),
           ),
           const SizedBox(height: 28),
           if (brandTitle.isNotEmpty)

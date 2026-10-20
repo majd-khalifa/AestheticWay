@@ -36,7 +36,7 @@ class FeaturedAdApiModel {
   final String subscriptionTier;
   final String videoUrl;
   bool get isSponsored =>
-      ['vip', 'featured'].contains(subscriptionTier.toLowerCase());
+      ['vip', 'featured'].contains(subscriptionTier.trim().toLowerCase());
 
   const FeaturedAdApiModel({
     required this.id,
@@ -61,17 +61,52 @@ class FeaturedAdApiModel {
   }
 }
 
+/// A genuine paid placement or a publicly listed premium subscription clinic.
+/// A subscription partner never becomes a fabricated advertisement record.
+class HomePartner {
+  const HomePartner({required this.clinic, this.placement});
+  final ClinicModel clinic;
+  final FeaturedAdApiModel? placement;
+  bool get isAdvertisement => placement != null;
+  bool get isVip => placement != null
+      ? placement!.subscriptionTier.trim().toLowerCase() == 'vip'
+      : clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
+}
+
 class HomeFeedModel {
   final List<FeaturedAdApiModel> featuredAds;
   final List<CategoryApiModel> categories;
   final List<OfferModel> activeOffers;
   final List<ClinicModel> nearbyClinics;
+  final List<ClinicModel> partnerClinics;
+  final bool partnerDirectoryUnavailable;
+
+  List<HomePartner> get premiumPartners {
+    final partners = <HomePartner>[
+      for (final ad in featuredAds)
+        if (ad.isSponsored && ad.clinic != null)
+          HomePartner(clinic: ad.clinic!, placement: ad),
+    ];
+    final advertised = partners.map((p) => p.clinic.id).toSet();
+    for (final clinic in [...partnerClinics, ...nearbyClinics]) {
+      if (clinic.isEligibleForTopCarousel && advertised.add(clinic.id)) {
+        partners.add(HomePartner(clinic: clinic));
+      }
+    }
+    // Stable priority: preserve server display order within each tier.
+    return [
+      ...partners.where((p) => p.isVip),
+      ...partners.where((p) => !p.isVip),
+    ];
+  }
 
   const HomeFeedModel({
     required this.featuredAds,
     required this.categories,
     required this.activeOffers,
     required this.nearbyClinics,
+    this.partnerClinics = const [],
+    this.partnerDirectoryUnavailable = false,
   });
 
   factory HomeFeedModel.fromJson(Map<String, dynamic> json) {

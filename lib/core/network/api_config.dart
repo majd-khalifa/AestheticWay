@@ -29,7 +29,32 @@ class ApiConfig {
   /// Resolve storage paths without decoding or rebuilding signed absolute URLs.
   static String resolveUrl(String? url) {
     if (url == null || url.trim().isEmpty) return '';
-    final value = url.trim();
+    final rawValue = url.trim();
+    final wrapped = Uri.tryParse(rawValue);
+    final signed =
+        wrapped?.queryParameters.keys.any(
+          (key) => ['x-amz-signature', 'signature'].contains(key.toLowerCase()),
+        ) ??
+        false;
+    if (signed && wrapped?.hasScheme == true) return rawValue;
+    final firstPartyWrapper =
+        wrapped != null &&
+        wrapped.host.isNotEmpty &&
+        (wrapped.scheme == 'http' || wrapped.scheme == 'https') &&
+        (wrapped.host == 'aestheticway.ae' || wrapped.origin == mediaOrigin);
+    final wrapperPath = rawValue.startsWith('/media/')
+        ? rawValue
+        : firstPartyWrapper
+        ? (wrapped.path.startsWith('/media/')
+              ? rawValue.substring(
+                  rawValue.indexOf('/', rawValue.indexOf('://') + 3),
+                )
+              : '')
+        : '';
+    final match = RegExp(
+      r'^/media/(https?)(?:%3[Aa]|:)/+(.*)$',
+    ).firstMatch(wrapperPath);
+    final value = match == null ? rawValue : '${match[1]}://${match[2]}';
     final uri = Uri.tryParse(value);
     if (uri != null &&
         (uri.scheme.toLowerCase() == 'http' ||

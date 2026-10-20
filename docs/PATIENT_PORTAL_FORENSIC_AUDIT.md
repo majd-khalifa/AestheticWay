@@ -1,5 +1,7 @@
 # Patient Portal forensic audit and implemented correction
 
+> Visual recovery update: [current presentation, comparison renders and validation](PATIENT_VISUAL_REGRESSION_RECOVERY.md). The original functional corrections below remain applicable; advertisement-only Home presentation has been replaced with the supported subscription-partner path. [Updated bilingual backend handoff](PATIENT_VISUAL_RECOVERY_BACKEND_GAPS_FOR_ALI.md).
+
 2026-10-20 · Repository `majd-khalifa/AestheticWay` · branch `codex/patient-portal-luxury-production-overhaul`.
 
 ## Scope, evidence and safety

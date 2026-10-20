@@ -5,7 +5,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
-import '../../../clinics/presentation/widgets/patient_clinic_card.dart';
+import '../../../../core/widgets/content_sized_page_view.dart';
+import '../../../../core/widgets/patient_media_banner.dart';
+import '../../../clinics/presentation/widgets/google_clinic_rating.dart';
+import '../../../../core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -13,7 +16,7 @@ import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 /// Top Featured / Sponsored Clinics Auto Carousel (Luxury B2B Subscription Priority)
 class FeaturedAdsCarousel extends StatefulWidget {
   final List<ClinicModel> ads;
-  final List<FeaturedAdApiModel>? placements;
+  final List<FeaturedAdApiModel?>? placements;
   final ValueChanged<ClinicModel> onClinicTap;
   final ValueChanged<ClinicModel> onRequestAppointmentTap;
   final ValueChanged<ClinicModel> onContactTap;
@@ -43,6 +46,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
       const AlwaysStoppedAnimation<double>(0);
   bool _tabActive = true;
   bool _foreground = true;
+  bool _reduceMotion = false;
 
   @override
   void initState() {
@@ -57,6 +61,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
     _tabActive =
         TabActivity.isActive(context) &&
         (ModalRoute.isCurrentOf(context) ?? true);
@@ -71,7 +76,11 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
 
   void _startAutoScroll() {
     _autoScrollTimer?.cancel();
-    if (widget.ads.length <= 1 || !_tabActive || !_foreground || !_inViewport) {
+    if (widget.ads.length <= 1 ||
+        !_tabActive ||
+        !_foreground ||
+        !_inViewport ||
+        _reduceMotion) {
       return;
     }
 
@@ -132,18 +141,27 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  loc.tr('featured_partners'),
-                  style: Theme.of(context).textTheme.titleLarge,
+                Expanded(
+                  child: Text(
+                    loc.tr('featured_partners'),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontFamily: loc.isArabic ? null : 'serif',
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.text(context),
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 12),
                 Text(
                   '${_currentIndex + 1} / ${widget.ads.length}',
-                  style: TextStyle(color: AppColors.subtext(context)),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.subtext(context),
+                  ),
                 ),
               ],
             ),
@@ -159,39 +177,20 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
               }
               return false;
             },
-            child: SizedBox(
-              height:
-                  ((widget.placements?.any(
-                            (ad) =>
-                                ad.image.isNotEmpty || ad.videoUrl.isNotEmpty,
-                          ) ??
-                          widget.ads.any(
-                            (c) => c.coverImageUrl.isNotEmpty || c.hasVideoAd,
-                          ))
-                      ? 360.0
-                      : 228.0) *
-                  MediaQuery.textScalerOf(context).scale(1).clamp(1, 1.6),
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: widget.ads.length,
-                onPageChanged: (idx) {
-                  setState(() {
-                    _currentIndex = idx;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final clinic = widget.ads[index];
-                  return _FeaturedAdCard(
-                    clinic: clinic,
-                    placement: widget.placements?[index],
-                    loc: loc,
-                    sheenAnimation: _sheenController,
-                    isActive: _currentIndex == index,
-                    onTap: () => widget.onClinicTap(clinic),
-                    onRequestTap: () => widget.onRequestAppointmentTap(clinic),
-                    onContactTap: () => widget.onContactTap(clinic),
-                  );
-                },
+            child: ContentSizedPageView(
+              controller: _pageController,
+              itemCount: widget.ads.length,
+              onPageChanged: (index) => setState(() => _currentIndex = index),
+              itemBuilder: (context, index) => _FeaturedAdCard(
+                clinic: widget.ads[index],
+                placement: widget.placements?[index],
+                loc: loc,
+                sheenAnimation: _sheenController,
+                isActive: _currentIndex == index,
+                onTap: () => widget.onClinicTap(widget.ads[index]),
+                onRequestTap: () =>
+                    widget.onRequestAppointmentTap(widget.ads[index]),
+                onContactTap: () => widget.onContactTap(widget.ads[index]),
               ),
             ),
           ),
@@ -214,12 +213,15 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeOut,
                       ),
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        width: _currentIndex == index ? 24 : 6,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
                           color: _currentIndex == index
                               ? AppColors.goldText(context)
-                              : AppColors.subtext(context),
+                              : AppColors.border(context),
                         ),
                       ),
                     ),
@@ -259,56 +261,159 @@ class _FeaturedAdCard extends StatefulWidget {
 }
 
 class _FeaturedAdCardState extends State<_FeaturedAdCard> {
-  String get _image => widget.placement?.image ?? widget.clinic.coverImageUrl;
-  String? get _video => widget.placement?.videoUrl ?? widget.clinic.videoUrl;
-  bool get _hasVideo => _video?.isNotEmpty == true;
+  String get _image => widget.placement?.image.isNotEmpty == true
+      ? widget.placement!.image
+      : widget.clinic.coverImageUrl;
+  String? get _video => widget.placement != null
+      ? widget.placement!.videoUrl
+      : widget.clinic.subscriptionTier == SubscriptionTier.vipPlatinum
+      ? widget.clinic.videoUrl
+      : null;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 6),
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (_image.isNotEmpty || _hasVideo)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: SizedBox(
-                height: 132,
-                child: FeaturedAdSlideMedia(
-                  imageUrl: _image,
-                  fallbackLogoUrl: widget.clinic.logoUrl,
-                  videoUrl: _video,
-                  isActive: widget.isActive,
+  Widget build(BuildContext context) {
+    final vip = widget.placement != null
+        ? widget.placement!.subscriptionTier.trim().toLowerCase() == 'vip'
+        : widget.clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
+    final loc = widget.loc;
+    final badge = vip ? 'VIP' : (loc.isArabic ? 'مميز' : 'FEATURED');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 0, 6, 8),
+      child: LuxuryCard(
+        padding: EdgeInsets.zero,
+        isVip: true,
+        borderRadius: 24,
+        gradient: AppColors.isDark(context)
+            ? AppColors.vipCardGradient
+            : AppColors.vipCardGradientLight,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FeaturedAdSlideMedia(
+                imageUrl: _image,
+                videoUrl: _video,
+                fallbackLogoUrl: widget.clinic.logoUrl,
+                isActive: widget.isActive,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.goldText(
+                              context,
+                            ).withValues(alpha: .1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            badge,
+                            style: TextStyle(
+                              color: AppColors.goldText(context),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        if (_video?.isNotEmpty == true)
+                          Text(
+                            loc.isArabic ? 'فيديو 15 ثانية' : '15s Video',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.subtext(context),
+                            ),
+                          ),
+                        Text(
+                          widget.placement != null
+                              ? (loc.isArabic
+                                    ? 'إعلان مدفوع'
+                                    : 'Sponsored placement')
+                              : (loc.isArabic
+                                    ? 'عيادة شريكة'
+                                    : 'Partner clinic'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.subtext(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LuxuryImage(
+                          imageUrl: widget.clinic.logoUrl,
+                          width: 54,
+                          height: 54,
+                          fit: BoxFit.contain,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                loc.isArabic
+                                    ? widget.clinic.nameAr
+                                    : widget.clinic.nameEn,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  height: 1.3,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.text(context),
+                                ),
+                              ),
+                              if (widget.clinic.city.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    widget.clinic.city,
+                                    style: TextStyle(
+                                      color: AppColors.subtext(context),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              GoogleClinicRating(clinic: widget.clinic),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: widget.onRequestTap,
+                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                      label: Text(loc.tr('request_consultation')),
+                    ),
+                    TextButton(
+                      onPressed: widget.onTap,
+                      child: Text(
+                        loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          if (_hasVideo)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                widget.loc.isArabic ? 'فيديو 15 ثانية' : '15s Video',
-                style: TextStyle(color: AppColors.subtext(context)),
-              ),
-            ),
-          if (widget.placement != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                widget.loc.isArabic ? 'إعلان شريك' : 'Sponsored partner',
-                style: TextStyle(color: AppColors.goldText(context)),
-              ),
-            ),
-          PatientClinicCard(
-            clinic: widget.clinic,
-            showCover: false,
-            onTap: widget.onTap,
-            onRequest: widget.onRequestTap,
-            onContact: widget.onContactTap,
+            ],
           ),
-        ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class FeaturedAdSlideMedia extends StatefulWidget {
@@ -459,23 +564,20 @@ class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
 
   @override
   Widget build(BuildContext context) {
-    Widget media = LuxuryImage(
-      imageUrl: widget.imageUrl,
-      fallbackLogoUrl: widget.fallbackLogoUrl,
-      fit: BoxFit.cover,
-      placeholderIcon: Icons.local_hospital_outlined,
-      iconSize: 42,
-    );
+    Widget media = PatientMediaBanner(source: widget.imageUrl, height: 185);
     if (_isVideoInitialized && !_hasVideoError && _controller != null) {
       final size = _controller!.value.size;
-      media = ClipRect(
-        child: FittedBox(
-          fit: BoxFit.cover,
-          clipBehavior: Clip.hardEdge,
-          child: SizedBox(
-            width: size.width > 0 ? size.width : 16,
-            height: size.height > 0 ? size.height : 9,
-            child: VideoPlayer(_controller!),
+      media = SizedBox(
+        height: 185,
+        child: ClipRect(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox(
+              width: size.width > 0 ? size.width : 16,
+              height: size.height > 0 ? size.height : 9,
+              child: VideoPlayer(_controller!),
+            ),
           ),
         ),
       );

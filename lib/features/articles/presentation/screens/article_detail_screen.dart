@@ -1,3 +1,4 @@
+import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../practitioners/data/practitioners_repository.dart';
@@ -139,14 +140,10 @@ class ArticleDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // Cover Image
-          LuxuryImage(
-            imageUrl: article.coverImageUrl,
-            fallbackLogoUrl: article.clinicLogoUrl,
-            height: article.coverImageUrl.isEmpty ? 100 : 200,
-            width: double.infinity,
+          PatientMediaBanner(
+            source: article.coverImageUrl,
+            height: 190,
             borderRadius: BorderRadius.circular(18),
-            placeholderIcon: Icons.article_outlined,
-            iconSize: 48,
           ),
           const SizedBox(height: 16),
 

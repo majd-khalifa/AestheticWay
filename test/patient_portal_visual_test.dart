@@ -1,3 +1,4 @@
+import 'support/settle_preview_images.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -187,6 +188,9 @@ Widget _app(Widget screen, bool dark, bool arabic, {double scale = 1.6}) {
   final theme = dark ? AppTheme.darkTheme : AppTheme.lightTheme;
   return MaterialApp(
     theme: theme.copyWith(
+      platform: TargetPlatform.android,
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       textTheme: theme.textTheme.apply(fontFamily: 'PatientPreview'),
       appBarTheme: theme.appBarTheme.copyWith(
         titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(
@@ -212,6 +216,9 @@ void main() {
     final bytes = File('test/fixtures/fonts/DejaVuSans.ttf').readAsBytesSync();
     await (FontLoader(
       'PatientPreview',
+    )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+    await (FontLoader(
+      'serif',
     )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
     await (FontLoader(
       'MaterialIcons',
@@ -305,55 +312,61 @@ void main() {
   }
   for (final dark in [false, true]) {
     for (final arabic in [false, true]) {
-      testWidgets(
-        'Clinic profile golden ${dark ? 'dark' : 'light'} ${arabic ? 'ar' : 'en'}',
-        (tester) async {
-          await tester.binding.setSurfaceSize(const Size(390, 844));
-          addTearDown(() => tester.binding.setSurfaceSize(null));
-          unawaited(
-            LocaleService().setLanguage(
-              arabic ? AppLanguage.arabic : AppLanguage.english,
-            ),
-          );
-          final client = _Client();
-          final screen = ClinicProfileScreen(
-            clinic: ClinicModel.fromJson(_clinic),
-            clinicsRepository: ClinicsRepository(apiClient: client),
-            practitionersRepository: PractitionersRepository(apiClient: client),
-            treatmentsRepository: TreatmentsRepository(apiClient: client),
-            offersRepository: OffersRepository(apiClient: client),
-          );
-          await tester.pumpWidget(_app(screen, dark, arabic, scale: 1));
-          await tester.pumpAndSettle();
-          await expectLater(
-            find.byType(Scaffold),
-            matchesGoldenFile(
-              'goldens/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
-            ),
-          );
-          await tester.tap(find.text(LocaleService().tr('tab_staff')));
-          await tester.pumpAndSettle();
-          expect(
-            find.text(arabic ? 'ممارس الاختبار' : 'Fixture Practitioner'),
-            findsOneWidget,
-          );
-          expect(tester.takeException(), isNull);
-          await tester.ensureVisible(
-            find.text(LocaleService().tr('tab_offers')),
-          );
-          await tester.tap(find.text(LocaleService().tr('tab_offers')));
-          await tester.pumpAndSettle();
-          expect(
-            find.text(
-              arabic
-                  ? 'عرض اختبار للاستشارة الجلدية'
-                  : 'Fixture skin consultation offer',
-            ),
-            findsOneWidget,
-          );
-          expect(tester.takeException(), isNull);
-        },
-      );
+      for (final host in [TargetPlatform.android, TargetPlatform.windows]) {
+        testWidgets(
+          'Clinic profile golden ${dark ? 'dark' : 'light'} ${arabic ? 'ar' : 'en'} host ${host.name}',
+          (tester) async {
+            await tester.binding.setSurfaceSize(const Size(390, 844));
+            addTearDown(() => tester.binding.setSurfaceSize(null));
+            unawaited(
+              LocaleService().setLanguage(
+                arabic ? AppLanguage.arabic : AppLanguage.english,
+              ),
+            );
+            final client = _Client();
+            final screen = ClinicProfileScreen(
+              clinic: ClinicModel.fromJson(_clinic),
+              clinicsRepository: ClinicsRepository(apiClient: client),
+              practitionersRepository: PractitionersRepository(
+                apiClient: client,
+              ),
+              treatmentsRepository: TreatmentsRepository(apiClient: client),
+              offersRepository: OffersRepository(apiClient: client),
+            );
+            await tester.pumpWidget(_app(screen, dark, arabic, scale: 1));
+            await tester.pumpAndSettle();
+            await settlePreviewImages(tester);
+            await expectLater(
+              find.byType(Scaffold),
+              matchesGoldenFile(
+                'goldens/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+              ),
+            );
+            await tester.tap(find.text(LocaleService().tr('tab_staff')));
+            await tester.pumpAndSettle();
+            expect(
+              find.text(arabic ? 'ممارس الاختبار' : 'Fixture Practitioner'),
+              findsOneWidget,
+            );
+            expect(tester.takeException(), isNull);
+            await tester.ensureVisible(
+              find.text(LocaleService().tr('tab_offers')),
+            );
+            await tester.tap(find.text(LocaleService().tr('tab_offers')));
+            await tester.pumpAndSettle();
+            expect(
+              find.text(
+                arabic
+                    ? 'عرض اختبار للاستشارة الجلدية'
+                    : 'Fixture skin consultation offer',
+              ),
+              findsOneWidget,
+            );
+            expect(tester.takeException(), isNull);
+          },
+          variant: TargetPlatformVariant({host}),
+        );
+      }
     }
   }
   testWidgets(

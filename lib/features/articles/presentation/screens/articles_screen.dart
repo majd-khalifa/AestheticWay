@@ -1,3 +1,5 @@
+import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/patient_media_banner.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
 import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
@@ -311,16 +312,10 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LuxuryImage(
-                  imageUrl: article.coverImageUrl,
-                  fallbackLogoUrl: article.clinicLogoUrl,
-                  height: article.coverImageUrl.isEmpty ? 96 : 170,
-                  width: double.infinity,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  placeholderIcon: Icons.article_outlined,
-                  iconSize: 36,
+                PatientMediaBanner(
+                  source: article.coverImageUrl,
+                  height: 190,
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(14),

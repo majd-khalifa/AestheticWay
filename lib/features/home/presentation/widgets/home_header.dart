@@ -106,7 +106,24 @@ class HomeHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 1. Official Brand Logo (assets/images/aesthetic_way_logo.png)
-          const AppBrandLogo.header(height: 46, width: 104),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppBrandLogo.header(height: 46, width: 46),
+              const SizedBox(width: 8),
+              Text(
+                'AESTHETIC\nWAY',
+                style: TextStyle(
+                  color: AppColors.text(context),
+                  fontSize: 11,
+                  height: 1.5,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
 
           // 2. City Selector (No heart/favorite icon on Home header per client spec)
           Flexible(
@@ -126,6 +143,7 @@ class HomeHeader extends StatelessWidget {
                   ),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.location_on_outlined,
