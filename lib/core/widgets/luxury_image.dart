@@ -28,6 +28,12 @@ ImageProvider? resolveImageProvider(String? source, {String? mediaCacheKey}) {
   if (source == null || source.trim().isEmpty) return null;
   final value = source.trim();
   if (value.startsWith('assets/')) return AssetImage(value);
+  // Uri treats a Windows drive letter as a scheme ("C:" becomes "c").
+  // Classify absolute drive/UNC paths before URI parsing, just as file: URIs
+  // use FileImage regardless of existence; load errors select the fallback.
+  if (RegExp(r'^[a-zA-Z]:[\\/]').hasMatch(value) || value.startsWith(r'\\')) {
+    return FileImage(File(value));
+  }
   final uri = Uri.tryParse(value);
   if (uri?.scheme == 'file') {
     try {

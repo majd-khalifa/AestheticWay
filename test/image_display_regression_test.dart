@@ -391,6 +391,38 @@ void main() {
       debugNetworkImageHttpClientProvider = null;
     },
   );
+  test(
+    'absolute Windows drive and UNC paths resolve as files rather than URI schemes',
+    () {
+      for (final source in [
+        r'C:\Users\tester\AppData\Local\Temp\picked image.png',
+        'C:/Users/tester/AppData/Local/Temp/picked image.png',
+        r'z:\clinic\logo.png',
+        r'\\server\share\clinic logo.png',
+        r'\\?\C:\clinic\logo.png',
+      ]) {
+        // Classification runs on every host; decoding a real native file is
+        // covered separately below, without pretending Linux can read C:\.
+        final provider = resolveImageProvider(source);
+        expect(provider, isA<FileImage>(), reason: 'Source: $source');
+        expect((provider! as FileImage).file.path, source);
+      }
+    },
+  );
+
+  test('HTTP URLs and unsupported URI schemes are not Windows files', () {
+    for (final url in [
+      'https://storage.example/C:/clinic/logo.png?token=signed',
+      'http://localhost:8000/media/clinic.png',
+    ]) {
+      final provider = resolveImageProvider(url);
+      expect(provider, isA<NetworkImage>());
+      expect((provider! as NetworkImage).url, url);
+    }
+    expect(resolveImageProvider('C:relative.png'), isNull);
+    expect(resolveImageProvider('content://media/external/images/123'), isNull);
+  });
+
   testWidgets(
     'native files, file URIs and bundled assets render as primary images',
     (tester) async {
@@ -398,18 +430,22 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final dir = Directory.systemTemp.createTempSync('aw-image-');
       addTearDown(() => dir.deleteSync(recursive: true));
-      final file = File('${dir.path}/picked.png')..writeAsBytesSync(_png);
-      for (final source in [
-        file.path,
-        file.uri.toString(),
-        'assets/images/app_launcher_icon.png',
+      final file = File.fromUri(dir.uri.resolve('picked image %23.png'))
+        ..writeAsBytesSync(_png);
+      for (final (kind, source) in [
+        ('native file path', file.path),
+        ('file URI', file.uri.toString()),
+        ('bundled asset', 'assets/images/app_launcher_icon.png'),
       ]) {
+        final primary = resolveImageProvider(source);
+        expect(primary, isNotNull, reason: '$kind: $source');
+        expect(
+          primary,
+          kind == 'bundled asset' ? isA<AssetImage>() : isA<FileImage>(),
+          reason: '$kind: $source',
+        );
         await tester.runAsync(() async {
-          final provider = ResizeImage.resizeIfNeeded(
-            100,
-            null,
-            resolveImageProvider(source)!,
-          );
+          final provider = ResizeImage.resizeIfNeeded(100, null, primary!);
           final stream = provider.resolve(ImageConfiguration.empty);
           final done = Completer<void>();
           final listener = ImageStreamListener(
