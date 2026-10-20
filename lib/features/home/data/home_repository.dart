@@ -1,4 +1,5 @@
 import '../../clinics/data/clinics_repository.dart';
+import '../../clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/home/data/models/home_feed_model.dart';
@@ -37,10 +38,20 @@ class HomeRepository {
       }
     }
 
-    final response = await _apiClient.get(
+    // Independent bounded reads start together. Attach the error handler now so
+    // a failed optional directory never becomes an unhandled async error while
+    // the primary feed is still loading.
+    final feedRequest = _apiClient.get(
       ApiConfig.homeFeed,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
+    final directory = ClinicsRepository(apiClient: _apiClient)
+        .getClinics(city: city, latitude: latitude, longitude: longitude)
+        .then<List<ClinicModel>?>(
+          (items) => items,
+          onError: (Object _, StackTrace _) => null,
+        );
+    final response = await feedRequest;
 
     final feed = HomeFeedModel.fromJson(response.data as Map<String, dynamic>);
     // The Home serializer omits clinic subscription/media metadata. The existing
@@ -48,9 +59,8 @@ class HomeRepository {
     // supported subscription visibility without inventing ads or using is_featured.
     // Its failure must not discard genuine ad records from a successful feed.
     try {
-      final clinics = await ClinicsRepository(
-        apiClient: _apiClient,
-      ).getClinics(city: city, latitude: latitude, longitude: longitude);
+      final clinics = await directory;
+      if (clinics == null) throw const _DirectoryUnavailable();
       final byId = {for (final clinic in clinics) clinic.id: clinic};
       return HomeFeedModel(
         featuredAds: [
@@ -81,4 +91,8 @@ class HomeRepository {
       );
     }
   }
+}
+
+class _DirectoryUnavailable implements Exception {
+  const _DirectoryUnavailable();
 }

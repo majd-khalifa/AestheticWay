@@ -231,6 +231,17 @@ class AuthInterceptor extends Interceptor {
           return;
         }
       }
+      if (refreshError is DioException &&
+          [429, 503].contains(refreshError.response?.statusCode)) {
+        handler.next(
+          DioException(
+            requestOptions: request,
+            response: refreshError.response,
+            type: DioExceptionType.badResponse,
+          ),
+        );
+        return;
+      }
       handler.next(error);
       return;
     }

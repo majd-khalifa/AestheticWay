@@ -32,7 +32,7 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
 
   late final PagedCollection<PractitionerModel> _paging;
   List<PractitionerModel> get _practitioners => _paging.items;
-  bool get _isLoading => _paging.isLoading;
+  bool get _isLoading => _paging.isLoading && _paging.items.isEmpty;
   String? get _errorMessage => _paging.items.isEmpty ? _paging.error : null;
   void _pageChanged() {
     if (mounted) setState(() {});

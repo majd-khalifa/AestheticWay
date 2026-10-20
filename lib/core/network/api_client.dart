@@ -1,8 +1,13 @@
 import '../auth/token_storage.dart';
+import '../auth/guest_auth_guard.dart';
+import '../data/single_flight.dart';
+import '../localization/app_locale.dart';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'api_config.dart';
 import 'api_exception.dart';
 import 'auth_interceptor.dart';
+import 'request_backpressure.dart';
 
 /// Centralized HTTP API Client powered by Dio
 class ApiClient {
@@ -10,6 +15,8 @@ class ApiClient {
   factory ApiClient() => _instance;
 
   late final Dio dio;
+  final _reads = SingleFlight();
+  final _backpressure = RequestBackpressure();
 
   ApiClient._internal() {
     dio = Dio(
@@ -30,6 +37,8 @@ class ApiClient {
   void updateBaseUrl(String newBaseUrl) {
     ApiConfig.setBaseUrl(newBaseUrl);
     dio.options.baseUrl = ApiConfig.baseUrl;
+    _reads.clear();
+    _backpressure.clear();
   }
 
   Options _sessionOptions(Options? options) {
@@ -49,15 +58,37 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    try {
-      return await dio.get<T>(
+    final stamped = _sessionOptions(options);
+    // Unusual per-request Options may change decoding/headers/validation. Keep
+    // those requests independent rather than guessing their equivalence.
+    final key = options == null ? _readKey(path, queryParameters) : null;
+    if (key == null) {
+      return _send<T>(
+        'GET',
         path,
         queryParameters: queryParameters,
-        options: _sessionOptions(options),
+        options: stamped,
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
     }
+    final response = await _reads.run(
+      key,
+      () => _send<dynamic>(
+        'GET',
+        path,
+        queryParameters: queryParameters,
+        options: stamped,
+      ),
+    );
+    return Response<T>(
+      data: response.data as T,
+      requestOptions: response.requestOptions,
+      headers: response.headers,
+      statusCode: response.statusCode,
+      statusMessage: response.statusMessage,
+      isRedirect: response.isRedirect,
+      redirects: response.redirects,
+      extra: Map.of(response.extra),
+    );
   }
 
   /// POST request
@@ -67,16 +98,13 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    try {
-      return await dio.post<T>(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: _sessionOptions(options),
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
-    }
+    return _send<T>(
+      'POST',
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: _sessionOptions(options),
+    );
   }
 
   /// PATCH request
@@ -86,16 +114,13 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    try {
-      return await dio.patch<T>(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: _sessionOptions(options),
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
-    }
+    return _send<T>(
+      'PATCH',
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: _sessionOptions(options),
+    );
   }
 
   /// PUT request
@@ -105,16 +130,13 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    try {
-      return await dio.put<T>(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: _sessionOptions(options),
-      );
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
-    }
+    return _send<T>(
+      'PUT',
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: _sessionOptions(options),
+    );
   }
 
   /// DELETE request
@@ -124,15 +146,67 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    return _send<T>(
+      'DELETE',
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: _sessionOptions(options),
+    );
+  }
+
+  String _scope() =>
+      '${dio.options.baseUrl}|${TokenStorage().sessionEpoch}|${AuthState().sessionEpoch}';
+
+  String? _readKey(String path, Map<String, dynamic>? query) {
+    Object? sorted(Object? value) {
+      if (value is Map<String, dynamic>) {
+        final keys = value.keys.toList()..sort();
+        return {for (final key in keys) key: sorted(value[key])};
+      }
+      if (value is List) return value.map(sorted).toList();
+      return value;
+    }
+
     try {
-      return await dio.delete<T>(
+      return jsonEncode([
+        _scope(),
+        LocaleService().currentLanguage.code,
+        path,
+        sorted(query),
+        sorted(dio.options.headers),
+      ]);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Response<T>> _send<T>(
+    String method,
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    required Options options,
+  }) async {
+    final scope = _scope();
+    _backpressure.check(scope);
+    if (method != 'GET') _reads.clear();
+    try {
+      final response = await dio.request<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _sessionOptions(options),
+        options: options.copyWith(method: method),
       );
-    } on DioException catch (e) {
-      throw ApiException.fromDioError(e);
+      _backpressure.succeeded(scope);
+      return response;
+    } on DioException catch (error) {
+      final mapped = ApiException.fromDioError(error);
+      _backpressure.record(scope, mapped);
+      throw mapped;
+    } finally {
+      // A GET started before/during a write must not service a post-write read.
+      if (method != 'GET') _reads.clear();
     }
   }
 }

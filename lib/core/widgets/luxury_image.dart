@@ -80,6 +80,19 @@ void configureImageCacheBudget() {
   PaintingBinding.instance.imageCache.maximumSizeBytes = 64 * 1024 * 1024;
 }
 
+/// Fit keeps the original aspect ratio. The height ceiling also bounds very
+/// tall source files; normal cover resolution and signed URL bytes are retained.
+ImageProvider boundedImageDecode(
+  int? width,
+  ImageProvider provider, {
+  int maxHeight = 2160,
+}) => ResizeImage(
+  provider,
+  width: width,
+  height: maxHeight,
+  policy: ResizeImagePolicy.fit,
+);
+
 /// Bulletproof Luxury Image widget with Smart Brand/Clinic Logo Fallbacks & RAM-Safe Image Decoding
 class LuxuryImage extends StatelessWidget {
   final String? imageUrl;
@@ -162,11 +175,10 @@ class LuxuryImage extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(logoPadding),
           child: Image(
-            image: ResizeImage.resizeIfNeeded(
+            image: boundedImageDecode(
               (logoBadgeSize * MediaQuery.devicePixelRatioOf(context))
                   .round()
                   .clamp(60, 400),
-              null,
               logoProvider,
             ),
             width: logoBadgeSize,
@@ -197,7 +209,7 @@ class LuxuryImage extends StatelessWidget {
 
     Widget image = Image(
       key: ValueKey(primaryProvider),
-      image: ResizeImage.resizeIfNeeded(safeCacheWidth, null, primaryProvider),
+      image: boundedImageDecode(safeCacheWidth, primaryProvider),
       width: width,
       height: height,
       fit: fit,
@@ -287,7 +299,11 @@ class LuxuryAvatar extends StatelessWidget {
         ),
         padding: EdgeInsets.all(logoPadding),
         child: Image(
-          image: ResizeImage.resizeIfNeeded(safeCacheWidth, null, logoProvider),
+          image: boundedImageDecode(
+            safeCacheWidth,
+            logoProvider,
+            maxHeight: 1600,
+          ),
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
           errorBuilder: (_, _, _) => buildBrandEmblemFallback(),
@@ -310,10 +326,10 @@ class LuxuryAvatar extends StatelessWidget {
     return ClipOval(
       child: Image(
         key: ValueKey(primaryProvider),
-        image: ResizeImage.resizeIfNeeded(
+        image: boundedImageDecode(
           safeCacheWidth,
-          null,
           primaryProvider,
+          maxHeight: 1600,
         ),
         width: radius * 2,
         height: radius * 2,

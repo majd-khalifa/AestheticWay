@@ -31,7 +31,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
   String _searchQuery = '';
   late final PagedCollection<TreatmentModel> _paging;
   List<TreatmentModel> get _treatments => _paging.items;
-  bool get _isLoading => _paging.isLoading;
+  bool get _isLoading => _paging.isLoading && _paging.items.isEmpty;
   String? get _error => _paging.items.isEmpty ? _paging.error : null;
   void _pageChanged() {
     if (mounted) setState(() {});

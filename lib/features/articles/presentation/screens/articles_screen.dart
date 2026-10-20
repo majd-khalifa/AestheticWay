@@ -37,7 +37,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
   final ScrollController _scrollController = ScrollController();
   late final PagedCollection<ArticleModel> _paging;
   List<ArticleModel> get _articles => _paging.items;
-  bool get _isLoading => _paging.isLoading;
+  bool get _isLoading => _paging.isLoading && _paging.items.isEmpty;
   String? get _errorMessage => _paging.items.isEmpty ? _paging.error : null;
   void _pageChanged() {
     if (mounted) setState(() {});

@@ -30,7 +30,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   final ScrollController _scrollController = ScrollController();
   late final PagedCollection<ProductModel> _paging;
   List<ProductModel> get _products => _paging.items;
-  bool get _isLoading => _paging.isLoading;
+  bool get _isLoading => _paging.isLoading && _paging.items.isEmpty;
   String? get _errorMessage => _paging.items.isEmpty ? _paging.error : null;
   void _pageChanged() {
     if (mounted) setState(() {});
@@ -290,6 +290,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           sliver: SliverList.builder(
             itemCount: (filteredProducts.length / columns).ceil(),
             itemBuilder: (context, row) => Padding(
+              key: ValueKey(filteredProducts[row * columns].id),
               padding: const EdgeInsets.only(bottom: 20),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,6 +301,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       child: row * columns + col >= filteredProducts.length
                           ? const SizedBox.shrink()
                           : _ProductCard(
+                              key: ValueKey(
+                                filteredProducts[row * columns + col].id,
+                              ),
                               product: filteredProducts[row * columns + col],
                               onTap: () => Navigator.push(
                                 context,
@@ -332,7 +336,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 }
 
 class _ProductCard extends StatelessWidget {
-  const _ProductCard({required this.product, required this.onTap});
+  const _ProductCard({super.key, required this.product, required this.onTap});
   final ProductModel product;
   final VoidCallback onTap;
   @override

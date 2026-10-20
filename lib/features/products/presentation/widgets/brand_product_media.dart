@@ -64,21 +64,28 @@ class BrandProductMedia extends StatelessWidget {
       color: AppColors.isDark(context)
           ? AppColors.cardSurfaceLight
           : const Color(0xFFFAF8F3),
-      child: Image(
-        key: ValueKey(provider),
-        image: ResizeImage.resizeIfNeeded(
-          computeSafeCacheWidth(
-            context,
-            MediaQuery.sizeOf(context).width,
-            hero ? 260 : 180,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Image(
+          key: ValueKey(provider),
+          image: boundedImageDecode(
+            computeSafeCacheWidth(
+              context,
+              constraints.hasBoundedWidth
+                  ? constraints.maxWidth
+                  : MediaQuery.sizeOf(context).width,
+              hero ? 260 : 180,
+            ),
+            provider,
+            maxHeight:
+                ((hero ? 260 : 180) * MediaQuery.devicePixelRatioOf(context))
+                    .round()
+                    .clamp(100, 1440),
           ),
-          null,
-          provider,
+          height: hero ? 260 : 180,
+          width: double.infinity,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => identity(),
         ),
-        height: hero ? 260 : 180,
-        width: double.infinity,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => identity(),
       ),
     );
   }
