@@ -1,3 +1,4 @@
+import '../../../core/services/local_media_cache.dart';
 import 'dart:collection';
 import '../../../core/data/single_flight.dart';
 import '../../../core/data/paged_collection.dart';
@@ -77,6 +78,83 @@ class ClinicPortalService extends ChangeNotifier {
   Future<List<CategoryModel>> getOrFetchCategories() async {
     await loadCollection('categories');
     return UnmodifiableListView(_categories);
+  }
+
+  void _mutateCategories(void Function(List<CategoryModel>) change) {
+    final page = _pages['categories'];
+    if (page == null) {
+      change(_categories);
+    } else {
+      page.mutate((items) {
+        change(_categories);
+      });
+    }
+    notifyListeners();
+  }
+
+  Future<CategoryModel> createCategory({
+    required String nameEn,
+    required String nameAr,
+  }) async {
+    final epoch = _sessionEpoch;
+    final created = _mockMode
+        ? CategoryModel(
+            id: 'test-category-${DateTime.now().microsecondsSinceEpoch}',
+            nameEn: nameEn.trim(),
+            nameAr: nameAr.trim(),
+            slug: 'test-category',
+          )
+        : await _inSession(
+            _catalogRepository.createCategory(nameEn: nameEn, nameAr: nameAr),
+            epoch,
+          );
+    _mutateCategories((items) {
+      items.removeWhere((c) => c.id == created.id);
+      items.insert(0, created);
+    });
+    return created;
+  }
+
+  Future<CategoryModel> updateCategory(
+    String id, {
+    required String nameEn,
+    required String nameAr,
+  }) async {
+    final epoch = _sessionEpoch;
+    final updated = _mockMode
+        ? CategoryModel(
+            id: id,
+            nameEn: nameEn.trim(),
+            nameAr: nameAr.trim(),
+            slug:
+                categories.where((c) => c.id == id).firstOrNull?.slug ??
+                'test-category',
+          )
+        : await _inSession(
+            _catalogRepository.updateCategory(
+              id,
+              nameEn: nameEn,
+              nameAr: nameAr,
+            ),
+            epoch,
+          );
+    _mutateCategories((items) {
+      final index = items.indexWhere((c) => c.id == id);
+      if (index < 0) {
+        items.add(updated);
+      } else {
+        items[index] = updated;
+      }
+    });
+    return updated;
+  }
+
+  Future<void> deleteCategory(String id) async {
+    final epoch = _sessionEpoch;
+    if (!_mockMode) {
+      await _inSession(_catalogRepository.deleteCategory(id), epoch);
+    }
+    _mutateCategories((items) => items.removeWhere((c) => c.id == id));
   }
 
   void _initializeDefaultActiveClinic() {
@@ -206,7 +284,10 @@ class ClinicPortalService extends ChangeNotifier {
         ),
         'categories' => PagedCollection<CategoryModel>(
           items: _categories,
-          loader: (page, q) => _catalogRepository.getCategories(page: page),
+          loader: (page, q) => _catalogRepository.getCategories(
+            page: page,
+            search: q['search'] as String?,
+          ),
           keyOf: (item) => item.id,
         ),
         'branches' => PagedCollection<ClinicBranch>(
@@ -256,6 +337,7 @@ class ClinicPortalService extends ChangeNotifier {
   /// Discard all account-scoped state and invalidate outstanding requests.
   void clearSession({bool notify = true}) {
     _sessionEpoch++;
+    LocalMediaCache().clear();
     for (final page in _pages.values) {
       page.clear();
     }
@@ -812,6 +894,29 @@ class ClinicPortalService extends ChangeNotifier {
     }
   }
 
+  void _rememberMedia(
+    Map<String, dynamic> data,
+    String field,
+    String kind,
+    String id,
+    String remote,
+  ) {
+    if (!data.containsKey(field)) return;
+    final key = LocalMediaCache.entity(kind, id);
+    final value = data[field];
+    if (value == null || value == '') {
+      LocalMediaCache().remove(key);
+      return;
+    }
+    if (value is String) {
+      LocalMediaCache().remember(
+        localPath: value,
+        entityKey: key,
+        remoteUrl: remote,
+      );
+    }
+  }
+
   // -------------------------------------------------------------
   // OFFERS CRUD (Live API)
   // -------------------------------------------------------------
@@ -833,6 +938,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createOffer(data),
       sessionEpoch,
     );
+    _rememberMedia(data, 'image', 'offer', created.id, created.imageUrl);
     _clinicOffers.insert(0, created);
     notifyListeners();
     return created;
@@ -863,6 +969,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updateOffer(id, data),
       sessionEpoch,
     );
+    _rememberMedia(data, 'image', 'offer', updated.id, updated.imageUrl);
     final idx = _clinicOffers.indexWhere((o) => o.id == id);
     if (idx != -1) {
       _clinicOffers[idx] = updated;
@@ -911,6 +1018,7 @@ class ClinicPortalService extends ChangeNotifier {
       if (_mockMode) return;
       try {
         await _inSession(_catalogRepository.deleteOffer(offerId), sessionEpoch);
+        LocalMediaCache().remove(LocalMediaCache.entity('offer', offerId));
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
           return;
@@ -945,6 +1053,13 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createPractitioner(data),
       sessionEpoch,
     );
+    _rememberMedia(
+      data,
+      'avatar',
+      'practitioner',
+      created.id,
+      created.avatarUrl,
+    );
     _clinicPractitioners.add(created);
     notifyListeners();
     return created;
@@ -977,6 +1092,13 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updatePractitioner(id, data),
       sessionEpoch,
     );
+    _rememberMedia(
+      data,
+      'avatar',
+      'practitioner',
+      updated.id,
+      updated.avatarUrl,
+    );
     final idx = _clinicPractitioners.indexWhere((p) => p.id == id);
     if (idx != -1) {
       _clinicPractitioners[idx] = updated;
@@ -997,6 +1119,7 @@ class ClinicPortalService extends ChangeNotifier {
           _catalogRepository.deletePractitioner(id),
           sessionEpoch,
         );
+        LocalMediaCache().remove(LocalMediaCache.entity('practitioner', id));
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
           return;
@@ -1110,6 +1233,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createProduct(data),
       sessionEpoch,
     );
+    _rememberMedia(data, 'image', 'product', created.id, created.imageUrl);
     _clinicProducts.insert(0, created);
     notifyListeners();
     return created;
@@ -1149,6 +1273,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updateProduct(id, data),
       sessionEpoch,
     );
+    _rememberMedia(data, 'image', 'product', updated.id, updated.imageUrl);
     final idx = _clinicProducts.indexWhere((p) => p.id == id);
     if (idx != -1) {
       _clinicProducts[idx] = updated;
@@ -1197,6 +1322,7 @@ class ClinicPortalService extends ChangeNotifier {
           _catalogRepository.deleteProduct(productId),
           sessionEpoch,
         );
+        LocalMediaCache().remove(LocalMediaCache.entity('product', productId));
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
           return;
@@ -1227,6 +1353,13 @@ class ClinicPortalService extends ChangeNotifier {
     }
     final created = _enrichArticleAuthor(
       await _inSession(_catalogRepository.createArticle(data), sessionEpoch),
+    );
+    _rememberMedia(
+      data,
+      'cover_image',
+      'article',
+      created.id,
+      created.coverImageUrl,
     );
     _clinicArticles.insert(0, created);
     notifyListeners();
@@ -1266,6 +1399,13 @@ class ClinicPortalService extends ChangeNotifier {
         _catalogRepository.updateArticle(id, data),
         sessionEpoch,
       ),
+    );
+    _rememberMedia(
+      data,
+      'cover_image',
+      'article',
+      updated.id,
+      updated.coverImageUrl,
     );
     final idx = _clinicArticles.indexWhere((a) => a.id == id);
     if (idx != -1) {
@@ -1319,6 +1459,7 @@ class ClinicPortalService extends ChangeNotifier {
           _catalogRepository.deleteArticle(articleId),
           sessionEpoch,
         );
+        LocalMediaCache().remove(LocalMediaCache.entity('article', articleId));
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
           return;
@@ -1402,6 +1543,14 @@ class ClinicPortalService extends ChangeNotifier {
         NetworkImage(old.coverImageUrl),
       );
     }
+    _rememberMedia(payload, 'logo', 'clinic_logo', updated.id, updated.logoUrl);
+    _rememberMedia(
+      payload,
+      'cover_image',
+      'clinic_cover',
+      updated.id,
+      updated.coverImageUrl,
+    );
     _activeClinic = updated;
     _calculateLocalChecklist();
     notifyListeners();

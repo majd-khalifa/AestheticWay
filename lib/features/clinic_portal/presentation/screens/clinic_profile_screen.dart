@@ -1,3 +1,6 @@
+import '../../../../core/services/local_media_cache.dart';
+import '../widgets/clinic_catalog_cards.dart';
+import 'clinic_offers_screen.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
 import '../../data/clinic_catalog_repository.dart';
 import '../../../offers/models/offer_model.dart';
@@ -2020,6 +2023,44 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     }
   }
 
+  Widget _productRow(BuildContext context, ProductModel p) {
+    final loc = LocaleService();
+    final clinicService = ClinicPortalService();
+    return ClinicCatalogMiniRow(
+      title: loc.isArabic ? p.nameAr : p.nameEn,
+      subtitle: loc.isArabic
+          ? (p.brandNameAr ?? p.brandNameEn ?? '')
+          : (p.brandNameEn ?? p.brandNameAr ?? ''),
+      imageUrl: p.imageUrl,
+      mediaCacheKey: LocalMediaCache.entity('product', p.id),
+      icon: Icons.auto_awesome_outlined,
+      onEdit: () => _showProductFormDialog(context, loc, existing: p),
+      onDelete: () => _deleteCatalogItem(
+        context,
+        loc,
+        () => clinicService.deleteProduct(p.id),
+      ),
+    );
+  }
+
+  Widget _articleRow(BuildContext context, ArticleModel art) {
+    final loc = LocaleService();
+    final clinicService = ClinicPortalService();
+    return ClinicCatalogMiniRow(
+      title: loc.isArabic ? art.titleAr : art.titleEn,
+      subtitle: loc.isArabic ? art.authorDoctorNameAr : art.authorDoctorNameEn,
+      imageUrl: art.coverImageUrl,
+      mediaCacheKey: LocalMediaCache.entity('article', art.id),
+      icon: Icons.article_outlined,
+      onEdit: () => _showArticleFormDialog(context, loc, existing: art),
+      onDelete: () => _deleteCatalogItem(
+        context,
+        loc,
+        () => clinicService.deleteArticle(art.id),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
@@ -2151,70 +2192,26 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          loc.tr('clinic_team_title'),
-                          style: AppTypography.cardTitle.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.silverPrimary
-                                : AppColors.lightTextPrimary,
-                          ),
+                    ClinicSectionHeader(
+                      title: loc.tr('clinic_team_title'),
+                      addLabel: loc.tr('clinic_add_practitioner'),
+                      onAdd: () => _showAddPractitionerDialog(context, loc),
+                      onManage: () => Navigator.push(
+                        context,
+                        LuxuryPageRoute(
+                          page: const ClinicPractitionersScreen(),
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton.outlined(
-                              style: IconButton.styleFrom(
-                                foregroundColor: AppColors.text(context),
-                                side: BorderSide(
-                                  color: AppColors.border(context),
-                                ),
-                              ),
-                              icon: Icon(
-                                Icons.open_in_new_rounded,
-                                color: AppColors.text(context),
-                                size: 18,
-                              ),
-                              tooltip: loc.isArabic
-                                  ? 'إدارة الكادر الطبي'
-                                  : 'Manage Staff',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  LuxuryPageRoute(
-                                    page: const ClinicPractitionersScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.add_circle_outline_rounded,
-                                color: AppColors.accentChampagne,
-                                size: 20,
-                              ),
-                              tooltip: loc.tr('clinic_add_practitioner'),
-                              onPressed: () =>
-                                  _showAddPractitionerDialog(context, loc),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     BoundedCatalogPreview<PractitionerModel>(
                       items: () => clinicService.clinicPractitioners,
                       listenable: clinicService,
                       page: clinicService.collection('practitioners'),
-                      itemBuilder: (context, p) => ClinicCatalogMiniRow(
-                        title: loc.isArabic ? p.nameAr : p.nameEn,
-                        subtitle: loc.isArabic ? p.specialtyAr : p.specialtyEn,
-                        imageUrl: p.avatarUrl,
-                        icon: Icons.person_outline,
+                      itemBuilder: (context, p) => ClinicPractitionerCard(
+                        practitioner: p,
+                        compact: true,
+                        clinicLogoUrl: clinic.logoUrl,
                         onEdit: () => _showAddPractitionerDialog(
                           context,
                           loc,
@@ -2238,73 +2235,23 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          loc.tr('clinic_services_title'),
-                          style: AppTypography.cardTitle.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.silverPrimary
-                                : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton.outlined(
-                              style: IconButton.styleFrom(
-                                foregroundColor: AppColors.text(context),
-                                side: BorderSide(
-                                  color: AppColors.border(context),
-                                ),
-                              ),
-                              icon: Icon(
-                                Icons.open_in_new_rounded,
-                                color: AppColors.text(context),
-                                size: 18,
-                              ),
-                              tooltip: loc.isArabic
-                                  ? 'إدارة الخدمات والعلاجات'
-                                  : 'Manage Treatments',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  LuxuryPageRoute(
-                                    page: const ClinicTreatmentsScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.add_circle_outline_rounded,
-                                color: AppColors.accentChampagne,
-                                size: 20,
-                              ),
-                              tooltip: loc.tr('clinic_add_service'),
-                              onPressed: () =>
-                                  _showAddServiceDialog(context, loc),
-                            ),
-                          ],
-                        ),
-                      ],
+                    ClinicSectionHeader(
+                      title: loc.tr('clinic_services_title'),
+                      addLabel: loc.tr('clinic_add_service'),
+                      onAdd: () => _showAddServiceDialog(context, loc),
+                      onManage: () => Navigator.push(
+                        context,
+                        LuxuryPageRoute(page: const ClinicTreatmentsScreen()),
+                      ),
                     ),
                     const SizedBox(height: 8),
                     BoundedCatalogPreview<TreatmentModel>(
                       items: () => clinicService.clinicTreatments,
                       listenable: clinicService,
                       page: clinicService.collection('treatments'),
-                      itemBuilder: (context, t) => ClinicCatalogMiniRow(
-                        title: loc.isArabic ? t.nameAr : t.nameEn,
-                        subtitle: loc.isArabic ? t.categoryAr : t.categoryEn,
-                        imageUrl: '',
-                        icon: Icons.spa_outlined,
-                        badge: t.price == null
-                            ? null
-                            : '${t.price!.toStringAsFixed(0)} ${loc.isArabic ? 'درهم' : 'AED'}',
+                      itemBuilder: (context, t) => ClinicTreatmentCard(
+                        treatment: t,
+                        practitioners: clinicService.clinicPractitioners,
                         onEdit: () =>
                             _showAddServiceDialog(context, loc, existing: t),
                         onDelete: () => _deleteCatalogItem(
@@ -2324,22 +2271,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            loc.tr('clinic_nav_offers'),
-                            style: AppTypography.cardTitle.copyWith(
-                              color: AppColors.text(context),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline_rounded),
-                          tooltip: loc.tr('clinic_btn_add_offer'),
-                          onPressed: () => showClinicOfferEditor(context, loc),
-                        ),
-                      ],
+                    ClinicSectionHeader(
+                      title: loc.tr('clinic_nav_offers'),
+                      addLabel: loc.tr('clinic_btn_add_offer'),
+                      onAdd: () => showClinicOfferEditor(context, loc),
+                      onManage: () => Navigator.push(
+                        context,
+                        LuxuryPageRoute(page: const ClinicOffersScreen()),
+                      ),
                     ),
                     if (clinicService.clinicOffers.isEmpty)
                       Text(
@@ -2350,15 +2289,8 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       items: () => clinicService.clinicOffers,
                       listenable: clinicService,
                       page: clinicService.collection('offers'),
-                      itemBuilder: (context, offer) => ClinicCatalogMiniRow(
-                        title: loc.isArabic ? offer.titleAr : offer.titleEn,
-                        subtitle: loc.isArabic
-                            ? offer.termsAr
-                            : (offer.termsEn ?? ''),
-                        imageUrl: offer.imageUrl,
-                        icon: Icons.local_offer_outlined,
-                        badge:
-                            '${offer.offerPrice.toStringAsFixed(0)} ${loc.isArabic ? 'درهم' : 'AED'} · ${offer.discountPercentage}%',
+                      itemBuilder: (context, offer) => ClinicOfferCard(
+                        offer: offer,
                         onEdit: () => showClinicOfferEditor(
                           context,
                           loc,
@@ -2383,29 +2315,17 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          loc.tr('clinic_manage_products'),
-                          style: AppTypography.cardTitle.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.silverPrimary
-                                : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.add_circle_outline_rounded,
-                            color: AppColors.accentChampagne,
-                            size: 20,
-                          ),
-                          tooltip: loc.tr('clinic_add_product'),
-                          onPressed: () => _showProductFormDialog(context, loc),
-                        ),
-                      ],
+                    ClinicSectionHeader(
+                      title: loc.tr('clinic_manage_products'),
+                      addLabel: loc.tr('clinic_add_product'),
+                      onAdd: () => _showProductFormDialog(context, loc),
+                      onManage: () => showBoundedCatalogSheet<ProductModel>(
+                        context,
+                        items: () => clinicService.clinicProducts,
+                        listenable: clinicService,
+                        page: clinicService.collection('products'),
+                        itemBuilder: _productRow,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     if (clinicService.clinicProducts.isEmpty)
@@ -2421,21 +2341,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         items: () => clinicService.clinicProducts,
                         listenable: clinicService,
                         page: clinicService.collection('products'),
-                        itemBuilder: (context, p) => ClinicCatalogMiniRow(
-                          title: loc.isArabic ? p.nameAr : p.nameEn,
-                          subtitle: loc.isArabic
-                              ? (p.brandNameAr ?? p.brandNameEn ?? '')
-                              : (p.brandNameEn ?? p.brandNameAr ?? ''),
-                          imageUrl: p.imageUrl,
-                          icon: Icons.auto_awesome_outlined,
-                          onEdit: () =>
-                              _showProductFormDialog(context, loc, existing: p),
-                          onDelete: () => _deleteCatalogItem(
-                            context,
-                            loc,
-                            () => clinicService.deleteProduct(p.id),
-                          ),
-                        ),
+                        itemBuilder: _productRow,
                       ),
                   ],
                 ),
@@ -2449,29 +2355,17 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          loc.tr('clinic_manage_articles'),
-                          style: AppTypography.cardTitle.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.silverPrimary
-                                : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.add_circle_outline_rounded,
-                            color: AppColors.accentChampagne,
-                            size: 20,
-                          ),
-                          tooltip: loc.tr('clinic_add_article'),
-                          onPressed: () => _showArticleFormDialog(context, loc),
-                        ),
-                      ],
+                    ClinicSectionHeader(
+                      title: loc.tr('clinic_manage_articles'),
+                      addLabel: loc.tr('clinic_add_article'),
+                      onAdd: () => _showArticleFormDialog(context, loc),
+                      onManage: () => showBoundedCatalogSheet<ArticleModel>(
+                        context,
+                        items: () => clinicService.clinicArticles,
+                        listenable: clinicService,
+                        page: clinicService.collection('articles'),
+                        itemBuilder: _articleRow,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     if (clinicService.clinicArticles.isEmpty)
@@ -2487,24 +2381,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         items: () => clinicService.clinicArticles,
                         listenable: clinicService,
                         page: clinicService.collection('articles'),
-                        itemBuilder: (context, art) => ClinicCatalogMiniRow(
-                          title: loc.isArabic ? art.titleAr : art.titleEn,
-                          subtitle: loc.isArabic
-                              ? art.authorDoctorNameAr
-                              : art.authorDoctorNameEn,
-                          imageUrl: art.coverImageUrl,
-                          icon: Icons.article_outlined,
-                          onEdit: () => _showArticleFormDialog(
-                            context,
-                            loc,
-                            existing: art,
-                          ),
-                          onDelete: () => _deleteCatalogItem(
-                            context,
-                            loc,
-                            () => clinicService.deleteArticle(art.id),
-                          ),
-                        ),
+                        itemBuilder: _articleRow,
                       ),
                   ],
                 ),

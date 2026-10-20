@@ -1,3 +1,4 @@
+import 'clinic_category_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/widgets/paged_entity_picker.dart';
@@ -27,6 +28,36 @@ class ClinicCategoryField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () async {
+                final category = await showClinicCategoryEditor(context);
+                if (context.mounted && category != null) onChanged(category);
+              },
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(loc.isArabic ? 'إضافة تصنيف' : 'Add Category'),
+            ),
+            TextButton.icon(
+              onPressed: () => showClinicCategoryManager(
+                context,
+                onUpdated: (category) {
+                  if (category.id == value) onChanged(category);
+                },
+                onDeleted: (id) {
+                  if (id == value) onChanged(null);
+                },
+              ),
+              icon: const Icon(Icons.tune, size: 18),
+              label: Text(
+                loc.isArabic ? 'إدارة التصنيفات' : 'Manage Categories',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           key: ValueKey(value),
           initialValue: value,

@@ -1,3 +1,4 @@
+import 'local_media_cache.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -32,20 +33,16 @@ class MediaUploadService {
     required String mediaType,
     String? clinicId,
   }) async {
+    final cacheEpoch = LocalMediaCache().epoch;
     try {
       final file = File(filePath);
       if (!file.existsSync()) {
-        throw ApiException(
-          message: 'Local image file not found at: $filePath',
-        );
+        throw ApiException(message: 'Local image file not found at: $filePath');
       }
 
       final fileName = filePath.split(RegExp(r'[\\/]')).last;
       final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          filePath,
-          filename: fileName,
-        ),
+        'file': await MultipartFile.fromFile(filePath, filename: fileName),
         'media_type': mediaType,
         if (clinicId != null && clinicId.isNotEmpty) 'clinic_id': clinicId,
       });
@@ -57,6 +54,11 @@ class MediaUploadService {
 
       final data = response.data;
       if (data is Map<String, dynamic>) {
+        LocalMediaCache().remember(
+          localPath: filePath,
+          remoteUrl: data['url'] is String ? data['url'] as String : null,
+          expectedEpoch: cacheEpoch,
+        );
         return data;
       }
       return <String, dynamic>{};

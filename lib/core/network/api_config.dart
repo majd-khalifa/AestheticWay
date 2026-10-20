@@ -34,26 +34,69 @@ class ApiConfig {
     if (uri != null &&
         (uri.scheme.toLowerCase() == 'http' ||
             uri.scheme.toLowerCase() == 'https')) {
-      return value;
+      return _productionMediaUrl(value);
+    }
+    if (RegExp(r'^/+media/').hasMatch(value)) {
+      return _productionMediaUrl(
+        '$mediaOrigin/${_cleanRelativeMedia(value).replaceFirst(RegExp(r"^/+"), "")}',
+      );
     }
     if (value.startsWith('//')) {
-      return '${Uri.parse(mediaOrigin).scheme}:$value';
+      return _productionMediaUrl('${Uri.parse(mediaOrigin).scheme}:$value');
     }
-    if (value.startsWith('/')) return '$mediaOrigin$value';
+    if (value.startsWith('/')) {
+      return _productionMediaUrl('$mediaOrigin${_cleanRelativeMedia(value)}');
+    }
     // Assets and file URIs are consumed by the appropriate image provider.
     if (value.startsWith('assets/') || (uri != null && uri.hasScheme)) {
       return value;
     }
-    if (value.startsWith('media/')) return '$mediaOrigin/$value';
+    if (value.startsWith('media/')) {
+      return _productionMediaUrl('$mediaOrigin/${_cleanRelativeMedia(value)}');
+    }
     // A bare Django storage name is relative to MEDIA_URL, not /api/v1/.
     if (value.contains('/') ||
         RegExp(
           r'\.(png|jpe?g|webp|gif|avif|heic|bmp|mp4|mov|webm)([?#].*)?$',
           caseSensitive: false,
         ).hasMatch(value)) {
-      return '$mediaOrigin/media/${value.startsWith('./') ? value.substring(2) : value}';
+      return _productionMediaUrl(
+        '$mediaOrigin/media/${_cleanRelativeMedia(value.startsWith('./') ? value.substring(2) : value)}',
+      );
     }
     return value;
+  }
+
+  static String _cleanRelativeMedia(String value) {
+    final boundary = value.indexOf(RegExp(r'[?#]'));
+    final path = boundary < 0 ? value : value.substring(0, boundary);
+    return path.replaceAll(RegExp(r'/+'), '/') +
+        (boundary < 0 ? '' : value.substring(boundary));
+  }
+
+  static String _productionMediaUrl(String value) {
+    final uri = Uri.tryParse(value);
+    final host = uri?.host.toLowerCase() ?? '';
+    if (host != 'aestheticway.ae' && !host.endsWith('.aestheticway.ae')) {
+      return value;
+    }
+    var result = value.replaceFirst(
+      RegExp(r'^http:', caseSensitive: false),
+      'https:',
+    );
+    result = result.replaceFirstMapped(
+      RegExp(r'^(https://[^/?#:]+):80(?=/|[?#]|$)', caseSensitive: false),
+      (match) => match[1]!,
+    );
+    // Only normalize first-party media paths; preserve R2/signed URLs verbatim.
+    final match = RegExp(
+      r'^(https://[^/?#]+)(/[^?#]*)?([?#].*)?$',
+      caseSensitive: false,
+    ).firstMatch(result);
+    if (match != null && RegExp(r'^/+media/').hasMatch(match[2] ?? '')) {
+      result = '${match[1]}${_cleanRelativeMedia(match[2]!)}${match[3] ?? ''}';
+    }
+    return result;
   }
 
   /// Null coalescing alone lets an empty serializer alias hide a real image.
@@ -125,6 +168,7 @@ class ApiConfig {
   static String treatmentDetail(String id) => 'treatments/$id/';
   static const String offers = 'offers/';
   static const String categories = 'categories/';
+  static const String clinicCategories = 'clinic-portal/categories/';
   static const String products = 'products/';
   static String productDetail(String id) => 'products/$id/';
   static const String articles = 'articles/';

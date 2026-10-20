@@ -103,6 +103,24 @@ class PagedCollection<T> extends ChangeNotifier {
     });
   }
 
+  /// Commit an acknowledged write without letting an older GET erase it.
+  void mutate(void Function(List<T>) change) {
+    if (_disposed) return;
+    ++_requestId;
+    _debounce?.cancel();
+    _firstFlight = null;
+    _nextFlight = null;
+    isLoading = false;
+    isLoadingMore = false;
+    error = null;
+    final before = items.length;
+    change(items);
+    if (total != null) {
+      total = (total! + items.length - before).clamp(0, 1 << 31);
+    }
+    _notify();
+  }
+
   /// Invalidate immediately on input, before waiting for the 350 ms quiet period.
   void search(Map<String, dynamic> query) {
     if (_disposed) return;

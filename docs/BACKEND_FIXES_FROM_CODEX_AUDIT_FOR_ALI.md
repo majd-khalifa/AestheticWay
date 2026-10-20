@@ -1460,3 +1460,219 @@ Audit every auth view's own `throttle_classes`; an override replaces defaults, s
 8. On physical lower-memory Android and iOS devices, profile in Flutter **profile/release mode** with 1,000 loaded records: frame build+raster <16.7 ms at 60 Hz / <8.3 ms at 120 Hz, bounded image memory, no codec growth across 100 tab/background/route cycles, keyboard and Arabic/English accessibility text checks. Headless widget tests and 500 mocked Dio calls cannot certify these frame budgets.
 
 Deployment order: backend contracts/permissions/media fixes → migrations/indexes/outbox workers and beat → warm snapshots and run acceptance → deploy Flutter → build/sign production release. Do not label an APK production-ready merely because analyze and unit/widget tests pass.
+
+---
+
+## 2026-10-20 — Clinic Portal categories, HTTPS media, and image persistence
+
+**Deployment required / يتطلب النشر:** The Flutter portal now exposes category creation, bilingual renaming, and deletion. It tries `clinic-portal/categories/` first and falls back to `categories/` only on HTTP 404/405/501. Authentication/permission/validation errors and timeouts are never retried against another endpoint. The original reference only implements category GET; exposing the UI does not deploy these Django writes.
+
+Categories are a **shared global taxonomy** in the current database, not clinic-owned records. The requested policy permits authenticated `clinic_admin` and `super_admin` users to edit this shared taxonomy. Do not imply tenant ownership without adding a corresponding model field. Deletion must reject categories referenced by **any** treatment, including soft-deleted treatments: the existing Category foreign key uses CASCADE and an unguarded delete could remove treatments in other clinics.
+
+### Category API — paste as `apps/treatments/category_crud.py`
+
+No category schema migration is required. Slugs are generated server-side on creation and remain stable on rename.
+
+```python
+import uuid
+
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.utils.text import slugify
+from rest_framework import filters, generics, serializers, status
+from rest_framework.exceptions import APIException
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.response import Response
+
+from apps.treatments.models import Category, Treatment
+
+
+class CategoryAccess(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        user = request.user
+        return bool(
+            user and user.is_authenticated
+            and user.role in {"clinic_admin", "super_admin"}
+        )
+
+
+class PortalCategoryAccess(CategoryAccess):
+    def has_permission(self, request, view):
+        return bool(
+            request.user and request.user.is_authenticated
+            and super().has_permission(request, view)
+        )
+
+
+class CategoryWriteSerializer(serializers.ModelSerializer):
+    name_en = serializers.CharField(max_length=200, allow_blank=False)
+    name_ar = serializers.CharField(max_length=200, allow_blank=False)
+
+    class Meta:
+        model = Category
+        fields = ["id", "name_en", "name_ar", "slug", "icon", "display_order"]
+        read_only_fields = ["id", "slug", "icon", "display_order"]
+
+    def create(self, validated_data):
+        prefix = slugify(validated_data["name_en"])[:180] or "category"
+        validated_data["slug"] = f"{prefix}-{uuid.uuid4().hex}"
+        return super().create(validated_data)
+
+
+class CategoryInUse(APIException):
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "This category is used by treatments and cannot be deleted."
+    default_code = "category_in_use"
+
+
+class CategoryListCreateAPIView(generics.ListCreateAPIView):
+    permission_classes = [CategoryAccess]
+    serializer_class = CategoryWriteSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["name_en", "name_ar"]
+
+    def get_queryset(self):
+        return Category.objects.filter(is_active=True).order_by("display_order", "name_en", "pk")
+
+
+class CategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [CategoryAccess]
+    serializer_class = CategoryWriteSerializer
+    queryset = Category.objects.filter(is_active=True)
+    lookup_url_kwarg = "id"
+    http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        category = get_object_or_404(
+            self.get_queryset().select_for_update(), pk=self.kwargs["id"]
+        )
+        self.check_object_permissions(request, category)
+        if Treatment.objects.filter(category_id=category.pk).exists():
+            raise CategoryInUse()
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PortalCategoryListCreateAPIView(CategoryListCreateAPIView):
+    permission_classes = [PortalCategoryAccess]
+
+
+class PortalCategoryDetailAPIView(CategoryDetailAPIView):
+    permission_classes = [PortalCategoryAccess]
+```
+
+In **`api/v1/urls.py`**, replace the existing `categories/` GET registration (do not leave an earlier matching GET-only route), and add the following imports/routes inside the existing API-v1 `urlpatterns`:
+
+```python
+from apps.treatments.category_crud import (
+    CategoryListCreateAPIView, CategoryDetailAPIView,
+    PortalCategoryListCreateAPIView, PortalCategoryDetailAPIView,
+)
+
+# These paths are inside the existing /api/v1/ include:
+path("categories/", CategoryListCreateAPIView.as_view(), name="category-list"),
+path("categories/<uuid:id>/", CategoryDetailAPIView.as_view(), name="category-detail"),
+path("clinic-portal/categories/", PortalCategoryListCreateAPIView.as_view(), name="portal-category-list"),
+path("clinic-portal/categories/<uuid:id>/", PortalCategoryDetailAPIView.as_view(), name="portal-category-detail"),
+```
+
+Expected responses: POST **201** with the complete category including UUID; PATCH **200** with the renamed category; DELETE **204**; DELETE in-use category **409**; unauthenticated/unauthorized writes **401/403**. Patient and `clinic_staff` write attempts must fail. Both route families operate on the same Category rows. Keep standard pagination and AR/EN search enabled.
+
+### Practitioner / offer persistence — do not discard URL strings
+
+The old archive contains `to_internal_value()` overrides that pop `avatar`/`image` when they are strings. Remove those overrides completely. The newer `backend_latest.zip` already contains a portal-image mixin; reconcile the following contract with that implementation instead of adding a second conflicting mixin.
+
+The shared image field/mixin in this document must enforce these exact rules:
+
+- Uploaded asset UUID + URL: validate asset purpose/ownership, assign the fresh FK, and clear the legacy URL column.
+- Direct URL without asset UUID: retain the URL, clear any stale FK, and never download arbitrary URLs on the server.
+- Explicit image `null`/empty: normalize the non-nullable URL column to `""` and clear its FK. Omission preserves existing media.
+- Binary image: validate it, store it as a MediaAsset with the correct media type, and return the new URL.
+- Asset lookup must reject another clinic's private assets and incorrect media types. Do not replace the scoped queryset with an unrestricted FK assignment.
+
+After installing the shared `PortalImageInputField` / `ScopedPortalImageMixin` from the earlier **“Shared serializer implementation / تطبيق مشترك للسيريالايزر”** section, use these exact class declarations and remove the old string-dropping methods:
+
+```python
+# apps/practitioners/portal_serializers.py
+from apps.media.portal_images import PortalImageInputField, ScopedPortalImageMixin
+from apps.media.models import MediaType
+
+class ClinicPractitionerPortalSerializer(ScopedPortalImageMixin, serializers.ModelSerializer):
+    avatar = PortalImageInputField(required=False, allow_null=True)
+    image_field_name = "avatar"
+    image_media_type = MediaType.PRACTITIONER_AVATAR
+    # Retain the existing fields, Meta, and type/status validation below.
+    # Delete the entire old to_internal_value override that pops avatar strings.
+```
+
+```python
+# apps/offers/portal_serializers.py
+from apps.media.portal_images import PortalImageInputField, ScopedPortalImageMixin
+from apps.media.models import MediaType
+
+class ClinicOfferPortalSerializer(ScopedPortalImageMixin, serializers.ModelSerializer):
+    image = PortalImageInputField(required=False, allow_null=True)
+    image_field_name = "image"
+    image_media_type = MediaType.OFFER_IMAGE
+    # Retain existing fields, Meta, pricing/date/clinic validation below.
+    # Delete the entire old to_internal_value override that pops image strings.
+```
+
+If the chosen shared mixin implements `validate()`, the serializers' own `validate()` methods must end with `return super().validate(attrs)` so their MRO does not bypass it. Keep tenant/type checks after ownership resolution. The current newer reference handles input normalization in the mixin's `to_internal_value`; do not silently replace it with a version whose validation is never invoked.
+
+**Model output must prefer the new asset.** Replace the existing properties with these bodies (inside their respective model classes):
+
+```python
+# Replace Practitioner.avatar_url:
+@property
+def avatar_url(self):
+    from apps.media.utils import resolve_media_url
+    if self.media_asset_id and self.media_asset and self.media_asset.file:
+        return resolve_media_url(self.media_asset.file) or ""
+    return resolve_media_url(self.avatar) or ""
+```
+
+```python
+# Replace Offer.image_url:
+@property
+def image_url(self):
+    from apps.media.utils import resolve_media_url
+    if self.media_asset_id and self.media_asset and self.media_asset.file:
+        return resolve_media_url(self.media_asset.file) or ""
+    return resolve_media_url(self.image) or ""
+```
+
+Keep `avatar_url` and `image_url` in the response serializers. Set the legacy `Practitioner.avatar` and `Offer.image` URLFields to `max_length=1000, blank=True, default=""`, then run `python manage.py makemigrations practitioners offers` and deploy those migrations before accepting long signed URLs. Retain multipart + JSON parsers on the views. The earlier sections cover equivalent product/article behavior and clinic ImageField URL handling.
+
+### Production HTTPS and real storage availability
+
+Flutter now upgrades only first-party `http://aestheticway.ae` / subdomain media URLs to HTTPS and normalizes duplicated slashes in first-party/relative media paths. R2/external URLs, encoded object names, and query signatures stay unchanged. Do not enable unrestricted Android cleartext traffic to work around the server configuration.
+
+Configure Django to trust forwarded protocol **only behind a trusted reverse proxy that overwrites those headers**:
+
+```python
+# config/settings/production.py, after the proxy is configured correctly:
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+```
+
+```nginx
+# In the trusted TLS Nginx location that proxies Django:
+proxy_set_header Host $host;
+proxy_set_header X-Forwarded-Host $host;
+proxy_set_header X-Forwarded-Proto $scheme;
+```
+
+For filesystem media, ensure `/media/` is served from the actual MEDIA_ROOT over HTTPS. For R2, verify the returned object URL resolves to image bytes, content type is an image type, signatures have not expired, and the public/custom storage hostname is configured correctly. Test from a device without a local cache and after application restart. A 200 profile PATCH alone does not prove that the returned URL is accessible or that a serializer persisted the photo.
+
+The Flutter `LocalMediaCache` is bounded and scoped to the current authenticated session. Successful saves map original picked files by entity key and returned URL; the renderer can show them immediately without a CDN fetch. It clears on session reset/logout and skips missing files. It **does not repair nginx/R2, synchronize another device, survive application restart, or prove durable backend persistence**. Only backend deployment and a fresh-client read can establish those properties.
+
+### Deployment acceptance
+
+1. Create/rename/delete an unused category through both URL families; verify public GET and treatment category selection reflect it. In-use deletion must return 409 without deleting any treatment.
+2. Verify patient/staff writes fail and clinic_admin/super_admin writes succeed. Names validate at 200 characters; the generated slug remains stable on rename.
+3. For practitioner and offer: test binary upload, uploaded UUID+URL, direct URL, omitted image, explicit null, and wrong-clinic/wrong-type assets.
+4. Re-fetch saved profiles/catalog items from a separate fresh client. Check returned URLs load over HTTPS without Flutter's local cache.

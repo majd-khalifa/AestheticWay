@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/features/treatments/data/category_repository.dart';
+import 'package:aesthetic_way/features/treatments/models/category_model.dart';
 import '../../../core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
@@ -88,4 +90,20 @@ class TreatmentsRepository {
       page: page,
     );
   }
+
+  Future<CategoryModel> createCategory({
+    required String nameEn,
+    required String nameAr,
+  }) => CategoryRepository(
+    apiClient: _client,
+  ).createCategory(nameEn: nameEn, nameAr: nameAr);
+  Future<CategoryModel> updateCategory(
+    String id, {
+    required String nameEn,
+    required String nameAr,
+  }) => CategoryRepository(
+    apiClient: _client,
+  ).updateCategory(id, nameEn: nameEn, nameAr: nameAr);
+  Future<void> deleteCategory(String id) =>
+      CategoryRepository(apiClient: _client).deleteCategory(id);
 }

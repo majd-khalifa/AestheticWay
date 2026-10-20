@@ -4,6 +4,24 @@ import '../localization/app_locale.dart';
 import '../theme/app_colors.dart';
 import 'pagination_footer.dart';
 
+Future<void> showBoundedCatalogSheet<T>(
+  BuildContext context, {
+  required ValueGetter<List<T>> items,
+  required Listenable listenable,
+  required Widget Function(BuildContext, T) itemBuilder,
+  PagedCollection<dynamic>? page,
+}) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  backgroundColor: AppColors.surface(context),
+  builder: (_) => _CatalogSheet<T>(
+    items: items,
+    listenable: listenable,
+    itemBuilder: itemBuilder,
+    page: page,
+  ),
+);
+
 /// A profile never eagerly lays out a clinic's entire catalog.
 class BoundedCatalogPreview<T> extends StatelessWidget {
   const BoundedCatalogPreview({

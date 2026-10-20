@@ -1,3 +1,5 @@
+import '../../../../core/services/local_media_cache.dart';
+import 'clinic_catalog_cards.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -39,21 +41,34 @@ class ClinicEditorialHeader extends StatelessWidget {
                       DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            stops: const [0, .7, 1],
                             colors: AppColors.isDark(context)
                                 ? [
                                     const Color(0xFF26394E),
                                     const Color(0xFF101A2A),
+                                    const Color(0xFF5E5039),
                                   ]
                                 : [
-                                    const Color(0xFFDCE6EC),
-                                    const Color(0xFFBCCDD6),
+                                    const Color(0xFF31465D),
+                                    const Color(0xFF17283E),
+                                    const Color(0xFF84734F),
                                   ],
                           ),
                         ),
                       ),
-                      if (clinic.coverImageUrl.isNotEmpty)
+                      if (clinic.coverImageUrl.isNotEmpty ||
+                          LocalMediaCache().lookup(
+                                entityKey: LocalMediaCache.clinicCover(
+                                  clinic.id,
+                                ),
+                              ) !=
+                              null)
                         LuxuryImage(
                           imageUrl: clinic.coverImageUrl,
+                          mediaCacheKey: LocalMediaCache.clinicCover(clinic.id),
+                          customPlaceholder: const SizedBox.expand(),
                           fit: BoxFit.cover,
                         ),
                       const DecoratedBox(
@@ -81,6 +96,7 @@ class ClinicEditorialHeader extends StatelessWidget {
                   ),
                   child: ClinicCatalogThumbnail(
                     imageUrl: clinic.logoUrl,
+                    mediaCacheKey: LocalMediaCache.clinicLogo(clinic.id),
                     icon: Icons.apartment_rounded,
                     size: 72,
                   ),
@@ -155,33 +171,30 @@ class ClinicCatalogThumbnail extends StatelessWidget {
     required this.imageUrl,
     required this.icon,
     this.size = 48,
+    this.mediaCacheKey,
   });
   final String imageUrl;
+  final String? mediaCacheKey;
   final IconData icon;
   final double size;
   @override
-  Widget build(BuildContext context) => imageUrl.isEmpty
-      ? Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: AppColors.goldText(context).withValues(alpha: .10),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(
-            icon,
-            color: AppColors.goldText(context),
-            size: size * .45,
-          ),
-        )
-      : LuxuryImage(
-          imageUrl: imageUrl,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          borderRadius: BorderRadius.circular(14),
-          placeholderIcon: icon,
-        );
+  Widget build(BuildContext context) => LuxuryImage(
+    imageUrl: imageUrl,
+    mediaCacheKey: mediaCacheKey,
+    width: size,
+    height: size,
+    fit: BoxFit.cover,
+    borderRadius: BorderRadius.circular(14),
+    customPlaceholder: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: AppColors.goldText(context).withValues(alpha: .10),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, color: AppColors.goldText(context), size: size * .45),
+    ),
+  );
 }
 
 /// Wrapping actions below content keeps the editor usable at large text scales.
@@ -195,14 +208,14 @@ class ClinicCatalogMiniRow extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.badge,
+    this.mediaCacheKey,
   });
   final String title, subtitle, imageUrl;
   final IconData icon;
   final VoidCallback onEdit, onDelete;
-  final String? badge;
+  final String? badge, mediaCacheKey;
   @override
   Widget build(BuildContext context) {
-    final ar = LocaleService().isArabic;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(12),
@@ -219,7 +232,11 @@ class ClinicCatalogMiniRow extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClinicCatalogThumbnail(imageUrl: imageUrl, icon: icon),
+              ClinicCatalogThumbnail(
+                imageUrl: imageUrl,
+                mediaCacheKey: mediaCacheKey,
+                icon: icon,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -274,21 +291,7 @@ class ClinicCatalogMiniRow extends StatelessWidget {
                     ),
                   ),
                 ),
-              TextButton.icon(
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined, size: 17),
-                label: Text(ar ? 'تعديل' : 'Edit'),
-              ),
-              TextButton.icon(
-                onPressed: onDelete,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.isDark(context)
-                      ? const Color(0xFFFDA4AF)
-                      : const Color(0xFF9F1239),
-                ),
-                icon: const Icon(Icons.delete_outline, size: 17),
-                label: Text(ar ? 'حذف' : 'Delete'),
-              ),
+              ClinicCatalogActions(onEdit: onEdit, onDelete: onDelete),
             ],
           ),
         ],

@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/features/treatments/data/category_repository.dart';
+import 'package:aesthetic_way/features/treatments/models/category_model.dart';
 import '../../../core/data/paged_collection.dart';
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
@@ -10,7 +12,6 @@ import '../../clinics/models/clinic_model.dart';
 import '../../offers/models/offer_model.dart';
 import '../../practitioners/models/practitioner_model.dart';
 import '../../products/models/product_model.dart';
-import '../../treatments/models/category_model.dart';
 import '../../treatments/models/treatment_model.dart';
 import 'models/clinic_setup_checklist_model.dart';
 
@@ -467,7 +468,14 @@ class ClinicCatalogRepository {
     int pageSize = 20,
     String? search,
   }) async {
-    final response = await _api.get(ApiConfig.categories);
+    final response = await _api.get(
+      ApiConfig.categories,
+      queryParameters: {
+        'page': page,
+        'page_size': catalogPageSize,
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
 
     return PageItems<CategoryModel>.fromResponse(
       response.data,
@@ -570,4 +578,20 @@ class ClinicCatalogRepository {
     final response = await _api.post(ApiConfig.clinicSubmitForReview, data: {});
     return response.data as Map<String, dynamic>? ?? {};
   }
+
+  Future<CategoryModel> createCategory({
+    required String nameEn,
+    required String nameAr,
+  }) => CategoryRepository(
+    apiClient: _api,
+  ).createCategory(nameEn: nameEn, nameAr: nameAr);
+  Future<CategoryModel> updateCategory(
+    String id, {
+    required String nameEn,
+    required String nameAr,
+  }) => CategoryRepository(
+    apiClient: _api,
+  ).updateCategory(id, nameEn: nameEn, nameAr: nameAr);
+  Future<void> deleteCategory(String id) =>
+      CategoryRepository(apiClient: _api).deleteCategory(id);
 }
