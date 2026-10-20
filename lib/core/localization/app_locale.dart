@@ -492,12 +492,26 @@ class LocaleService extends ChangeNotifier {
     // SUPER ADMIN PORTAL (إدارة المنصة)
     // ==========================================
     'admin_portal_title': {
-      'ar': 'لوحة الإدارة الرئيسية (Super Admin)',
-      'en': 'Super Admin Dashboard',
+      'ar': 'بوابة المشرف العام',
+      'en': 'Super Admin Portal',
     },
     'admin_demo_login': {
       'ar': 'دخول تجريبي: مدير المنصة (Super Admin)',
       'en': 'Super Admin Demo Login',
+    },
+    'admin_title_dashboard': {'ar': 'لوحة القيادة', 'en': 'Dashboard'},
+    'admin_title_clinics': {'ar': 'العيادات الشريكة', 'en': 'Partner Clinics'},
+    'admin_title_leads': {
+      'ar': 'الإشراف على الطلبات',
+      'en': 'Leads Supervision',
+    },
+    'admin_title_catalog': {
+      'ar': 'الكتالوج والمراجعة',
+      'en': 'Catalog & Moderation',
+    },
+    'admin_title_analytics': {
+      'ar': 'تحليلات المنصة',
+      'en': 'Platform Analytics',
     },
     'admin_nav_dashboard': {'ar': 'الرئيسية', 'en': 'Dashboard'},
     'admin_nav_clinics': {'ar': 'العيادات', 'en': 'Clinics'},
@@ -510,7 +524,7 @@ class LocaleService extends ChangeNotifier {
     'admin_active_users': {'ar': 'المستخدمون النشطون', 'en': 'Active Users'},
     'admin_total_leads': {'ar': 'إجمالي طلبات الاستشارة', 'en': 'Total Leads'},
     'admin_today_leads': {'ar': 'طلبات اليوم', 'en': 'Today\'s Leads'},
-    'admin_active_clinics': {'ar': 'العيادات الشريكة', 'en': 'Partner Clinics'},
+    'admin_active_clinics': {'ar': 'العيادات النشطة', 'en': 'Active Clinics'},
     'admin_whatsapp_taps': {'ar': 'تواصل عبر واتساب', 'en': 'WhatsApp Taps'},
     'admin_call_taps': {'ar': 'تواصل عبر الاتصال', 'en': 'Call Taps'},
     'admin_recent_activity': {
@@ -636,7 +650,6 @@ class LocaleService extends ChangeNotifier {
     'admin_clinic_treatments': {'ar': 'العلاجات', 'en': 'Treatments'},
     'admin_clinic_products': {'ar': 'المنتجات', 'en': 'Products'},
     'admin_clinic_articles': {'ar': 'المقالات', 'en': 'Articles'},
-    'admin_redeemed_codes': {'ar': 'أكواد مستخدمة', 'en': 'Redeemed Codes'},
     'admin_events_count': {'ar': 'إجمالي التفاعلات', 'en': 'Total Events'},
 
     // Navigation
@@ -659,7 +672,7 @@ class LocaleService extends ChangeNotifier {
     'filter_button': {'ar': 'فلترة', 'en': 'Filter'},
 
     // Badges & Labels
-    'vip_partner': {'ar': 'شريك ماسي VIP', 'en': 'VIP Partner'},
+    'vip_partner': {'ar': 'بلاتيني VIP', 'en': 'VIP Platinum'},
     'featured_badge': {'ar': 'إعلان مميز', 'en': 'Featured'},
     'role_doctor': {'ar': 'طبيب', 'en': 'Doctor'},
     'role_nurse': {'ar': 'ممرض مرخص', 'en': 'Licensed Nurse'},
@@ -1032,8 +1045,8 @@ class LocaleService extends ChangeNotifier {
     },
     'full_name': {'ar': 'الاسم الكامل', 'en': 'Full Name'},
     'name_hint': {'ar': 'مثال: سارة المنصوري', 'en': 'e.g. Sarah Al Mansoori'},
+    'phone_number': {'ar': 'رقم الهاتف', 'en': 'Phone number'},
     'phone_uae': {'ar': 'رقم الهاتف (الإمارات)', 'en': 'Phone Number (UAE)'},
-    'phone_number': {'ar': 'رقم الهاتف (الإمارات)', 'en': 'Phone Number (UAE)'},
     'phone_hint': {'ar': '50 123 4567', 'en': '50 123 4567'},
     'email_address': {'ar': 'البريد الإلكتروني', 'en': 'Email Address'},
     'email_hint': {'ar': 'name@example.com', 'en': 'name@example.com'},
@@ -1309,10 +1322,6 @@ class LocaleService extends ChangeNotifier {
     'admin_issued_coupons': {
       'ar': 'أكواد الخصم المُصدرة (15%)',
       'en': 'Issued 15% Codes',
-    },
-    'admin_redeemed_coupons': {
-      'ar': 'الأكواد المستخدمة بالعيادات',
-      'en': 'Redeemed In-Clinic',
     },
 
     // Price Display Labels

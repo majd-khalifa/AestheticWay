@@ -174,9 +174,6 @@ class ProductModel {
     if (sponsorCompany != null && sponsorCompany!.trim().isNotEmpty) {
       map['sponsor_company'] = sponsorCompany!.trim();
     }
-    if (price > 0) {
-      map['price'] = price.toStringAsFixed(2);
-    }
     if (imageUrl.trim().isNotEmpty) {
       map['image'] = imageUrl.trim();
     }

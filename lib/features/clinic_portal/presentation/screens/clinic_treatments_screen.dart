@@ -1,3 +1,5 @@
+import '../widgets/clinic_catalog_cards.dart';
+import '../widgets/clinic_category_manager.dart';
 import '../widgets/clinic_category_field.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +9,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/ltr_text_field.dart';
-import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../../treatments/models/treatment_model.dart';
 import '../../services/clinic_portal_service.dart';
@@ -151,6 +152,14 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
               ),
             ),
             actions: [
+              IconButton(
+                onPressed: () => showClinicCategoryEditor(context),
+                tooltip: loc.isArabic ? 'إضافة تصنيف جديد' : 'Add New Category',
+                icon: Icon(
+                  Icons.create_new_folder_outlined,
+                  color: AppColors.text(context),
+                ),
+              ),
               IconButton(
                 icon: const Icon(
                   Icons.add_circle_outline_rounded,
@@ -401,123 +410,16 @@ class _ClinicTreatmentsScreenState extends State<ClinicTreatmentsScreen> {
 
                               final t = filtered[index];
 
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: LuxuryCard(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.accentChampagne
-                                              .withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.spa_rounded,
-                                          color: AppColors.accentChampagne,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              loc.isArabic
-                                                  ? t.nameAr
-                                                  : t.nameEn,
-                                              style: AppTypography.cardTitle
-                                                  .copyWith(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: isDark
-                                                        ? AppColors
-                                                              .silverPrimary
-                                                        : AppColors
-                                                              .lightTextPrimary,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              loc.isArabic
-                                                  ? t.categoryAr
-                                                  : t.categoryEn,
-                                              style: AppTypography.caption
-                                                  .copyWith(
-                                                    color: AppColors.mutedText(
-                                                      context,
-                                                    ),
-                                                    fontSize: 11.5,
-                                                  ),
-                                            ),
-                                            if (t.price != null &&
-                                                t.price! > 0) ...[
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '${t.price!.toInt()} ${loc.tr('currency_aed')}',
-                                                style: AppTypography.caption
-                                                    .copyWith(
-                                                      color: AppColors.goldText(
-                                                        context,
-                                                      ),
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 12,
-                                                    ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.edit_outlined,
-                                              size: 18,
-                                              color: isDark
-                                                  ? AppColors.silverPrimary
-                                                  : AppColors
-                                                        .lightTextSecondary,
-                                            ),
-                                            tooltip: loc.isArabic
-                                                ? 'تعديل'
-                                                : 'Edit',
-                                            onPressed: () =>
-                                                showClinicTreatmentEditor(
-                                                  context,
-                                                  loc,
-                                                  existing: t,
-                                                ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline_rounded,
-                                              size: 18,
-                                              color: AppColors.errorRed,
-                                            ),
-                                            tooltip: loc.isArabic
-                                                ? 'حذف'
-                                                : 'Delete',
-                                            onPressed: () =>
-                                                _confirmDelete(context, loc, t),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                              return ClinicTreatmentCard(
+                                treatment: t,
+                                practitioners:
+                                    clinicService.clinicPractitioners,
+                                onEdit: () => showClinicTreatmentEditor(
+                                  context,
+                                  loc,
+                                  existing: t,
                                 ),
+                                onDelete: () => _confirmDelete(context, loc, t),
                               );
                             },
                           ),

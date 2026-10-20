@@ -1,474 +1,322 @@
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
-import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
-import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/tier_badge.dart';
-import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
-import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
-import 'package:aesthetic_way/features/admin/presentation/screens/admin_clinic_detail_sheet.dart';
-import 'package:aesthetic_way/features/admin/presentation/screens/admin_create_clinic_dialog.dart';
+import '../../../../core/localization/app_locale.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/luxury_card.dart';
+import '../../../../core/widgets/tier_badge.dart';
+import '../../../clinics/models/clinic_model.dart';
+import '../../models/admin_clinic_model.dart';
+import '../../services/admin_portal_service.dart';
+import '../widgets/admin_components.dart';
+import 'admin_clinic_detail_sheet.dart';
+import 'admin_create_clinic_dialog.dart';
 
-/// Super Admin Tab 2: Partner Clinics Directory, Tiers & Active/Suspended Controls
 class AdminClinicsScreen extends StatefulWidget {
   const AdminClinicsScreen({super.key});
-
   @override
   State<AdminClinicsScreen> createState() => _AdminClinicsScreenState();
 }
 
 class _AdminClinicsScreenState extends State<AdminClinicsScreen> {
-  String _searchQuery = '';
-  SubscriptionTier? _selectedTierFilter;
-
+  String _search = '';
+  SubscriptionTier? _tier;
+  final _searchController = TextEditingController();
+  final _service = AdminPortalService();
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) AdminPortalService().loadCollection('clinics');
+      if (mounted) _service.loadCollection('clinics');
     });
   }
 
-  void _queryChanged() => AdminPortalService().searchCollection('clinics', {
-    'search': _searchQuery,
-    'tier': _selectedTierFilter?.apiValue,
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _query() => _service.searchCollection('clinics', {
+    'search': _search,
+    'tier': _tier?.apiValue,
   });
+  void _selectTier(SubscriptionTier? tier) {
+    setState(() => _tier = tier);
+    _query();
+  }
 
   @override
-  Widget build(BuildContext context) {
-    final loc = LocaleService();
-    final adminService = AdminPortalService();
-    final isDark = AppColors.isDark(context);
-
-    return ListenableBuilder(
-      listenable: Listenable.merge([loc, adminService]),
-      builder: (context, _) {
-        var clinics = adminService.clinics;
-
-        // Filter by Tier
-        if (_selectedTierFilter != null) {
-          clinics = clinics
-              .where((c) => c.subscriptionTier == _selectedTierFilter)
-              .toList();
-        }
-
-        // Search Filter
-        if (_searchQuery.trim().isNotEmpty) {
-          final q = _searchQuery.toLowerCase();
-          clinics = clinics
-              .where(
-                (c) =>
-                    c.nameAr.toLowerCase().contains(q) ||
-                    c.nameEn.toLowerCase().contains(q) ||
-                    c.slug.toLowerCase().contains(q),
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([_service, LocaleService()]),
+    builder: (context, _) {
+      var clinics = _service.clinics;
+      if (_service.isMockMode) {
+        clinics = clinics
+            .where(
+              (c) =>
+                  (_tier == null || c.subscriptionTier == _tier) &&
+                  '${c.nameEn} ${c.nameAr} ${c.slug}'.toLowerCase().contains(
+                    _search.toLowerCase(),
+                  ),
+            )
+            .toList();
+      }
+      return Scaffold(
+        backgroundColor: AppColors.bg(context),
+        floatingActionButton: _service.canManage
+            ? FloatingActionButton.extended(
+                onPressed: () => AdminCreateClinicDialog.show(context),
+                backgroundColor: AppColors.darkGold,
+                foregroundColor: AppColors.backgroundDeep,
+                icon: const Icon(Icons.add_business_rounded),
+                label: Text(adminText('Add Clinic', 'إضافة عيادة')),
               )
-              .toList();
-        }
-
-        return Scaffold(
-          backgroundColor: AppColors.bg(context),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => AdminCreateClinicDialog.show(context),
-            backgroundColor: AppColors.accentChampagne,
-            foregroundColor: Colors.black,
-            icon: const Icon(Icons.add_business_rounded, size: 20),
-            label: Text(
-              loc.isArabic ? 'إضافة عيادة' : 'Add Clinic',
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            : null,
+        body: AdminDirectory<AdminClinicModel>(
+          items: clinics,
+          page: _service.collection('clinics'),
+          bottomPadding: 104,
+          onRefresh: () => _service.loadCollection('clinics', refresh: true),
+          onLoadMore: () => _service.loadMore('clinics'),
+          headers: [
+            AdminSectionTitle(
+              adminText('Partner clinics', 'العيادات الشريكة'),
+              subtitle: adminText(
+                'Manage clinic identity, subscriptions and access.',
+                'إدارة هوية العيادات واشتراكاتها وحالة تفعيلها.',
+              ),
             ),
-          ),
-          body: PagedScrollBoundary(
-            onLoadMore: () => adminService.loadMore('clinics'),
-            child: Column(
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: adminText('Search clinics', 'البحث عن عيادة'),
+                hintText: LocaleService().tr('admin_clinic_search_hint'),
+                prefixIcon: const Icon(Icons.search),
+              ),
+              onChanged: (v) {
+                _search = v;
+                _query();
+              },
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
               children: [
-                // Search Input
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: TextField(
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.textPrimary
-                          : AppColors.lightTextPrimary,
-                      fontSize: 13,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: loc.tr('admin_clinic_search_hint'),
-                      hintStyle: TextStyle(
-                        color: AppColors.text(context),
-                        fontSize: 12,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        size: 18,
-                        color: AppColors.mutedText(context),
-                      ),
-                      filled: true,
-                      fillColor: isDark
-                          ? AppColors.cardSurface
-                          : AppColors.lightCardSurface,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: AppColors.border(context),
-                          width: 0.8,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AppColors.accentChampagne,
-                          width: 1.4,
-                        ),
-                      ),
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                      });
-                      _queryChanged();
-                    },
-                  ),
+                ChoiceChip(
+                  label: Text(adminText('All Tiers', 'جميع الباقات')),
+                  selected: _tier == null,
+                  onSelected: (_) => _selectTier(null),
                 ),
-
-                // Tier Filter Chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    children: [
-                      _FilterChipItem(
-                        label: loc.isArabic ? 'جميع الباقات' : 'All Tiers',
-                        isSelected: _selectedTierFilter == null,
-                        onTap: () => setState(() => _selectedTierFilter = null),
-                      ),
-                      const SizedBox(width: 6),
-                      _FilterChipItem(
-                        label: 'VIP Platinum',
-                        isSelected:
-                            _selectedTierFilter == SubscriptionTier.vipPlatinum,
-                        onTap: () => setState(
-                          () => _selectedTierFilter =
-                              SubscriptionTier.vipPlatinum,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      _FilterChipItem(
-                        label: 'Featured',
-                        isSelected:
-                            _selectedTierFilter == SubscriptionTier.featured,
-                        onTap: () => setState(
-                          () => _selectedTierFilter = SubscriptionTier.featured,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      _FilterChipItem(
-                        label: 'Basic',
-                        isSelected:
-                            _selectedTierFilter == SubscriptionTier.basic,
-                        onTap: () => setState(
-                          () => _selectedTierFilter = SubscriptionTier.basic,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-
-                // Clinics List
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () => adminService.loadClinics(),
-                    color: AppColors.accentChampagne,
-                    backgroundColor: isDark
-                        ? AppColors.cardSurface
-                        : AppColors.lightCardSurface,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                      itemCount: clinics.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index >= clinics.length) {
-                          return PaginationFooter(
-                            loading: adminService
-                                .collection('clinics')
-                                .isLoadingMore,
-                            hasMore: adminService.collection('clinics').hasMore,
-                            error: adminService.collection('clinics').error,
-                            onLoadMore: () => adminService.loadMore('clinics'),
-                          );
-                        }
-
-                        final clinic = clinics[index];
-                        final metric = adminService.getMetricForClinic(
-                          clinic.id,
-                        );
-                        final isActive = metric?.isActive ?? clinic.isActive;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: LuxuryCard(
-                            padding: const EdgeInsets.all(14),
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (ctx) =>
-                                    AdminClinicDetailSheet(clinic: clinic),
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Top Row: Avatar, Name, Tier, Switch
-                                Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: LuxuryImage(
-                                        imageUrl: clinic.logo,
-                                        fallbackLogoUrl: clinic.coverImageUrl,
-                                        width: 48,
-                                        height: 48,
-                                        fit: BoxFit.cover,
-                                        customPlaceholder: Container(
-                                          width: 48,
-                                          height: 48,
-                                          color: isDark
-                                              ? AppColors.cardSurfaceHover
-                                              : AppColors.lightCardSurfaceHover,
-                                          child: const Icon(
-                                            Icons.apartment_rounded,
-                                            color: AppColors.accentChampagne,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            loc.isArabic
-                                                ? clinic.nameAr
-                                                : clinic.nameEn,
-                                            style: AppTypography.cardTitle
-                                                .copyWith(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: isDark
-                                                      ? AppColors.silverPrimary
-                                                      : AppColors
-                                                            .lightTextPrimary,
-                                                ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${clinic.city} • ${loc.isArabic ? clinic.areaAr : clinic.areaEn}',
-                                                style: AppTypography.caption
-                                                    .copyWith(
-                                                      color:
-                                                          AppColors.mutedText(
-                                                            context,
-                                                          ),
-                                                      fontSize: 11,
-                                                    ),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              TierBadge(
-                                                tier: clinic.subscriptionTier,
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Switch.adaptive(
-                                      value: isActive,
-                                      activeThumbColor:
-                                          AppColors.accentChampagne,
-                                      onChanged: (val) async {
-                                        final success = await adminService
-                                            .toggleClinicStatus(clinic.id);
-                                        if (!success && context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                adminService.errorMessage ??
-                                                    'Error updating clinic',
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                const Divider(height: 16),
-
-                                // Clinic Catalog & Leads Counts (strictly from backend AdminClinicModel)
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    _PillMetric(
-                                      icon: Icons.mark_email_read_outlined,
-                                      label:
-                                          '${clinic.leadsCount} ${loc.tr('admin_table_leads')}',
-                                      isGold: true,
-                                    ),
-                                    _PillMetric(
-                                      icon: Icons.store_outlined,
-                                      label:
-                                          '${clinic.branchesCount} ${loc.tr('admin_clinic_branches')}',
-                                    ),
-                                    _PillMetric(
-                                      icon: Icons.badge_outlined,
-                                      label:
-                                          '${clinic.practitionersCount} ${loc.tr('admin_clinic_practitioners')}',
-                                    ),
-                                    _PillMetric(
-                                      icon: Icons.local_offer_outlined,
-                                      label:
-                                          '${clinic.offersCount} ${loc.tr('admin_clinic_offers')}',
-                                      iconColor: const Color(0xFF10B981),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                for (final tier in SubscriptionTier.values)
+                  ChoiceChip(
+                    label: Text(
+                      tier == SubscriptionTier.vipPlatinum
+                          ? adminText('VIP Platinum', 'بلاتيني VIP')
+                          : tier == SubscriptionTier.featured
+                          ? adminText('Featured', 'مميز')
+                          : adminText('Basic', 'أساسي'),
                     ),
+                    selected: _tier == tier,
+                    onSelected: (_) => _selectTier(tier),
                   ),
-                ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _FilterChipItem extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterChipItem({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accentChampagne
-              : (isDark
-                    ? AppColors.cardSurfaceHover
-                    : AppColors.lightCardSurface),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accentChampagne
-                : AppColors.border(context),
-            width: 0.8,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-            color: isSelected
-                ? AppColors.backgroundDeep
-                : AppColors.mutedText(context),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PillMetric extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isGold;
-  final Color? iconColor;
-
-  const _PillMetric({
-    required this.icon,
-    required this.label,
-    this.isGold = false,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.cardSurfaceHover
-            : AppColors.lightCardSurfaceHover,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.border(context), width: 0.6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 12,
-            color:
-                iconColor ??
-                (isGold
-                    ? AppColors.accentChampagne
-                    : AppColors.mutedText(context)),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              color: isGold
-                  ? AppColors.goldText(context)
-                  : (isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary),
+            const SizedBox(height: 8),
+          ],
+          itemBuilder: (context, c) => AdminClinicCard(
+            key: ValueKey('admin-clinic-${c.id}'),
+            clinic: c,
+            onOpen: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              useSafeArea: true,
+              builder: (_) => AdminClinicDetailSheet(clinic: c),
             ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class AdminClinicCard extends StatelessWidget {
+  const AdminClinicCard({
+    super.key,
+    required this.clinic,
+    required this.onOpen,
+  });
+  final AdminClinicModel clinic;
+  final VoidCallback onOpen;
+  @override
+  Widget build(BuildContext context) {
+    final service = AdminPortalService(), c = clinic;
+    final busy = service.isPending('clinic', c.id);
+    return LuxuryCard(
+      onTap: onOpen,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AdminEntityImage(
+                url: c.logo,
+                logo: c.coverImage,
+                isLogo: true,
+                mediaKey: clinicLogoCacheKey(c.id),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      c.localizedName(arabic: LocaleService().isArabic),
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontSize: 16,
+                        height: 1.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      c.locationLabel(arabic: LocaleService().isArabic),
+                      style: TextStyle(
+                        color: AppColors.mutedText(context),
+                        height: 1.5,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TierBadge(tier: c.subscriptionTier, showBasic: true),
+              AdminStatusBadge(status: c.status),
+              if (c.isFeatured)
+                Text(
+                  adminText(
+                    'Home placement enabled',
+                    'الظهور في الرئيسية مفعّل',
+                  ),
+                  style: TextStyle(
+                    color: AppColors.goldText(context),
+                    fontSize: 12,
+                  ),
+                ),
+            ],
+          ),
+          const Divider(height: 26),
+          Wrap(
+            spacing: 16,
+            runSpacing: 10,
+            children: [
+              _Count(
+                c.leadsCount,
+                LocaleService().tr('admin_table_leads'),
+                Icons.mark_email_read_outlined,
+              ),
+              _Count(
+                c.branchesCount,
+                LocaleService().tr('admin_clinic_branches'),
+                Icons.store_outlined,
+              ),
+              _Count(
+                c.practitionersCount,
+                LocaleService().tr('admin_clinic_practitioners'),
+                Icons.badge_outlined,
+              ),
+              _Count(
+                c.offersCount,
+                LocaleService().tr('admin_clinic_offers'),
+                Icons.local_offer_outlined,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: onOpen,
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  label: Text(adminText('Clinic details', 'تفاصيل العيادة')),
+                ),
+              ),
+              if (busy)
+                const SizedBox.square(
+                  dimension: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Switch.adaptive(
+                  value: c.isActive,
+                  onChanged: !service.canManage
+                      ? null
+                      : (_) async {
+                          if (c.isActive &&
+                              !await confirmClinicSuspension(context)) {
+                            return;
+                          }
+                          if (!context.mounted) return;
+                          final saved = await service.toggleClinicStatus(c.id);
+                          if (context.mounted) {
+                            showAppSnackBar(
+                              context,
+                              saved
+                                  ? adminText(
+                                      'Clinic status updated.',
+                                      'تم تحديث حالة العيادة.',
+                                    )
+                                  : service.writeError('clinic', c.id) ??
+                                        adminText(
+                                          'Could not update clinic.',
+                                          'تعذر تحديث العيادة.',
+                                        ),
+                              type: saved
+                                  ? AppSnackBarType.success
+                                  : AppSnackBarType.error,
+                            );
+                          }
+                        },
+                ),
+            ],
           ),
         ],
       ),
     );
   }
+}
+
+class _Count extends StatelessWidget {
+  const _Count(this.value, this.label, this.icon);
+  final int value;
+  final String label;
+  final IconData icon;
+  @override
+  Widget build(BuildContext context) => Text.rich(
+    TextSpan(
+      children: [
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(end: 6),
+            child: Icon(icon, size: 16, color: AppColors.goldText(context)),
+          ),
+        ),
+        TextSpan(text: '${adminNumber(value)} $label'),
+      ],
+    ),
+    style: TextStyle(color: AppColors.text(context), fontSize: 12, height: 1.5),
+  );
 }

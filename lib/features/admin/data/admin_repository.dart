@@ -1,4 +1,5 @@
 import '../../../core/data/paged_collection.dart';
+import '../../../core/network/api_exception.dart';
 import 'package:dio/dio.dart';
 import '../../../core/services/media_payload_builder.dart';
 import '../../../core/services/media_upload_service.dart';
@@ -59,13 +60,41 @@ class AdminRepository {
     return payload;
   }
 
+  static Map<String, dynamic> _moderationRow(
+    Map<String, dynamic> row,
+    String? filter,
+  ) {
+    final state =
+        row['status']?.toString().toLowerCase() ??
+        (['active', 'pending', 'suspended', 'rejected'].contains(filter)
+            ? filter!
+            : 'unknown');
+    return {
+      ...row,
+      'status': state,
+      'is_active': state == 'active' && row['is_active'] != false,
+    };
+  }
+
+  static Map<String, dynamic> _object(dynamic value) {
+    if (value is Map<String, dynamic> &&
+        value['data'] is Map<String, dynamic>) {
+      return value['data'];
+    }
+    if (value is Map<String, dynamic>) return value;
+    throw const ApiException(
+      message:
+          'The server returned an invalid response. Please refresh before retrying.',
+    );
+  }
+
   // -------------------------------------------------------------
   // 1. DASHBOARD
   // -------------------------------------------------------------
 
   Future<AdminDashboardModel> getDashboard() async {
     final response = await _api.get(ApiConfig.adminDashboard);
-    return AdminDashboardModel.fromJson(response.data as Map<String, dynamic>);
+    return AdminDashboardModel.fromJson(_object(response.data));
   }
 
   // -------------------------------------------------------------
@@ -106,7 +135,7 @@ class AdminRepository {
 
   Future<AdminClinicModel> getClinicDetail(String id) async {
     final response = await _api.get(ApiConfig.adminClinicDetail(id));
-    return AdminClinicModel.fromJson(response.data as Map<String, dynamic>);
+    return AdminClinicModel.fromJson(_object(response.data));
   }
 
   Future<Map<String, dynamic>> suspendClinic(
@@ -176,7 +205,7 @@ class AdminRepository {
       ApiConfig.adminClinicDetail(id),
       data: payload,
     );
-    return AdminClinicModel.fromJson(response.data as Map<String, dynamic>);
+    return AdminClinicModel.fromJson(_object(response.data));
   }
 
   // -------------------------------------------------------------
@@ -217,7 +246,7 @@ class AdminRepository {
 
   Future<AdminLeadModel> getLeadDetail(String id) async {
     final response = await _api.get(ApiConfig.adminLeadDetail(id));
-    return AdminLeadModel.fromJson(response.data as Map<String, dynamic>);
+    return AdminLeadModel.fromJson(_object(response.data));
   }
 
   // -------------------------------------------------------------
@@ -239,9 +268,8 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
-    if (search != null && search.trim().isNotEmpty) {
-      queryParams['search'] = search.trim();
-    }
+    // The supplied server searches nonexistent name fields for offers/articles.
+    // These two directories use explicitly labeled loaded-page search until Ali fixes it.
     queryParams['page'] = page;
     queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
@@ -251,7 +279,7 @@ class AdminRepository {
 
     return PageItems<OfferModel>.fromResponse(
       response.data,
-      OfferModel.fromJson,
+      (row) => OfferModel.fromJson(_moderationRow(row, status)),
       page: page,
     );
   }
@@ -317,7 +345,7 @@ class AdminRepository {
 
     return PageItems<ProductModel>.fromResponse(
       response.data,
-      ProductModel.fromJson,
+      (row) => ProductModel.fromJson(_moderationRow(row, status)),
       page: page,
     );
   }
@@ -371,9 +399,8 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
-    if (search != null && search.trim().isNotEmpty) {
-      queryParams['search'] = search.trim();
-    }
+    // The supplied server searches nonexistent name fields for offers/articles.
+    // These two directories use explicitly labeled loaded-page search until Ali fixes it.
     queryParams['page'] = page;
     queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
@@ -383,7 +410,7 @@ class AdminRepository {
 
     return PageItems<ArticleModel>.fromResponse(
       response.data,
-      ArticleModel.fromJson,
+      (row) => ArticleModel.fromJson(_moderationRow(row, status)),
       page: page,
     );
   }
@@ -437,6 +464,11 @@ class AdminRepository {
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    return AdminAnalyticsModel.fromJson(response.data as Map<String, dynamic>);
+    return AdminAnalyticsModel.fromJson(_object(response.data));
+  }
+
+  Future<AdminReferralAnalyticsModel> getReferralAnalytics() async {
+    final response = await _api.get(ApiConfig.adminReferralAnalytics);
+    return AdminReferralAnalyticsModel.fromJson(_object(response.data));
   }
 }

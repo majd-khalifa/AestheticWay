@@ -260,7 +260,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.10),
             LuxuryEmptyState(
-              icon: Icons.shopping_bag_outlined,
+              icon: Icons.auto_awesome_outlined,
               title: loc.isArabic
                   ? 'لا توجد منتجات طبية حالياً'
                   : 'No medical skincare products',

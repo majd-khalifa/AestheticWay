@@ -1,12 +1,12 @@
+import '../widgets/clinic_catalog_cards.dart';
 import 'package:aesthetic_way/core/widgets/remote_catalog_preview.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
-import 'package:aesthetic_way/core/utils/contact_launcher.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
 import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
@@ -240,6 +240,7 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                               const SizedBox(height: 3),
                               Text(
                                 widget.lead.patientPhone,
+                                textDirection: TextDirection.ltr,
                                 style: AppTypography.bodyMedium.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.goldText(context),
@@ -254,51 +255,10 @@ class _ClinicLeadDetailScreenState extends State<ClinicLeadDetailScreen> {
                     const SizedBox(height: 16),
 
                     // Direct Contact Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SilverButton(
-                            label: loc.tr('clinic_lead_call'),
-                            icon: Icons.phone_rounded,
-                            height: 42,
-                            onPressed: () {
-                              ContactLauncher.makePhoneCall(
-                                widget.lead.patientPhone,
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              ContactLauncher.openWhatsApp(
-                                phoneNumber: widget.lead.patientPhone,
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                            label: Text(
-                              loc.tr('clinic_lead_whatsapp'),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12.5,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF10B981),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                            ),
-                          ),
-                        ),
-                      ],
+                    ClinicLeadContactActions(
+                      phone: widget.lead.patientPhone,
+                      callLabel: loc.tr('clinic_lead_call'),
+                      whatsappLabel: loc.tr('clinic_lead_whatsapp'),
                     ),
                   ],
                 ),
@@ -660,7 +620,11 @@ class _StatusSelectChip extends StatelessWidget {
             child: Text(
               label,
               style: AppTypography.caption.copyWith(
-                color: isSelected ? color : AppColors.mutedText(context),
+                color: isSelected
+                    ? (isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary)
+                    : AppColors.mutedText(context),
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                 fontSize: 11.5,
               ),

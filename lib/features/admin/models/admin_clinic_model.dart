@@ -1,3 +1,4 @@
+import '../../../core/utils/clinic_location.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
@@ -9,10 +10,11 @@ class AdminClinicBranchModel {
   final String addressEn;
   final String city;
   final String phone;
+  final String googleMapsUrl;
   final bool isMainBranch;
   final bool isActive;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
 
   const AdminClinicBranchModel({
     required this.id,
@@ -21,10 +23,11 @@ class AdminClinicBranchModel {
     required this.addressEn,
     required this.city,
     required this.phone,
+    this.googleMapsUrl = '',
     required this.isMainBranch,
     required this.isActive,
-    this.latitude = 25.2048,
-    this.longitude = 55.2708,
+    this.latitude,
+    this.longitude,
   });
 
   factory AdminClinicBranchModel.fromJson(Map<String, dynamic> json) {
@@ -35,10 +38,21 @@ class AdminClinicBranchModel {
       addressEn: json['address_en']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
+      googleMapsUrl:
+          verifiedGoogleMapsUri(
+            json['google_maps_url']?.toString(),
+          )?.toString() ??
+          '',
       isMainBranch: json['is_main_branch'] == true,
       isActive: json['is_active'] != false,
-      latitude: (json['latitude'] as num?)?.toDouble() ?? 25.2048,
-      longitude: (json['longitude'] as num?)?.toDouble() ?? 55.2708,
+      latitude: ClinicCoordinates.parse(
+        json['latitude'],
+        json['longitude'],
+      )?.latitude,
+      longitude: ClinicCoordinates.parse(
+        json['latitude'],
+        json['longitude'],
+      )?.longitude,
     );
   }
 }
@@ -51,6 +65,10 @@ class AdminClinicModel {
   final String slug;
   final String city;
   final String emirate;
+  final String addressEn, addressAr;
+  final String areaEn, areaAr;
+  final double? storedLatitude, storedLongitude;
+  final String storedGoogleMapsUrl;
   final String status; // active, suspended, pending, rejected
   final String setupStatus; // draft, submitted, approved, rejected
   final String licenseNumber;
@@ -85,6 +103,13 @@ class AdminClinicModel {
     this.slug = '',
     required this.city,
     this.emirate = '',
+    this.addressEn = '',
+    this.addressAr = '',
+    this.areaEn = '',
+    this.areaAr = '',
+    this.storedLatitude,
+    this.storedLongitude,
+    this.storedGoogleMapsUrl = '',
     required this.status,
     this.setupStatus = 'draft',
     this.licenseNumber = '',
@@ -115,12 +140,42 @@ class AdminClinicModel {
 
   bool get isSuspended => status.toLowerCase() == 'suspended';
   String get coverImageUrl => coverImage;
-  String get areaAr => city;
-  String get areaEn => city;
-  double get latitude =>
-      branches.isNotEmpty ? branches.first.latitude : 25.2048;
-  double get longitude =>
-      branches.isNotEmpty ? branches.first.longitude : 55.2708;
+  String locationLabel({required bool arabic}) =>
+      formatClinicLocation(city, arabic ? areaAr : areaEn, arabic: arabic);
+  String localizedName({required bool arabic}) =>
+      (arabic ? nameAr : nameEn).trim().isNotEmpty
+      ? (arabic ? nameAr : nameEn)
+      : (arabic ? nameEn : nameAr);
+  List<AdminClinicBranchModel> get _locatedBranches {
+    final values = branches
+        .where(
+          (b) =>
+              b.isActive &&
+              (ClinicCoordinates.parse(b.latitude, b.longitude) != null ||
+                  verifiedGoogleMapsUri(b.googleMapsUrl) != null),
+        )
+        .toList();
+    values.sort(
+      (a, b) => (b.isMainBranch ? 1 : 0).compareTo(a.isMainBranch ? 1 : 0),
+    );
+    return values;
+  }
+
+  ClinicCoordinates? get coordinates =>
+      ClinicCoordinates.parse(storedLatitude, storedLongitude) ??
+      (_locatedBranches.isEmpty
+          ? null
+          : ClinicCoordinates.parse(
+              _locatedBranches.first.latitude,
+              _locatedBranches.first.longitude,
+            ));
+  double? get latitude => coordinates?.latitude;
+  double? get longitude => coordinates?.longitude;
+  String get googleMapsUrl =>
+      verifiedGoogleMapsUri(storedGoogleMapsUrl)?.toString() ??
+      (_locatedBranches.isEmpty ? '' : _locatedBranches.first.googleMapsUrl);
+  bool get hasVerifiedLocation =>
+      coordinates != null || verifiedGoogleMapsUri(googleMapsUrl) != null;
 
   factory AdminClinicModel.fromJson(Map<String, dynamic> json) {
     SubscriptionTier tier = SubscriptionTier.basic;
@@ -164,14 +219,31 @@ class AdminClinicModel {
       slug: json['slug']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
       emirate: json['emirate']?.toString() ?? '',
-      status: json['status']?.toString().toLowerCase() ?? 'active',
+      addressEn: json['address_en']?.toString() ?? '',
+      addressAr: json['address_ar']?.toString() ?? '',
+      areaEn: json['area_en']?.toString() ?? '',
+      areaAr: json['area_ar']?.toString() ?? '',
+      storedLatitude: ClinicCoordinates.parse(
+        json['latitude'],
+        json['longitude'],
+      )?.latitude,
+      storedLongitude: ClinicCoordinates.parse(
+        json['latitude'],
+        json['longitude'],
+      )?.longitude,
+      storedGoogleMapsUrl:
+          verifiedGoogleMapsUri(
+            json['google_maps_url']?.toString(),
+          )?.toString() ??
+          '',
+      status: json['status']?.toString().toLowerCase() ?? 'unknown',
       setupStatus: json['setup_status']?.toString() ?? 'draft',
       licenseNumber: json['license_number']?.toString() ?? '',
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       subscriptionTier: tier,
       isActive:
           json['is_active'] != false &&
-          json['status']?.toString().toLowerCase() != 'suspended',
+          json['status']?.toString().toLowerCase() == 'active',
       isFeatured: json['is_featured'] == true,
       displayOrder: (json['display_order'] as num?)?.toInt() ?? 0,
       phone: json['phone']?.toString() ?? '',
@@ -220,6 +292,13 @@ class AdminClinicModel {
       slug: slug,
       city: city,
       emirate: emirate,
+      addressEn: addressEn,
+      addressAr: addressAr,
+      areaEn: areaEn,
+      areaAr: areaAr,
+      storedLatitude: storedLatitude,
+      storedLongitude: storedLongitude,
+      storedGoogleMapsUrl: storedGoogleMapsUrl,
       status: status ?? this.status,
       setupStatus: setupStatus ?? this.setupStatus,
       licenseNumber: licenseNumber ?? this.licenseNumber,
@@ -233,6 +312,7 @@ class AdminClinicModel {
       email: email,
       logo: logo,
       coverImage: coverImage,
+      videoAdFile: videoAdFile,
       branchesCount: branchesCount,
       practitionersCount: practitionersCount,
       treatmentsCount: treatmentsCount,

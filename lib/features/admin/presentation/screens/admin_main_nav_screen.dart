@@ -1,3 +1,8 @@
+import 'dart:async';
+import '../../../../core/auth/guest_auth_guard.dart';
+import '../../services/admin_portal_service.dart';
+import '../widgets/admin_components.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,16 +30,42 @@ class AdminMainNavScreen extends StatefulWidget {
 
 class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
   late int _currentIndex;
-  DateTime? _lastBackPressTime;
+  Timer? _backReset;
+  bool _exitArmed = false;
+  bool _redirecting = false;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
+    _currentIndex = widget.initialIndex.clamp(0, 4);
+    AuthState().addListener(_sessionChanged);
+  }
+
+  @override
+  void dispose() {
+    _backReset?.cancel();
+    AuthState().removeListener(_sessionChanged);
+    super.dispose();
+  }
+
+  void _sessionChanged() {
+    if (_redirecting || AdminPortalService().canManage) return;
+    _redirecting = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (_) => false,
+        );
+      }
+    });
   }
 
   void _onTabSelected(int index) {
+    if (index == 0) AdminPortalService().loadOverview();
     if (_currentIndex != index) {
+      _exitArmed = false;
+      _backReset?.cancel();
       HapticFeedback.selectionClick();
     }
     setState(() {
@@ -47,10 +78,10 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
       _onTabSelected(0);
       return;
     }
-    final now = DateTime.now();
-    if (_lastBackPressTime == null ||
-        now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
-      _lastBackPressTime = now;
+    if (!_exitArmed) {
+      _exitArmed = true;
+      _backReset?.cancel();
+      _backReset = Timer(const Duration(seconds: 2), () => _exitArmed = false);
       showAppSnackBar(
         context,
         loc.isArabic
@@ -60,6 +91,8 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
       );
       return;
     }
+    _backReset?.cancel();
+    _exitArmed = false;
     SystemNavigator.pop();
   }
 
@@ -81,8 +114,40 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
     ];
 
     return ListenableBuilder(
-      listenable: loc,
+      listenable: Listenable.merge([loc, AuthState()]),
       builder: (context, _) {
+        if (!AdminPortalService().canManage) {
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AdminNotice(
+                        message: adminText(
+                          'Super Admin access is required.',
+                          'يتطلب الوصول حساب مشرف عام.',
+                        ),
+                      ),
+                      FilledButton(
+                        onPressed: () =>
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                              (_) => false,
+                            ),
+                        child: Text(adminText('Sign in', 'تسجيل الدخول')),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) {
@@ -92,27 +157,41 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
           child: Scaffold(
             backgroundColor: AppColors.bg(context),
             appBar: AppBar(
+              toolbarHeight:
+                  (MediaQuery.textScalerOf(context).scale(15) * 2.6 + 12)
+                      .clamp(kToolbarHeight, double.infinity)
+                      .toDouble(),
               backgroundColor: AppColors.bg(context),
               title: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.admin_panel_settings_rounded,
-                    color: AppColors.accentChampagne,
+                    color: AppColors.goldText(context),
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      loc.tr('admin_portal_title'),
+                      loc.tr(
+                        const [
+                          'admin_title_dashboard',
+                          'admin_title_clinics',
+                          'admin_title_leads',
+                          'admin_title_catalog',
+                          'admin_title_analytics',
+                        ][_currentIndex],
+                      ),
                       style: TextStyle(
                         color: isDark
                             ? AppColors.silverPrimary
                             : AppColors.lightTextPrimary,
                         fontSize: 15,
+                        height: 1.3,
                         fontWeight: FontWeight.w700,
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                      maxLines: 2,
                     ),
                   ),
                 ],
@@ -120,9 +199,9 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.settings_outlined,
-                    color: AppColors.accentChampagne,
+                    color: AppColors.goldText(context),
                     size: 20,
                   ),
                   tooltip: loc.tr('admin_nav_settings'),
@@ -152,8 +231,8 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
                   boxShadow: isDark
                       ? [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            blurRadius: 28,
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 18,
                             offset: const Offset(0, 10),
                             spreadRadius: 2,
                           ),
@@ -264,73 +343,68 @@ class _AdminFloatingNavItem extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.accentChampagne.withValues(
-                    alpha: isDark ? 0.15 : 0.2,
-                  )
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-            border: isSelected
-                ? Border.all(
-                    color: AppColors.accentChampagne.withValues(
-                      alpha: isDark ? 0.45 : 0.65,
-                    ),
-                    width: 0.85,
-                  )
-                : null,
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.accentChampagne.withValues(
-                        alpha: isDark ? 0.12 : 0.2,
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        excludeSemantics: true,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.darkGold.withValues(alpha: isDark ? 0.15 : 0.2)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(24),
+              border: isSelected
+                  ? Border.all(
+                      color: AppColors.darkGold.withValues(
+                        alpha: isDark ? 0.45 : 0.65,
                       ),
-                      blurRadius: 10,
-                      spreadRadius: 0.5,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedScale(
-                scale: isSelected ? 1.10 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  isSelected ? activeIcon : icon,
-                  size: 19,
-                  color: isSelected
-                      ? AppColors.accentChampagne
-                      : (isDark
-                            ? AppColors.silverSecondary
-                            : AppColors.lightTextSecondary),
+                      width: 0.85,
+                    )
+                  : null,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedScale(
+                  scale: isSelected ? 1.10 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    isSelected ? activeIcon : icon,
+                    size: 19,
+                    color: isSelected
+                        ? AppColors.goldText(context)
+                        : (isDark
+                              ? AppColors.silverSecondary
+                              : AppColors.lightTextSecondary),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 3),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                  color: isSelected
-                      ? AppColors.goldText(context)
-                      : (isDark
-                            ? AppColors.silverSecondary
-                            : AppColors.lightTextSecondary),
+                const SizedBox(height: 3),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                    fontSize: 10,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                    color: isSelected
+                        ? AppColors.goldText(context)
+                        : (isDark
+                              ? AppColors.silverSecondary
+                              : AppColors.lightTextSecondary),
+                  ),
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                child: Text(label),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

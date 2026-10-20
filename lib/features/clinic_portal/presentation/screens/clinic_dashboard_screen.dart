@@ -1,3 +1,5 @@
+import '../widgets/clinic_catalog_cards.dart';
+import '../../../../core/services/local_media_cache.dart';
 import '../widgets/clinic_location_selector.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:flutter/material.dart';
@@ -65,19 +67,23 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.business_rounded,
-                  color: AppColors.accentChampagne,
+                  color: AppColors.goldText(context),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  loc.tr('clinic_portal_title'),
-                  style: AppTypography.screenTitle.copyWith(
-                    color: isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary,
-                    fontSize: 16,
+                Flexible(
+                  child: Text(
+                    loc.tr('clinic_portal_title'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.screenTitle.copyWith(
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ],
@@ -88,9 +94,9 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
               clinicService.isLoading &&
                   clinicService.clinicLeads.isEmpty &&
                   clinicService.dashboardData == null
-              ? const Center(
+              ? Center(
                   child: CircularProgressIndicator(
-                    color: AppColors.accentChampagne,
+                    color: AppColors.goldText(context),
                     strokeWidth: 2.5,
                   ),
                 )
@@ -148,7 +154,7 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                   ),
                 )
               : RefreshIndicator(
-                  color: AppColors.accentChampagne,
+                  color: AppColors.goldText(context),
                   backgroundColor: isDark
                       ? AppColors.cardSurface
                       : Colors.white,
@@ -172,6 +178,9 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                               borderRadius: BorderRadius.circular(12),
                               child: LuxuryImage(
                                 imageUrl: clinic.logoUrl,
+                                mediaCacheKey: LocalMediaCache.clinicLogo(
+                                  clinic.id,
+                                ),
                                 fallbackLogoUrl: clinic.coverImageUrl,
                                 width: 58,
                                 height: 58,
@@ -182,9 +191,9 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                                   color: isDark
                                       ? AppColors.cardSurfaceHover
                                       : AppColors.lightCardSurfaceHover,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.apartment_rounded,
-                                    color: AppColors.accentChampagne,
+                                    color: AppColors.goldText(context),
                                   ),
                                 ),
                               ),
@@ -357,7 +366,7 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                                   ? 'المنتجات الطبية'
                                   : 'Skincare Products',
                               count: '${clinicService.activeProductsCount}',
-                              icon: Icons.shopping_bag_outlined,
+                              icon: Icons.auto_awesome_outlined,
                               onTap: () {
                                 if (widget.onNavigateToSection != null) {
                                   widget.onNavigateToSection!('products');
@@ -425,14 +434,16 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            loc.tr('clinic_recent_leads'),
-                            style: AppTypography.cardTitle.copyWith(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? AppColors.silverPrimary
-                                  : AppColors.lightTextPrimary,
+                          Expanded(
+                            child: Text(
+                              loc.tr('clinic_recent_leads'),
+                              style: AppTypography.cardTitle.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
+                              ),
                             ),
                           ),
                           TextButton(
@@ -497,9 +508,9 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: AppColors.accentChampagne,
+                              color: AppColors.goldText(context),
                               size: 18,
                             ),
                             const SizedBox(width: 10),
@@ -551,12 +562,14 @@ class _MetricCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.mutedText(context),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.mutedText(context),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               Icon(
@@ -614,13 +627,15 @@ class _ShortcutButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.border(context), width: 0.8),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: AppColors.accentChampagne),
-            const SizedBox(width: 8),
+            Icon(icon, size: 16, color: AppColors.goldText(context)),
+            const SizedBox(height: 8),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: AppTypography.caption.copyWith(
                 color: isDark
                     ? AppColors.silverPrimary
@@ -637,100 +652,12 @@ class _ShortcutButton extends StatelessWidget {
 }
 
 class _LeadSummaryTile extends StatelessWidget {
+  const _LeadSummaryTile({required this.lead, required this.onTap});
   final AppointmentRequestModel lead;
   final VoidCallback onTap;
-
-  const _LeadSummaryTile({required this.lead, required this.onTap});
-
   @override
-  Widget build(BuildContext context) {
-    final loc = LocaleService();
-    final isDark = AppColors.isDark(context);
-
-    Color statusColor;
-    String statusText;
-    switch (lead.status) {
-      case AppointmentLeadStatus.sent:
-        statusColor = const Color(0xFFF59E0B);
-        statusText = loc.tr('clinic_lead_status_new');
-        break;
-      case AppointmentLeadStatus.contacted:
-        statusColor = const Color(0xFF3B82F6);
-        statusText = loc.tr('clinic_lead_status_contacted');
-        break;
-      case AppointmentLeadStatus.closed:
-        statusColor = const Color(0xFF10B981);
-        statusText = loc.tr('clinic_lead_status_closed');
-        break;
-    }
-
-    return LuxuryCard(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      onTap: onTap,
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: isDark
-                ? AppColors.cardSurfaceHover
-                : AppColors.lightCardSurfaceHover,
-            child: Icon(
-              Icons.person,
-              color: isDark
-                  ? AppColors.silverPrimary
-                  : AppColors.lightTextPrimary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lead.patientFullName,
-                  style: AppTypography.cardTitle.copyWith(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  lead.serviceNameAr,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.mutedText(context),
-                    fontSize: 11.5,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-            ),
-            child: Text(
-              statusText,
-              style: AppTypography.badge.copyWith(
-                color: statusColor,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      ClinicLeadSummaryCard(lead: lead, onTap: onTap);
 }
 
 class _CatalogCountCard extends StatelessWidget {
@@ -764,7 +691,7 @@ class _CatalogCountCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 20, color: AppColors.accentChampagne),
+            Icon(icon, size: 20, color: AppColors.goldText(context)),
             const SizedBox(height: 6),
             Text(
               count,

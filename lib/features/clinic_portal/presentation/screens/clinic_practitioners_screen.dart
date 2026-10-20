@@ -1,4 +1,4 @@
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
+import '../widgets/clinic_catalog_cards.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
@@ -6,8 +6,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/ltr_text_field.dart';
-import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/practitioner_badge.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../../../core/widgets/luxury_image_picker_field.dart';
 import '../../../../core/network/api_exception.dart';
@@ -908,122 +906,16 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
 
                               final p = filtered[index];
 
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: LuxuryCard(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(22),
-                                        child: LuxuryImage(
-                                          imageUrl: p.avatarUrl,
-                                          width: 44,
-                                          height: 44,
-                                          fit: BoxFit.cover,
-                                          customPlaceholder: Container(
-                                            width: 44,
-                                            height: 44,
-                                            color: isDark
-                                                ? AppColors.cardSurfaceHover
-                                                : AppColors
-                                                      .lightCardSurfaceHover,
-                                            child: const Icon(
-                                              Icons.person,
-                                              color: AppColors.accentChampagne,
-                                              size: 24,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    loc.isArabic
-                                                        ? p.nameAr
-                                                        : p.nameEn,
-                                                    style: AppTypography
-                                                        .cardTitle
-                                                        .copyWith(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: isDark
-                                                              ? AppColors
-                                                                    .silverPrimary
-                                                              : AppColors
-                                                                    .lightTextPrimary,
-                                                        ),
-                                                  ),
-                                                ),
-                                                PractitionerBadge(
-                                                  type: p.type,
-                                                  showIcon: false,
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              loc.isArabic
-                                                  ? p.specialtyAr
-                                                  : p.specialtyEn,
-                                              style: AppTypography.caption
-                                                  .copyWith(
-                                                    color: AppColors.mutedText(
-                                                      context,
-                                                    ),
-                                                    fontSize: 11.5,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.edit_outlined,
-                                              size: 18,
-                                              color: AppColors.silverPrimary,
-                                            ),
-                                            tooltip: loc.isArabic
-                                                ? 'تعديل'
-                                                : 'Edit',
-                                            onPressed: () =>
-                                                _showPractitionerFormDialog(
-                                                  context,
-                                                  loc,
-                                                  existing: p,
-                                                ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline_rounded,
-                                              size: 18,
-                                              color: AppColors.errorRed,
-                                            ),
-                                            tooltip: loc.isArabic
-                                                ? 'حذف'
-                                                : 'Delete',
-                                            onPressed: () =>
-                                                _confirmDelete(context, loc, p),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                              return ClinicPractitionerCard(
+                                practitioner: p,
+                                clinicLogoUrl:
+                                    clinicService.activeClinic.logoUrl,
+                                onEdit: () => _showPractitionerFormDialog(
+                                  context,
+                                  loc,
+                                  existing: p,
                                 ),
+                                onDelete: () => _confirmDelete(context, loc, p),
                               );
                             },
                           ),

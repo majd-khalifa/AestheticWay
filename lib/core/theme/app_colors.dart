@@ -6,7 +6,7 @@ abstract class AppColors {
   // ==========================================
   // DARK THEME TOKENS (Default)
   // ==========================================
-  static const Color backgroundDeep = Color(0xFF060A14); // Dark Canvas
+  static const Color backgroundDeep = Color(0xFF070C1A); // Dark Canvas
   static const Color backgroundBase = Color(0xFF0B1220); // Base layer
   static const Color backgroundElevated = Color(0xFF0F172A);
 
@@ -82,6 +82,15 @@ abstract class AppColors {
   static const Color successGreen = Color(0xFF10B981);
   static const Color errorRed = Color(0xFFEF4444);
   static const Color starGold = Color(0xFFF59E0B);
+
+  static Color positiveText(BuildContext context) =>
+      isDark(context) ? const Color(0xFF6EE7B7) : const Color(0xFF166534);
+  static Color dangerText(BuildContext context) =>
+      isDark(context) ? const Color(0xFFFDA4AF) : const Color(0xFF9F1239);
+  static Color warningText(BuildContext context) =>
+      isDark(context) ? const Color(0xFFFDE68A) : const Color(0xFF854D0E);
+  static Color infoText(BuildContext context) =>
+      isDark(context) ? const Color(0xFFBFDBFE) : const Color(0xFF1E3A8A);
 
   // Button Tones
   static const Color primaryButtonFill = Color(0xFFF1F5F9);

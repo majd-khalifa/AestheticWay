@@ -1,3 +1,4 @@
+import '../services/local_media_cache.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
@@ -18,7 +19,12 @@ bool isValidNetworkImageUrl(String? url) {
 }
 
 /// Use the actual source. A valid device/asset path is not a missing image.
-ImageProvider? resolveImageProvider(String? source) {
+ImageProvider? resolveImageProvider(String? source, {String? mediaCacheKey}) {
+  final cached = LocalMediaCache().lookup(
+    entityKey: mediaCacheKey,
+    remoteUrl: source,
+  );
+  if (cached != null) return FileImage(File(cached));
   if (source == null || source.trim().isEmpty) return null;
   final value = source.trim();
   if (value.startsWith('assets/')) return AssetImage(value);
@@ -72,6 +78,7 @@ void configureImageCacheBudget() {
 class LuxuryImage extends StatelessWidget {
   final String? imageUrl;
   final String? fallbackLogoUrl;
+  final String? mediaCacheKey;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -84,6 +91,7 @@ class LuxuryImage extends StatelessWidget {
     super.key,
     required this.imageUrl,
     this.fallbackLogoUrl,
+    this.mediaCacheKey,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -94,9 +102,17 @@ class LuxuryImage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: LocalMediaCache(),
+    builder: (context, _) => _buildImage(context),
+  );
+
+  Widget _buildImage(BuildContext context) {
     final safeCacheWidth = computeSafeCacheWidth(context, width, height);
-    final primaryProvider = resolveImageProvider(imageUrl);
+    final primaryProvider = resolveImageProvider(
+      imageUrl,
+      mediaCacheKey: mediaCacheKey,
+    );
 
     Widget buildBrandEmblemFallback() {
       final shortestSide =
@@ -256,6 +272,7 @@ class LuxuryImage extends StatelessWidget {
 class LuxuryAvatar extends StatelessWidget {
   final String? imageUrl;
   final String? fallbackLogoUrl;
+  final String? mediaCacheKey;
   final double radius;
   final IconData fallbackIcon;
   final Color? backgroundColor;
@@ -264,16 +281,25 @@ class LuxuryAvatar extends StatelessWidget {
     super.key,
     required this.imageUrl,
     this.fallbackLogoUrl,
+    this.mediaCacheKey,
     this.radius = 24,
     this.fallbackIcon = Icons.person_outline_rounded,
     this.backgroundColor,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: LocalMediaCache(),
+    builder: (context, _) => _buildImage(context),
+  );
+
+  Widget _buildImage(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final safeCacheWidth = (radius * 2 * dpr).round().clamp(60, 400);
-    final primaryProvider = resolveImageProvider(imageUrl);
+    final primaryProvider = resolveImageProvider(
+      imageUrl,
+      mediaCacheKey: mediaCacheKey,
+    );
 
     Widget buildBrandEmblemFallback() {
       final emblemPadding = (radius * 2 * 0.20).clamp(6.0, 20.0);
