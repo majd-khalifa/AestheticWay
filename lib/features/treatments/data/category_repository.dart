@@ -1,3 +1,4 @@
+import '../../../core/data/paged_collection.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/api_exception.dart';
@@ -7,6 +8,28 @@ import '../models/category_model.dart';
 class CategoryRepository {
   CategoryRepository({ApiClient? apiClient}) : _api = apiClient ?? ApiClient();
   final ApiClient _api;
+
+  /// The verified public API exposes active treatment categories only.
+  /// Admin reads must never select a clinic or probe a clinic write route.
+  Future<List<CategoryModel>> getCategories({
+    int page = 1,
+    String? search,
+  }) async {
+    final response = await _api.get(
+      ApiConfig.categories,
+      queryParameters: {
+        'page': page,
+        'page_size': catalogPageSize,
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
+    return PageItems<CategoryModel>.fromResponse(
+      response.data,
+      CategoryModel.fromJson,
+      page: page,
+    );
+  }
+
   Future<dynamic> _write(
     String method,
     String suffix, {

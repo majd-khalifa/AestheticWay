@@ -157,6 +157,10 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
           child: Scaffold(
             backgroundColor: AppColors.bg(context),
             appBar: AppBar(
+              toolbarHeight:
+                  (MediaQuery.textScalerOf(context).scale(15) * 2.6 + 12)
+                      .clamp(kToolbarHeight, double.infinity)
+                      .toDouble(),
               backgroundColor: AppColors.bg(context),
               title: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -169,15 +173,25 @@ class _AdminMainNavScreenState extends State<AdminMainNavScreen> {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      loc.tr('admin_portal_title'),
+                      loc.tr(
+                        const [
+                          'admin_title_dashboard',
+                          'admin_title_clinics',
+                          'admin_title_leads',
+                          'admin_title_catalog',
+                          'admin_title_analytics',
+                        ][_currentIndex],
+                      ),
                       style: TextStyle(
                         color: isDark
                             ? AppColors.silverPrimary
                             : AppColors.lightTextPrimary,
                         fontSize: 15,
+                        height: 1.3,
                         fontWeight: FontWeight.w700,
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                      maxLines: 2,
                     ),
                   ),
                 ],

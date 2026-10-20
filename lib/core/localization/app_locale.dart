@@ -499,6 +499,20 @@ class LocaleService extends ChangeNotifier {
       'ar': 'دخول تجريبي: مدير المنصة (Super Admin)',
       'en': 'Super Admin Demo Login',
     },
+    'admin_title_dashboard': {'ar': 'لوحة القيادة', 'en': 'Dashboard'},
+    'admin_title_clinics': {'ar': 'العيادات الشريكة', 'en': 'Partner Clinics'},
+    'admin_title_leads': {
+      'ar': 'الإشراف على الطلبات',
+      'en': 'Leads Supervision',
+    },
+    'admin_title_catalog': {
+      'ar': 'الكتالوج والمراجعة',
+      'en': 'Catalog & Moderation',
+    },
+    'admin_title_analytics': {
+      'ar': 'تحليلات المنصة',
+      'en': 'Platform Analytics',
+    },
     'admin_nav_dashboard': {'ar': 'الرئيسية', 'en': 'Dashboard'},
     'admin_nav_clinics': {'ar': 'العيادات', 'en': 'Clinics'},
     'admin_nav_leads': {'ar': 'الطلبات', 'en': 'Leads'},

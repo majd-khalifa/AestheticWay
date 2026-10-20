@@ -1,12 +1,12 @@
 # Super Admin Portal — implementation audit and delivery report
 
 Date: 20 October 2026. Repository: `majd-khalifa/AestheticWay`.
-Branch: `codex/super-admin-production-hardening`.
+Integration branch: `codex/frontend-audit-scale-ui-20261019`; PR #4 is mirrored on `codex/super-admin-production-hardening`.
 Implementation baseline: `c6fe01dfc16c0409c0766769cf51505b579cd85f`.
 
 ## Outcome and evidence boundaries
 
-The frontend now waits for verified server mutation results, distinguishes unknown moderation state from Active, uses genuine locations without Dubai coordinate fallbacks, keeps lead supervision read-only, and presents products as brand showcases. All ten Admin screens have been refined using shared, responsive components and the existing repositories, navigation, paging and authentication architecture.
+The frontend now waits for verified server mutation results, distinguishes unknown moderation state from Active, uses genuine locations without Dubai coordinate fallbacks, keeps lead supervision read-only, and presents products as brand showcases. The ten original Admin screens and a new read-only treatment-category directory have been refined using shared, responsive components and the existing repositories, navigation, paging and authentication architecture.
 
 This is a frontend implementation, not a claim of production deployment. Django sources, migrations, permissions and storage configuration were not modified. The inspected latest backend reference proves several server contract gaps. Their safe frontend behavior and exact bilingual implementation handoff are in [SUPER_ADMIN_BACKEND_GAPS_FOR_ALI.md](SUPER_ADMIN_BACKEND_GAPS_FOR_ALI.md). Interactive Admin map writes, complete offer/article server search and reliable status on fresh unfiltered moderation reads remain dependent on that handoff.
 
@@ -77,9 +77,20 @@ First-install defaults remain the existing English LTR and Soft Light Luxury; Ar
 
 These findings are source-verified, not live-server failures reproduced with production credentials. No authenticated Super Admin JWT was supplied, no production data was altered and no backend deployment occurred. Physical-device camera behavior, external map launch, platform font rendering, real storage/CDN lifecycle, release APK/IPA performance and screen-reader interaction still require device/staging acceptance. Headless widget renders are not production screenshots.
 
+## Additional requirements — preserved history and supported catalog scope
+
+The full Clinic Portal commit `c6fe01dfc16c0409c0766769cf51505b579cd85f` is an ancestor of both the previous Admin commit `15f6709` and the final integration history. The requested status/branch/log/ancestor checks passed before this addendum. The local Clinic Portal branch was fast-forwarded from `c6fe01d` to the existing tested Admin commit, preserving all earlier files without conflict or reset. No previous audit or implementation was restarted. The final normal push updates the preferred Clinic Portal branch and mirrors the same commit to the existing PR #4 head; `main` is never updated.
+
+- **Independent brand products:** inspected Django has global read/moderation only. Its product model can already represent `clinic=None` with an English brand or sponsor, but no Admin POST/PATCH/DELETE mappings exist. Clinic portal writes select a clinic, including a first-clinic fallback for Super Admin; they are not used. Add/Edit/Archive controls are explicitly unavailable; inspection and real confirmed publication moderation remain usable. There is no unsupported write or pretend native editor. The exact proposed private serializer, multipart/platform media UUID handling, ownership restrictions, soft archive, audit and routes are in Ali's sections 7–8. After deployment the editor must use `LuxuryImagePickerField` and the specified bilingual/brand/sponsor fields, without prices or clinic assignment.
+- **Categories:** the new `AdminCategoriesScreen` reuses `CategoryRepository`, `CategoryModel`, `PagedCollection` and Admin shared components for verified active treatment-category GET/search/paging. It never instantiates ClinicPortalService or calls clinic category write fallbacks. It exposes readable scope/unavailable states with disabled create/edit/delete controls, failure/retry and role/session invalidation. No public response proves write capability. Cosmetic brand categories have no model/API in the archive and are clearly separate; Ali has an explicit proposed schema/migration and private CRUD pattern, with protective deletion semantics.
+- **Contextual AppBar:** Dashboard / Partner Clinics / Leads Supervision / Catalog & Moderation / Platform Analytics, localized in Arabic and English. Titles wrap within a text-scale-aware toolbar rather than inheriting the generic portal title or clipping at large text.
+- **Clinic Offers section:** a pinned heading/close control and View clinic offers shortcut lead to a fully reachable Offers heading. One bounded scroll viewport, a shared controller/scrollbar, bottom spacing and a genuine empty state replace the orphaned heading at the bottom. Embedded offers still build at most six previews and retain paged View All behavior.
+
+Nine additional automated cases cover both localized contextual title sequences, category read payloads, server search/debounce/paging, unavailable writes, load retry, late role-change completion, unsupported product authoring and reachable loaded/empty Offers sections. The 16 existing responsive cases now include the eleventh screen. Current full CRUD is **not claimed**: Ali must deploy the new write contracts, after which a Flutter editor integration is still required. No automatic capability probing or speculative endpoint call is shipped.
+
 ## Regression protection and validation
 
-Added `test/admin_hardening_test.dart`: **50 focused unit/widget tests**, including 16 width/theme/language matrix cases. Each matrix case renders all ten Admin screens at 1.4 text scale, for 160 screen-layout checks in addition to interaction tests.
+Added `test/admin_hardening_test.dart`: **59 focused unit/widget tests**, including 16 width/theme/language matrix cases. Each matrix case renders all eleven Admin screens at 1.4 text scale, for 176 screen-layout checks in addition to interaction tests.
 
 Coverage includes safe coordinates/maps/location deduplication; missing dates; canonical KPI/zero mapping; brand and sponsor display; no rendered redemption/product pricing; query mappings; genuine server filtering across unloaded records; 350 ms debounce/page size; confirmed clinic/content mutation success/failure/duplicates; incorrect acknowledgement rejection; role/session invalidation; media cache success/null/omission; native camera/gallery settings and local preview; international phone zeros/prefixes; tier/home independence; failed edit modal retention; offscreen form validation; provisioning wait/credentials; password reset; reachable FAB/footer; role changes through nested routes; double-back timeout; keyboard/safe area; and global dashboard activity independent of Leads filters.
 
@@ -90,9 +101,9 @@ Final quality gates actually executed:
 | Gate | Result |
 | --- | --- |
 | Baseline `flutter analyze` / `flutter test` | Zero issues / 262 passing tests. |
-| `dart format .` | Completed successfully; 177 Dart files checked. Unrelated formatting-only diffs restored. |
+| `dart format .` | Completed successfully; 178 Dart files checked. Unrelated formatting-only diffs restored. |
 | Final `flutter analyze` | **No issues found**. |
-| Final `flutter test` | **312 passed, 0 failed, 0 skipped** (262 baseline + 50 new tests). |
+| Final `flutter test` | **321 passed, 0 failed, 0 skipped** (262 baseline + 59 Admin tests). |
 | `git diff --check` | Passed. |
 | Read-only backend SHA-256 comparison | Original **622/622** and latest **636/636** files identical to the pre-edit snapshot. |
 | Django handoff probe | Passed the serializer/query/media checks described below; zero DB writes. |
@@ -101,8 +112,8 @@ The final full suite includes Patient Portal, Clinic Portal, Admin, media/networ
 
 Additional evidence:
 
-- Read-only Django probe validates 8 Python blocks, 9 location cases, 3 private serializers, 3 search query compilations and 4 media input cases, including signed URL round-trip. **Zero database writes.** This checks serializer/query examples against the actual latest source; it is not a full DRF/deployment integration test.
-- 32 headless preview PNGs rendered from synthetic test fixtures: eight views × English/Arabic × light/dark. Fonts were supplied for inspection; fixtures deliberately include zeros and absent maps. Four preview-render cases passed. The scratch renderer is not shipped as an application/test dependency.
+- Read-only Django probe parses 17 Python blocks and validates 9 location cases, 3 private inspection serializers, 3 search query compilations and 4 media input cases, including signed URL round-trip. The catalog addendum also validates 15 independent-product input cases, native ImageField and platform MediaUploadSerializer inputs, platform asset queryset scope and 3 treatment-category serializer cases. **Zero database writes.** This checks serializer/query examples against the actual latest source; it is not a full DRF/deployment integration test.
+- 36 headless preview PNGs rendered from synthetic test fixtures: nine views × English/Arabic × light/dark. Fonts were supplied for inspection; fixtures deliberately include zeros and absent maps. Four preview-render cases passed. The scratch renderer is not shipped as an application/test dependency.
 - `dart format .` was run. Formatting-only changes to 42 previously untouched files were restored, preserving unrelated project files; touched implementation/test files remain formatted.
 - Backend integrity was verified against the original file-by-file SHA-256 snapshot: all 1,258 reference files are unchanged. Git delivery is described below.
 
@@ -120,6 +131,7 @@ The following paths are the complete task diff from the clean implementation bas
 - `lib/core/utils/maps_launcher.dart`
 - `lib/core/widgets/luxury_image_picker_field.dart`
 - `lib/core/widgets/luxury_phone_input_field.dart`
+- `lib/core/widgets/remote_catalog_preview.dart`
 - `lib/core/widgets/tier_badge.dart`
 - `lib/features/admin/data/admin_repository.dart`
 - `lib/features/admin/models/admin_analytics_model.dart`
@@ -127,6 +139,7 @@ The following paths are the complete task diff from the clean implementation bas
 - `lib/features/admin/models/admin_dashboard_model.dart`
 - `lib/features/admin/models/admin_lead_model.dart`
 - `lib/features/admin/presentation/screens/admin_analytics_screen.dart`
+- `lib/features/admin/presentation/screens/admin_categories_screen.dart`
 - `lib/features/admin/presentation/screens/admin_clinic_detail_sheet.dart`
 - `lib/features/admin/presentation/screens/admin_clinics_screen.dart`
 - `lib/features/admin/presentation/screens/admin_create_clinic_dialog.dart`
@@ -148,6 +161,7 @@ The following paths are the complete task diff from the clean implementation bas
 - `lib/features/products/models/product_model.dart`
 - `lib/features/products/presentation/screens/products_screen.dart`
 - `lib/features/products/presentation/widgets/product_inquiry_bottom_sheet.dart`
+- `lib/features/treatments/data/category_repository.dart`
 - `test/admin_hardening_test.dart`
 - `test/admin_portal_api_test.dart`
 - `test/admin_portal_test.dart`
@@ -158,9 +172,9 @@ The following paths are the complete task diff from the clean implementation bas
 
 ## Delivery and review risks
 
-The dedicated branch preserves the earlier Clinic Portal implementation commit `c6fe01d`, which had not been pushed to `origin/main` when this task began. `origin/main` was fetched and remains `ce4442d`. The PR therefore includes that existing prerequisite plus the Super Admin commit; it does not discard or rewrite prior work. Review the current task against `c6fe01d` for its exact 45-file manifest above. Review the PR against `origin/main` for the cumulative preserved work.
+The final preferred branch is `codex/frontend-audit-scale-ui-20261019`. It contains the exact Clinic Portal commit `c6fe01d`, all completed Admin work in `15f6709` and this addendum. The same final commit is mirrored to `codex/super-admin-production-hardening`, updating [PR #4](https://github.com/majd-khalifa/AestheticWay/pull/4) against `main`. Both pushes must be fast-forward-safe; no force flag, main update or PR merge is authorized/performed.
 
-Final checks, commit and normal branch push are recorded in the PR and the delivery message. The branch targets `main`; merging is left to the maintainer.
+`origin/main` was fetched and remains `ce4442d`. The cumulative PR includes earlier Clinic Portal work plus the Admin task. Review this complete task against `c6fe01d` for the manifest above and the PR against `origin/main` for the cumulative preserved work. Final commit SHA, matching remote tips, test results and clean Git status are reported in the delivery message.
 
 Review the shared phone parser against any additional country-specific numbering plans supported by the product; the mandated 10-national-digit limit is enforced even where a real country can issue longer numbers. Review production storage and permissions in Ali's staging environment, not through Flutter mock fixtures. Offset paging over concurrently changing datasets retains normal offset movement limitations; the handoff adds unique sort tie-breakers and does not pretend to supply snapshot isolation.
 

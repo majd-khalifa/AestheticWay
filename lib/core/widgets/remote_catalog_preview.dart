@@ -11,7 +11,9 @@ class RemoteCatalogPreview<T> extends StatefulWidget {
     required this.loader,
     required this.keyOf,
     required this.itemBuilder,
+    this.emptyState,
   });
+  final Widget? emptyState;
   final Future<List<T>> Function(int page) loader;
   final String Function(T) keyOf;
   final Widget Function(BuildContext context, T item) itemBuilder;
@@ -68,6 +70,9 @@ class _RemoteCatalogPreviewState<T> extends State<RemoteCatalogPreview<T>> {
           error: _page.error,
           onLoadMore: _page.refresh,
         );
+      }
+      if (_page.isLoaded && _page.items.isEmpty && widget.emptyState != null) {
+        return widget.emptyState!;
       }
       return BoundedCatalogPreview<T>(
         items: () => _page.items,

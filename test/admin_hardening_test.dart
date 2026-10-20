@@ -1,3 +1,6 @@
+import 'package:aesthetic_way/features/admin/presentation/screens/admin_categories_screen.dart';
+import 'package:aesthetic_way/features/treatments/data/category_repository.dart';
+import 'package:aesthetic_way/features/treatments/models/category_model.dart';
 import 'package:aesthetic_way/features/admin/presentation/widgets/admin_components.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -322,6 +325,13 @@ class _Repository implements AdminRepository {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _DeferredCategories extends CategoryRepository {
+  final response = Completer<List<CategoryModel>>();
+  @override
+  Future<List<CategoryModel>> getCategories({int page = 1, String? search}) =>
+      response.future;
 }
 
 void main() {
@@ -1321,6 +1331,357 @@ void main() {
       expect(queries, hasLength(2));
     },
   );
+
+  for (final ar in [false, true]) {
+    testWidgets(
+      'Admin AppBar follows all five tabs and locale ${ar ? 'ar' : 'en'}',
+      (tester) async {
+        service.enableMockMode();
+        LocaleService().setLanguage(
+          ar ? AppLanguage.arabic : AppLanguage.english,
+        );
+        await tester.binding.setSurfaceSize(const Size(320, 800));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1.4)),
+              child: Directionality(
+                textDirection: ar ? TextDirection.rtl : TextDirection.ltr,
+                child: child!,
+              ),
+            ),
+            home: const AdminMainNavScreen(),
+          ),
+        );
+        for (final (nav, title) in [
+          ('admin_nav_dashboard', 'admin_title_dashboard'),
+          ('admin_nav_clinics', 'admin_title_clinics'),
+          ('admin_nav_leads', 'admin_title_leads'),
+          ('admin_nav_offers', 'admin_title_catalog'),
+          ('admin_nav_analytics', 'admin_title_analytics'),
+        ]) {
+          await tester.tap(find.text(LocaleService().tr(nav)).last);
+          await tester.pumpAndSettle();
+          final actual = find.descendant(
+            of: find.byType(AppBar),
+            matching: find.text(LocaleService().tr(title)),
+          );
+          expect(actual, findsOneWidget);
+          final text = tester.widget<Text>(actual);
+          expect(text.overflow, isNot(TextOverflow.ellipsis));
+          expect(tester.takeException(), isNull);
+          expect(
+            tester.getBottomLeft(actual).dy,
+            lessThanOrEqualTo(tester.getBottomLeft(find.byType(AppBar)).dy),
+          );
+        }
+      },
+    );
+  }
+  test(
+    'shared categories read preserves treatment taxonomy and only calls the verified public GET',
+    () async {
+      final requests = <Map<String, dynamic>>[];
+      final api = FakeApiClient(
+        onGet: (path, query) {
+          expect(path, ApiConfig.categories);
+          requests.add(Map.of(query ?? {}));
+          return {
+            'count': 21,
+            'next': null,
+            'results': [
+              {
+                'id': 'treatment-category',
+                'name_en': 'Laser',
+                'name_ar': 'ليزر',
+                'slug': 'laser',
+                'icon': 'https://aestheticway.ae/media/laser.png',
+                'display_order': 3,
+              },
+            ],
+          };
+        },
+        onPost: (_, _) => throw StateError('No category write is supported'),
+      );
+      final rows = await CategoryRepository(
+        apiClient: api,
+      ).getCategories(page: 2, search: ' laser ');
+      expect(rows.single.nameAr, 'ليزر');
+      expect(rows.single.slug, 'laser');
+      expect(rows.single.displayOrder, 3);
+      expect(rows.single.icon, contains('/laser.png'));
+      expect(requests.single, {'page': 2, 'page_size': 20, 'search': 'laser'});
+    },
+  );
+  testWidgets(
+    'Admin treatment categories have real search and paging with unavailable writes and separate brand taxonomy',
+    (tester) async {
+      final requests = <Map<String, dynamic>>[];
+      var writes = 0;
+      final api = FakeApiClient(
+        onGet: (path, query) {
+          expect(path, ApiConfig.categories);
+          final q = Map<String, dynamic>.of(query ?? {});
+          requests.add(q);
+          final index = q['page'] as int;
+          return {
+            'count': 21,
+            'next': index == 1 ? '?page=2' : null,
+            'results': index == 1
+                ? List.generate(
+                    20,
+                    (i) => {
+                      'id': 'category-$i',
+                      'name_en': 'Treatment $i',
+                      'name_ar': 'علاج $i',
+                    },
+                  )
+                : [
+                    {
+                      'id': 'category-20',
+                      'name_en': 'Final treatment',
+                      'name_ar': 'العلاج الأخير',
+                    },
+                  ],
+          };
+        },
+        onPost: (_, _) {
+          writes++;
+          return {};
+        },
+        onPatch: (_, _) {
+          writes++;
+          return {};
+        },
+        onDelete: (_) {
+          writes++;
+        },
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: AdminCategoriesScreen(
+            repository: CategoryRepository(apiClient: api),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Active treatment categories'), findsOneWidget);
+      expect(
+        find.textContaining('brand-product categories are separate'),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Add Category'),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester.enterText(find.byType(TextField), 'Skin');
+      await tester.pump(const Duration(milliseconds: 349));
+      expect(requests, hasLength(1));
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pumpAndSettle();
+      expect(requests, hasLength(2));
+      expect(requests.last['search'], 'Skin');
+      expect(requests.last['page_size'], 20);
+      final scroll = find.byType(CustomScrollView);
+      for (var i = 0; i < 14 && requests.length < 3; i++) {
+        await tester.drag(scroll, const Offset(0, -700));
+        await tester.pumpAndSettle();
+      }
+      expect(requests.last['page'], 2);
+      await tester.scrollUntilVisible(
+        find.text('Final treatment'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextButton>(find.widgetWithText(TextButton, 'Edit').last)
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<TextButton>(find.widgetWithText(TextButton, 'Delete').last)
+            .onPressed,
+        isNull,
+      );
+      expect(writes, 0);
+    },
+  );
+  testWidgets(
+    'Admin category load errors can retry without invoking clinic writes',
+    (tester) async {
+      var fail = true, reads = 0;
+      final api = FakeApiClient(
+        onGet: (path, q) {
+          expect(path, ApiConfig.categories);
+          reads++;
+          if (fail) throw const ApiException(message: 'Categories unavailable');
+          return {
+            'next': null,
+            'results': [
+              {'id': 'ok', 'name_en': 'Recovered category'},
+            ],
+          };
+        },
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AdminCategoriesScreen(
+            repository: CategoryRepository(apiClient: api),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Categories unavailable'), findsWidgets);
+      fail = false;
+      await tester.tap(find.text('Retry').first);
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Recovered category'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(reads, 2);
+      expect(find.text('Recovered category'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'category read completion cannot restore data after an Admin role change',
+    (tester) async {
+      final repo = _DeferredCategories();
+      await tester.pumpWidget(
+        MaterialApp(home: AdminCategoriesScreen(repository: repo)),
+      );
+      await tester.pump();
+      AuthState().login(
+        name: 'Patient',
+        phone: '+442079460123',
+        role: 'patient',
+      );
+      await tester.pump();
+      repo.response.complete([
+        const CategoryModel(
+          id: 'late',
+          nameEn: 'Late category',
+          nameAr: 'متأخر',
+          slug: 'late',
+        ),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text('Late category'), findsNothing);
+      expect(find.text('Super Admin access is required.'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'independent product authoring never sends an unsupported or clinic-scoped write',
+    (tester) async {
+      await load();
+      await tester.pumpWidget(MaterialApp(home: const AdminOffersScreen()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Products'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.byKey(const ValueKey('admin-add-brand-product')),
+            )
+            .onPressed,
+        isNull,
+      );
+      final inspect = find.text('Inspect content');
+      await tester.scrollUntilVisible(
+        inspect.hitTestable(),
+        350,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(inspect);
+      await tester.pumpAndSettle();
+      final archive = find.text('Archive Brand Product');
+      await tester.scrollUntilVisible(
+        archive,
+        400,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Edit Brand Product'),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Archive Brand Product'),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(repository.writes, 0);
+      expect(find.textContaining('987.65'), findsNothing);
+      expect(find.textContaining('AED'), findsNothing);
+    },
+  );
+  for (final empty in [false, true]) {
+    testWidgets(
+      'clinic Offers section remains fully reachable with safe area and ${empty ? 'empty' : 'loaded'} records',
+      (tester) async {
+        if (empty) repository.offers = [];
+        await tester.binding.setSurfaceSize(const Size(320, 700));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: const TextScaler.linear(1.4),
+                padding: const EdgeInsets.only(bottom: 34),
+              ),
+              child: child!,
+            ),
+            home: Scaffold(body: AdminClinicDetailSheet(clinic: _clinic())),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('admin-clinic-view-offers')),
+        );
+        await tester.pumpAndSettle();
+        final heading = find.descendant(
+          of: find.byType(AdminSectionTitle),
+          matching: find.text('Offers'),
+        );
+        final viewport = find.byKey(
+          const ValueKey('admin-clinic-detail-scroll'),
+        );
+        expect(
+          tester.getTopLeft(heading).dy,
+          greaterThanOrEqualTo(tester.getTopLeft(viewport).dy),
+        );
+        expect(
+          tester.getBottomLeft(heading).dy,
+          lessThanOrEqualTo(tester.getBottomLeft(viewport).dy),
+        );
+        expect(
+          find.text(empty ? 'No offers for this clinic.' : 'Skin consultation'),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   for (final width in [320.0, 360.0, 390.0, 430.0]) {
     for (final dark in [false, true]) {
       for (final ar in [false, true]) {
@@ -1345,6 +1706,13 @@ void main() {
               const AdminOffersScreen(),
               const AdminAnalyticsScreen(),
               const AdminSettingsScreen(),
+              AdminCategoriesScreen(
+                repository: CategoryRepository(
+                  apiClient: FakeApiClient(
+                    onGet: (_, _) => {'results': <dynamic>[], 'next': null},
+                  ),
+                ),
+              ),
               AdminClinicDetailSheet(clinic: _clinic()),
               const Scaffold(body: AdminCreateClinicDialog()),
               const AdminMainNavScreen(),

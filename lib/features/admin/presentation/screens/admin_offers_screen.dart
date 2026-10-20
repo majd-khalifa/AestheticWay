@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/luxury_card.dart';
 import '../../services/admin_portal_service.dart';
 import '../widgets/admin_components.dart';
+import 'admin_categories_screen.dart';
 
 /// Each module owns its server page. Unsupported legacy search stays explicitly local.
 class AdminOffersScreen extends StatefulWidget {
@@ -115,6 +116,39 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                   ),
               ],
             ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: OutlinedButton.icon(
+                key: const ValueKey('admin-treatment-categories'),
+                onPressed: !_service.canManage
+                    ? null
+                    : () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminCategoriesScreen(),
+                        ),
+                      ),
+                icon: const Icon(Icons.category_outlined),
+                label: Text(
+                  adminText('Treatment Categories', 'تصنيفات العلاجات'),
+                ),
+              ),
+            ),
+            if (_module == 1) ...[
+              const _BrandProductAvailability(),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FilledButton.icon(
+                  key: const ValueKey('admin-add-brand-product'),
+                  onPressed: null,
+                  icon: const Icon(Icons.add_photo_alternate_outlined),
+                  label: Text(
+                    adminText('Add Brand Product', 'إضافة منتج علامة تجميلية'),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             TextField(
               controller: _search,
@@ -537,7 +571,45 @@ class _ContentInspection extends StatelessWidget {
             fontSize: 15,
           ),
         ),
+        if (item.kind == 'product') ...[
+          const SizedBox(height: 16),
+          const _BrandProductAvailability(),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (icon, en, ar) in [
+                (
+                  Icons.edit_outlined,
+                  'Edit Brand Product',
+                  'تعديل منتج العلامة',
+                ),
+                (
+                  Icons.archive_outlined,
+                  'Archive Brand Product',
+                  'أرشفة منتج العلامة',
+                ),
+              ])
+                OutlinedButton.icon(
+                  onPressed: null,
+                  icon: Icon(icon),
+                  label: Text(adminText(en, ar)),
+                ),
+            ],
+          ),
+        ],
       ],
+    ),
+  );
+}
+
+class _BrandProductAvailability extends StatelessWidget {
+  const _BrandProductAvailability();
+  @override
+  Widget build(BuildContext context) => AdminNotice(
+    message: adminText(
+      'Adding, editing and archiving brand products is currently unavailable. Inspection and publication moderation are available.',
+      'إضافة منتجات العلامات وتعديلها وأرشفتها غير متاح حالياً. يمكن فحص المحتوى والتحكم في النشر.',
     ),
   );
 }
