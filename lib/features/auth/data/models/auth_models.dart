@@ -30,7 +30,7 @@ class UserModel {
       fullName: json['full_name']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
       email: json['email']?.toString(),
-      role: json['role']?.toString() ?? 'patient',
+      role: json['role']?.toString() ?? '',
       isVerified: json['is_verified'] == true,
       devicePlatform: json['device_platform']?.toString(),
       createdAt: json['created_at']?.toString(),
@@ -57,7 +57,7 @@ class UserModel {
   bool get isSuperAdmin => role == 'super_admin';
   bool get isClinicAdmin => role == 'clinic_admin';
   bool get isClinicStaff => role == 'clinic_staff';
-  bool get isPatient => role == 'patient' || role.isEmpty;
+  bool get isPatient => role == 'patient';
 }
 
 /// Token & Session Response returned by /auth/login/ and /auth/verify-otp/
@@ -84,7 +84,7 @@ class AuthResponse {
       expiresIn: (json['expires_in'] as num?)?.toInt() ?? 3600,
       user: json['user'] is Map<String, dynamic>
           ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
-          : const UserModel(id: '', fullName: '', phone: '', role: 'patient'),
+          : const UserModel(id: '', fullName: '', phone: '', role: ''),
     );
   }
 }

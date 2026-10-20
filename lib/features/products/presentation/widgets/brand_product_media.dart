@@ -6,20 +6,8 @@ import '../../models/product_model.dart';
 
 String productBrandLabel(ProductModel product, LocaleService locale) {
   final labels = locale.isArabic
-      ? [
-          product.brandNameAr,
-          product.brandNameEn,
-          product.sponsorCompany,
-          product.clinicNameAr,
-          product.clinicNameEn,
-        ]
-      : [
-          product.brandNameEn,
-          product.brandNameAr,
-          product.sponsorCompany,
-          product.clinicNameEn,
-          product.clinicNameAr,
-        ];
+      ? [product.brandNameAr, product.brandNameEn, product.sponsorCompany]
+      : [product.brandNameEn, product.brandNameAr, product.sponsorCompany];
   return labels
           .whereType<String>()
           .where((value) => value.trim().isNotEmpty)

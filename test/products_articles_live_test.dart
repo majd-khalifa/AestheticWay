@@ -478,6 +478,8 @@ void main() {
             'results': [
               {
                 'id': 'p-live-99',
+                'brand_name_en': 'Fixture Brand',
+                'brand_name_ar': 'علامة الاختبار',
                 'name_en': 'Vitamin C Brightening Serum',
                 'name_ar': 'سيروم فيتامين سي للنضارة',
                 'description_en': 'Antioxidant medical serum',
@@ -509,7 +511,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('سيروم فيتامين سي للنضارة'), findsOneWidget);
-        expect(find.text('إيليت للتجميل'), findsOneWidget);
+        expect(find.text('علامة الاختبار'), findsOneWidget);
+        expect(find.text('إيليت للتجميل'), findsNothing);
 
         // Navigate to ProductDetailScreen
         await tester.tap(find.text('سيروم فيتامين سي للنضارة'));
@@ -517,7 +520,7 @@ void main() {
 
         expect(find.byType(ProductDetailScreen), findsOneWidget);
         expect(find.text('سيروم طبي مضاد للأكسدة'), findsOneWidget);
-        // Verify brand showcase has no cart, no checkout, and no inquiry button (informational showcase)
+        // Verify brand showcase has no cart, checkout or direct contact; general inquiry is allowed.
         expect(find.byIcon(Icons.send_rounded), findsNothing);
         expect(find.byIcon(Icons.shopping_cart), findsNothing);
         expect(find.text('العلامة / الجهة الراعية'), findsOneWidget);

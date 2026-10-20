@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -80,8 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
         targetScreen = const AdminMainNavScreen();
       } else if (role == 'clinic_admin' || role == 'clinic_staff') {
         targetScreen = const ClinicMainNavScreen();
-      } else {
+      } else if (role == 'patient') {
         targetScreen = const MainNavScreen();
+      } else {
+        AuthState().logout();
+        targetScreen = const LoginScreen();
       }
 
       Navigator.of(context).pushAndRemoveUntil(

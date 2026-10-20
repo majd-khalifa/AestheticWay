@@ -32,11 +32,19 @@ class FeaturedAdApiModel {
   final String id;
   final String image;
   final String link;
+  final ClinicModel? clinic;
+  final String subscriptionTier;
+  final String videoUrl;
+  bool get isSponsored =>
+      ['vip', 'featured'].contains(subscriptionTier.toLowerCase());
 
   const FeaturedAdApiModel({
     required this.id,
     required this.image,
     required this.link,
+    this.clinic,
+    this.subscriptionTier = 'basic',
+    this.videoUrl = '',
   });
 
   factory FeaturedAdApiModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +52,11 @@ class FeaturedAdApiModel {
       id: json['id']?.toString() ?? '',
       image: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
       link: json['link'] as String? ?? '',
+      clinic: json['clinic'] is Map<String, dynamic>
+          ? ClinicModel.fromJson(json['clinic'] as Map<String, dynamic>)
+          : null,
+      subscriptionTier: json['subscription_tier']?.toString() ?? 'basic',
+      videoUrl: ApiConfig.firstMediaUrl([json['video_url']]),
     );
   }
 }

@@ -32,15 +32,18 @@ class _LuxuryShimmerState extends State<LuxuryShimmer>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     );
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
+      'Test',
+    );
     if (!isTest) {
       _controller.repeat(reverse: true);
     } else {
       _controller.value = 0.5;
     }
-    _animation = Tween<double>(begin: 0.35, end: 0.85).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.35,
+      end: 0.85,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -101,7 +104,8 @@ class HomeFeedSkeleton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(
               4,
-              (i) => const LuxuryShimmer(width: 72, height: 72, borderRadius: 16),
+              (i) =>
+                  const LuxuryShimmer(width: 72, height: 72, borderRadius: 16),
             ),
           ),
           const SizedBox(height: 24),
@@ -127,9 +131,17 @@ class HomeFeedSkeleton extends StatelessWidget {
           // Nearby clinics section skeleton
           const LuxuryShimmer(width: 160, height: 20, borderRadius: 6),
           const SizedBox(height: 12),
-          const LuxuryShimmer(width: double.infinity, height: 110, borderRadius: 16),
+          const LuxuryShimmer(
+            width: double.infinity,
+            height: 110,
+            borderRadius: 16,
+          ),
           const SizedBox(height: 12),
-          const LuxuryShimmer(width: double.infinity, height: 110, borderRadius: 16),
+          const LuxuryShimmer(
+            width: double.infinity,
+            height: 110,
+            borderRadius: 16,
+          ),
         ],
       ),
     );

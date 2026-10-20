@@ -99,22 +99,31 @@ class CategoryGrid extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: categories.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 14,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, index) {
-              final cat = categories[index];
-              return _CategoryItemWidget(
-                category: cat,
-                label: loc.tr(cat.translationKey),
-                onTap: () => onCategorySelected(cat),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final minWidth = MediaQuery.textScalerOf(context).scale(1) > 1.3
+                  ? 120.0
+                  : 76.0;
+              final columns = (constraints.maxWidth / minWidth).floor().clamp(
+                2,
+                4,
+              );
+              final width =
+                  (constraints.maxWidth - (columns - 1) * 12) / columns;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 18,
+                children: [
+                  for (final category in categories)
+                    SizedBox(
+                      width: width,
+                      child: _CategoryItemWidget(
+                        category: category,
+                        label: loc.tr(category.translationKey),
+                        onTap: () => onCategorySelected(category),
+                      ),
+                    ),
+                ],
               );
             },
           ),
@@ -230,8 +239,6 @@ class _CategoryItemWidgetState extends State<_CategoryItemWidget> {
                 letterSpacing: -0.1,
               ),
               textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

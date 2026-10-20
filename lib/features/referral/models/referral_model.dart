@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum ReferralCodeStatus {
-  available,
-  used,
-  expired,
-}
+enum ReferralCodeStatus { available, used, expired }
 
 ReferralCodeStatus parseReferralCodeStatus(String? status) {
   switch (status?.toLowerCase()) {
@@ -18,10 +14,10 @@ ReferralCodeStatus parseReferralCodeStatus(String? status) {
   }
 }
 
-/// 15% Referral Discount Code Model
+/// Legacy response compatibility only. Never rendered or redeemable.
 class ReferralDiscountCode {
   final String id;
-  final String code; // e.g. AW-15-7892
+  final String code;
   final double discountPercent; // 15.0
   final ReferralCodeStatus status;
   final String userId;
@@ -38,7 +34,7 @@ class ReferralDiscountCode {
     this.discountPercent = 15.0,
     required this.status,
     this.userId = 'current_user',
-    this.userName = 'سارة المنصوري',
+    this.userName = '',
     required this.createdAt,
     required this.expiresAt,
     this.usedAt,
@@ -48,12 +44,14 @@ class ReferralDiscountCode {
 
   bool get isAvailable => status == ReferralCodeStatus.available;
   bool get isUsed => status == ReferralCodeStatus.used;
-  bool get isExpired => status == ReferralCodeStatus.expired || DateTime.now().isAfter(expiresAt);
+  bool get isExpired =>
+      status == ReferralCodeStatus.expired || DateTime.now().isAfter(expiresAt);
 
   factory ReferralDiscountCode.fromJson(Map<String, dynamic> json) {
     DateTime createdAt = DateTime.now();
     if (json['created_at'] != null) {
-      createdAt = DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
+      createdAt =
+          DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
     }
 
     DateTime expiresAt = DateTime.now().add(const Duration(days: 90));
@@ -72,7 +70,7 @@ class ReferralDiscountCode {
       discountPercent: (json['discount_percent'] as num?)?.toDouble() ?? 15.0,
       status: parseReferralCodeStatus(json['status']?.toString()),
       userId: json['patient']?.toString() ?? 'current_user',
-      userName: json['patient_name']?.toString() ?? 'سارة المنصوري',
+      userName: json['patient_name']?.toString() ?? '',
       createdAt: createdAt,
       expiresAt: expiresAt,
       usedAt: usedAt,
@@ -179,19 +177,23 @@ class PatientReferralStatusModel {
         .map((c) => ReferralDiscountCode.fromJson(c))
         .toList();
 
-    final invites = (json['successful_invites_count'] as num?)?.toInt() ??
+    final invites =
+        (json['successful_invites_count'] as num?)?.toInt() ??
         (json['total_successful_invites'] as num?)?.toInt() ??
         0;
 
     final code = json['referral_code']?.toString() ?? '';
-    final link = json['invite_link']?.toString() ??
-        (code.isNotEmpty ? 'https://aestheticway.ae/invite/$code' : '');
+    final link =
+        authenticInviteLink(json['invite_link']) ??
+        authenticInviteLink(json['referral_link']) ??
+        '';
 
     return PatientReferralStatusModel(
       referralCode: code,
       inviteLink: link,
       successfulInvitesCount: invites,
-      totalSuccessfulInvites: (json['total_successful_invites'] as num?)?.toInt() ?? invites,
+      totalSuccessfulInvites:
+          (json['total_successful_invites'] as num?)?.toInt() ?? invites,
       currentPoints: (json['current_points'] as num?)?.toInt() ?? 0,
       pointsToCollect: (json['points_to_collect'] as num?)?.toInt() ?? 500,
       canCollectCode: json['can_collect_code'] == true,
@@ -229,4 +231,22 @@ class CollectCodeResult {
       remainingPoints: (json['remaining_points'] as num?)?.toInt() ?? 0,
     );
   }
+}
+
+/// Accept only the exact public invite origin and one nonempty token segment.
+String? authenticInviteLink(Object? raw) {
+  final uri = Uri.tryParse(raw?.toString().trim() ?? '');
+  if (uri == null ||
+      uri.scheme != 'https' ||
+      uri.host != 'aestheticway.ae' ||
+      uri.hasPort ||
+      uri.userInfo.isNotEmpty ||
+      uri.hasQuery ||
+      uri.hasFragment ||
+      uri.pathSegments.length != 2 ||
+      uri.pathSegments.first != 'invite' ||
+      !RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(uri.pathSegments.last)) {
+    return null;
+  }
+  return uri.toString();
 }

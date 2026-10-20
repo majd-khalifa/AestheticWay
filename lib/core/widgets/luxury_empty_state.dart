@@ -27,17 +27,19 @@ class LuxuryEmptyState extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: LuxuryCard(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 34),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 58,
-              height: 58,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.12 : 0.18),
+                color: AppColors.accentChampagne.withValues(
+                  alpha: isDark ? 0.12 : 0.18,
+                ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: AppColors.accentChampagne.withValues(alpha: 0.35),
@@ -56,7 +58,9 @@ class LuxuryEmptyState extends StatelessWidget {
               style: AppTypography.cardTitle.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 letterSpacing: 0.2,
               ),
               textAlign: TextAlign.center,
@@ -76,34 +80,16 @@ class LuxuryEmptyState extends StatelessWidget {
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 18),
-              InkWell(
-                onTap: onAction,
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.accentChampagne.withValues(alpha: 0.5),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.refresh_rounded, size: 14, color: AppColors.accentChampagne),
-                      const SizedBox(width: 6),
-                      Text(
-                        actionLabel!,
-                        style: TextStyle(
-                          color: AppColors.goldText(context),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+              TextButton.icon(
+                onPressed: onAction,
+                icon: Icon(
+                  Icons.sync,
+                  size: 18,
+                  color: AppColors.goldText(context),
+                ),
+                label: Text(
+                  actionLabel!,
+                  style: TextStyle(color: AppColors.goldText(context)),
                 ),
               ),
             ],

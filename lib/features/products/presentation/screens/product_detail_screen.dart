@@ -1,3 +1,6 @@
+import '../widgets/product_inquiry_bottom_sheet.dart';
+import '../../../../core/widgets/silver_button.dart';
+import '../../../../core/utils/entity_id.dart';
 import '../widgets/brand_product_media.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -62,32 +65,20 @@ class ProductDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
-    final brandTitle = loc.isArabic
-        ? (product.brandNameAr?.isNotEmpty == true
-              ? product.brandNameAr!
-              : (product.brandNameEn?.isNotEmpty == true
-                    ? product.brandNameEn!
-                    : product.clinicNameAr))
-        : (product.brandNameEn?.isNotEmpty == true
-              ? product.brandNameEn!
-              : (product.brandNameAr?.isNotEmpty == true
-                    ? product.brandNameAr!
-                    : (product.clinicNameEn ?? product.clinicNameAr)));
+    final brandTitle = productBrandLabel(product, loc);
     final sponsorTitle = product.sponsorCompany?.trim();
     final hasClinicInfo =
         product.clinicNameAr.isNotEmpty ||
         (product.clinicNameEn?.isNotEmpty ?? false);
     final hasBrandOrClinicInfo =
-        hasClinicInfo ||
-        brandTitle.isNotEmpty ||
-        (sponsorTitle?.isNotEmpty == true);
+        brandTitle.isNotEmpty || (sponsorTitle?.isNotEmpty == true);
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
       appBar: AppBar(
         backgroundColor: AppColors.bg(context),
         title: Text(
-          loc.isArabic ? product.nameAr : product.nameEn,
+          loc.isArabic ? 'عرض العلامة التجارية' : 'Brand showcase',
           style: AppTypography.screenTitle.copyWith(
             color: isDark
                 ? AppColors.silverPrimary
@@ -154,12 +145,12 @@ class ProductDetailScreen extends StatelessWidget {
           // Providing Clinic / Brand Showcase Card
           if (hasBrandOrClinicInfo)
             LuxuryCard(
-              onTap: hasClinicInfo ? () => _handleOpenClinic(context) : null,
+              onTap: null,
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
                   const Icon(
-                    Icons.verified_rounded,
+                    Icons.business_outlined,
                     color: AppColors.accentChampagne,
                     size: 20,
                   ),
@@ -183,12 +174,8 @@ class ProductDetailScreen extends StatelessWidget {
                               ? (brandTitle.isNotEmpty
                                     ? '$brandTitle • $sponsorTitle'
                                     : sponsorTitle)
-                              : (brandTitle.isNotEmpty
-                                    ? brandTitle
-                                    : (loc.isArabic
-                                          ? product.clinicNameAr
-                                          : (product.clinicNameEn ??
-                                                product.clinicNameAr))),
+                              : brandTitle,
+
                           style: TextStyle(
                             color: isDark
                                 ? AppColors.silverPrimary
@@ -200,16 +187,25 @@ class ProductDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (hasClinicInfo)
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: AppColors.accentChampagne,
-                    ),
                 ],
               ),
             ),
+          if (hasClinicInfo)
+            TextButton(
+              onPressed: () => _handleOpenClinic(context),
+              child: Text(
+                loc.isArabic ? 'العيادة المعلنة' : 'Advertising clinic',
+              ),
+            ),
           const SizedBox(height: 24),
+          SilverButton(
+            label: loc.tr('product_inquiry_btn'),
+            icon: Icons.chat_bubble_outline,
+            onPressed: isEntityUuid(product.id)
+                ? () =>
+                      ProductInquiryBottomSheet.show(context, product: product)
+                : null,
+          ),
         ],
       ),
     );

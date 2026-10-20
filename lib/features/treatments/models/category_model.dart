@@ -22,7 +22,9 @@ class CategoryModel {
       nameAr: json['name_ar']?.toString() ?? '',
       slug: json['slug']?.toString() ?? '',
       icon: json['icon']?.toString(),
-      displayOrder: json['display_order'] is int ? json['display_order'] as int : 0,
+      displayOrder: json['display_order'] is int
+          ? json['display_order'] as int
+          : 0,
     );
   }
 
@@ -40,7 +42,9 @@ class CategoryModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CategoryModel && runtimeType == other.runtimeType && id == other.id;
+      other is CategoryModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 
   @override
   int get hashCode => id.hashCode;

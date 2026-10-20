@@ -34,10 +34,10 @@ class ClinicBadgeCountsModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'new_requests': newRequests,
-        'unread_requests': unreadRequests,
-        'contacted_requests': contactedRequests,
-        'closed_requests': closedRequests,
-        'total_requests': totalRequests,
-      };
+    'new_requests': newRequests,
+    'unread_requests': unreadRequests,
+    'contacted_requests': contactedRequests,
+    'closed_requests': closedRequests,
+    'total_requests': totalRequests,
+  };
 }

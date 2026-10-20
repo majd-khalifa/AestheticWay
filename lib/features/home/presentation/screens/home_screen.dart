@@ -1,3 +1,5 @@
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/utils/entity_id.dart';
 import 'dart:async';
 import 'package:aesthetic_way/core/data/single_flight.dart';
 import 'package:flutter/material.dart';
@@ -35,15 +37,23 @@ import '../widgets/active_offers_section.dart';
 /// Powered by live API: GET /api/v1/home/feed/
 class HomeScreen extends StatefulWidget {
   final ValueChanged<String?>? onNavigateToClinics;
+  final ValueChanged<int>? onNavigateToTab;
+  final HomeRepository? repository;
 
-  const HomeScreen({super.key, this.onNavigateToClinics});
+  const HomeScreen({
+    super.key,
+    this.onNavigateToClinics,
+    this.onNavigateToTab,
+    this.repository,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final HomeRepository _homeRepository = HomeRepository();
+  late final HomeRepository _homeRepository =
+      widget.repository ?? HomeRepository();
   final ClinicsRepository _clinicsRepository = ClinicsRepository();
 
   String _selectedCity = 'الكل';
@@ -95,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _feed = null;
     });
 
     try {
@@ -146,52 +157,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleOfferTap(OfferModel offer) async {
-    final existingClinic = _feed?.nearbyClinics
-        .where((c) => c.id == offer.clinicId)
-        .firstOrNull;
-    if (existingClinic != null) {
-      _navigateToClinicProfile(existingClinic);
-      return;
-    }
-
+    final loc = LocaleService();
+    if (!isEntityUuid(offer.clinicId) || !isEntityUuid(offer.id)) return;
     try {
       final clinic = await _clinicsRepository.getClinicDetail(offer.clinicId);
-      if (mounted) {
-        _navigateToClinicProfile(clinic);
-      }
-    } catch (_) {
-      // Create minimal fallback clinic representation if detail fetch fails
-      final fallbackClinic = ClinicModel(
-        id: offer.clinicId,
-        nameAr: offer.clinicNameAr,
-        nameEn: offer.clinicNameEn ?? offer.clinicNameAr,
-        descriptionAr: offer.termsAr,
-        descriptionEn: offer.termsEn ?? '',
-        coverImageUrl: offer.imageUrl,
-        galleryImages: offer.imageUrl.isNotEmpty ? [offer.imageUrl] : [],
-        logoUrl: offer.imageUrl,
-        rating: 4.8,
-        reviewCount: 0,
-        subscriptionTier: SubscriptionTier.basic,
-        licenseAuthority: 'DHA',
-        licenseNumber: '',
-        city: _selectedCity,
-        areaAr: '',
-        areaEn: '',
-        addressAr: '',
-        addressEn: '',
-        distanceKm: 0.0,
-        mainPhone: '',
-        receptionPhone: '',
-        whatsapp: '',
-        workingHoursAr: '',
-        workingHoursEn: '',
-        branches: const [],
-        practitionerIds: const [],
-        treatmentIds: const [],
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        LuxuryPageRoute(
+          page: AppointmentRequestScreen(
+            clinic: clinic,
+            selectedOfferId: offer.id,
+            selectedOfferTitle: loc.isArabic ? offer.titleAr : offer.titleEn,
+          ),
+        ),
       );
+    } catch (_) {
       if (mounted) {
-        _navigateToClinicProfile(fallbackClinic);
+        showAppSnackBar(
+          context,
+          loc.isArabic
+              ? 'تعذر تحميل العيادة. حاول فتح العرض مجدداً.'
+              : 'Unable to load the clinic. Please try the offer again.',
+          type: AppSnackBarType.error,
+        );
       }
     }
   }
@@ -199,6 +188,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleCategoryTap(CategoryItem category) {
     switch (category.id) {
       case 'offers':
+        if (widget.onNavigateToTab != null) {
+          widget.onNavigateToTab!(3);
+          return;
+        }
         Navigator.push(context, LuxuryPageRoute(page: const OffersScreen()));
         break;
       case 'treatments':
@@ -232,6 +225,10 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         break;
       case 'products':
+        if (widget.onNavigateToTab != null) {
+          widget.onNavigateToTab!(2);
+          return;
+        }
         Navigator.push(context, LuxuryPageRoute(page: const ProductsScreen()));
         break;
       case 'articles':
@@ -333,48 +330,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final feed = _feed!;
     final allClinics = feed.nearbyClinics;
 
-    // Carousel: Featured/VIP clinics first
-    List<ClinicModel> topAds = allClinics
-        .where((c) => c.isEligibleForTopCarousel)
+    final sponsoredAds = feed.featuredAds
+        .where((ad) => ad.isSponsored && ad.clinic != null)
         .toList();
-    if (topAds.isEmpty && allClinics.isNotEmpty) {
-      topAds = allClinics.take(3).toList();
-    }
-
-    // Filter by search query if user typed something
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      topAds = topAds.where((c) {
-        return c.nameAr.toLowerCase().contains(q) ||
-            c.nameEn.toLowerCase().contains(q) ||
-            c.areaAr.toLowerCase().contains(q) ||
-            c.areaEn.toLowerCase().contains(q);
-      }).toList();
-    }
-
-    // Filter nearby list
-    List<ClinicModel> nearbyList = allClinics;
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      nearbyList = nearbyList.where((c) {
-        return c.nameAr.toLowerCase().contains(q) ||
-            c.nameEn.toLowerCase().contains(q) ||
-            c.areaAr.toLowerCase().contains(q) ||
-            c.areaEn.toLowerCase().contains(q);
-      }).toList();
-    }
-
-    // Filter offers
-    List<OfferModel> offersList = feed.activeOffers;
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      offersList = offersList.where((o) {
-        return o.titleAr.toLowerCase().contains(q) ||
-            o.titleEn.toLowerCase().contains(q) ||
-            o.clinicNameAr.toLowerCase().contains(q) ||
-            (o.clinicNameEn?.toLowerCase().contains(q) ?? false);
-      }).toList();
-    }
+    final topAds = sponsoredAds.map((ad) => ad.clinic!).toList();
+    final nearbyList = allClinics;
+    final offersList = feed.activeOffers;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -397,6 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: FeaturedAdsCarousel(
               ads: topAds,
+              placements: sponsoredAds,
               onClinicTap: _navigateToClinicProfile,
               onRequestAppointmentTap: _handleAppointmentLeadRequest,
               onContactTap: _handleContact,
@@ -464,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Expanded(
             child: Container(
-              height: 44,
+              height: 52,
               decoration: BoxDecoration(
                 color: AppColors.surface(context),
                 borderRadius: BorderRadius.circular(14),
@@ -475,13 +437,25 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: TextField(
                 controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) => Navigator.push(
+                  context,
+                  LuxuryPageRoute(
+                    page: ClinicsListScreen(
+                      initialCity: _selectedCity,
+                      initialSearch: value,
+                    ),
+                  ),
+                ),
                 style: TextStyle(
                   color: AppColors.text(context),
                   fontSize: 13.5,
                 ),
                 onChanged: _searchChanged,
                 decoration: InputDecoration(
-                  hintText: loc.tr('search_hint'),
+                  hintText: loc.isArabic
+                      ? 'ابحث في دليل العيادات'
+                      : 'Search the clinic directory',
                   hintStyle: AppTypography.bodyMedium.copyWith(
                     color: AppColors.text(context),
                     fontSize: 12,
@@ -520,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: _openFilterSheet,
             borderRadius: BorderRadius.circular(14),
             child: Container(
-              height: 44,
+              height: 52,
               width: 44,
               decoration: BoxDecoration(
                 color: AppColors.surface(context),

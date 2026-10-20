@@ -1,3 +1,4 @@
+import '../../../core/utils/source_text.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 
 class TreatmentModel {
@@ -207,13 +208,19 @@ class TreatmentModel {
 
     return TreatmentModel(
       id: json['id']?.toString() ?? '',
-      nameAr: json['name_ar'] ?? json['name_en'] ?? '',
-      nameEn: json['name_en'] ?? json['name_ar'] ?? '',
+      nameAr: firstSourceText([json['name_ar'], json['name_en']]),
+      nameEn: firstSourceText([json['name_en'], json['name_ar']]),
       categoryAr: catAr.isNotEmpty ? catAr : 'إجراء تجميلي',
       categoryEn: catEn.isNotEmpty ? catEn : 'Aesthetic Procedure',
       categoryId: catId,
-      descriptionAr: json['description_ar']?.toString() ?? '',
-      descriptionEn: json['description_en']?.toString(),
+      descriptionAr: firstSourceText([
+        json['description_ar'],
+        json['description_en'],
+      ]),
+      descriptionEn: firstSourceText([
+        json['description_en'],
+        json['description_ar'],
+      ]),
       durationMinutes: parsedDurationMins,
       durationText: resolvedDurationAr,
       durationTextEn: resolvedDurationEn,
@@ -231,7 +238,7 @@ class TreatmentModel {
           .trim(),
       clinicsCount: json['clinics_count'] is int
           ? json['clinics_count'] as int
-          : 1,
+          : (parsedClinicId?.isNotEmpty == true ? 1 : 0),
       imageUrl: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
       clinicId: parsedClinicId,
       clinicNameAr: parsedClinicNameAr,

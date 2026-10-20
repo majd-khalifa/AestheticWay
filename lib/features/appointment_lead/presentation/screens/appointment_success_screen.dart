@@ -15,7 +15,7 @@ import 'package:aesthetic_way/features/appointment_lead/presentation/screens/my_
 /// Appointment Request Success Screen (Strict Frozen Copy & Dual-Theme Luxury Visual Finish)
 class AppointmentSuccessScreen extends StatelessWidget {
   final AppointmentRequestModel request;
-  final ClinicModel clinic;
+  final ClinicModel? clinic;
 
   const AppointmentSuccessScreen({
     super.key,
@@ -27,9 +27,15 @@ class AppointmentSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
-    final clinicName = loc.isArabic ? clinic.nameAr : clinic.nameEn;
-    final branchName = loc.isArabic ? request.branchNameAr : (request.branchNameEn ?? request.branchNameAr);
-    final serviceName = loc.isArabic ? request.serviceNameAr : (request.serviceNameEn ?? request.serviceNameAr);
+    final clinicName = loc.isArabic
+        ? (clinic?.nameAr ?? request.clinicNameAr)
+        : (clinic?.nameEn ?? request.clinicNameEn ?? '');
+    final branchName = loc.isArabic
+        ? request.branchNameAr
+        : (request.branchNameEn ?? request.branchNameAr);
+    final serviceName = loc.isArabic
+        ? request.serviceNameAr
+        : (request.serviceNameEn ?? request.serviceNameAr);
     final practitionerName = loc.isArabic
         ? request.practitionerNameAr
         : (request.practitionerNameEn ?? request.practitionerNameAr);
@@ -48,7 +54,10 @@ class AppointmentSuccessScreen extends StatelessWidget {
             backgroundColor: AppColors.bg(context),
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -61,11 +70,15 @@ class AppointmentSuccessScreen extends StatelessWidget {
                         height: 72,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isDark ? AppColors.primaryButtonFill : AppColors.primaryButtonFillLight,
+                          color: isDark
+                              ? AppColors.primaryButtonFill
+                              : AppColors.primaryButtonFillLight,
                           boxShadow: [
                             BoxShadow(
                               color: isDark
-                                  ? AppColors.silverPrimary.withValues(alpha: 0.25)
+                                  ? AppColors.silverPrimary.withValues(
+                                      alpha: 0.25,
+                                    )
                                   : Colors.black.withValues(alpha: 0.12),
                               blurRadius: 20,
                               spreadRadius: 2,
@@ -76,7 +89,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
                           child: Icon(
                             Icons.check_rounded,
                             size: 42,
-                            color: isDark ? AppColors.backgroundDeep : Colors.white,
+                            color: isDark
+                                ? AppColors.backgroundDeep
+                                : Colors.white,
                           ),
                         ),
                       ),
@@ -84,9 +99,7 @@ class AppointmentSuccessScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Official Brand Logo (Prominent Auth/Splash Standard Sizing)
-                    const Center(
-                      child: AppBrandLogo.auth(),
-                    ),
+                    const Center(child: AppBrandLogo.auth()),
                     const SizedBox(height: 16),
 
                     // Success Heading
@@ -94,7 +107,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
                       child: Text(
                         loc.tr('lead_success_title'),
                         style: AppTypography.heroTitle.copyWith(
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                           fontSize: 21,
                           fontWeight: FontWeight.w800,
                         ),
@@ -104,12 +119,17 @@ class AppointmentSuccessScreen extends StatelessWidget {
 
                     // MANDATORY STRICT BODY WORDING (Frozen Rule)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surface(context),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.35 : 0.6),
+                          color: AppColors.accentChampagne.withValues(
+                            alpha: isDark ? 0.35 : 0.6,
+                          ),
                           width: 0.8,
                         ),
                       ),
@@ -118,7 +138,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
                           Text(
                             'تم إرسال طلبك وستتواصل العيادة معك',
                             style: AppTypography.cardTitle.copyWith(
-                              color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverPrimary
+                                  : AppColors.lightTextPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 14.5,
                             ),
@@ -129,7 +151,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
                             Text(
                               'Your request has been sent and the clinic will contact you',
                               style: AppTypography.cardTitle.copyWith(
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13.5,
                               ),
@@ -142,7 +166,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
                                 ? 'تم إرسال طلبك بنجاح إلى $clinicName. سيقوم فريق الاستقبال في العيادة بالتواصل معك قريباً عبر الهاتف أو الواتساب لمتابعة التفاصيل.'
                                 : 'Your inquiry lead has been sent to $clinicName. The clinic reception will contact you shortly via phone or WhatsApp to assist you.',
                             style: AppTypography.bodyMedium.copyWith(
-                              color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                              color: isDark
+                                  ? AppColors.textSecondary
+                                  : AppColors.lightTextSecondary,
                               height: 1.5,
                               fontSize: 12.5,
                             ),
@@ -158,24 +184,35 @@ class AppointmentSuccessScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 loc.tr('lead_summary_title'),
                                 style: AppTypography.cardTitle.copyWith(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                  color: isDark
+                                      ? AppColors.silverPrimary
+                                      : AppColors.lightTextPrimary,
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2.5,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.accentChampagne.withValues(alpha: 0.15),
+                                  color: AppColors.accentChampagne.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: AppColors.accentChampagne.withValues(alpha: 0.6),
+                                    color: AppColors.accentChampagne.withValues(
+                                      alpha: 0.6,
+                                    ),
                                     width: 0.7,
                                   ),
                                 ),
@@ -193,24 +230,45 @@ class AppointmentSuccessScreen extends StatelessWidget {
                           const SizedBox(height: 10),
                           const Divider(),
                           const SizedBox(height: 8),
-                          _SummaryRow(label: loc.tr('clinic_label'), value: clinicName),
-                          if (!request.isProductInquiry && branchName.trim().isNotEmpty)
-                            _SummaryRow(label: loc.tr('branch_label'), value: branchName),
+                          if (clinicName.trim().isNotEmpty)
+                            _SummaryRow(
+                              label: loc.tr('clinic_label'),
+                              value: clinicName,
+                            ),
+                          if (!request.isProductInquiry &&
+                              branchName.trim().isNotEmpty)
+                            _SummaryRow(
+                              label: loc.tr('branch_label'),
+                              value: branchName,
+                            ),
                           _SummaryRow(
                             label: request.isProductInquiry
                                 ? (loc.isArabic ? 'المنتج:' : 'Product:')
                                 : loc.tr('service_label'),
                             value: serviceName,
                           ),
-                          if (!request.isProductInquiry && practitionerName != null)
-                            _SummaryRow(label: loc.tr('practitioner_label'), value: practitionerName),
+                          if (!request.isProductInquiry &&
+                              practitionerName != null)
+                            _SummaryRow(
+                              label: loc.tr('practitioner_label'),
+                              value: practitionerName,
+                            ),
                           _SummaryRow(
                             label: loc.tr('submitted_at'),
-                            value: DateFormat('yyyy/MM/dd').format(request.createdAt),
+                            value: DateFormat(
+                              'yyyy/MM/dd',
+                            ).format(request.createdAt),
                           ),
-                          _SummaryRow(label: loc.tr('patient_label'), value: request.patientFullName),
-                          _SummaryRow(label: loc.tr('phone_label'), value: request.patientPhone),
-                          if (request.notes != null && request.notes!.trim().isNotEmpty)
+                          _SummaryRow(
+                            label: loc.tr('patient_label'),
+                            value: request.patientFullName,
+                          ),
+                          _SummaryRow(
+                            label: loc.tr('phone_label'),
+                            value: request.patientPhone,
+                          ),
+                          if (request.notes != null &&
+                              request.notes!.trim().isNotEmpty)
                             _SummaryRow(
                               label: loc.isArabic ? 'الملاحظات:' : 'Notes:',
                               value: request.notes!.trim(),
@@ -223,7 +281,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
 
                     // Primary CTA: View My Requests
                     SilverButton(
-                      label: loc.isArabic ? 'متابعة طلباتي' : 'View My Requests',
+                      label: loc.isArabic
+                          ? 'متابعة طلباتي'
+                          : 'View My Requests',
                       icon: Icons.assignment_outlined,
                       isFullWidth: true,
                       height: 48,
@@ -240,32 +300,45 @@ class AppointmentSuccessScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () {
-                              MapsLauncher.openMapLocation(
-                                latitude: clinic.latitude,
-                                longitude: clinic.longitude,
-                                placeId: clinic.googlePlaceId,
-                                placeName: loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                              );
-                            },
+                            onPressed:
+                                clinic?.hasMapLocation != true ||
+                                    request.isProductInquiry
+                                ? null
+                                : () {
+                                    MapsLauncher.openVerifiedLocation(
+                                      latitude: clinic!.latitude,
+                                      longitude: clinic!.longitude,
+                                      googleMapsUrl: clinic!.mapsUri
+                                          ?.toString(),
+                                    );
+                                  },
                             icon: Icon(
                               Icons.location_on_outlined,
                               size: 15,
-                              color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverSecondary
+                                  : AppColors.lightTextPrimary,
                             ),
                             label: Text(
                               loc.tr('open_maps_btn'),
                               style: AppTypography.button.copyWith(
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontSize: 12,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.border(context), width: 0.8),
+                              side: BorderSide(
+                                color: AppColors.border(context),
+                                width: 0.8,
+                              ),
                               backgroundColor: AppColors.surface(context),
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
@@ -273,26 +346,37 @@ class AppointmentSuccessScreen extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () {
-                              Navigator.of(context).popUntil((route) => route.isFirst);
+                              Navigator.of(
+                                context,
+                              ).popUntil((route) => route.isFirst);
                             },
                             icon: Icon(
                               Icons.home_outlined,
                               size: 15,
-                              color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.silverSecondary
+                                  : AppColors.lightTextPrimary,
                             ),
                             label: Text(
                               loc.tr('back_home'),
                               style: AppTypography.button.copyWith(
-                                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                                 fontSize: 12,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.border(context), width: 0.8),
+                              side: BorderSide(
+                                color: AppColors.border(context),
+                                width: 0.8,
+                              ),
                               backgroundColor: AppColors.surface(context),
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
@@ -327,13 +411,17 @@ class _SummaryRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+            style: AppTypography.caption.copyWith(
+              color: AppColors.mutedText(context),
+            ),
           ),
           Flexible(
             child: Text(
               value,
               style: AppTypography.caption.copyWith(
-                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.textPrimary
+                    : AppColors.lightTextPrimary,
                 fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,

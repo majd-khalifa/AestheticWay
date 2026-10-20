@@ -4,12 +4,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 
 /// SnackBar severity types
-enum AppSnackBarType {
-  info,
-  success,
-  error,
-  warning,
-}
+enum AppSnackBarType { info, success, error, warning }
 
 /// Unified Luxury App SnackBar Helper for AESTHETIC WAY
 /// Uses rootOverlay to guarantee banners render on top of modal bottom sheets & dialogs,
@@ -33,7 +28,8 @@ class AppSnackBar {
   }) {
     if (message.trim().isEmpty) return;
 
-    final overlay = Overlay.maybeOf(context, rootOverlay: true) ?? Overlay.maybeOf(context);
+    final overlay =
+        Overlay.maybeOf(context, rootOverlay: true) ?? Overlay.maybeOf(context);
     if (overlay != null) {
       dismissCurrent();
 
@@ -144,34 +140,56 @@ class AppSnackBar {
         return _SnackStyle(
           bg: isDark ? const Color(0xFF2B1D06) : const Color(0xFFFEF3C7),
           border: AppColors.accentChampagne,
-          iconColor: isDark ? AppColors.accentChampagne : const Color(0xFFB45309),
+          iconColor: isDark
+              ? AppColors.accentChampagne
+              : const Color(0xFFB45309),
           icon: Icons.warning_amber_rounded,
           textColor: isDark ? const Color(0xFFFEF3C7) : const Color(0xFF78350F),
         );
       case AppSnackBarType.info:
         return _SnackStyle(
           bg: isDark ? const Color(0xFF131B2E) : const Color(0xFFF1F5F9),
-          border: isDark ? AppColors.silverSecondary.withValues(alpha: 0.5) : const Color(0xFF94A3B8),
-          iconColor: isDark ? AppColors.accentChampagne : const Color(0xFF0F172A),
+          border: isDark
+              ? AppColors.silverSecondary.withValues(alpha: 0.5)
+              : const Color(0xFF94A3B8),
+          iconColor: isDark
+              ? AppColors.accentChampagne
+              : const Color(0xFF0F172A),
           icon: Icons.info_outline_rounded,
           textColor: isDark ? AppColors.silverPrimary : const Color(0xFF0F172A),
         );
     }
   }
 
-  static void success(BuildContext context, String message, {Duration duration = const Duration(seconds: 3)}) {
+  static void success(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
     show(context, message, type: AppSnackBarType.success, duration: duration);
   }
 
-  static void error(BuildContext context, String message, {Duration duration = const Duration(seconds: 3)}) {
+  static void error(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
     show(context, message, type: AppSnackBarType.error, duration: duration);
   }
 
-  static void warning(BuildContext context, String message, {Duration duration = const Duration(seconds: 3)}) {
+  static void warning(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
     show(context, message, type: AppSnackBarType.warning, duration: duration);
   }
 
-  static void info(BuildContext context, String message, {Duration duration = const Duration(seconds: 3)}) {
+  static void info(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
     show(context, message, type: AppSnackBarType.info, duration: duration);
   }
 }
@@ -228,17 +246,11 @@ class _LuxuryToastOverlayState extends State<_LuxuryToastOverlay>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, -0.4),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOutCubic,
-    ));
-    _fadeAnim = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOut,
-    );
+    _slideAnim = Tween<Offset>(begin: const Offset(0, -0.4), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
+    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
 
     _animController.forward();
 
@@ -285,7 +297,10 @@ class _LuxuryToastOverlayState extends State<_LuxuryToastOverlay>
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: style.bg,
                       borderRadius: BorderRadius.circular(12),
@@ -314,7 +329,8 @@ class _LuxuryToastOverlayState extends State<_LuxuryToastOverlay>
                             ),
                           ),
                         ),
-                        if (widget.actionLabel != null && widget.onAction != null) ...[
+                        if (widget.actionLabel != null &&
+                            widget.onAction != null) ...[
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: () {

@@ -695,7 +695,7 @@ class LocaleService extends ChangeNotifier {
     'downtime_label': {'ar': 'فترة التعافي', 'en': 'Downtime'},
     'target_area_label': {'ar': 'المنطقة المستهدفة', 'en': 'Target Area'},
     'available_in_clinics': {'ar': 'متوفر في', 'en': 'Available in'},
-    'clinics_count_suffix': {'ar': 'عيادة مرخصة', 'en': 'licensed clinics'},
+    'clinics_count_suffix': {'ar': 'عيادة', 'en': 'clinics'},
     'terms_conditions': {'ar': 'الشروط والأحكام', 'en': 'Terms & Conditions'},
     'valid_until': {'ar': 'صلاحية العرض', 'en': 'Validity'},
 
@@ -705,7 +705,7 @@ class LocaleService extends ChangeNotifier {
       'ar': 'التصنيفات والخدمات',
       'en': 'Categories & Services',
     },
-    'nearby_title': {'ar': 'العيادات القريبة منك', 'en': 'Clinics near you'},
+    'nearby_title': {'ar': 'اكتشف العيادات', 'en': 'Discover clinics'},
     'active_offers': {
       'ar': 'الباقات والعروض التجميلية',
       'en': 'Aesthetic Packages & Offers',
@@ -847,7 +847,7 @@ class LocaleService extends ChangeNotifier {
     },
 
     // Articles Module
-    'article_author_by': {'ar': 'بقلم الطبيب', 'en': 'Written by'},
+    'article_author_by': {'ar': 'بقلم', 'en': 'Written by'},
     'article_read_time': {'ar': 'مدة القراءة: 3 دقائق', 'en': '3 min read'},
     'article_consult_author_btn': {
       'ar': 'طلب استشارة مع الكاتب / العيادة',
@@ -966,15 +966,12 @@ class LocaleService extends ChangeNotifier {
       'en': 'UAE Clinic Branches',
     },
     'request_with_doctor': {
-      'ar': 'طلب موعد مع الممارس',
-      'en': 'Request Lead with Practitioner',
+      'ar': 'طلب استشارة مع الممارس',
+      'en': 'Request consultation',
     },
-    'offer_claim': {'ar': 'طلب بالعرض', 'en': 'Claim Offer'},
+    'offer_claim': {'ar': 'طلب بالعرض', 'en': 'Inquire about offer'},
     'verified_visit': {'ar': 'زيارة موثقة', 'en': 'Verified Visit'},
-    'reviews_summary': {
-      'ar': 'تقييم Google موثوق مبني على زيارات المرضى',
-      'en': 'Verified Google rating based on patient visits',
-    },
+    'reviews_summary': {'ar': 'تقييمات من Google', 'en': 'Ratings from Google'},
     'google_rating': {'ar': 'تقييم Google', 'en': 'Google Rating'},
 
     // Filter Sheet
@@ -1202,126 +1199,13 @@ class LocaleService extends ChangeNotifier {
     },
     'referral_sub': {
       'ar':
-          'ادعُ أصدقاءك لتحميل التطبيق واجمع النقاط بدون انتهاء صلاحية لتصرفها متى تشاء للحصول على كود خصم 15% بالعيادات.',
+          'شارك رابط دعوتك الشخصي وتابع الدعوات الناجحة والنقاط ومراحل التقدم.',
       'en':
-          'Invite friends to download the app and earn non-expiring points to spend whenever you wish for a 15% clinic discount code.',
-    },
-    'your_referral_code': {
-      'ar': 'كود الدعوة الخاص بك',
-      'en': 'Your Referral Code',
-    },
-    'copy_code': {'ar': 'نسخ الكود', 'en': 'Copy Code'},
-    'code_copied': {
-      'ar': 'تم نسخ كود الدعوة بنجاح',
-      'en': 'Referral code copied successfully',
-    },
-    'share_invite': {'ar': 'مشاركة رابط الدعوة', 'en': 'Share Invite'},
-    'invites_count': {'ar': 'الدعوات الناجحة', 'en': 'Successful Invites'},
-    'current_points': {'ar': 'النقاط الحالية', 'en': 'Current Points'},
-    'next_milestone': {'ar': 'العتبة التالية', 'en': 'Next Milestone'},
-    'all_milestones_completed': {
-      'ar': 'أكملت جميع العتبات',
-      'en': 'All Milestones Completed',
-    },
-    'progress_to_next_milestone': {
-      'ar': 'التقدم نحو العتبة التالية',
-      'en': 'Progress to Next Milestone',
-    },
-    'pts_suffix': {'ar': 'نقطة', 'en': 'pts'},
-    'invites_suffix': {'ar': 'دعوة', 'en': 'invites'},
-    'collect_discount_btn': {
-      'ar': 'استبدال 500 نقطة بكود خصم 15%',
-      'en': 'Redeem 500 pts for 15% Code',
-    },
-    'collect_demo_btn': {
-      'ar': 'توليد كود تجريبي (Demo)',
-      'en': 'Generate Demo Code',
+          'Share your personal invitation link and track successful invitations, points and milestones.',
     },
     'referral_milestones_title': {
       'ar': 'مستويات النقاط والمكافآت',
       'en': 'Points & Milestones',
-    },
-    'referral_rule_note': {
-      'ar':
-          'الشروط: الهدف هو دعوة الأصدقاء لتحميل تطبيق Aesthetic Way. نقاطك لا تنتهي صلاحيتها وتصرفها متى شئت بدون ضغط زمني. يُطبق كود الخصم (15%) في العيادة مباشرة على السعر الأصلي للإجراءات خارج باقات العروض. المنصة لا تدفع ولا تحصّل مبالغ الخصم.',
-      'en':
-          'Terms: The goal is inviting friends to download the Aesthetic Way app. Your points do not expire and can be spent whenever you wish without time pressure. The 15% discount is applied directly at the clinic on original treatment prices outside offers.',
-    },
-    'discount_codes_title': {
-      'ar': 'أكواد الخصم المُجمّعة (15%)',
-      'en': 'Issued 15% Discount Codes',
-    },
-    'no_discount_codes': {
-      'ar':
-          'لا توجد أكواد خصم نشطة حالياً. اجمع 500 نقطة بدون انتهاء صلاحية لتوليد كود خصم 15%.',
-      'en':
-          'No active discount codes. Earn 500 non-expiring points to collect a 15% code.',
-    },
-    'code_status_available': {
-      'ar': 'صالح للاستخدام في العيادة',
-      'en': 'Available for Clinic Use',
-    },
-    'code_status_used': {
-      'ar': 'تم استخدامه في العيادة',
-      'en': 'Redeemed in Clinic',
-    },
-    'code_status_expired': {'ar': 'منتهي الصلاحية', 'en': 'Expired'},
-    'code_generated_success': {
-      'ar': 'تم توليد كود الخصم بنجاح! احتفظ بالكود لإبرازه للعيادة.',
-      'en': 'Discount code generated successfully! Present it at the clinic.',
-    },
-
-    // Clinic Portal Verification
-    'clinic_verify_code_title': {
-      'ar': 'التحقق من كود الخصم (15%)',
-      'en': 'Verify 15% Discount Code',
-    },
-    'clinic_verify_code_sub': {
-      'ar': 'فحص صلاحية أكواد الخصم الترويجية الخاصة ببرنامج المكافآت',
-      'en': 'Validate patient 15% referral discount codes',
-    },
-    'clinic_enter_code_hint': {
-      'ar': 'أدخل كود الخصم (مثال: AW-15-7892)',
-      'en': 'Enter code (e.g. AW-15-7892)',
-    },
-    'clinic_verify_btn': {'ar': 'فحص صلاحية الكود', 'en': 'Validate Code'},
-    'clinic_code_valid': {
-      'ar': 'الكود صالح ومفعل — خصم 15% على الإجراءات خارج العروض',
-      'en': 'Code Valid — 15% off original non-offer treatment prices',
-    },
-    'clinic_code_used': {
-      'ar': 'تم استخدام هذا الكود مسبقاً',
-      'en': 'Code already redeemed',
-    },
-    'clinic_code_invalid': {
-      'ar': 'رمز الكود غير صحيح أو منتهي',
-      'en': 'Invalid or expired code',
-    },
-    'clinic_mark_used_btn': {
-      'ar': 'تسجيل استخدام الكود (تطبيق الخصم)',
-      'en': 'Mark Code as Redeemed',
-    },
-    'clinic_code_redeemed_success': {
-      'ar': 'تم تسجيل استخدام الكود وتطبيق الخصم بنجاح',
-      'en': 'Code marked as redeemed successfully',
-    },
-    'referral_code_optional': {
-      'ar': 'كود الدعوة (اختياري)',
-      'en': 'Referral Code (Optional)',
-    },
-    'referral_code_hint': {
-      'ar': 'أدخل كود صديقك للحصول على نقاط ترحيبية',
-      'en': 'Enter referral code for welcome points',
-    },
-
-    // Admin Portal Referral Overview
-    'admin_total_referrals': {
-      'ar': 'إجمالي الدعوات المسجلة',
-      'en': 'Total Referrals',
-    },
-    'admin_issued_coupons': {
-      'ar': 'أكواد الخصم المُصدرة (15%)',
-      'en': 'Issued 15% Codes',
     },
 
     // Price Display Labels

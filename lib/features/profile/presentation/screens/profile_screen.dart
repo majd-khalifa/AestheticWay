@@ -125,7 +125,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       showAppSnackBar(
         context,
-        loc.isArabic ? 'تم تحديث الملف الشخصي بنجاح' : 'Profile updated successfully',
+        loc.isArabic
+            ? 'تم تحديث الملف الشخصي بنجاح'
+            : 'Profile updated successfully',
         type: AppSnackBarType.success,
       );
     } on ApiException catch (e) {
@@ -134,23 +136,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isSaving = false;
         _profileEditErrorMessage = e.message;
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
-      final msg = loc.isArabic ? 'فشل حفظ التعديلات، يرجى المحاولة مرة أخرى' : 'Failed to save changes, please try again';
+      final msg = loc.isArabic
+          ? 'فشل حفظ التعديلات، يرجى المحاولة مرة أخرى'
+          : 'Failed to save changes, please try again';
       setState(() {
         _isSaving = false;
         _profileEditErrorMessage = msg;
       });
-      showAppSnackBar(
-        context,
-        msg,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, msg, type: AppSnackBarType.error);
     }
   }
 
@@ -159,7 +155,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+      backgroundColor: isDark
+          ? AppColors.cardSurface
+          : AppColors.lightCardSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -176,7 +174,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.mutedText(context).withValues(alpha: 0.4),
+                      color: AppColors.mutedText(
+                        context,
+                      ).withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -184,14 +184,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Icon(Icons.security_outlined, color: AppColors.accentChampagne, size: 22),
+                    const Icon(
+                      Icons.security_outlined,
+                      color: AppColors.accentChampagne,
+                      size: 22,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         loc.tr('privacy_sheet_title'),
                         style: AppTypography.cardTitle.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                     ),
@@ -201,7 +207,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   loc.tr('privacy_sheet_text'),
                   style: AppTypography.bodyMedium.copyWith(
-                    color: isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary,
+                    color: isDark
+                        ? AppColors.silverSecondary
+                        : AppColors.lightTextSecondary,
                     height: 1.6,
                     fontSize: 13,
                   ),
@@ -228,7 +236,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
+      backgroundColor: isDark
+          ? AppColors.cardSurface
+          : AppColors.lightCardSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -246,7 +256,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.mutedText(context).withValues(alpha: 0.4),
+                      color: AppColors.mutedText(
+                        context,
+                      ).withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -254,14 +266,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Icon(Icons.headset_mic_outlined, color: AppColors.accentChampagne, size: 22),
+                    const Icon(
+                      Icons.headset_mic_outlined,
+                      color: AppColors.accentChampagne,
+                      size: 22,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         loc.tr('concierge_title'),
                         style: AppTypography.cardTitle.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                     ),
@@ -286,25 +304,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 14),
                 ListTile(
-                  tileColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                  tileColor: isDark
+                      ? AppColors.cardSurfaceHover
+                      : AppColors.lightCardSurfaceHover,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: AppColors.border(context), width: 0.8),
+                    side: BorderSide(
+                      color: AppColors.border(context),
+                      width: 0.8,
+                    ),
                   ),
-                  leading: const Icon(Icons.chat_bubble_outline, color: Color(0xFF34D399)),
+                  leading: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: Color(0xFF34D399),
+                  ),
                   title: Text(
                     loc.tr('whatsapp_concierge'),
                     style: TextStyle(
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: Text(
                     '${info.phoneDisplay} (WhatsApp)',
-                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
+                    style: TextStyle(
+                      color: AppColors.mutedText(context),
+                      fontSize: 11.5,
+                    ),
                   ),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 13,
+                    color: AppColors.mutedText(context),
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     ContactLauncher.openWhatsApp(
@@ -317,25 +352,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 ListTile(
-                  tileColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                  tileColor: isDark
+                      ? AppColors.cardSurfaceHover
+                      : AppColors.lightCardSurfaceHover,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: AppColors.border(context), width: 0.8),
+                    side: BorderSide(
+                      color: AppColors.border(context),
+                      width: 0.8,
+                    ),
                   ),
-                  leading: const Icon(Icons.phone_outlined, color: AppColors.accentChampagne),
+                  leading: const Icon(
+                    Icons.phone_outlined,
+                    color: AppColors.accentChampagne,
+                  ),
                   title: Text(
                     loc.tr('call_concierge'),
                     style: TextStyle(
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: Text(
                     info.phoneDisplay,
-                    style: TextStyle(color: AppColors.mutedText(context), fontSize: 11.5),
+                    style: TextStyle(
+                      color: AppColors.mutedText(context),
+                      fontSize: 11.5,
+                    ),
                   ),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 13,
+                    color: AppColors.mutedText(context),
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     ContactLauncher.makePhoneCall(info.phone);
@@ -349,7 +401,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildEditProfileSection(BuildContext context, LocaleService loc, bool isDark) {
+  Widget _buildEditProfileSection(
+    BuildContext context,
+    LocaleService loc,
+    bool isDark,
+  ) {
     return LuxuryCard(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -359,30 +415,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.edit_note_rounded, color: AppColors.accentChampagne, size: 20),
+                const Icon(
+                  Icons.edit_note_rounded,
+                  color: AppColors.accentChampagne,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    loc.isArabic ? 'تعديل البيانات الشخصية' : 'Edit Personal Profile',
+                    loc.isArabic
+                        ? 'تعديل البيانات الشخصية'
+                        : 'Edit Personal Profile',
                     style: AppTypography.cardTitle.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 14.5,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                 ),
                 if (_isEditing)
                   IconButton(
-                    icon: Icon(Icons.close_rounded, size: 18, color: AppColors.mutedText(context)),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: AppColors.mutedText(context),
+                    ),
                     tooltip: loc.isArabic ? 'إغلاق' : 'Close',
                     onPressed: _isSaving
                         ? null
                         : () {
                             setState(() {
                               _isEditing = false;
-                              _nameController.text = _user?.fullName ?? AuthState().userName;
-                              _phoneController.text = _user?.phone ?? AuthState().userPhone;
-                              _emailController.text = _user?.email ?? AuthState().userEmail;
+                              _nameController.text =
+                                  _user?.fullName ?? AuthState().userName;
+                              _phoneController.text =
+                                  _user?.phone ?? AuthState().userPhone;
+                              _emailController.text =
+                                  _user?.email ?? AuthState().userEmail;
                             });
                           },
                   ),
@@ -391,7 +462,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (_profileEditErrorMessage != null) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -403,7 +477,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.redAccent,
+                      size: 20,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -420,7 +498,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
-                      icon: const Icon(Icons.close_rounded, size: 16, color: Colors.redAccent),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: Colors.redAccent,
+                      ),
                       onPressed: () {
                         setState(() => _profileEditErrorMessage = null);
                       },
@@ -435,20 +517,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
               controller: _nameController,
               enabled: !_isSaving,
               style: TextStyle(
-                color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.textPrimary
+                    : AppColors.lightTextPrimary,
                 fontSize: 13.5,
               ),
               decoration: InputDecoration(
                 labelText: loc.tr('full_name'),
-                hintText: loc.isArabic ? 'مثال: سارة المنصوري' : 'e.g. Sarah Al Mansoori',
+                hintText: loc.isArabic
+                    ? 'مثال: سارة المنصوري'
+                    : 'e.g. Sarah Al Mansoori',
                 hintStyle: TextStyle(
                   color: AppColors.text(context).withValues(alpha: 0.68),
                   fontSize: 12.5,
                   fontWeight: FontWeight.w400,
                 ),
-                prefixIcon: Icon(Icons.person_outline, size: 19, color: AppColors.mutedText(context)),
+                prefixIcon: Icon(
+                  Icons.person_outline,
+                  size: 19,
+                  color: AppColors.mutedText(context),
+                ),
                 filled: true,
-                fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                fillColor: isDark
+                    ? AppColors.cardSurfaceHover
+                    : AppColors.lightCardSurfaceHover,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: AppColors.border(context)),
@@ -456,7 +548,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return loc.isArabic ? 'الاسم الكامل مطلوب' : 'Full name is required';
+                  return loc.isArabic
+                      ? 'الاسم الكامل مطلوب'
+                      : 'Full name is required';
                 }
                 return null;
               },
@@ -488,10 +582,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontSize: 12.5,
                   fontWeight: FontWeight.w400,
                 ),
-                prefixIcon: Icon(Icons.email_outlined, size: 19, color: AppColors.mutedText(context)),
-                suffixIcon: Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.mutedText(context)),
+                prefixIcon: Icon(
+                  Icons.email_outlined,
+                  size: 19,
+                  color: AppColors.mutedText(context),
+                ),
+                suffixIcon: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16,
+                  color: AppColors.mutedText(context),
+                ),
                 filled: true,
-                fillColor: isDark ? AppColors.cardSurface : AppColors.lightBackgroundAlt,
+                fillColor: isDark
+                    ? AppColors.cardSurface
+                    : AppColors.lightBackgroundAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: AppColors.border(context)),
@@ -574,7 +678,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: Text(
               loc.tr('profile_title'),
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             automaticallyImplyLeading: false,
@@ -584,7 +690,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   tooltip: loc.isArabic ? 'تحديث البيانات' : 'Refresh Profile',
                   icon: Icon(
                     Icons.refresh_rounded,
-                    color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverSecondary
+                        : AppColors.lightTextPrimary,
                   ),
                   onPressed: _isLoading ? null : _loadProfile,
                 ),
@@ -595,332 +703,408 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onRefresh: _loadProfile,
             child: _isLoading && _user == null && !auth.isLoggedIn
                 ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.accentChampagne),
+                    child: CircularProgressIndicator(
+                      color: AppColors.accentChampagne,
+                    ),
                   )
                 : !hasAuthenticatedUser
-                    ? ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                        children: [
-                          if (_errorMessage != null) ...[
-                            LuxuryCard(
-                              padding: const EdgeInsets.all(14),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.error_outline_rounded, color: Colors.redAccent),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: AppTypography.caption.copyWith(color: Colors.redAccent),
-                                    ),
+                ? ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    children: [
+                      if (_errorMessage != null) ...[
+                        LuxuryCard(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.error_outline_rounded,
+                                color: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: AppTypography.caption.copyWith(
+                                    color: Colors.redAccent,
                                   ),
-                                  TextButton(
-                                    onPressed: _loadProfile,
-                                    child: Text(loc.isArabic ? 'إعادة المحاولة' : 'Retry'),
-                                  ),
-                                ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _loadProfile,
+                                child: Text(
+                                  loc.isArabic ? 'إعادة المحاولة' : 'Retry',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+                      LuxuryCard(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.cardSurfaceHover
+                                    : AppColors.lightCardSurfaceHover,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.border(context),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.lock_outline_rounded,
+                                size: 44,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 14),
-                          ],
-                          LuxuryCard(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: AppColors.border(context)),
-                                  ),
-                                  child: Icon(
-                                    Icons.lock_outline_rounded,
-                                    size: 44,
-                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                Text(
-                                  loc.tr('login_title'),
-                                  style: AppTypography.heroTitle.copyWith(
-                                    fontSize: 18,
-                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  loc.tr('login_prompt'),
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: AppColors.mutedText(context),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 18),
-                                SilverButton(
-                                  label: loc.tr('login_btn'),
-                                  icon: Icons.login_rounded,
-                                  isFullWidth: true,
-                                  onPressed: () {
-                                    Navigator.of(context).pushAndRemoveUntil(
-                                      LuxuryPageRoute(page: const LoginScreen()),
-                                      (route) => false,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _ThemeSwitchTile(loc: loc),
-                          const SizedBox(height: 10),
-                          _LanguageSwitchTile(loc: loc),
-                          const SizedBox(height: 10),
-                          _ProfileMenuTile(
-                            icon: Icons.security_outlined,
-                            title: loc.tr('privacy_terms'),
-                            subtitle: loc.isArabic
-                                ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
-                                : 'Aesthetic and medical discovery platform in the UAE',
-                            onTap: () => _showPrivacyTermsSheet(context, loc),
-                          ),
-                          const SizedBox(height: 10),
-                          _ProfileMenuTile(
-                            icon: Icons.headset_mic_outlined,
-                            title: loc.tr('support_help'),
-                            subtitle: loc.isArabic
-                                ? 'تواصل مع فريق خدمة العملاء والدعم'
-                                : 'Contact Aesthetic Way customer support',
-                            onTap: () => _showSupportSheet(context, loc),
-                          ),
-                        ],
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                        children: [
-                          if (_isLoading)
-                            const Padding(
-                              padding: EdgeInsets.only(bottom: 12),
-                              child: LinearProgressIndicator(
-                                color: AppColors.accentChampagne,
-                                minHeight: 2,
+                            Text(
+                              loc.tr('login_title'),
+                              style: AppTypography.heroTitle.copyWith(
+                                fontSize: 18,
+                                color: isDark
+                                    ? AppColors.silverPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
-                          if (_errorMessage != null) ...[
-                            LuxuryCard(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
+                            const SizedBox(height: 6),
+                            Text(
+                              loc.tr('login_prompt'),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.mutedText(context),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 18),
+                            SilverButton(
+                              label: loc.tr('login_btn'),
+                              icon: Icons.login_rounded,
+                              isFullWidth: true,
+                              onPressed: () {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  LuxuryPageRoute(page: const LoginScreen()),
+                                  (route) => false,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _ThemeSwitchTile(loc: loc),
+                      const SizedBox(height: 10),
+                      _LanguageSwitchTile(loc: loc),
+                      const SizedBox(height: 10),
+                      _ProfileMenuTile(
+                        icon: Icons.security_outlined,
+                        title: loc.tr('privacy_terms'),
+                        subtitle: loc.isArabic
+                            ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
+                            : 'Aesthetic and medical discovery platform in the UAE',
+                        onTap: () => _showPrivacyTermsSheet(context, loc),
+                      ),
+                      const SizedBox(height: 10),
+                      _ProfileMenuTile(
+                        icon: Icons.headset_mic_outlined,
+                        title: loc.tr('support_help'),
+                        subtitle: loc.isArabic
+                            ? 'تواصل مع فريق خدمة العملاء والدعم'
+                            : 'Contact Aesthetic Way customer support',
+                        onTap: () => _showSupportSheet(context, loc),
+                      ),
+                    ],
+                  )
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    children: [
+                      if (_isLoading)
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: LinearProgressIndicator(
+                            color: AppColors.accentChampagne,
+                            minHeight: 2,
+                          ),
+                        ),
+                      if (_errorMessage != null) ...[
+                        LuxuryCard(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.orangeAccent,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: AppTypography.caption.copyWith(
+                                    color: isDark
+                                        ? AppColors.silverSecondary
+                                        : AppColors.lightTextSecondary,
+                                  ),
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: _loadProfile,
+                                icon: const Icon(
+                                  Icons.refresh_rounded,
+                                  size: 16,
+                                  color: AppColors.accentChampagne,
+                                ),
+                                label: Text(
+                                  loc.isArabic ? 'إعادة المحاولة' : 'Retry',
+                                  style: TextStyle(
+                                    color: AppColors.goldText(context),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Logged-in User Profile Summary Card
+                      LuxuryCard(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor: isDark
+                                  ? AppColors.cardSurfaceHover
+                                  : AppColors.lightCardSurfaceHover,
+                              child: Text(
+                                displayName.isNotEmpty
+                                    ? displayName.characters.first.toUpperCase()
+                                    : 'U',
+                                style: AppTypography.heroTitle.copyWith(
+                                  fontSize: 22,
+                                  color: AppColors.goldText(context),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 20),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: AppTypography.caption.copyWith(
-                                        color: isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary,
-                                      ),
+                                  Text(
+                                    displayName,
+                                    style: AppTypography.cardTitle.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark
+                                          ? AppColors.silverPrimary
+                                          : AppColors.lightTextPrimary,
                                     ),
                                   ),
-                                  TextButton.icon(
-                                    onPressed: _loadProfile,
-                                    icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.accentChampagne),
-                                    label: Text(
-                                      loc.isArabic ? 'إعادة المحاولة' : 'Retry',
-                                      style: TextStyle(color: AppColors.goldText(context), fontSize: 12),
+                                  if (displayPhone.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Directionality(
+                                      textDirection: TextDirection.ltr,
+                                      child: Text(
+                                        displayPhone,
+                                        style: AppTypography.caption.copyWith(
+                                          color: AppColors.mutedText(context),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  if (displayEmail.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Directionality(
+                                      textDirection: TextDirection.ltr,
+                                      child: Text(
+                                        displayEmail,
+                                        style: AppTypography.caption.copyWith(
+                                          color: AppColors.mutedText(context),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.accentChampagne
+                                          .withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppColors.accentChampagne
+                                            .withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isVerified
+                                              ? Icons.verified_outlined
+                                              : Icons.info_outline,
+                                          size: 12,
+                                          color: AppColors.accentChampagne,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          child: Text(
+                                            isVerified
+                                                ? (loc.isArabic
+                                                      ? 'مستخدم موثق'
+                                                      : 'Verified Member')
+                                                : (loc.isArabic
+                                                      ? 'حساب مسجل'
+                                                      : 'Registered Account'),
+                                            style: AppTypography.badge.copyWith(
+                                              color: AppColors.goldText(
+                                                context,
+                                              ),
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 12),
-                          ],
-
-                          // Logged-in User Profile Summary Card
-                          LuxuryCard(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                  child: Text(
-                                    displayName.isNotEmpty ? displayName.characters.first.toUpperCase() : 'U',
-                                    style: AppTypography.heroTitle.copyWith(
-                                      fontSize: 22,
-                                      color: AppColors.goldText(context),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        displayName,
-                                        style: AppTypography.cardTitle.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
-                                        ),
-                                      ),
-                                      if (displayPhone.isNotEmpty) ...[
-                                        const SizedBox(height: 2),
-                                        Directionality(
-                                          textDirection: TextDirection.ltr,
-                                          child: Text(
-                                            displayPhone,
-                                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                          ),
-                                        ),
-                                      ],
-                                      if (displayEmail.isNotEmpty) ...[
-                                        const SizedBox(height: 2),
-                                        Directionality(
-                                          textDirection: TextDirection.ltr,
-                                          child: Text(
-                                            displayEmail,
-                                            style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
-                                          ),
-                                        ),
-                                      ],
-                                      const SizedBox(height: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.accentChampagne.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: AppColors.accentChampagne.withValues(alpha: 0.4)),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              isVerified ? Icons.verified_outlined : Icons.info_outline,
-                                              size: 12,
-                                              color: AppColors.accentChampagne,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              isVerified
-                                                  ? (loc.isArabic ? 'مستخدم موثق' : 'Verified Member')
-                                                  : (loc.isArabic ? 'حساب مسجل' : 'Registered Account'),
-                                              style: AppTypography.badge.copyWith(
-                                                color: AppColors.goldText(context),
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  key: const Key('toggle_edit_profile_btn'),
-                                  tooltip: loc.isArabic ? 'تعديل الملف الشخصي' : 'Edit Profile',
-                                  icon: Icon(
-                                    _isEditing ? Icons.expand_less_rounded : Icons.edit_outlined,
-                                    color: AppColors.accentChampagne,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isEditing = !_isEditing;
-                                    });
-                                  },
-                                ),
-                              ],
+                            IconButton(
+                              key: const Key('toggle_edit_profile_btn'),
+                              tooltip: loc.isArabic
+                                  ? 'تعديل الملف الشخصي'
+                                  : 'Edit Profile',
+                              icon: Icon(
+                                _isEditing
+                                    ? Icons.expand_less_rounded
+                                    : Icons.edit_outlined,
+                                color: AppColors.accentChampagne,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isEditing = !_isEditing;
+                                });
+                              },
                             ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Live Profile Edit Form (always accessible via edit button or expanded)
-                          if (_isEditing) ...[
-                            _buildEditProfileSection(context, loc, isDark),
-                            const SizedBox(height: 16),
                           ],
-
-                          // Menu Items
-                          _ProfileMenuTile(
-                            icon: Icons.assignment_outlined,
-                            title: loc.tr('my_requests_title'),
-                            subtitle: loc.isArabic
-                                ? 'متابعة حالة الطلبات والتواصل مع العيادات'
-                                : 'Track lead status and clinic responses',
-                            onTap: widget.onNavigateToRequests,
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Referral & Rewards Tile
-                          _ProfileMenuTile(
-                            icon: Icons.card_giftcard_rounded,
-                            title: loc.tr('referral_nav_title'),
-                            subtitle: loc.isArabic
-                                ? 'ادعُ أصدقاءك لتحميل التطبيق واكسب كود خصم 15%'
-                                : 'Invite friends to download the app & earn 15% off',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                LuxuryPageRoute(page: const ReferralScreen()),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Theme Switcher Tile
-                          _ThemeSwitchTile(loc: loc),
-                          const SizedBox(height: 10),
-
-                          // Language Switcher Tile
-                          _LanguageSwitchTile(loc: loc),
-                          const SizedBox(height: 10),
-
-                          _ProfileMenuTile(
-                            icon: Icons.security_outlined,
-                            title: loc.tr('privacy_terms'),
-                            subtitle: loc.isArabic
-                                ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
-                                : 'Aesthetic and medical discovery platform in the UAE',
-                            onTap: () => _showPrivacyTermsSheet(context, loc),
-                          ),
-                          const SizedBox(height: 10),
-                          _ProfileMenuTile(
-                            icon: Icons.headset_mic_outlined,
-                            title: loc.tr('support_help'),
-                            subtitle: loc.isArabic
-                                ? 'تواصل مع فريق خدمة العملاء والدعم'
-                                : 'Contact Aesthetic Way customer support',
-                            onTap: () => _showSupportSheet(context, loc),
-                          ),
-                          const SizedBox(height: 20),
-
-                          SilverButton(
-                            label: loc.tr('logout_btn'),
-                            variant: SilverButtonVariant.secondary,
-                            icon: Icons.logout_rounded,
-                            isFullWidth: true,
-                            onPressed: () async {
-                              await _authRepo.logout();
-                              if (!context.mounted) return;
-                              showAppSnackBar(
-                                context,
-                                loc.isArabic ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully',
-                                type: AppSnackBarType.info,
-                              );
-                              Navigator.of(context).pushAndRemoveUntil(
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
-                                  transitionDuration: const Duration(milliseconds: 400),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    return FadeTransition(opacity: animation, child: child);
-                                  },
-                                ),
-                                (route) => false,
-                              );
-                            },
-                          ),
-                        ],
+                        ),
                       ),
+                      const SizedBox(height: 12),
+
+                      // Live Profile Edit Form (always accessible via edit button or expanded)
+                      if (_isEditing) ...[
+                        _buildEditProfileSection(context, loc, isDark),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Menu Items
+                      _ProfileMenuTile(
+                        icon: Icons.assignment_outlined,
+                        title: loc.tr('my_requests_title'),
+                        subtitle: loc.isArabic
+                            ? 'متابعة حالة الطلبات والتواصل مع العيادات'
+                            : 'Track lead status and clinic responses',
+                        onTap: widget.onNavigateToRequests,
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Referral & Rewards Tile
+                      _ProfileMenuTile(
+                        icon: Icons.card_giftcard_rounded,
+                        title: loc.tr('referral_nav_title'),
+                        subtitle: loc.isArabic
+                            ? 'شارك رابط دعوتك وتابع النقاط ومراحل التقدم'
+                            : 'Share your invite link and track points and milestones',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            LuxuryPageRoute(page: const ReferralScreen()),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Theme Switcher Tile
+                      _ThemeSwitchTile(loc: loc),
+                      const SizedBox(height: 10),
+
+                      // Language Switcher Tile
+                      _LanguageSwitchTile(loc: loc),
+                      const SizedBox(height: 10),
+
+                      _ProfileMenuTile(
+                        icon: Icons.security_outlined,
+                        title: loc.tr('privacy_terms'),
+                        subtitle: loc.isArabic
+                            ? 'دليل واكتشاف العيادات الطبية والتجميلية في الإمارات'
+                            : 'Aesthetic and medical discovery platform in the UAE',
+                        onTap: () => _showPrivacyTermsSheet(context, loc),
+                      ),
+                      const SizedBox(height: 10),
+                      _ProfileMenuTile(
+                        icon: Icons.headset_mic_outlined,
+                        title: loc.tr('support_help'),
+                        subtitle: loc.isArabic
+                            ? 'تواصل مع فريق خدمة العملاء والدعم'
+                            : 'Contact Aesthetic Way customer support',
+                        onTap: () => _showSupportSheet(context, loc),
+                      ),
+                      const SizedBox(height: 20),
+
+                      SilverButton(
+                        label: loc.tr('logout_btn'),
+                        variant: SilverButtonVariant.secondary,
+                        icon: Icons.logout_rounded,
+                        isFullWidth: true,
+                        onPressed: () async {
+                          await _authRepo.logout();
+                          if (!context.mounted) return;
+                          showAppSnackBar(
+                            context,
+                            loc.isArabic
+                                ? 'تم تسجيل الخروج بنجاح'
+                                : 'Logged out successfully',
+                            type: AppSnackBarType.info,
+                          );
+                          Navigator.of(context).pushAndRemoveUntil(
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      const LoginScreen(),
+                              transitionDuration: const Duration(
+                                milliseconds: 400,
+                              ),
+                              transitionsBuilder:
+                                  (
+                                    context,
+                                    animation,
+                                    secondaryAnimation,
+                                    child,
+                                  ) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                            ),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
           ),
         );
       },
@@ -953,10 +1137,16 @@ class _ThemeSwitchTile extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
-                      color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+                      color: AppColors.accentChampagne.withValues(
+                        alpha: isDark ? 0.15 : 0.2,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.palette_outlined, color: AppColors.accentChampagne, size: 18),
+                    child: const Icon(
+                      Icons.palette_outlined,
+                      color: AppColors.accentChampagne,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -964,7 +1154,9 @@ class _ThemeSwitchTile extends StatelessWidget {
                       loc.tr('theme_title'),
                       style: AppTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary,
                         fontSize: 14,
                       ),
                     ),
@@ -1023,7 +1215,9 @@ class _ThemePill extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     final activeTextColor = isDark ? AppColors.backgroundDeep : Colors.white;
-    final inactiveTextColor = isDark ? AppColors.silverSecondary : AppColors.lightTextSecondary;
+    final inactiveTextColor = isDark
+        ? AppColors.silverSecondary
+        : AppColors.lightTextSecondary;
 
     return Expanded(
       child: GestureDetector(
@@ -1034,8 +1228,12 @@ class _ThemePill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: isSelected
-                ? (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary)
-                : (isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover),
+                ? (isDark
+                      ? AppColors.silverPrimary
+                      : AppColors.lightTextPrimary)
+                : (isDark
+                      ? AppColors.cardSurfaceHover
+                      : AppColors.lightCardSurfaceHover),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected
@@ -1053,12 +1251,14 @@ class _ThemePill extends StatelessWidget {
                 color: isSelected ? activeTextColor : inactiveTextColor,
               ),
               const SizedBox(width: 4),
-              Text(
-                label,
-                style: AppTypography.caption.copyWith(
-                  color: isSelected ? activeTextColor : inactiveTextColor,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: 11.5,
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppTypography.caption.copyWith(
+                    color: isSelected ? activeTextColor : inactiveTextColor,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontSize: 11.5,
+                  ),
                 ),
               ),
             ],
@@ -1086,10 +1286,16 @@ class _LanguageSwitchTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.2),
+              color: AppColors.accentChampagne.withValues(
+                alpha: isDark ? 0.15 : 0.2,
+              ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.language_rounded, color: AppColors.accentChampagne, size: 18),
+            child: const Icon(
+              Icons.language_rounded,
+              color: AppColors.accentChampagne,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1100,13 +1306,17 @@ class _LanguageSwitchTile extends StatelessWidget {
                   loc.tr('app_language'),
                   style: AppTypography.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   loc.isArabic ? 'العربية (Arabic - RTL)' : 'English (LTR)',
-                  style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.mutedText(context),
+                  ),
                 ),
               ],
             ),
@@ -1114,7 +1324,9 @@ class _LanguageSwitchTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+              color: isDark
+                  ? AppColors.cardSurfaceHover
+                  : AppColors.lightCardSurfaceHover,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.border(context), width: 0.8),
             ),
@@ -1158,11 +1370,19 @@ class _ProfileMenuTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+              color: isDark
+                  ? AppColors.cardSurfaceHover
+                  : AppColors.lightCardSurfaceHover,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.border(context), width: 0.8),
             ),
-            child: Icon(icon, color: isDark ? AppColors.silverSecondary : AppColors.lightTextPrimary, size: 18),
+            child: Icon(
+              icon,
+              color: isDark
+                  ? AppColors.silverSecondary
+                  : AppColors.lightTextPrimary,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1173,20 +1393,28 @@ class _ProfileMenuTile extends StatelessWidget {
                   title,
                   style: AppTypography.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: AppTypography.caption.copyWith(color: AppColors.mutedText(context)),
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.mutedText(context),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, size: 13, color: AppColors.mutedText(context)),
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 13,
+            color: AppColors.mutedText(context),
+          ),
         ],
       ),
     );

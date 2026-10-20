@@ -49,7 +49,9 @@ class LuxurySectionHeader extends StatelessWidget {
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.25,
-                      color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

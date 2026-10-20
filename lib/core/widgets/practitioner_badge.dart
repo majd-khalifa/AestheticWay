@@ -8,11 +8,13 @@ import 'package:aesthetic_way/features/practitioners/models/practitioner_model.d
 class PractitionerBadge extends StatelessWidget {
   final PractitionerType type;
   final bool showIcon;
+  final bool hasKnownType;
 
   const PractitionerBadge({
     super.key,
     required this.type,
     this.showIcon = true,
+    this.hasKnownType = true,
   });
 
   @override
@@ -68,15 +70,16 @@ class PractitionerBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: border, width: 0.7),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 4,
         children: [
           if (showIcon) ...[
             Icon(icon, size: 11, color: textColor),
             const SizedBox(width: 4),
           ],
           Text(
-            label,
+            hasKnownType ? label : (loc.isArabic ? 'ممارس' : 'Practitioner'),
             style: AppTypography.badge.copyWith(
               color: textColor,
               fontSize: 10.5,

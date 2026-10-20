@@ -65,18 +65,18 @@ class LuxuryCardShimmerSkeleton extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LuxuryShimmer(
-            width: thumbSize,
-            height: thumbSize,
-            borderRadius: 12,
-          ),
+          LuxuryShimmer(width: thumbSize, height: thumbSize, borderRadius: 12),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
-                LuxuryShimmer(width: double.infinity, height: 16, borderRadius: 4),
+                LuxuryShimmer(
+                  width: double.infinity,
+                  height: 16,
+                  borderRadius: 4,
+                ),
                 LuxuryShimmer(width: 130, height: 12, borderRadius: 4),
                 Row(
                   children: [

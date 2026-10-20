@@ -43,7 +43,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final normalizedPhone = AuthRepository.normalizePhone(input);
 
     try {
-      final response = await AuthRepository().forgotPassword(phone: normalizedPhone);
+      final response = await AuthRepository().forgotPassword(
+        phone: normalizedPhone,
+      );
 
       if (!mounted) return;
       setState(() {
@@ -53,7 +55,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       showAppSnackBar(
         context,
         response['message']?.toString() ??
-            (loc.isArabic ? 'تم إرسال كود التحقق إلى هاتفك' : 'Verification code sent to your phone'),
+            (loc.isArabic
+                ? 'تم إرسال كود التحقق إلى هاتفك'
+                : 'Verification code sent to your phone'),
         type: AppSnackBarType.info,
       );
 
@@ -71,21 +75,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       setState(() {
         _isLoading = false;
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      showAppSnackBar(
-        context,
-        e.toString(),
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
     }
   }
 
@@ -104,13 +100,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             title: Text(
               loc.tr('forgot_title'),
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 size: 18,
               ),
               onPressed: () => Navigator.pop(context),
@@ -125,9 +125,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Official Brand Logo (Prominent Auth Sizing)
-                    const Center(
-                      child: AppBrandLogo.auth(),
-                    ),
+                    const Center(child: AppBrandLogo.auth()),
                     const SizedBox(height: 20),
 
                     // Header Info
@@ -152,7 +150,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       child: LuxuryPhoneInputField(
                         controller: _identifierController,
                         isRequired: true,
-                        labelText: loc.isArabic ? 'رقم الهاتف المسجل' : 'Registered Phone Number',
+                        labelText: loc.isArabic
+                            ? 'رقم الهاتف المسجل'
+                            : 'Registered Phone Number',
                       ),
                     ),
                     const SizedBox(height: 20),

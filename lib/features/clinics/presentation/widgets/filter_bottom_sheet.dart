@@ -7,44 +7,37 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
-
-enum ClinicSortOption { featuredFirst, highestRating, nearestDistance }
 
 class ClinicFilterOptions {
   String
   selectedCity; // 'الكل' / 'دبي' / 'أبوظبي' or 'All' / 'Dubai' / 'Abu Dhabi'
   String? selectedSpecialtyId;
-  PractitionerType? selectedPractitionerType;
-  ClinicSortOption sortOption;
+  String? specialtyNameAr, specialtyNameEn;
 
   ClinicFilterOptions({
     this.selectedCity = 'الكل',
     this.selectedSpecialtyId,
-    this.selectedPractitionerType,
-    this.sortOption = ClinicSortOption.featuredFirst,
+    this.specialtyNameAr,
+    this.specialtyNameEn,
   });
 
   ClinicFilterOptions copyWith({
     String? selectedCity,
     String? selectedSpecialtyId,
-    PractitionerType? selectedPractitionerType,
-    ClinicSortOption? sortOption,
   }) {
     return ClinicFilterOptions(
       selectedCity: selectedCity ?? this.selectedCity,
       selectedSpecialtyId: selectedSpecialtyId ?? this.selectedSpecialtyId,
-      selectedPractitionerType:
-          selectedPractitionerType ?? this.selectedPractitionerType,
-      sortOption: sortOption ?? this.sortOption,
+      specialtyNameAr: specialtyNameAr,
+      specialtyNameEn: specialtyNameEn,
     );
   }
 
   void reset() {
     selectedCity = 'الكل';
     selectedSpecialtyId = null;
-    selectedPractitionerType = null;
-    sortOption = ClinicSortOption.featuredFirst;
+    specialtyNameAr = null;
+    specialtyNameEn = null;
   }
 }
 
@@ -92,6 +85,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   void initState() {
     super.initState();
     _filters = widget.initialFilters.copyWith();
+    _categoryLabel = LocaleService().isArabic
+        ? _filters.specialtyNameAr
+        : _filters.specialtyNameEn;
   }
 
   @override
@@ -103,7 +99,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        16,
+        20,
+        24 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -152,7 +153,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: 12),
           const Divider(),
 
-          Expanded(
+          Flexible(
+            fit: FlexFit.loose,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,6 +238,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     },
                     onChanged: (c) => setState(() {
                       _filters.selectedSpecialtyId = c?.id;
+                      _filters.specialtyNameAr = c?.nameAr;
+                      _filters.specialtyNameEn = c?.nameEn;
                       _categoryLabel = c == null
                           ? null
                           : (loc.isArabic ? c.nameAr : c.nameEn);

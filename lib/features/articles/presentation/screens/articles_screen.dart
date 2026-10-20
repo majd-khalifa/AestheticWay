@@ -131,7 +131,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Container(
-                    height: 44,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(14),
@@ -314,7 +314,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                 LuxuryImage(
                   imageUrl: article.coverImageUrl,
                   fallbackLogoUrl: article.clinicLogoUrl,
-                  height: 150,
+                  height: article.coverImageUrl.isEmpty ? 96 : 170,
                   width: double.infinity,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
@@ -351,15 +351,16 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                               ),
                             ),
                           const Spacer(),
-                          Text(
-                            DateFormat(
-                              'yyyy/MM/dd',
-                            ).format(article.publishedAt),
-                            style: TextStyle(
-                              color: AppColors.mutedText(context),
-                              fontSize: 10.5,
+                          if (article.hasPublicationDate)
+                            Text(
+                              DateFormat(
+                                'yyyy/MM/dd',
+                              ).format(article.publishedAt),
+                              style: TextStyle(
+                                color: AppColors.mutedText(context),
+                                fontSize: 10.5,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 8),

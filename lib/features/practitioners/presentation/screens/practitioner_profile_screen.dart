@@ -1,3 +1,5 @@
+import '../../../../core/utils/clinic_location.dart';
+import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -29,7 +31,8 @@ class PractitionerProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<PractitionerProfileScreen> createState() => _PractitionerProfileScreenState();
+  State<PractitionerProfileScreen> createState() =>
+      _PractitionerProfileScreenState();
 }
 
 class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
@@ -37,6 +40,7 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
   ClinicModel? _clinic;
   bool _isLoadingPractitioner = false;
   bool _isLoadingClinic = false;
+  bool _loadFailed = false;
 
   @override
   void initState() {
@@ -46,7 +50,9 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
   }
 
   Future<void> _loadLiveDetails() async {
-    final practRepo = widget.practitionersRepository ?? PractitionersRepository();
+    setState(() => _loadFailed = false);
+    final practRepo =
+        widget.practitionersRepository ?? PractitionersRepository();
     final clinicsRepo = widget.clinicsRepository ?? ClinicsRepository();
 
     if (_practitioner.id.trim().isNotEmpty) {
@@ -63,7 +69,10 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
         }
       } catch (_) {
         if (mounted) {
-          setState(() => _isLoadingPractitioner = false);
+          setState(() {
+            _isLoadingPractitioner = false;
+            _loadFailed = true;
+          });
         }
       }
     }
@@ -73,7 +82,9 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
         setState(() => _isLoadingClinic = true);
       }
       try {
-        final clinic = await clinicsRepo.getClinicDetail(_practitioner.clinicId);
+        final clinic = await clinicsRepo.getClinicDetail(
+          _practitioner.clinicId,
+        );
         if (mounted) {
           setState(() {
             _clinic = clinic;
@@ -82,47 +93,13 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
         }
       } catch (_) {
         if (mounted) {
-          setState(() => _isLoadingClinic = false);
+          setState(() {
+            _isLoadingClinic = false;
+            _loadFailed = true;
+          });
         }
       }
     }
-  }
-
-  ClinicModel _buildFallbackClinic() {
-    return ClinicModel(
-      id: _practitioner.clinicId.isNotEmpty ? _practitioner.clinicId : 'clinic-id',
-      nameAr: _practitioner.clinicNameAr.isNotEmpty
-          ? _practitioner.clinicNameAr
-          : (_practitioner.clinicNameEn ?? ''),
-      nameEn: _practitioner.clinicNameEn ?? _practitioner.clinicNameAr,
-      descriptionAr: '',
-      descriptionEn: '',
-      coverImageUrl: _practitioner.avatarUrl,
-      galleryImages: const [],
-      logoUrl: _practitioner.avatarUrl,
-      rating: 4.9,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      licenseAuthority: '',
-      licenseNumber: '',
-      city: 'Dubai',
-      areaAr: 'دبي',
-      areaEn: 'Dubai',
-      addressAr: 'دبي',
-      addressEn: 'Dubai',
-      distanceKm: 0,
-      mainPhone: '+971500000000',
-      receptionPhone: '+971500000000',
-      whatsapp: '+971500000000',
-      latitude: 25.2048,
-      longitude: 55.2708,
-      workingHoursAr: '10:00 ص - 9:00 م',
-      workingHoursEn: '10:00 AM - 9:00 PM',
-      branches: const [],
-      practitionerIds: [_practitioner.id],
-      treatmentIds: const [],
-      featuredOffers: const [],
-    );
   }
 
   Future<void> _handleBookLead(BuildContext context) async {
@@ -135,7 +112,8 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
     );
     if (!auth || !context.mounted) return;
 
-    final targetClinic = _clinic ?? _buildFallbackClinic();
+    final targetClinic = _clinic;
+    if (targetClinic == null || !isEntityUuid(targetClinic.id)) return;
     Navigator.push(
       context,
       LuxuryPageRoute(
@@ -152,22 +130,34 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final clinicName = loc.isArabic
-        ? (_clinic?.nameAr.isNotEmpty == true ? _clinic!.nameAr : _practitioner.clinicNameAr)
-        : (_clinic?.nameEn.isNotEmpty == true ? _clinic!.nameEn : (_practitioner.clinicNameEn ?? _practitioner.clinicNameAr));
+        ? (_clinic?.nameAr.isNotEmpty == true
+              ? _clinic!.nameAr
+              : _practitioner.clinicNameAr)
+        : (_clinic?.nameEn.isNotEmpty == true
+              ? _clinic!.nameEn
+              : (_practitioner.clinicNameEn ?? _practitioner.clinicNameAr));
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
       appBar: AppBar(
         backgroundColor: AppColors.bg(context),
         title: Text(
-          loc.isArabic ? _practitioner.nameAr : _practitioner.nameEn,
+          loc.isArabic ? 'ملف الممارس' : 'Practitioner profile',
           style: AppTypography.screenTitle.copyWith(
-            color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
             fontSize: 16,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary, size: 18),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark
+                ? AppColors.silverPrimary
+                : AppColors.lightTextPrimary,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -193,19 +183,28 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      PractitionerBadge(type: _practitioner.type),
+                      PractitionerBadge(
+                        type: _practitioner.type,
+                        hasKnownType: _practitioner.hasKnownType,
+                      ),
                       const SizedBox(height: 6),
                       Text(
-                        loc.isArabic ? _practitioner.nameAr : _practitioner.nameEn,
+                        loc.isArabic
+                            ? _practitioner.nameAr
+                            : _practitioner.nameEn,
                         style: AppTypography.cardTitle.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        loc.isArabic ? _practitioner.specialtyAr : _practitioner.specialtyEn,
+                        loc.isArabic
+                            ? _practitioner.specialtyAr
+                            : _practitioner.specialtyEn,
                         style: AppTypography.caption.copyWith(
                           color: AppColors.subtext(context),
                           fontSize: 12.5,
@@ -224,7 +223,8 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
           if (clinicName.isNotEmpty || _isLoadingClinic)
             LuxuryCard(
               onTap: () {
-                final target = _clinic ?? _buildFallbackClinic();
+                final target = _clinic;
+                if (target == null) return;
                 Navigator.push(
                   context,
                   LuxuryPageRoute(page: ClinicProfileScreen(clinic: target)),
@@ -233,7 +233,11 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
-                  const Icon(Icons.apartment_rounded, color: AppColors.accentChampagne, size: 20),
+                  const Icon(
+                    Icons.apartment_rounded,
+                    color: AppColors.accentChampagne,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -251,20 +255,36 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                         if (_clinic != null) ...[
                           const SizedBox(height: 2),
                           Text(
-                            '${_clinic!.city} • ${loc.isArabic ? _clinic!.areaAr : _clinic!.areaEn}',
-                            style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5),
+                            formatClinicLocation(
+                              _clinic!.city,
+                              loc.isArabic ? _clinic!.areaAr : _clinic!.areaEn,
+                              arabic: loc.isArabic,
+                            ),
+                            style: TextStyle(
+                              color: AppColors.subtext(context),
+                              fontSize: 11.5,
+                            ),
                           ),
                         ] else if (_isLoadingClinic) ...[
                           const SizedBox(height: 2),
                           Text(
-                            loc.isArabic ? 'جاري تحميل بيانات العيادة...' : 'Loading clinic details...',
-                            style: TextStyle(color: AppColors.subtext(context), fontSize: 11.5),
+                            loc.isArabic
+                                ? 'جاري تحميل بيانات العيادة...'
+                                : 'Loading clinic details...',
+                            style: TextStyle(
+                              color: AppColors.subtext(context),
+                              fontSize: 11.5,
+                            ),
                           ),
                         ],
                       ],
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.subtext(context)),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12,
+                    color: AppColors.subtext(context),
+                  ),
                 ],
               ),
             ),
@@ -277,13 +297,18 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 28),
               child: Center(
-                child: CircularProgressIndicator(color: AppColors.accentChampagne),
+                child: CircularProgressIndicator(
+                  color: AppColors.accentChampagne,
+                ),
               ),
             ),
           ],
 
           // About / Bio Section
-          if ((loc.isArabic ? _practitioner.aboutAr : (_practitioner.aboutEn ?? _practitioner.aboutAr)).isNotEmpty) ...[
+          if ((loc.isArabic
+                  ? _practitioner.aboutAr
+                  : (_practitioner.aboutEn ?? _practitioner.aboutAr))
+              .isNotEmpty) ...[
             LuxuryCard(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -299,7 +324,9 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    loc.isArabic ? _practitioner.aboutAr : (_practitioner.aboutEn ?? _practitioner.aboutAr),
+                    loc.isArabic
+                        ? _practitioner.aboutAr
+                        : (_practitioner.aboutEn ?? _practitioner.aboutAr),
                     style: AppTypography.bodyMedium.copyWith(
                       color: AppColors.subtext(context),
                       height: 1.6,
@@ -331,26 +358,37 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: (loc.isArabic
-                            ? _practitioner.procedures
-                            : (_practitioner.proceduresEn ?? _practitioner.procedures))
-                        .map((proc) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.border(context)),
-                              ),
-                              child: Text(
-                                proc,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.text(context),
-                                  fontWeight: FontWeight.w600,
+                    children:
+                        (loc.isArabic
+                                ? _practitioner.procedures
+                                : (_practitioner.proceduresEn ??
+                                      _practitioner.procedures))
+                            .map(
+                              (proc) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppColors.cardSurfaceHover
+                                      : AppColors.lightCardSurfaceHover,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: AppColors.border(context),
+                                  ),
+                                ),
+                                child: Text(
+                                  proc,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.text(context),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ))
-                        .toList(),
+                            )
+                            .toList(),
                   ),
                 ],
               ),
@@ -358,12 +396,24 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
             const SizedBox(height: 20),
           ],
 
+          if (_loadFailed || (!_isLoadingClinic && _clinic == null))
+            TextButton.icon(
+              onPressed: _loadLiveDetails,
+              icon: const Icon(Icons.sync),
+              label: Text(
+                loc.isArabic
+                    ? 'تعذر التحقق من العيادة، أعد المحاولة'
+                    : 'Clinic details unavailable. Try again',
+              ),
+            ),
           // Lead Request CTA
           SilverButton(
             label: loc.tr('request_with_doctor'),
-            icon: Icons.calendar_today_outlined,
+            icon: Icons.chat_bubble_outline,
             isFullWidth: true,
-            onPressed: () => _handleBookLead(context),
+            onPressed: _clinic != null && isEntityUuid(_clinic!.id)
+                ? () => _handleBookLead(context)
+                : null,
           ),
           const SizedBox(height: 30),
         ],

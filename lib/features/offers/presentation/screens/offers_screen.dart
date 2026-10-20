@@ -14,7 +14,9 @@ import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
-import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import '../../../clinics/data/clinics_repository.dart';
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/utils/entity_id.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profile_screen.dart';
 
@@ -22,15 +24,23 @@ import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profi
 /// Powered by live API: GET /api/v1/offers/
 class OffersScreen extends StatefulWidget {
   final List<OfferModel>? initialOffers;
+  final ClinicsRepository? clinicsRepository;
+  final OffersRepository? repository;
 
-  const OffersScreen({super.key, this.initialOffers});
+  const OffersScreen({
+    super.key,
+    this.initialOffers,
+    this.clinicsRepository,
+    this.repository,
+  });
 
   @override
   State<OffersScreen> createState() => _OffersScreenState();
 }
 
 class _OffersScreenState extends State<OffersScreen> {
-  final OffersRepository _offersRepository = OffersRepository();
+  late final OffersRepository _offersRepository =
+      widget.repository ?? OffersRepository();
 
   final ScrollController _scrollController = ScrollController();
   late final PagedCollection<OfferModel> _paging;
@@ -93,69 +103,59 @@ class _OffersScreenState extends State<OffersScreen> {
       reasonTitle: LocaleService().tr('offer_claim'),
       reasonSubtitle: LocaleService().isArabic
           ? 'سجّل دخولك برقم الهاتف للاستفادة من باقة العرض'
-          : 'Login with phone number to claim this offer lead',
+          : 'Sign in to inquire about this offer',
     );
     if (!auth || !mounted) return;
 
-    final clinic = ClinicModel(
-      id: offer.clinicId,
-      nameAr: offer.clinicNameAr,
-      nameEn: offer.clinicNameEn ?? offer.clinicNameAr,
-      descriptionAr: offer.termsAr,
-      descriptionEn: offer.termsEn ?? '',
-      coverImageUrl: offer.imageUrl,
-      galleryImages: isValidNetworkImageUrl(offer.imageUrl)
-          ? [offer.imageUrl]
-          : const [],
-      logoUrl: offer.imageUrl,
-      rating: 0.0,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      city: 'Dubai',
-      areaAr: '',
-      addressAr: '',
-    );
-
-    Navigator.push(
-      context,
-      LuxuryPageRoute(
-        page: AppointmentRequestScreen(
-          clinic: clinic,
-          selectedOfferTitle: LocaleService().isArabic
-              ? offer.titleAr
-              : offer.titleEn,
-          selectedOfferId: offer.id,
+    if (!isEntityUuid(offer.clinicId) || !isEntityUuid(offer.id)) {
+      _showUnavailable();
+      return;
+    }
+    try {
+      final clinic = await (widget.clinicsRepository ?? ClinicsRepository())
+          .getClinicDetail(offer.clinicId);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        LuxuryPageRoute(
+          page: AppointmentRequestScreen(
+            clinic: clinic,
+            selectedOfferTitle: LocaleService().isArabic
+                ? offer.titleAr
+                : offer.titleEn,
+            selectedOfferId: offer.id,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (_) {
+      if (mounted) _showUnavailable();
+    }
   }
 
-  void _navigateToClinic(
+  void _showUnavailable() => showAppSnackBar(
+    context,
+    LocaleService().isArabic
+        ? 'تعذر تحميل العيادة، حاول مجدداً'
+        : 'Clinic unavailable. Please try again.',
+    type: AppSnackBarType.error,
+  );
+  Future<void> _navigateToClinic(
     String clinicId, {
     String? clinicNameAr,
     String? clinicNameEn,
-  }) {
-    final clinic = ClinicModel(
-      id: clinicId,
-      nameAr: clinicNameAr ?? 'العيادة التجميلية',
-      nameEn: clinicNameEn ?? 'Aesthetic Clinic',
-      descriptionAr: '',
-      descriptionEn: '',
-      coverImageUrl: '',
-      galleryImages: const [],
-      logoUrl: '',
-      rating: 0.0,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      city: 'Dubai',
-      areaAr: '',
-      addressAr: '',
-    );
-
-    Navigator.push(
-      context,
-      LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
-    );
+  }) async {
+    try {
+      final clinic = await (widget.clinicsRepository ?? ClinicsRepository())
+          .getClinicDetail(clinicId);
+      if (mounted) {
+        Navigator.push(
+          context,
+          LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
+        );
+      }
+    } catch (_) {
+      if (mounted) _showUnavailable();
+    }
   }
 
   void _onSearchChanged(String value) {
@@ -328,7 +328,9 @@ class _OffersScreenState extends State<OffersScreen> {
                                             imageUrl: offer.imageUrl,
                                             fallbackLogoUrl:
                                                 offer.clinicLogoUrl,
-                                            height: 160,
+                                            height: offer.imageUrl.isEmpty
+                                                ? 96
+                                                : 160,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
                                             borderRadius:
@@ -467,7 +469,11 @@ class _OffersScreenState extends State<OffersScreen> {
                                             const SizedBox(height: 12),
 
                                             // Price & Action Row
-                                            Row(
+                                            Wrap(
+                                              spacing: 12,
+                                              runSpacing: 12,
+                                              crossAxisAlignment:
+                                                  WrapCrossAlignment.center,
                                               children: [
                                                 Column(
                                                   crossAxisAlignment:
@@ -525,7 +531,6 @@ class _OffersScreenState extends State<OffersScreen> {
                                                     ),
                                                   ],
                                                 ),
-                                                const Spacer(),
                                                 SilverButton(
                                                   label: loc.tr('offer_claim'),
                                                   icon: Icons.send_rounded,

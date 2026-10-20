@@ -127,7 +127,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Container(
-                    height: 44,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(14),
@@ -275,40 +275,47 @@ class _ProductsScreenState extends State<ProductsScreen> {
       );
     }
 
+    final columns =
+        filteredProducts.length == 1 ||
+            MediaQuery.sizeOf(context).width < 380 ||
+            MediaQuery.textScalerOf(context).scale(1) > 1.3
+        ? 1
+        : 2;
     return CustomScrollView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount:
-                  MediaQuery.sizeOf(context).width < 350 ||
-                      MediaQuery.textScalerOf(context).scale(1) > 1.3
-                  ? 1
-                  : 2,
-              mainAxisExtent:
-                  340 +
-                  (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0, 2) *
-                      90,
-              crossAxisSpacing: 18,
-              mainAxisSpacing: 24,
-            ),
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final product = filteredProducts[index];
-              return _ProductCard(
-                product: product,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(
-                      page: ProductDetailScreen(product: product),
+          padding: const EdgeInsets.all(20),
+          sliver: SliverList.builder(
+            itemCount: (filteredProducts.length / columns).ceil(),
+            itemBuilder: (context, row) => Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var col = 0; col < columns; col++) ...[
+                    if (col > 0) const SizedBox(width: 16),
+                    Expanded(
+                      child: row * columns + col >= filteredProducts.length
+                          ? const SizedBox.shrink()
+                          : _ProductCard(
+                              product: filteredProducts[row * columns + col],
+                              onTap: () => Navigator.push(
+                                context,
+                                LuxuryPageRoute(
+                                  page: ProductDetailScreen(
+                                    product:
+                                        filteredProducts[row * columns + col],
+                                  ),
+                                ),
+                              ),
+                            ),
                     ),
-                  );
-                },
-              );
-            }, childCount: filteredProducts.length),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
         SliverToBoxAdapter(
@@ -342,7 +349,10 @@ class _ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: BrandProductMedia(product: product)),
+              AspectRatio(
+                aspectRatio: 1.5,
+                child: BrandProductMedia(product: product),
+              ),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 16),
                 child: Column(

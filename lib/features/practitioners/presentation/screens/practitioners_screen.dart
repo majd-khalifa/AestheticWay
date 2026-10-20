@@ -374,7 +374,10 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                                                   MainAxisAlignment
                                                       .spaceBetween,
                                               children: [
-                                                PractitionerBadge(type: p.type),
+                                                PractitionerBadge(
+                                                  type: p.type,
+                                                  hasKnownType: p.hasKnownType,
+                                                ),
                                                 Icon(
                                                   Icons.arrow_forward_ios,
                                                   size: 12,

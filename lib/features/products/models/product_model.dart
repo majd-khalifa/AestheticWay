@@ -1,3 +1,4 @@
+import '../../../core/utils/source_text.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 
 /// Product Entity for Aesthetic & Medical Skincare, Cosmeceuticals and Beauty Devices
@@ -104,12 +105,15 @@ class ProductModel {
     final rawStatus = json['status']?.toString().toLowerCase() ?? 'active';
     final isActive = json['is_active'] as bool? ?? (rawStatus == 'active');
 
-    final nameEnVal = json['name_en'] as String? ?? '';
+    final nameEnVal = firstSourceText([json['name_en'], json['name_ar']]);
     final nameArVal = (json['name_ar'] as String? ?? '').trim().isNotEmpty
         ? json['name_ar'] as String
         : nameEnVal;
 
-    final descEnVal = json['description_en'] as String? ?? '';
+    final descEnVal = firstSourceText([
+      json['description_en'],
+      json['description_ar'],
+    ]);
     final descArVal =
         (json['description_ar'] as String? ?? '').trim().isNotEmpty
         ? json['description_ar'] as String

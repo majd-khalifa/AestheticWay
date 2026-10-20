@@ -1,11 +1,9 @@
+import '../widgets/patient_clinic_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/rating_chip.dart';
-import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
@@ -24,15 +22,24 @@ import 'package:aesthetic_way/features/appointment_lead/presentation/screens/app
 class ClinicsListScreen extends StatefulWidget {
   final String? initialCategory;
   final String? initialCity;
+  final String? initialSearch;
+  final ClinicsRepository? repository;
 
-  const ClinicsListScreen({super.key, this.initialCategory, this.initialCity});
+  const ClinicsListScreen({
+    super.key,
+    this.initialCategory,
+    this.initialCity,
+    this.initialSearch,
+    this.repository,
+  });
 
   @override
   State<ClinicsListScreen> createState() => _ClinicsListScreenState();
 }
 
 class _ClinicsListScreenState extends State<ClinicsListScreen> {
-  final ClinicsRepository _clinicsRepository = ClinicsRepository();
+  late final ClinicsRepository _clinicsRepository =
+      widget.repository ?? ClinicsRepository();
 
   late ClinicFilterOptions _filterOptions;
   String _searchQuery = '';
@@ -68,6 +75,8 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
           ? null
           : widget.initialCategory,
     );
+    _searchQuery = widget.initialSearch?.trim() ?? '';
+    _searchController.text = _searchQuery;
     _loadClinics();
   }
 
@@ -182,8 +191,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
     final hasActiveFilters =
         _filterOptions.selectedCity != 'الكل' &&
             _filterOptions.selectedCity != 'All' ||
-        _filterOptions.selectedSpecialtyId != null ||
-        _filterOptions.selectedPractitionerType != null;
+        _filterOptions.selectedSpecialtyId != null;
 
     // Keep canonical ordering and server-wide matching across page boundaries.
     final clinicList = List<ClinicModel>.of(_paging.items);
@@ -197,7 +205,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
             children: [
               Expanded(
                 child: Container(
-                  height: 44,
+                  height: 52,
                   decoration: BoxDecoration(
                     color: AppColors.surface(context),
                     borderRadius: BorderRadius.circular(14),
@@ -215,7 +223,9 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                     onChanged: _onSearchChanged,
                     onSubmitted: (_) => _loadClinics(),
                     decoration: InputDecoration(
-                      hintText: loc.tr('search_hint'),
+                      hintText: loc.isArabic
+                          ? 'ابحث باسم العيادة أو المدينة'
+                          : 'Search clinic name or city',
                       hintStyle: AppTypography.bodyMedium.copyWith(
                         color: AppColors.text(context),
                         fontSize: 12,
@@ -257,7 +267,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                 onTap: _openFilters,
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  height: 44,
+                  height: 52,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     color: hasActiveFilters
@@ -373,7 +383,11 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        loc.tr('cat_${_filterOptions.selectedSpecialtyId}'),
+                        loc.isArabic
+                            ? (_filterOptions.specialtyNameAr ??
+                                  'تصنيف طبي محدد')
+                            : (_filterOptions.specialtyNameEn ??
+                                  'Medical category selected'),
                         style: AppTypography.caption.copyWith(
                           color: isDark
                               ? AppColors.silverPrimary
@@ -416,8 +430,8 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
               children: [
                 Text(
                   loc.isArabic
-                      ? '${clinicList.length} عيادة معتمدة'
-                      : '${clinicList.length} Verified Clinics',
+                      ? '${_paging.total ?? clinicList.length} عيادة'
+                      : '${_paging.total ?? clinicList.length} clinics',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.mutedText(context),
                   ),
@@ -493,184 +507,31 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                       );
                     }
                     final clinic = clinicList[index];
-                    return StaggeredEntrance(
-                      index: index,
-                      child: LuxuryCard(
-                        isVip:
-                            clinic.subscriptionTier ==
-                            SubscriptionTier.vipPlatinum,
-                        borderRadius: 18,
-                        padding: const EdgeInsets.all(14),
-                        onTap: () {
+                    return PatientClinicCard(
+                      clinic: clinic,
+                      onTap: () => Navigator.push(
+                        context,
+                        LuxuryPageRoute(
+                          page: ClinicProfileScreen(clinic: clinic),
+                        ),
+                      ),
+                      onContact: () =>
+                          ContactOptionsSheet.show(context, clinic),
+                      onRequest: () async {
+                        final auth = await GuestAuthGuard.requireAuth(
+                          context,
+                          reasonTitle: loc.tr('request_consultation'),
+                          reasonSubtitle: loc.tr('request_consultation'),
+                        );
+                        if (auth && context.mounted) {
                           Navigator.push(
                             context,
                             LuxuryPageRoute(
-                              page: ClinicProfileScreen(clinic: clinic),
+                              page: AppointmentRequestScreen(clinic: clinic),
                             ),
                           );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                LuxuryImage(
-                                  imageUrl: clinic.coverImageUrl,
-                                  fallbackLogoUrl: clinic.logoUrl,
-                                  width: 78,
-                                  height: 78,
-                                  borderRadius: BorderRadius.circular(14),
-                                  fit: BoxFit.cover,
-                                  placeholderIcon:
-                                      Icons.local_hospital_outlined,
-                                  iconSize: 32,
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              loc.isArabic
-                                                  ? clinic.nameAr
-                                                  : clinic.nameEn,
-                                              style: AppTypography.cardTitle
-                                                  .copyWith(
-                                                    fontSize: 14.5,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: isDark
-                                                        ? AppColors.textPrimary
-                                                        : AppColors
-                                                              .lightTextPrimary,
-                                                  ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        loc.isArabic
-                                            ? clinic.addressAr
-                                            : clinic.addressEn,
-                                        style: AppTypography.caption.copyWith(
-                                          color: isDark
-                                              ? AppColors.silverMuted
-                                              : AppColors.lightTextMuted,
-                                          fontSize: 11.5,
-                                        ),
-                                        maxLines: 1,
-                                      ),
-                                      const SizedBox(height: 7),
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 5,
-                                        children: [
-                                          RatingChip(
-                                            rating: clinic.rating,
-                                            reviewCount: clinic.reviewCount,
-                                            isCompact: true,
-                                            showGoogleSource: true,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                OutlinedButton(
-                                  onPressed: () =>
-                                      ContactOptionsSheet.show(context, clinic),
-                                  style: OutlinedButton.styleFrom(
-                                    visualDensity: VisualDensity.compact,
-                                    side: BorderSide(
-                                      color: AppColors.border(context),
-                                      width: 0.8,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    loc.tr('contact_btn'),
-                                    style: AppTypography.caption.copyWith(
-                                      color: isDark
-                                          ? AppColors.silverPrimary
-                                          : AppColors.lightTextPrimary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 11.5,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    final auth = await GuestAuthGuard.requireAuth(
-                                      context,
-                                      reasonTitle: loc.tr(
-                                        'request_consultation',
-                                      ),
-                                      reasonSubtitle: loc.isArabic
-                                          ? 'سجل دخولك برقم الهاتف لإرسال طلبك للعيادة'
-                                          : 'Login with phone number to submit your lead',
-                                    );
-                                    if (auth && context.mounted) {
-                                      Navigator.push(
-                                        context,
-                                        LuxuryPageRoute(
-                                          page: AppointmentRequestScreen(
-                                            clinic: clinic,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: isDark
-                                        ? AppColors.silverPrimary
-                                        : AppColors.lightTextPrimary,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 6,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    loc.tr('request_appointment'),
-                                    style: AppTypography.caption.copyWith(
-                                      color: isDark
-                                          ? AppColors.backgroundDeep
-                                          : Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                        }
+                      },
                     );
                   },
                 ),

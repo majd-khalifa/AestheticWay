@@ -120,64 +120,26 @@ class LuxuryImage extends StatelessWidget {
       mediaCacheKey: mediaCacheKey,
     );
 
-    Widget buildBrandEmblemFallback() {
-      final shortestSide =
-          (width != null &&
-              width!.isFinite &&
-              height != null &&
-              height!.isFinite)
-          ? (width! < height! ? width! : height!)
-          : (height != null && height!.isFinite
-                ? height!
-                : (width != null && width!.isFinite ? width! : 120.0));
-      final emblemPadding = (shortestSide * 0.20).clamp(8.0, 28.0);
-      final emblemBadgeSize = (shortestSide * 0.72).clamp(32.0, 140.0);
-
-      return Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: const Color(0xFF070C1A),
-          borderRadius: borderRadius,
-          border: Border.all(
-            color: AppColors.accentChampagne.withValues(alpha: 0.25),
-            width: 0.8,
+    Widget buildBrandEmblemFallback() => Container(
+      width: width,
+      height: height,
+      color: AppColors.surfaceHover(context),
+      alignment: Alignment.center,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Image.asset(
+          'assets/images/aesthetic_way_logo.png',
+          width: 64,
+          height: 64,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => Icon(
+            placeholderIcon,
+            size: iconSize ?? 32,
+            color: AppColors.mutedText(context),
           ),
         ),
-        child: Center(
-          child: Container(
-            width: emblemBadgeSize,
-            height: emblemBadgeSize,
-            padding: EdgeInsets.all(emblemPadding),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D1527),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.accentChampagne.withValues(alpha: 0.35),
-                width: 0.8,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Image.asset(
-              'assets/images/aesthetic_way_logo.png',
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              errorBuilder: (_, _, _) => Icon(
-                placeholderIcon,
-                size: iconSize ?? (emblemBadgeSize * 0.5),
-                color: AppColors.accentChampagne,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
 
     Widget buildClinicLogoFallback(ImageProvider logoProvider) {
       final shortestSide =
@@ -195,47 +157,23 @@ class LuxuryImage extends StatelessWidget {
       return Container(
         width: width,
         height: height,
-        decoration: BoxDecoration(
-          color: const Color(0xFF070C1A),
-          borderRadius: borderRadius,
-          border: Border.all(
-            color: AppColors.border(context).withValues(alpha: 0.4),
-            width: 0.7,
-          ),
-        ),
-        child: Center(
-          child: Container(
+        color: AppColors.surfaceHover(context),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.all(logoPadding),
+          child: Image(
+            image: ResizeImage.resizeIfNeeded(
+              (logoBadgeSize * MediaQuery.devicePixelRatioOf(context))
+                  .round()
+                  .clamp(60, 400),
+              null,
+              logoProvider,
+            ),
             width: logoBadgeSize,
             height: logoBadgeSize,
-            padding: EdgeInsets.all(logoPadding),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D1527),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.accentChampagne.withValues(alpha: 0.35),
-                width: 0.8,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Image(
-              image: ResizeImage.resizeIfNeeded(
-                (logoBadgeSize * MediaQuery.devicePixelRatioOf(context))
-                    .round()
-                    .clamp(60, 400),
-                null,
-                logoProvider,
-              ),
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              errorBuilder: (_, _, _) =>
-                  customPlaceholder ?? buildBrandEmblemFallback(),
-            ),
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) =>
+                customPlaceholder ?? buildBrandEmblemFallback(),
           ),
         ),
       );

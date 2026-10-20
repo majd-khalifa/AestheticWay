@@ -17,7 +17,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -31,10 +32,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     );
-    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
     );
+    _scaleAnimation = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
 
     // Auto navigate after splash duration
@@ -55,8 +60,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         nextScreen = const AdminMainNavScreen();
       } else if (role == 'clinic_admin' || role == 'clinic_staff') {
         nextScreen = const ClinicMainNavScreen();
-      } else {
+      } else if (role == 'patient') {
         nextScreen = const MainNavScreen();
+      } else {
+        AuthState().logout();
+        nextScreen = const LoginScreen();
       }
     } else if (!hasSeenOnboarding) {
       nextScreen = const OnboardingScreen();
@@ -96,10 +104,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               scale: _scaleAnimation,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24),
-                child: AppBrandLogo.splash(
-                  height: 300,
-                  width: 300,
-                ),
+                child: AppBrandLogo.splash(height: 300, width: 300),
               ),
             ),
           ),

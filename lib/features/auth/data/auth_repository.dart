@@ -26,8 +26,8 @@ class AuthRepository {
   }
 
   AuthRepository._internal()
-      : _api = ApiClient(),
-        _tokenStorage = TokenStorage();
+    : _api = ApiClient(),
+      _tokenStorage = TokenStorage();
 
   AuthRepository._custom(this._api, this._tokenStorage);
 
@@ -53,7 +53,9 @@ class AuthRepository {
     String? referralCode,
   }) async {
     final normalized = normalizePhone(phone);
-    final String platform = kIsWeb ? 'web' : (Platform.isAndroid ? 'android' : 'ios');
+    final String platform = kIsWeb
+        ? 'web'
+        : (Platform.isAndroid ? 'android' : 'ios');
 
     final data = <String, dynamic>{
       'full_name': fullName.trim(),
@@ -127,17 +129,18 @@ class AuthRepository {
     required String password,
   }) async {
     final trimmed = identifier.trim();
-    final normalizedIdentifier = trimmed.contains('@') ? trimmed : normalizePhone(trimmed);
+    final normalizedIdentifier = trimmed.contains('@')
+        ? trimmed
+        : normalizePhone(trimmed);
 
     final response = await _api.post(
       ApiConfig.login,
-      data: {
-        'identifier': normalizedIdentifier,
-        'password': password,
-      },
+      data: {'identifier': normalizedIdentifier, 'password': password},
     );
 
-    final authResponse = AuthResponse.fromJson(response.data as Map<String, dynamic>);
+    final authResponse = AuthResponse.fromJson(
+      response.data as Map<String, dynamic>,
+    );
     await _tokenStorage.saveTokens(
       accessToken: authResponse.accessToken,
       refreshToken: authResponse.refreshToken,
@@ -164,18 +167,13 @@ class AuthRepository {
     final normalized = normalizePhone(phone);
     final response = await _api.post(
       ApiConfig.resendOtp,
-      data: {
-        'phone': normalized,
-        'purpose': purpose,
-      },
+      data: {'phone': normalized, 'purpose': purpose},
     );
     return response.data as Map<String, dynamic>;
   }
 
   /// Request password reset OTP
-  Future<Map<String, dynamic>> forgotPassword({
-    required String phone,
-  }) async {
+  Future<Map<String, dynamic>> forgotPassword({required String phone}) async {
     final normalized = normalizePhone(phone);
     final response = await _api.post(
       ApiConfig.forgotPassword,
@@ -198,10 +196,7 @@ class AuthRepository {
     if (otpCode != null && otpCode.trim().isNotEmpty) {
       data['otp_code'] = otpCode.trim();
     }
-    final response = await _api.post(
-      ApiConfig.resetPassword,
-      data: data,
-    );
+    final response = await _api.post(ApiConfig.resetPassword, data: data);
     return response.data as Map<String, dynamic>;
   }
 
@@ -257,13 +252,13 @@ class AuthRepository {
     String? email,
     String? phone,
   }) async {
-    final payload = <String, dynamic>{
-      'full_name': fullName.trim(),
-    };
+    final payload = <String, dynamic>{'full_name': fullName.trim()};
 
     if (email != null) {
       final cleanEmail = email.trim();
-      payload['email'] = cleanEmail.isNotEmpty ? cleanEmail.toLowerCase() : null;
+      payload['email'] = cleanEmail.isNotEmpty
+          ? cleanEmail.toLowerCase()
+          : null;
     }
 
     if (phone != null && phone.trim().isNotEmpty) {
@@ -300,10 +295,7 @@ class AuthRepository {
   }) async {
     final response = await _api.post(
       ApiConfig.authPhoneChangeConfirm,
-      data: {
-        'new_phone': normalizePhone(newPhone),
-        'code': code.trim(),
-      },
+      data: {'new_phone': normalizePhone(newPhone), 'code': code.trim()},
     );
     // Refresh user profile after confirmation
     try {
@@ -328,10 +320,7 @@ class AuthRepository {
   }) async {
     final response = await _api.post(
       ApiConfig.authEmailChangeConfirm,
-      data: {
-        'new_email': newEmail.trim().toLowerCase(),
-        'code': code.trim(),
-      },
+      data: {'new_email': newEmail.trim().toLowerCase(), 'code': code.trim()},
     );
     // Refresh user profile after confirmation
     try {

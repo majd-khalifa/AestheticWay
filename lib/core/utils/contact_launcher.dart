@@ -53,9 +53,7 @@ abstract class ContactLauncher {
       return await launchUrl(uri);
     } catch (e) {
       if (kDebugMode) {
-        debugPrint(
-          '[ContactLauncher.makePhoneCall] Failed to launch $uri: $e',
-        );
+        debugPrint('[ContactLauncher.makePhoneCall] Failed to launch $uri: $e');
       }
       return false;
     }
@@ -86,9 +84,7 @@ abstract class ContactLauncher {
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (kDebugMode) {
-        debugPrint(
-          '[ContactLauncher.openWhatsApp] Failed to launch $uri: $e',
-        );
+        debugPrint('[ContactLauncher.openWhatsApp] Failed to launch $uri: $e');
       }
       return false;
     }
