@@ -6,6 +6,8 @@ on:
       - 'test/**'
       - 'lib/**'
       - 'pubspec.*'
+      - 'assets/fonts/**'
+      - 'tool/*public_clinic*.ps1'
       - '.github/workflows/flutter-visual-regressions.yml'
 
 permissions:
@@ -43,6 +45,10 @@ jobs:
           flutter test test/preview_image_settling_test.dart
           test/media_first_previews_test.dart test/patient_portal_visual_test.dart
           test/image_display_regression_test.dart --reporter expanded
+      - name: Validate public-clinic capture redaction offline
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tool/test_public_clinic_capture.ps1
       - run: flutter analyze
       - name: Full suite
         run: flutter test --reporter expanded

@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
@@ -91,7 +92,9 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -314,7 +317,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
               children: [
                 PatientMediaBanner(
                   source: article.coverImageUrl,
-                  height: 190,
+                  aspectRatio: 16 / 10,
                   borderRadius: BorderRadius.circular(18),
                 ),
                 Padding(
@@ -361,13 +364,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                       const SizedBox(height: 8),
                       Text(
                         loc.isArabic ? article.titleAr : article.titleEn,
-                        style: TextStyle(
-                          color: isDark
-                              ? AppColors.silverPrimary
-                              : AppColors.lightTextPrimary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14.5,
-                        ),
+                        style: PatientDesign.heading(context, size: 23),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

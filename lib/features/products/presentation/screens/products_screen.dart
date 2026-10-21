@@ -1,10 +1,10 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/brand_product_media.dart';
 import '../../../../core/widgets/editorial_heading.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -83,7 +83,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -99,7 +101,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             automaticallyImplyLeading: false,
             title: Text(
               loc.tr('category_products_title'),
-              style: AppTypography.screenTitle.copyWith(
+              style: PatientDesign.heading(context, size: 23).copyWith(
                 color: isDark
                     ? AppColors.silverPrimary
                     : AppColors.lightTextPrimary,
@@ -177,8 +179,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ? 'علامات تجميلية'
                         : 'COSMETIC BRANDS',
                     title: loc.isArabic
-                        ? 'عناية تستحق التعرّف عليها'
-                        : 'A closer look at skincare',
+                        ? 'اكتشف عالم العناية'
+                        : 'Discover skincare',
                   ),
                 // Products Grid
                 Expanded(
@@ -378,12 +380,7 @@ class _ProductCard extends StatelessWidget {
                       locale.isArabic ? product.nameAr : product.nameEn,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.text(context),
-                        fontSize: 18,
-                        height: 1.4,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: PatientDesign.heading(context, size: 21),
                     ),
                     if (product.sponsorCompany?.trim().isNotEmpty == true &&
                         product.sponsorCompany != brand)
@@ -394,6 +391,27 @@ class _ProductCard extends StatelessWidget {
                           style: TextStyle(
                             color: AppColors.subtext(context),
                             fontSize: 11,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    if ((locale.isArabic
+                                ? product.descriptionAr
+                                : product.descriptionEn)
+                            .trim()
+                            .isNotEmpty ==
+                        true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          (locale.isArabic
+                              ? product.descriptionAr
+                              : product.descriptionEn),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.subtext(context),
+                            fontSize: 13,
                             height: 1.5,
                           ),
                         ),

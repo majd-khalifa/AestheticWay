@@ -438,7 +438,7 @@ void main() {
 
   for (final width in [320.0, 600.0]) {
     testWidgets(
-      'responsive actual photo frame at $width has 3:2 ratio, missing media collapses',
+      'responsive actual photo frame at $width has 3:2 ratio, missing media uses compact identity',
       (tester) async {
         await tester.binding.setSurfaceSize(Size(width, 1200));
         addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -488,7 +488,13 @@ void main() {
         final media = find.byType(PatientMediaBanner);
         final image = tester.getSize(media.first);
         expect(image.width / image.height, closeTo(1.5, .01));
-        expect(tester.getSize(media.last).height, 0);
+        expect(
+          tester.getSize(media.last).height,
+          inInclusiveRange(48, 96),
+          reason:
+              'Compact fallback may wrap Arabic at 160% text, but must stay under 96dp.',
+        );
+        expect(find.byType(PatientMediaFallback), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );

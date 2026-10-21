@@ -56,7 +56,9 @@ Map<String, Object?> clinicGoldenGeometry(WidgetTester tester) {
 void expectClinicGoldenGeometry(WidgetTester tester, String name) {
   final actual = clinicGoldenGeometry(tester);
   const capture = String.fromEnvironment('PATIENT_GOLDEN_CAPTURE_DIR');
-  final expected = File('test/goldens/clinic_profile_v2/geometry/$name.json');
+  final expected = File(
+    'test/goldens/patient_design_lock_v1/geometry/$name.json',
+  );
   if (capture.isNotEmpty) {
     final output = File.fromUri(Directory(capture).uri.resolve('$name.json'));
     output.parent.createSync(recursive: true);

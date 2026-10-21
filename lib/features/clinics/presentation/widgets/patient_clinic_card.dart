@@ -1,3 +1,5 @@
+import '../../../../core/theme/patient_design.dart';
+import '../../../../core/widgets/silver_button.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -19,36 +21,41 @@ class PatientClinicCard extends StatelessWidget {
     this.onRequestAction,
     this.onContact,
     this.showCover = true,
+    this.media,
+    this.compact = false,
   });
   final ClinicModel clinic;
-  final bool showCover;
+  final bool showCover, compact;
+  final Widget? media;
   final VoidCallback onTap;
   final VoidCallback? onRequest, onContact;
   final AsyncPatientAction? onRequestAction;
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final area = loc.isArabic ? clinic.areaAr : clinic.areaEn;
     final location = formatClinicLocation(
       clinic.city,
-      area,
+      loc.isArabic ? clinic.areaAr : clinic.areaEn,
       arabic: loc.isArabic,
     );
+    final description = loc.isArabic
+        ? clinic.descriptionAr
+        : clinic.descriptionEn;
     return LuxuryCard(
       padding: EdgeInsets.zero,
       onTap: onTap,
-      borderRadius: 22,
-      isVip: clinic.isEligibleForTopCarousel,
+      borderRadius: 16,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (showCover)
-              PatientMediaBanner(
-                source: clinic.primaryPhotoUrl,
-                aspectRatio: 3 / 2,
-              ),
+              media ??
+                  PatientMediaBanner(
+                    source: clinic.primaryPhotoUrl,
+                    aspectRatio: 3 / 2,
+                  ),
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -58,107 +65,112 @@ class PatientClinicCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(5),
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceSubtle(context),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: LuxuryImage(
                           imageUrl: clinic.logoUrl,
-                          width: 44,
-                          height: 44,
+                          width: 46,
+                          height: 46,
                           fit: BoxFit.contain,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (clinic.isEligibleForTopCarousel)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: Text(
-                                  clinic.subscriptionTier ==
-                                          SubscriptionTier.vipPlatinum
-                                      ? 'VIP'
-                                      : (loc.isArabic
-                                            ? 'عيادة مميزة'
-                                            : 'FEATURED CLINIC'),
-                                  style: TextStyle(
-                                    color: AppColors.goldText(context),
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: loc.isArabic ? 0 : 1,
-                                  ),
-                                ),
-                              ),
                             Text(
                               loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                              style: TextStyle(
-                                color: AppColors.text(context),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                height: 1.35,
+                              style: PatientDesign.heading(
+                                context,
+                                size: compact ? 18 : 21,
                               ),
                             ),
-                            if (clinic.city.trim().isNotEmpty ||
-                                area.trim().isNotEmpty)
+                            if (location.trim().isNotEmpty)
                               Padding(
-                                padding: const EdgeInsets.only(top: 7),
-                                child: Text(
-                                  location,
-                                  style: TextStyle(
-                                    color: AppColors.subtext(context),
-                                    fontSize: 12,
-                                  ),
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      size: 14,
+                                      color: AppColors.subtext(context),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        location,
+                                        style: TextStyle(
+                                          color: AppColors.subtext(context),
+                                          fontSize: 12,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            GoogleClinicRating(clinic: clinic),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  if (onRequestAction != null)
-                    AsyncActionButton(
-                      label: loc.tr('request_consultation'),
-                      loadingLabel: loc.isArabic
-                          ? 'جارٍ فتح الاستشارة'
-                          : 'Opening consultation',
-                      icon: Icons.chat_bubble_outline,
-                      onPressed: isEntityUuid(clinic.id)
-                          ? onRequestAction
-                          : null,
-                    )
-                  else if (onRequest != null)
-                    FilledButton.icon(
-                      onPressed: isEntityUuid(clinic.id) ? onRequest : null,
-                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                      label: Text(loc.tr('request_consultation')),
-                    ),
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: onTap,
-                        child: Text(
-                          loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
+                  GoogleClinicRating(clinic: clinic),
+                  if (!compact && description.trim().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.5,
+                          color: AppColors.subtext(context),
                         ),
                       ),
-                      if (onContact != null &&
-                          (clinic.hasPhone ||
-                              clinic.hasWhatsapp ||
-                              clinic.hasMapLocation))
-                        TextButton(
-                          onPressed: onContact,
-                          child: Text(loc.tr('contact_btn')),
-                        ),
-                    ],
+                    ),
+                  const SizedBox(height: 12),
+                  SilverButton(
+                    label: loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
+                    onPressed: onTap,
+                    icon: Icons.arrow_forward_rounded,
+                    isFullWidth: true,
                   ),
+                  if (!compact &&
+                      (onRequestAction != null ||
+                          onRequest != null ||
+                          onContact != null))
+                    Row(
+                      children: [
+                        if (onRequestAction != null || onRequest != null)
+                          Expanded(
+                            child: onRequestAction != null
+                                ? AsyncActionButton(
+                                    label: loc.tr('request_consultation'),
+                                    onPressed: isEntityUuid(clinic.id)
+                                        ? onRequestAction
+                                        : null,
+                                    variant: SilverButtonVariant.textOnly,
+                                  )
+                                : TextButton(
+                                    onPressed: onRequest,
+                                    child: Text(loc.tr('request_consultation')),
+                                  ),
+                          ),
+                        if (onContact != null)
+                          IconButton(
+                            onPressed: onContact,
+                            tooltip: loc.tr('contact_btn'),
+                            icon: const Icon(Icons.phone_outlined, size: 20),
+                          ),
+                      ],
+                    ),
                 ],
               ),
             ),

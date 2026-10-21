@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/product_inquiry_bottom_sheet.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../../../core/utils/entity_id.dart';
@@ -62,7 +63,9 @@ class ProductDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final brandTitle = productBrandLabel(product, loc);

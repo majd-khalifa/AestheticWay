@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/utils/clinic_location.dart';
 import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,9 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final clinicName = loc.isArabic

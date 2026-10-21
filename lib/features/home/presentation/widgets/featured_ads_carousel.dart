@@ -1,3 +1,5 @@
+import '../../../clinics/presentation/widgets/patient_clinic_card.dart';
+import '../../../../core/theme/patient_design.dart';
 import '../../data/models/home_feed_model.dart';
 import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:aesthetic_way/core/widgets/viewport_activity.dart';
@@ -8,8 +10,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import '../../../../core/widgets/content_sized_page_view.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/widgets/async_action_button.dart';
-import '../../../clinics/presentation/widgets/google_clinic_rating.dart';
-import '../../../../core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -152,13 +152,8 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
                   children: [
                     Expanded(
                       child: Text(
-                        loc.tr('featured_partners'),
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontFamily: loc.isArabic ? null : 'serif',
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.text(context),
-                        ),
+                        loc.isArabic ? 'عيادات مختارة' : 'Featured Clinics',
+                        style: PatientDesign.heading(context),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -294,155 +289,43 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
       : null;
   @override
   Widget build(BuildContext context) {
-    final vip = widget.placement != null
-        ? widget.placement!.subscriptionTier.trim().toLowerCase() == 'vip'
-        : widget.clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
-    final loc = widget.loc;
-    final badge = vip ? 'VIP' : (loc.isArabic ? 'مميز' : 'FEATURED');
     return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 0, 6, 8),
-      child: LuxuryCard(
-        padding: EdgeInsets.zero,
-        isVip: true,
-        borderRadius: 24,
-        gradient: AppColors.isDark(context)
-            ? AppColors.vipCardGradient
-            : AppColors.vipCardGradientLight,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FeaturedAdSlideMedia(
-                imageUrl: _image,
-                videoUrl: _video,
-                fallbackLogoUrl: widget.clinic.logoUrl,
-                isActive: widget.isActive,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.goldText(
-                              context,
-                            ).withValues(alpha: .1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            badge,
-                            style: TextStyle(
-                              color: AppColors.goldText(context),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (_video?.isNotEmpty == true)
-                          Text(
-                            loc.isArabic ? 'فيديو 15 ثانية' : '15s Video',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.subtext(context),
-                            ),
-                          ),
-                        Text(
-                          widget.placement != null
-                              ? (loc.isArabic
-                                    ? 'إعلان مدفوع'
-                                    : 'Sponsored placement')
-                              : (loc.isArabic
-                                    ? 'عيادة شريكة'
-                                    : 'Partner clinic'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.subtext(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        LuxuryImage(
-                          imageUrl: widget.clinic.logoUrl,
-                          width: 54,
-                          height: 54,
-                          fit: BoxFit.contain,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                loc.isArabic
-                                    ? widget.clinic.nameAr
-                                    : widget.clinic.nameEn,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  height: 1.3,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.text(context),
-                                ),
-                              ),
-                              if (widget.clinic.city.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: Text(
-                                    widget.clinic.city,
-                                    style: TextStyle(
-                                      color: AppColors.subtext(context),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              GoogleClinicRating(clinic: widget.clinic),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (widget.onRequestAction != null)
-                      AsyncActionButton(
-                        label: loc.tr('request_consultation'),
-                        loadingLabel: loc.isArabic
-                            ? 'جارٍ فتح الاستشارة'
-                            : 'Opening consultation',
-                        onPressed: widget.onRequestAction,
-                        icon: Icons.chat_bubble_outline,
-                      )
-                    else
-                      FilledButton.icon(
-                        onPressed: widget.onRequestTap,
-                        icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                        label: Text(loc.tr('request_consultation')),
-                      ),
-                    TextButton(
-                      onPressed: widget.onTap,
-                      child: Text(
-                        loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
-                      ),
-                    ),
-                  ],
+      padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 8),
+      child: PatientClinicCard(
+        clinic: widget.clinic,
+        compact: true,
+        onTap: widget.onTap,
+        onRequestAction: widget.onRequestAction,
+        onRequest: widget.onRequestTap,
+        onContact: widget.onContactTap,
+        media: Stack(
+          children: [
+            FeaturedAdSlideMedia(
+              imageUrl: _image,
+              videoUrl: _video,
+              fallbackLogoUrl: widget.clinic.logoUrl,
+              isActive: widget.isActive,
+            ),
+            if (_video?.isNotEmpty == true)
+              PositionedDirectional(
+                start: 10,
+                top: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: .7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    widget.loc.isArabic ? 'فيديو 15 ثانية' : '15s Video',
+                    style: const TextStyle(color: Colors.white, fontSize: 11),
+                  ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );

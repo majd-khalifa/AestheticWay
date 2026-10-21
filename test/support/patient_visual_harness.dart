@@ -12,6 +12,15 @@ Future<void> loadPatientVisualFonts() async {
   final bold = ByteData.sublistView(
     File('test/fixtures/fonts/DejaVuSans-Bold.ttf').readAsBytesSync(),
   );
+  for (final entry in {
+    'PatientDisplay': 'PlayfairDisplay.ttf',
+    'PatientArabic': 'NotoSansArabic.ttf',
+  }.entries) {
+    final data = ByteData.sublistView(
+      File('assets/fonts/patient/${entry.value}').readAsBytesSync(),
+    );
+    await (FontLoader(entry.key)..addFont(Future.value(data))).load();
+  }
   for (final family in ['PatientPreview', 'serif']) {
     await (FontLoader(family)..addFont(Future.value(regular))).load();
   }

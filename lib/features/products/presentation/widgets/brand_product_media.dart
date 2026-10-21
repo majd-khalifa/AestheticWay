@@ -31,7 +31,7 @@ class BrandProductMedia extends StatelessWidget {
     final loc = LocaleService();
     final brand = productBrandLabel(product, loc);
     Widget identity() => Container(
-      padding: EdgeInsets.all(hero ? 28 : 20),
+      padding: EdgeInsets.all(hero ? 24 : 16),
       decoration: BoxDecoration(
         gradient: AppColors.isDark(context)
             ? AppColors.vipCardGradient
@@ -48,8 +48,8 @@ class BrandProductMedia extends StatelessWidget {
                 ? (loc.isArabic ? 'عرض علامة تجميل' : 'Brand showcase')
                 : brand,
             style: TextStyle(
-              fontFamily: loc.isArabic ? null : 'serif',
-              fontSize: hero ? 30 : 23,
+              fontFamily: loc.isArabic ? 'PatientArabic' : 'PatientDisplay',
+              fontSize: hero ? 26 : 21,
               height: 1.35,
               fontWeight: FontWeight.w500,
               color: AppColors.text(context),

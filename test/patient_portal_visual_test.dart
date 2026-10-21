@@ -353,7 +353,7 @@ void main() {
                       'PATIENT_GOLDEN_CAPTURE_DIR',
                     ).isEmpty
                     ? Uri.parse(
-                        'goldens/clinic_profile_v2/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                        'goldens/patient_design_lock_v1/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
                       )
                     : Directory(
                         const String.fromEnvironment(

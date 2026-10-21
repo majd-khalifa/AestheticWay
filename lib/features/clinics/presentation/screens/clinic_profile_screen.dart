@@ -1,5 +1,8 @@
+import '../../../../core/widgets/silver_button.dart';
+import '../../../treatments/presentation/widgets/patient_treatment_card.dart';
+import '../widgets/patient_clinic_gallery.dart';
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../practitioners/presentation/widgets/patient_practitioner_card.dart';
 import '../../../offers/presentation/widgets/patient_offer_card.dart';
 import 'package:flutter/material.dart';
@@ -181,7 +184,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final clinic = _clinic;
     final images = {
@@ -214,36 +219,11 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            if (images.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 18),
-                child: LayoutBuilder(
-                  builder: (context, constraints) => SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final image in images)
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 10),
-                            child: SizedBox(
-                              width: constraints.maxWidth,
-                              child: PatientMediaBanner(
-                                source: image,
-                                aspectRatio: 16 / 9,
-                                borderRadius: BorderRadius.circular(22),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            PatientClinicGallery(images: images),
+            const SizedBox(height: 16),
             LuxuryCard(
               padding: const EdgeInsets.all(18),
               gradient: AppColors.cardGrad(context),
-              isVip: clinic.isEligibleForTopCarousel,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -262,31 +242,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (clinic.isEligibleForTopCarousel)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 7),
-                                child: Text(
-                                  clinic.subscriptionTier ==
-                                          SubscriptionTier.vipPlatinum
-                                      ? 'VIP'
-                                      : (loc.isArabic
-                                            ? 'عيادة مميزة'
-                                            : 'FEATURED CLINIC'),
-                                  style: TextStyle(
-                                    color: AppColors.goldText(context),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
                             Text(
                               loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                              style: TextStyle(
-                                fontSize: 23,
-                                height: 1.35,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.text(context),
-                              ),
+                              style: PatientDesign.heading(context, size: 24),
                             ),
                             const SizedBox(height: 6),
                             if (clinic.city.isNotEmpty ||
@@ -334,30 +292,46 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           ? 'العيادة غير متاحة لاستقبال الطلبات'
                           : 'This clinic is unavailable for inquiries',
                     ),
-                  Wrap(
-                    spacing: 8,
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (clinic.hasPhone || clinic.hasWhatsapp)
-                        TextButton.icon(
-                          onPressed: () =>
-                              ContactOptionsSheet.show(context, clinic),
-                          icon: const Icon(Icons.phone_outlined),
-                          label: Text(loc.tr('contact_btn')),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () =>
+                                ContactOptionsSheet.show(context, clinic),
+                            icon: const Icon(Icons.phone_outlined, size: 18),
+                            label: Text(
+                              loc.tr('contact_btn'),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
+                      if ((clinic.hasPhone || clinic.hasWhatsapp) &&
+                          clinic.mapsUri != null)
+                        const SizedBox(width: 8),
                       if (clinic.mapsUri != null)
-                        TextButton.icon(
-                          onPressed: () async {
-                            try {
-                              await launchUrl(
-                                clinic.mapsUri!,
-                                mode: LaunchMode.externalApplication,
+                        Expanded(
+                          child: AsyncActionButton(
+                            label: loc.tr('map_google'),
+                            icon: Icons.map_outlined,
+                            variant: SilverButtonVariant.secondary,
+                            loadingLabel: loc.isArabic
+                                ? 'جارٍ فتح الخرائط'
+                                : 'Opening Maps',
+                            onPressed: (action) async {
+                              final opened = await action.wait(
+                                launchUrl(
+                                  clinic.mapsUri!,
+                                  mode: LaunchMode.externalApplication,
+                                ),
                               );
-                            } catch (_) {
-                              /* Retain profile on missing OS handler. */
-                            }
-                          },
-                          icon: const Icon(Icons.map_outlined),
-                          label: Text(loc.tr('map_google')),
+                              if (!opened) {
+                                throw StateError('Map handler unavailable');
+                              }
+                            },
+                          ),
                         ),
                     ],
                   ),
@@ -365,19 +339,20 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (var i = 0; i < tabs.length; i++)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < tabs.length; i++)
+                  Expanded(
+                    child: Semantics(
+                      selected: _tab == i,
+                      button: true,
                       child: InkWell(
                         onTap: () => _select(i),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 15,
+                            horizontal: 3,
+                            vertical: 12,
                           ),
                           decoration: BoxDecoration(
                             border: Border(
@@ -389,21 +364,43 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                               ),
                             ),
                           ),
-                          child: Text(
-                            tabs[i],
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: _tab == i
-                                  ? AppColors.goldText(context)
-                                  : AppColors.subtext(context),
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                [
+                                  Icons.article_outlined,
+                                  Icons.people_outline,
+                                  Icons.auto_awesome_outlined,
+                                  Icons.local_offer_outlined,
+                                ][i],
+                                size: 21,
+                                color: _tab == i
+                                    ? AppColors.goldText(context)
+                                    : AppColors.subtext(context),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                tabs[i],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  height: 1.4,
+                                  fontWeight: _tab == i
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: _tab == i
+                                      ? AppColors.goldText(context)
+                                      : AppColors.subtext(context),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             if (_tab == 0)
@@ -418,7 +415,9 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         child: Text(
                           loc.isArabic ? 'عن العيادة' : 'About the clinic',
                           style: TextStyle(
-                            fontFamily: loc.isArabic ? null : 'serif',
+                            fontFamily: loc.isArabic
+                                ? 'PatientArabic'
+                                : 'PatientDisplay',
                             fontSize: 23,
                             color: AppColors.text(context),
                           ),
@@ -505,13 +504,16 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                     : 'No treatments published',
               ),
               for (final t in _treatments.items)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(loc.isArabic ? t.nameAr : t.nameEn),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    LuxuryPageRoute(page: TreatmentDetailScreen(treatment: t)),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: PatientTreatmentCard(
+                    treatment: t,
+                    onTap: () => Navigator.push(
+                      context,
+                      LuxuryPageRoute(
+                        page: TreatmentDetailScreen(treatment: t),
+                      ),
+                    ),
                   ),
                 ),
               _footer(_treatments),

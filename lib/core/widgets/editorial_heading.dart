@@ -1,3 +1,4 @@
+import '../theme/patient_theme_tokens.dart';
 import 'package:flutter/material.dart';
 import '../localization/app_locale.dart';
 import '../theme/app_colors.dart';
@@ -35,7 +36,10 @@ class EditorialHeading extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontFamily: arabic ? null : 'serif',
+              fontFamily:
+                  Theme.of(context).extension<PatientThemeTokens>() == null
+                  ? (arabic ? null : 'serif')
+                  : (arabic ? 'PatientArabic' : 'PatientDisplay'),
               fontSize: 28,
               height: 1.35,
               fontWeight: FontWeight.w500,

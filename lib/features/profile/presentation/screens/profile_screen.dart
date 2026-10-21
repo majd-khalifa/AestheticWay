@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -43,6 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserModel? _user;
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _profileFlight = false;
   bool _isEditing = false;
   String? _errorMessage;
   String? _profileEditErrorMessage;
@@ -67,6 +69,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    if (_profileFlight) return;
+    _profileFlight = true;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -96,10 +100,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             : 'Unable to load profile data from server.';
         _isLoading = false;
       });
+    } finally {
+      _profileFlight = false;
     }
   }
 
   Future<void> _saveProfile() async {
+    if (_isSaving) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final loc = LocaleService();
@@ -651,7 +658,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final auth = AuthState();
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
@@ -677,7 +686,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: AppColors.bg(context),
             title: Text(
               loc.tr('profile_title'),
-              style: AppTypography.screenTitle.copyWith(
+              style: PatientDesign.heading(context, size: 23).copyWith(
                 color: isDark
                     ? AppColors.silverPrimary
                     : AppColors.lightTextPrimary,
@@ -688,12 +697,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (hasAuthenticatedUser)
                 IconButton(
                   tooltip: loc.isArabic ? 'تحديث البيانات' : 'Refresh Profile',
-                  icon: Icon(
-                    Icons.refresh_rounded,
-                    color: isDark
-                        ? AppColors.silverSecondary
-                        : AppColors.lightTextPrimary,
-                  ),
+                  icon: _isLoading
+                      ? SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            semanticsLabel: loc.isArabic
+                                ? 'جارٍ تحديث الملف الشخصي'
+                                : 'Updating profile',
+                          ),
+                        )
+                      : Icon(
+                          Icons.refresh_rounded,
+                          color: isDark
+                              ? AppColors.silverSecondary
+                              : AppColors.lightTextPrimary,
+                        ),
                   onPressed: _isLoading ? null : _loadProfile,
                 ),
             ],
@@ -767,12 +786,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 14),
                             Text(
                               loc.tr('login_title'),
-                              style: AppTypography.heroTitle.copyWith(
-                                fontSize: 18,
-                                color: isDark
-                                    ? AppColors.silverPrimary
-                                    : AppColors.lightTextPrimary,
-                              ),
+                              style: PatientDesign.heading(context, size: 26)
+                                  .copyWith(
+                                    fontSize: 18,
+                                    color: isDark
+                                        ? AppColors.silverPrimary
+                                        : AppColors.lightTextPrimary,
+                                  ),
                             ),
                             const SizedBox(height: 6),
                             Text(
@@ -888,10 +908,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 displayName.isNotEmpty
                                     ? displayName.characters.first.toUpperCase()
                                     : 'U',
-                                style: AppTypography.heroTitle.copyWith(
-                                  fontSize: 22,
-                                  color: AppColors.goldText(context),
-                                ),
+                                style: PatientDesign.heading(context, size: 26)
+                                    .copyWith(
+                                      fontSize: 22,
+                                      color: AppColors.goldText(context),
+                                    ),
                               ),
                             ),
                             const SizedBox(width: 14),

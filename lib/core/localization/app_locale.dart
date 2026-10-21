@@ -753,8 +753,8 @@ class LocaleService extends ChangeNotifier {
       'en': 'Aesthetic Offers & Packages',
     },
     'category_products_title': {
-      'ar': 'المنتجات والمستحضرات الطبية',
-      'en': 'Medical Products & Skincare',
+      'ar': 'عالم العلامات التجميلية',
+      'en': 'Cosmetic Brand Showcase',
     },
     'category_articles_title': {
       'ar': 'المقالات ودليل التوعية الطبية',
@@ -969,7 +969,7 @@ class LocaleService extends ChangeNotifier {
       'ar': 'طلب استشارة مع الممارس',
       'en': 'Request consultation',
     },
-    'offer_claim': {'ar': 'طلب بالعرض', 'en': 'Inquire about offer'},
+    'offer_claim': {'ar': 'استفسر عن العرض', 'en': 'Inquire about offer'},
     'verified_visit': {'ar': 'زيارة موثقة', 'en': 'Verified Visit'},
     'reviews_summary': {'ar': 'تقييمات من Google', 'en': 'Ratings from Google'},
     'google_rating': {'ar': 'تقييم Google', 'en': 'Google Rating'},

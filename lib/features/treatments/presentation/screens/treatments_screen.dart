@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_picker.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
@@ -119,7 +120,9 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
       : null;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 

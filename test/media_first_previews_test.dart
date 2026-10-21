@@ -1,3 +1,8 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
+import 'package:aesthetic_way/features/articles/presentation/screens/articles_screen.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
+import 'package:aesthetic_way/features/profile/presentation/screens/profile_screen.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'support/settle_preview_images.dart';
 import 'package:aesthetic_way/core/widgets/async_action_button.dart';
@@ -73,7 +78,14 @@ final _practitioner = <String, dynamic>{
   'bio_ar': 'سيرة تقدمها العيادة.',
 };
 Object _response(String path) {
-  final clinic = {...previewClinic, if (!populated) 'cover_image': ''};
+  final clinic = {
+    ...previewClinic,
+    if (!populated) ...{
+      'cover_image': '',
+      'google_rating': null,
+      'google_reviews_count': 0,
+    },
+  };
   final offer = {..._offer, 'clinic': clinic, if (!populated) 'image_url': ''};
   final product = {
     ..._product,
@@ -106,6 +118,14 @@ Object _response(String path) {
     };
   }
   if (path == 'clinics/$previewClinicId/') return clinic;
+  if (path == 'auth/me/') {
+    return {
+      'id': 'fixture-patient',
+      'full_name': 'Preview Patient',
+      'role': 'patient',
+      'phone': '+971501234567',
+    };
+  }
   return {
     'count': 1,
     'next': null,
@@ -114,6 +134,31 @@ Object _response(String path) {
       'products/' => [product],
       'offers/' => [offer],
       'practitioners/' => [practitioner],
+      'articles/' => [
+        {
+          'id': '66666666-6666-4666-8666-666666666666',
+          'title_en': 'Understanding your skin consultation',
+          'title_ar': 'تعرّف على استشارة البشرة',
+          'content_en':
+              'An editorial preview using synthetic test data. Learn what to discuss with a medical professional.',
+          'content_ar':
+              'معاينة تحريرية ببيانات اختبار اصطناعية. تعرّف على ما يمكنك مناقشته مع المختص الطبي.',
+          'cover_image_url': populated ? _photo : '',
+          'category_en': 'Skin care',
+          'category_ar': 'العناية بالبشرة',
+          'clinic': clinic,
+        },
+      ],
+      'treatments/' => [
+        {
+          'id': '77777777-7777-4777-8777-777777777777',
+          'name_en': 'Skin consultation',
+          'name_ar': 'استشارة للبشرة',
+          'description_en': 'Discuss care options with the clinic.',
+          'description_ar': 'ناقش خيارات العناية مع العيادة.',
+          'image_url': populated ? _photo : '',
+        },
+      ],
       _ => [],
     },
   };
@@ -121,11 +166,21 @@ Object _response(String path) {
 
 void main() {
   setUpAll(() async {
+    FlutterSecureStorage.setMockInitialValues({});
     final bytes = File('test/fixtures/fonts/DejaVuSans.ttf').readAsBytesSync();
     for (final family in ['PatientPreview', 'serif']) {
       await (FontLoader(
         family,
       )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+    }
+    for (final entry in {
+      'PatientDisplay': 'PlayfairDisplay.ttf',
+      'PatientArabic': 'NotoSansArabic.ttf',
+    }.entries) {
+      final data = ByteData.sublistView(
+        File('assets/fonts/patient/${entry.value}').readAsBytesSync(),
+      );
+      await (FontLoader(entry.key)..addFont(Future.value(data))).load();
     }
     await (FontLoader(
       'MaterialIcons',
@@ -157,6 +212,12 @@ void main() {
           'products',
           'offers',
           'practitioners',
+          'articles',
+          'consultation',
+          'profile',
+          'clinic_staff',
+          'clinic_treatments',
+          'clinic_offers',
           'busy',
         ]) {
           final name =
@@ -177,11 +238,28 @@ void main() {
               'products' => const MainNavScreen(initialIndex: 2),
               'offers' => const MainNavScreen(initialIndex: 3),
               'practitioners' => const PractitionersScreen(),
+              'articles' => const ArticlesScreen(),
+              'profile' => ProfileScreen(onNavigateToRequests: () {}),
+              'consultation' => AppointmentRequestScreen(
+                clinic: ClinicModel.fromJson({
+                  ...previewClinic,
+                  if (!media) 'cover_image': '',
+                }),
+              ),
+              'clinic_staff' ||
+              'clinic_treatments' ||
+              'clinic_offers' => ClinicProfileScreen(
+                clinic: ClinicModel.fromJson({
+                  ...previewClinic,
+                  if (!media) 'cover_image': '',
+                }),
+              ),
               _ => _ConsultationBusyPreview(),
             },
           );
           testWidgets('Media-first preview ${entry.$1}', (tester) async {
             populated = media;
+            AuthState().login(name: 'Preview Patient', phone: '+971501234567');
             tester.view.devicePixelRatio = 3;
             addTearDown(tester.view.resetDevicePixelRatio);
             tester.view.physicalSize = const Size(1170, 2532);
@@ -240,6 +318,24 @@ void main() {
             );
             await tester.pumpAndSettle();
             await settlePreviewImages(tester);
+            if (screen.startsWith('clinic_')) {
+              final key = screen == 'clinic_staff'
+                  ? 'tab_staff'
+                  : screen == 'clinic_treatments'
+                  ? 'tab_treatments'
+                  : 'tab_offers';
+              await tester.ensureVisible(
+                find.text(LocaleService().tr(key)).first,
+              );
+              await tester.tap(find.text(LocaleService().tr(key)).first);
+              await tester.pumpAndSettle();
+              await tester.drag(
+                find.byType(ListView).first,
+                const Offset(0, -470),
+              );
+              await tester.pumpAndSettle();
+              await settlePreviewImages(tester);
+            }
             if (media && (screen == 'products' || screen == 'practitioners')) {
               final fixture = screen == 'products'
                   ? 'packaging_fixture.png'
@@ -280,12 +376,38 @@ void main() {
               await tester.pump(const Duration(milliseconds: 300));
               expect(find.byType(CircularProgressIndicator), findsOneWidget);
             }
+            for (final tier in [
+              'VIP',
+              'FEATURED',
+              'FEATURED CLINIC',
+              'عيادة مميزة',
+            ]) {
+              expect(
+                find.text(tier),
+                findsNothing,
+                reason:
+                    'Internal placement entitlement must never become a patient label.',
+              );
+            }
             expect(tester.takeException(), isNull);
             const output = String.fromEnvironment('MEDIA_FIRST_CAPTURE_DIR');
             if (output.isNotEmpty) {
               await expectLater(
                 find.byKey(const ValueKey('capture')),
                 matchesGoldenFile(Uri.file('$output/${entry.$1}.png')),
+              );
+            }
+            if (output.isNotEmpty &&
+                (screen == 'home' ||
+                    screen == 'consultation' ||
+                    screen == 'profile')) {
+              final scrollable = find.byType(Scrollable).first;
+              await tester.drag(scrollable, const Offset(0, -540));
+              await tester.pumpAndSettle();
+              await settlePreviewImages(tester);
+              await expectLater(
+                find.byKey(const ValueKey('capture')),
+                matchesGoldenFile(Uri.file('$output/${entry.$1}_scrolled.png')),
               );
             }
             await tester.pumpWidget(const SizedBox.shrink());

@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../offers/presentation/offer_actions.dart';
 import 'dart:async';
@@ -255,7 +256,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
 
     return ListenableBuilder(
@@ -329,6 +332,37 @@ class _HomeScreenState extends State<HomeScreen> {
           child: HomeHeader(
             selectedCity: _selectedCity,
             onCityChanged: _cityChanged,
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.isArabic
+                      ? 'عناية جمالية\nتليق بك'
+                      : 'Aesthetic Care\nfor a More You',
+                  style: PatientDesign.heading(context, size: 34),
+                ),
+                const SizedBox(height: 10),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 320),
+                  child: Text(
+                    loc.isArabic
+                        ? 'اكتشف العيادات والمختصين والإجراءات المناسبة لاحتياجاتك.'
+                        : 'Discover clinics, medical professionals and treatments for your skin and wellbeing.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.6,
+                      color: AppColors.subtext(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
 

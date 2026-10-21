@@ -1,7 +1,7 @@
+import '../../../../core/theme/patient_design.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../../core/localization/app_locale.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../offers/presentation/widgets/patient_offer_card.dart';
 
 import '../../../offers/models/offer_model.dart';
@@ -27,12 +27,7 @@ class ActiveOffersSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             loc.tr('active_offers'),
-            style: TextStyle(
-              fontSize: 22,
-              fontFamily: loc.isArabic ? null : 'serif',
-              fontWeight: FontWeight.w500,
-              color: AppColors.text(context),
-            ),
+            style: PatientDesign.heading(context),
           ),
         ),
         const SizedBox(height: 12),

@@ -1,3 +1,4 @@
+import '../../../../core/theme/patient_design.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -31,9 +32,9 @@ class PatientOfferCard extends StatelessWidget {
     final description = loc.isArabic ? offer.termsAr : offer.termsEn;
     return LuxuryCard(
       padding: EdgeInsets.zero,
-      borderRadius: 22,
+      borderRadius: 16,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -75,11 +76,9 @@ class PatientOfferCard extends StatelessWidget {
                     ),
                   Text(
                     loc.isArabic ? offer.titleAr : offer.titleEn,
-                    style: TextStyle(
-                      fontSize: compact ? 18 : 21,
-                      height: 1.4,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.text(context),
+                    style: PatientDesign.heading(
+                      context,
+                      size: compact ? 19 : 23,
                     ),
                   ),
                   if (description?.trim().isNotEmpty == true)
@@ -148,7 +147,9 @@ class PatientOfferCard extends StatelessWidget {
                   const SizedBox(height: 14),
                   if (onInquiryAction != null)
                     AsyncActionButton(
-                      label: loc.tr('offer_claim'),
+                      label: loc.isArabic
+                          ? 'استفسر عن العرض'
+                          : 'Inquire about offer',
                       loadingLabel: loc.isArabic
                           ? 'جارٍ تحميل العيادة'
                           : 'Loading clinic',

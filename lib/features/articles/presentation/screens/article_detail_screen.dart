@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -95,7 +96,9 @@ class ArticleDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final categoryLabel = loc.isArabic
@@ -118,7 +121,7 @@ class ArticleDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.bg(context),
         title: Text(
           loc.tr('category_articles_title'),
-          style: AppTypography.screenTitle.copyWith(
+          style: PatientDesign.heading(context, size: 23).copyWith(
             color: isDark
                 ? AppColors.silverPrimary
                 : AppColors.lightTextPrimary,
@@ -196,7 +199,7 @@ class ArticleDetailScreen extends StatelessWidget {
           // Article Title
           Text(
             loc.isArabic ? article.titleAr : article.titleEn,
-            style: AppTypography.screenTitle.copyWith(
+            style: PatientDesign.heading(context, size: 23).copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w900,
               color: isDark

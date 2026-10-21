@@ -1,8 +1,10 @@
+import '../localization/app_locale.dart';
+import '../theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'luxury_image.dart';
 
-/// Photography has no reserved empty panel. Missing/failed media collapses while
-/// the adjacent clinic/brand identity remains visible. No invented stock photo.
+/// Genuine photography keeps its intended framing. Absent or failed media uses
+/// a compact editorial strip, never a large empty photograph or invented image.
 class PatientMediaBanner extends StatelessWidget {
   const PatientMediaBanner({
     super.key,
@@ -20,7 +22,7 @@ class PatientMediaBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = resolveImageProvider(source);
-    if (provider == null) return const SizedBox.shrink();
+    if (provider == null) return const PatientMediaFallback();
     return ClipRRect(
       borderRadius: borderRadius,
       child: LayoutBuilder(
@@ -42,10 +44,38 @@ class PatientMediaBanner extends StatelessWidget {
             fit: BoxFit.cover,
             semanticLabel: semanticLabel,
             excludeFromSemantics: semanticLabel == null,
-            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            errorBuilder: (_, _, _) => const PatientMediaFallback(),
           );
         },
       ),
     );
   }
+}
+
+/// Content-sized missing-media treatment, deliberately independent of photo ratio.
+class PatientMediaFallback extends StatelessWidget {
+  const PatientMediaFallback({super.key});
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    color: AppColors.surfaceSubtle(context),
+    child: Row(
+      children: [
+        Icon(
+          Icons.photo_outlined,
+          size: 22,
+          color: AppColors.goldText(context),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            LocaleService().isArabic
+                ? 'الصور غير متاحة'
+                : 'Photography unavailable',
+            style: TextStyle(fontSize: 12, color: AppColors.subtext(context)),
+          ),
+        ),
+      ],
+    ),
+  );
 }

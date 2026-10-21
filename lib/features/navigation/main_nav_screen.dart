@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +66,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final localeService = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -106,7 +109,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
               body: LazyTabStack(index: _currentIndex, builders: screens),
               bottomNavigationBar: SafeArea(
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 7,
@@ -163,8 +166,8 @@ class _MainNavScreenState extends State<MainNavScreen> {
                         _FloatingNavItem(
                           index: 0,
                           selectedIndex: _currentIndex,
-                          icon: Icons.space_dashboard_outlined,
-                          activeIcon: Icons.space_dashboard_rounded,
+                          icon: Icons.home_outlined,
+                          activeIcon: Icons.home_rounded,
                           label: localeService.tr('nav_home'),
                           onTap: () => _onTabTapped(0),
                         ),

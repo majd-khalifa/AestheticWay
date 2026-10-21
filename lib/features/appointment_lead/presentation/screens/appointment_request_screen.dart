@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/utils/clinic_location.dart';
 import '../../../clinics/data/clinics_repository.dart';
@@ -368,7 +369,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -417,7 +420,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
           elevation: 0,
           title: Text(
             loc.tr('request_consultation'),
-            style: AppTypography.screenTitle.copyWith(
+            style: PatientDesign.heading(context, size: 23).copyWith(
               color: isDark
                   ? AppColors.silverPrimary
                   : AppColors.lightTextPrimary,
@@ -541,12 +544,12 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                               null)
                           ? LuxuryImage(
                               imageUrl: widget.clinic.coverImageUrl,
-                              width: 52,
-                              height: 52,
+                              width: 82,
+                              height: 78,
                               fit: BoxFit.cover,
                               customPlaceholder: Container(
-                                width: 52,
-                                height: 52,
+                                width: 82,
+                                height: 78,
                                 color: isDark
                                     ? AppColors.cardSurfaceHover
                                     : AppColors.lightCardSurfaceHover,
@@ -559,8 +562,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                               ),
                             )
                           : Container(
-                              width: 52,
-                              height: 52,
+                              width: 82,
+                              height: 78,
                               color: isDark
                                   ? AppColors.cardSurfaceHover
                                   : AppColors.lightCardSurfaceHover,
@@ -780,9 +783,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                     size: 18,
                   ),
                   filled: true,
-                  fillColor: isDark
-                      ? AppColors.cardSurfaceHover
-                      : AppColors.lightCardSurfaceHover,
+                  fillColor: AppColors.surface(context),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
@@ -847,9 +848,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   ),
                   alignLabelWithHint: true,
                   filled: true,
-                  fillColor: isDark
-                      ? AppColors.cardSurfaceHover
-                      : AppColors.lightCardSurfaceHover,
+                  fillColor: AppColors.surface(context),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(

@@ -188,7 +188,7 @@ void main() {
     );
   });
   testWidgets(
-    'Genuine photo decodes with cover geometry; absent media reserves no panel',
+    'Genuine photo decodes with cover geometry; absent media uses a compact strip',
     (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -207,14 +207,18 @@ void main() {
       );
       await settlePreviewImages(tester);
       expect(tester.getSize(find.byType(PatientMediaBanner).first).height, 180);
-      expect(tester.getSize(find.byType(PatientMediaBanner).last).height, 0);
+      expect(
+        tester.getSize(find.byType(PatientMediaBanner).last).height,
+        inInclusiveRange(48, 76),
+      );
+      expect(find.byType(PatientMediaFallback), findsOneWidget);
       final image = tester.widget<Image>(find.byType(Image));
       expect(image.fit, BoxFit.cover);
       expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
     },
   );
   testWidgets(
-    'Undecodable native media collapses instead of becoming a giant fallback panel',
+    'Undecodable native media uses the same compact fallback without hiding identity',
     (tester) async {
       final dir = Directory.systemTemp.createTempSync('aw-broken-media-');
       addTearDown(() => dir.deleteSync(recursive: true));
@@ -236,13 +240,17 @@ void main() {
       // async zone. Advance frames and yield real IO until Image.errorBuilder
       // has replaced it; observing a second stream can miss that first error.
       for (var frame = 0; frame < 30; frame++) {
-        if (tester.getSize(find.byType(PatientMediaBanner)).height == 0) break;
+        if (find.byType(PatientMediaFallback).evaluate().isNotEmpty) break;
         await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 10)),
         );
         await tester.pump();
       }
-      expect(tester.getSize(find.byType(PatientMediaBanner)).height, 0);
+      expect(
+        tester.getSize(find.byType(PatientMediaBanner)).height,
+        inInclusiveRange(48, 76),
+      );
+      expect(find.byType(PatientMediaFallback), findsOneWidget);
       expect(find.text('Actual clinic identity'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
