@@ -35,6 +35,7 @@ final previewClinic = <String, dynamic>{
   'logo': 'assets/images/aesthetic_way_logo.png',
   'cover_image': _photo,
   'gallery_images': [_photo, 'assets/images/onboarding/onboarding_2.webp'],
+  'google_place_id': 'preview-test-place-id',
   'google_rating': 4.7,
   'google_reviews_count': 125,
   'google_maps_url': 'https://www.google.com/maps/search/?api=1&query=Dubai',

@@ -30,6 +30,7 @@ class RequestBackpressure {
             : 'Please wait a moment before trying again.',
         statusCode: 429,
         errorCode: 'THROTTLED',
+        isLocalBackpressure: true,
         retryAfter: remaining,
       );
     }

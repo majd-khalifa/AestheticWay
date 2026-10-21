@@ -55,6 +55,7 @@ class _Client implements ApiClient {
               {
                 ..._clinic('vip-no-ad', 'vip'),
                 'cover_image': '/media/genuine.jpg',
+                'google_place_id': 'fixture-configured-place',
                 'google_rating': 4.6,
                 'google_reviews_count': 30,
               },

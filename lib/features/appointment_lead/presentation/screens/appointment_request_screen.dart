@@ -1,3 +1,5 @@
+import '../widgets/lead_rejection_notice.dart';
+import 'my_requests_screen.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/utils/clinic_location.dart';
@@ -71,7 +73,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   String? _selectedPractitionerLabel;
   bool _consentAccepted = false;
   bool _isSubmitting = false;
-  String? _rateLimitBannerMessage;
+  ApiException? _submissionRejection;
+  bool _openingRequests = false;
+  final _rejectionKey = GlobalKey();
 
   final Map<String, String> _treatmentNameToId = {};
 
@@ -214,7 +218,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
 
     setState(() {
       _isSubmitting = true;
-      _rateLimitBannerMessage = null;
+      _submissionRejection = null;
     });
 
     // Format phone into E.164: +9715XXXXXXXX
@@ -301,9 +305,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         practitionerNameAr: selectedPractitioner?.nameAr,
         practitionerNameEn: selectedPractitioner?.nameEn,
         practitionerType: selectedPractitioner?.type,
-        patientFullName: _nameController.text.trim(),
+        patientFullName: payload['patient_name'] as String,
         patientPhone: formattedPhone,
-        notes: _notesController.text.trim(),
+        notes: payload['notes'] as String?,
         consentAccepted: true,
         status: AppointmentLeadStatus.sent,
         createdAt: result.createdAt,
@@ -320,12 +324,11 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       );
     } on ApiException catch (e) {
       if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
-      final is429 =
-          e.statusCode == 429 ||
-          e.message.contains('already submitted') ||
-          e.message.contains('too many requests') ||
-          e.message.contains('مؤخراً') ||
-          e.message.contains('مؤخرا');
+      if (e.isCancelled) {
+        setState(() => _isSubmitting = false);
+        return;
+      }
+      final is429 = e.statusCode == 429 || e.errorCode == 'DUPLICATE_LEAD';
       final isSuspendedOrInactive =
           e.statusCode == 403 ||
           e.statusCode == 404 ||
@@ -337,17 +340,23 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   e.message.toLowerCase().contains('not found')));
       setState(() {
         _isSubmitting = false;
-        if (is429) {
-          _rateLimitBannerMessage = loc.isArabic
-              ? 'يرجى الانتظار لحظات قبل إرسال طلب جديد لنفس العيادة'
-              : 'Please wait a moment before submitting another request to this clinic';
-        }
+        if (is429) _submissionRejection = e;
       });
-      final errorMessage = is429
-          ? (loc.isArabic
-                ? 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'
-                : 'A similar request was recently submitted. Please try again shortly.')
-          : isSuspendedOrInactive
+      if (is429) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
+          final target = _rejectionKey.currentContext;
+          if (target != null) {
+            Scrollable.ensureVisible(
+              target,
+              alignment: .5,
+              duration: const Duration(milliseconds: 200),
+            );
+          }
+        });
+        return;
+      }
+      final errorMessage = isSuspendedOrInactive
           ? (loc.isArabic
                 ? 'العيادة غير متاحة حالياً لتلقي الطلبات. يرجى اختيار عيادة أخرى'
                 : 'This clinic is currently unavailable to accept requests. Please choose another clinic.')
@@ -496,40 +505,6 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-              ],
-
-              if (_rateLimitBannerMessage != null) ...[
-                Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFEF4444).withValues(alpha: 0.4),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.hourglass_top_rounded,
-                        color: Color(0xFFEF4444),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _rateLimitBannerMessage!,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: const Color(0xFFEF4444),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
 
               // Clinic Summary Card
@@ -936,6 +911,32 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                       ? 'العيادة غير متاحة لاستقبال الطلبات'
                       : 'This clinic is unavailable for inquiries',
                 ),
+              if (_submissionRejection != null) ...[
+                LeadRejectionNotice(
+                  key: _rejectionKey,
+                  error: _submissionRejection!,
+                  onViewRequests: _openingRequests
+                      ? null
+                      : () async {
+                          if (_openingRequests) return;
+                          setState(() => _openingRequests = true);
+                          try {
+                            await Navigator.of(context).push(
+                              LuxuryPageRoute(
+                                page: MyRequestsScreen(
+                                  leadsRepository: _leadsRepository,
+                                ),
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() => _openingRequests = false);
+                            }
+                          }
+                        },
+                ),
+                const SizedBox(height: 14),
+              ],
               // Submit the inquiry only after explicit consent.
               SilverButton(
                 label: loc.tr('submit_lead_btn'),

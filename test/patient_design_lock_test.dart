@@ -178,6 +178,7 @@ void main() {
       final clinic = ClinicModel.fromJson({
         'id': '11111111-1111-4111-8111-111111111111',
         'name_en': 'Test clinic',
+        'google_place_id': 'fixture-configured-place',
         'google_rating': 4.6,
         'google_reviews_count': 123,
         'google_maps_url':

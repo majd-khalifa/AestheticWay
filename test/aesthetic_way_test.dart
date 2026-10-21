@@ -122,8 +122,8 @@ void main() {
       );
 
       expect(find.text('طبيب'), findsOneWidget);
-      expect(find.text('ممرض مرخص'), findsOneWidget);
-      expect(find.text('أخصائي مرخص'), findsOneWidget);
+      expect(find.text('ممرض'), findsOneWidget);
+      expect(find.text('أخصائي'), findsOneWidget);
     });
 
     testWidgets(

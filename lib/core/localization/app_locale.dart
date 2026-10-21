@@ -389,7 +389,7 @@ class LocaleService extends ChangeNotifier {
     },
 
     'clinic_team_title': {
-      'ar': 'الكادر الطبي والممارسون المعتمدون',
+      'ar': 'الكادر الطبي والممارسون الصحيون',
       'en': 'Medical Staff & Practitioners',
     },
     'clinic_add_practitioner': {
@@ -675,8 +675,8 @@ class LocaleService extends ChangeNotifier {
     'vip_partner': {'ar': 'بلاتيني VIP', 'en': 'VIP Platinum'},
     'featured_badge': {'ar': 'إعلان مميز', 'en': 'Featured'},
     'role_doctor': {'ar': 'طبيب', 'en': 'Doctor'},
-    'role_nurse': {'ar': 'ممرض مرخص', 'en': 'Licensed Nurse'},
-    'role_specialist': {'ar': 'أخصائي مرخص', 'en': 'Licensed Specialist'},
+    'role_nurse': {'ar': 'ممرض', 'en': 'Nurse'},
+    'role_specialist': {'ar': 'أخصائي', 'en': 'Specialist'},
     'unit_km': {'ar': 'كم', 'en': 'km'},
     'currency_aed': {'ar': 'د.إ', 'en': 'AED'},
     'whatsapp_btn': {'ar': 'واتساب', 'en': 'WhatsApp'},
@@ -761,8 +761,8 @@ class LocaleService extends ChangeNotifier {
       'en': 'Medical Aesthetic Articles',
     },
     'category_clinics_title': {
-      'ar': 'العيادات والمراكز المعتمدة',
-      'en': 'Verified Clinics & Centers',
+      'ar': 'العيادات والمراكز الطبية',
+      'en': 'Clinics & Medical Centers',
     },
 
     // Products Module
@@ -1096,34 +1096,30 @@ class LocaleService extends ChangeNotifier {
     'back_home': {'ar': 'العودة إلى الرئيسية', 'en': 'Back to Home'},
 
     // My Requests (Lead Tracking)
-    'my_requests_title': {
-      'ar': 'طلبات المواعيد والاستشارات',
-      'en': 'Appointment Leads',
-    },
+    'my_requests_title': {'ar': 'طلباتي', 'en': 'My Requests'},
     'status_all': {'ar': 'الكل', 'en': 'All'},
     'status_sent': {'ar': 'تم الإرسال', 'en': 'Sent'},
     'status_contacted': {'ar': 'تم التواصل', 'en': 'Contacted'},
-    'status_closed': {'ar': 'مكتمل / مغلق', 'en': 'Closed'},
+    'status_closed': {'ar': 'مغلق', 'en': 'Closed'},
     'no_requests': {
-      'ar': 'لا توجد طلبات مواعيد مسجلة حالياً',
-      'en': 'No appointment leads yet',
+      'ar': 'لا توجد طلبات استشارة حالياً',
+      'en': 'No consultation requests yet',
+    },
+    'no_requests_for_status': {
+      'ar': 'لا توجد طلبات بهذه الحالة',
+      'en': 'No requests with this status',
+    },
+    'no_requests_for_status_sub': {
+      'ar': 'اختر حالة أخرى أو اسحب للتحديث',
+      'en': 'Choose another status or pull to refresh',
     },
     'no_requests_sub': {
       'ar': 'تصفح العيادات وأرسل طلب استشارة لتظهر هنا',
-      'en': 'Explore clinics and request a lead to track it here',
+      'en': 'Explore clinics and send a consultation request to track it here',
     },
-    'status_sent_label': {
-      'ar': 'بانتظار تواصل العيادة',
-      'en': 'Awaiting Clinic Response',
-    },
-    'status_contacted_label': {
-      'ar': 'تم التواصل من العيادة',
-      'en': 'Contacted by Clinic',
-    },
-    'status_closed_label': {
-      'ar': 'طلب مكتمل / منتهي',
-      'en': 'Closed / Completed',
-    },
+    'status_sent_label': {'ar': 'تم الإرسال', 'en': 'Sent'},
+    'status_contacted_label': {'ar': 'تم التواصل', 'en': 'Contacted'},
+    'status_closed_label': {'ar': 'مغلق', 'en': 'Closed'},
 
     // Profile & Settings
     'profile_title': {'ar': 'حسابي وإعداداتي', 'en': 'My Profile & Settings'},
@@ -1155,9 +1151,9 @@ class LocaleService extends ChangeNotifier {
     },
     'privacy_sheet_text': {
       'ar':
-          'منصة Aesthetic Way — دليل واكتشاف العيادات الطبية والتجميلية في دولة الإمارات العربية المتحدة.\n\nتعتبر منصة Aesthetic Way أداة رقمية وتطبيقاً للربط والتسهيل بين العملاء وبين العيادات والمراكز الطبية المعتمدة في الدولة. تتم كافة الاستشارات والتشخيصات والإجراءات الطبية والتواصل المباشر عبر الكوادر الطبية والعيادات المرخصة حصراً، وتلتزم المنصة بحماية وسرية بيانات المستخدمين.',
+          'منصة Aesthetic Way — دليل واكتشاف العيادات الطبية والتجميلية في دولة الإمارات العربية المتحدة.\n\nتعتبر منصة Aesthetic Way أداة رقمية وتطبيقاً للربط والتسهيل بين العملاء وبين العيادات والمراكز الطبية في الدولة. تتم كافة الاستشارات والتشخيصات والإجراءات الطبية والتواصل المباشر عبر الكوادر الطبية والعيادات المشاركة، وتلتزم المنصة بحماية وسرية بيانات المستخدمين.',
       'en':
-          'Aesthetic Way Platform — Discovery and connection platform for certified aesthetic clinics in the UAE.\n\nAesthetic Way facilitates seamless lead connection between users and certified aesthetic medical clinics in the UAE. All medical consultations, assessments, and procedures are handled directly by the licensed clinic or medical practitioner. User privacy and data protection are strictly upheld.',
+          'Aesthetic Way Platform — Discovery and connection platform for aesthetic clinics in the UAE.\n\nAesthetic Way facilitates seamless lead connection between users and aesthetic medical clinics in the UAE. All medical consultations, assessments, and procedures are handled directly by the clinic or medical practitioner. User privacy and data protection are strictly upheld.',
     },
 
     // Customer Support Sheet Text

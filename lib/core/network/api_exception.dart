@@ -12,6 +12,7 @@ class ApiException implements Exception {
   final dynamic rawData;
   final Duration? retryAfter;
   final bool isCancelled;
+  final bool isLocalBackpressure;
 
   const ApiException({
     required this.message,
@@ -22,6 +23,7 @@ class ApiException implements Exception {
     this.rawData,
     this.retryAfter,
     this.isCancelled = false,
+    this.isLocalBackpressure = false,
   });
 
   /// Get first error message for a specific field, if present
@@ -91,6 +93,13 @@ class ApiException implements Exception {
       if (data['error'] is Map<String, dynamic>) {
         final errObj = data['error'] as Map<String, dynamic>;
         errorCode = errObj['code']?.toString();
+        final bodyWait = errObj['retry_after'];
+        if (bodyWait is num && bodyWait.isFinite && bodyWait >= 0) {
+          final delay = Duration(
+            milliseconds: (bodyWait.clamp(0, 365 * 24 * 60 * 60) * 1000).ceil(),
+          );
+          if (retryAfter == null || delay > retryAfter) retryAfter = delay;
+        }
         rawBackendMsg = errObj['message']?.toString();
 
         if (errObj['fields'] is Map<String, dynamic>) {
@@ -150,14 +159,22 @@ class ApiException implements Exception {
       }
     }
 
-    // Special fallback for 429 Too Many Requests / Duplicate Lead
+    // ca15dc6's manual duplicate Response has no code. Recognize only its
+    // exact contract sentence, before discarding the untrusted response body.
+    if (statusCode == 429 &&
+        rawBackendMsg ==
+            'A request for this service at this clinic was already submitted recently.') {
+      errorCode = 'DUPLICATE_LEAD';
+    }
+
+    // A general throttle does not establish that any lead was saved.
     if (statusCode == 429) {
       if (rawBackendMsg != null && rawBackendMsg.isNotEmpty) {
         message = _localizeBackendMessage(rawBackendMsg);
       } else {
         message = LocaleService().isArabic
-            ? 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'
-            : 'A similar request was recently submitted. Please try again shortly.';
+            ? 'يرجى الانتظار قبل إعادة المحاولة.'
+            : 'Please wait before trying again.';
       }
     }
 
@@ -173,6 +190,7 @@ class ApiException implements Exception {
             'NOT_AUTHENTICATED',
             'PERMISSION_DENIED',
             'THROTTLED',
+            'RATE_LIMIT_EXCEEDED',
             'OTP_INVALID',
             'OTP_EXPIRED',
             'OTP_LOCKED',
@@ -425,10 +443,11 @@ class ApiException implements Exception {
 
     // If English mode, return friendly wording for 429 duplicate/rate limit
     if (!isArabic) {
-      if (lower.contains('already submitted') ||
-          lower.contains('too many requests') ||
-          lower.contains('throttled')) {
-        return 'A similar request was recently submitted. Please try again shortly.';
+      if (lower.contains('already submitted')) {
+        return 'This request was blocked as a repeat. Review My Requests before trying again.';
+      }
+      if (lower.contains('too many requests') || lower.contains('throttled')) {
+        return 'Too many attempts. Please wait before trying again.';
       }
       if (lower.contains('otp') || lower.contains('verification code')) {
         return 'Please check the verification code and try again.';
@@ -525,12 +544,12 @@ class ApiException implements Exception {
         lower.contains('already submitted') ||
         lower.contains('similar request') ||
         (lower.contains('recent') && lower.contains('request'))) {
-      return 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل';
+      return 'تعذر إرسال طلب متكرر. راجع طلباتك قبل إعادة المحاولة.';
     }
     if (lower.contains('too many requests') ||
         lower.contains('throttled') ||
         lower.contains('request was throttled')) {
-      return 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل';
+      return 'محاولات كثيرة. يرجى الانتظار قبل إعادة المحاولة.';
     }
     if (lower.contains('consent must be accepted') ||
         lower.contains('consent_accepted')) {

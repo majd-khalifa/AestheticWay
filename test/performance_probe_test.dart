@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 // Deterministic local probes. Virtual time and fixture bytes are not device
 // latency, network throughput, frame timing or production capacity evidence.
 import 'dart:async';
@@ -233,7 +234,14 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final mountedCards = find.byType(BrandProductMedia).evaluate().length;
+    // Count actual cards: missing-media cards deliberately contain no media widget.
+    final mountedCards = find
+        .descendant(
+          of: find.byType(ProductsScreen),
+          matching: find.byType(LuxuryCard),
+        )
+        .evaluate()
+        .length;
     probe({
       'scenario': 'products_first_page',
       'server_records': 520,

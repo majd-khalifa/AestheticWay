@@ -1024,12 +1024,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Live Profile Edit Form (always accessible via edit button or expanded)
-                      if (_isEditing) ...[
-                        _buildEditProfileSection(context, loc, isDark),
-                        const SizedBox(height: 16),
-                      ],
-
                       // Menu Items
                       _ProfileMenuTile(
                         icon: Icons.assignment_outlined,
@@ -1040,6 +1034,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: widget.onNavigateToRequests,
                       ),
                       const SizedBox(height: 10),
+
+                      // Live Profile Edit Form (always accessible via edit button or expanded)
+                      if (_isEditing) ...[
+                        _buildEditProfileSection(context, loc, isDark),
+                        const SizedBox(height: 16),
+                      ],
 
                       // Referral & Rewards Tile
                       _ProfileMenuTile(

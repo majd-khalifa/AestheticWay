@@ -293,7 +293,7 @@ void main() {
           ),
         );
 
-        expect(find.text('الكادر الطبي والممارسون المعتمدون'), findsOneWidget);
+        expect(find.text('الكادر الطبي والممارسون الصحيون'), findsOneWidget);
         expect(find.text('العلاجات والخدمات المقدمة'), findsOneWidget);
         expect(find.text('فتح في خرائط Google'), findsOneWidget);
         await tester.scrollUntilVisible(

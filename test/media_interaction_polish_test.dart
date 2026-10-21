@@ -486,15 +486,16 @@ void main() {
         );
         await tester.pumpAndSettle();
         final media = find.byType(PatientMediaBanner);
-        final image = tester.getSize(media.first);
-        expect(image.width / image.height, closeTo(1.5, .01));
         expect(
-          tester.getSize(media.last).height,
-          inInclusiveRange(48, 96),
-          reason:
-              'Compact fallback may wrap Arabic at 160% text, but must stay under 96dp.',
+          media,
+          findsOneWidget,
+          reason: 'Only genuine clinic photography gets a media frame.',
         );
-        expect(find.byType(PatientMediaFallback), findsOneWidget);
+        final image = tester.getSize(media);
+        expect(image.width / image.height, closeTo(3 / 2, .01));
+        expect(find.text('Discover the details'), findsNothing);
+        expect(find.text('اكتشف التفاصيل'), findsNothing);
+
         expect(tester.takeException(), isNull);
       },
     );

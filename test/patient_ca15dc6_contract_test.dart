@@ -180,6 +180,7 @@ void main() {
         expect(
           patientClinic(
             extra: {
+              'google_place_id': 'source-place-id',
               'google_rating': rating,
               'google_reviews_count': 27,
               'rating': 5,

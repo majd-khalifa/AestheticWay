@@ -303,7 +303,7 @@ void main() {
 
         // Expect exact user-requested 429 duplicate message
         expect(
-          find.text('تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل'),
+          find.text('تعذر إرسال طلب متكرر. راجع طلباتك قبل إعادة المحاولة.'),
           findsOneWidget,
         );
       },
@@ -318,6 +318,7 @@ class _Mock429LeadsRepository extends LeadsRepository {
       message:
           'A request for this service at this clinic was already submitted recently.',
       statusCode: 429,
+      errorCode: 'DUPLICATE_LEAD',
     );
   }
 }

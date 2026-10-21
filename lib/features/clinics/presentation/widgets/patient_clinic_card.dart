@@ -115,7 +115,6 @@ class PatientClinicCard extends StatelessWidget {
                     source: clinic.primaryPhotoUrl,
                     aspectRatio: 3 / 2,
                   ),
-            if (showCover && !hasPhoto) const PatientMediaBanner(source: null),
             // The fine champagne rule joins a photograph to its identity panel.
             Container(
               height: 2,
@@ -144,40 +143,70 @@ class PatientClinicCard extends StatelessWidget {
                     ),
                   if (!compact) ...[
                     const SizedBox(height: 12),
-                    if (onRequestAction != null || onRequest != null)
-                      onRequestAction != null
-                          ? AsyncActionButton(
-                              label: loc.tr('request_consultation'),
-                              onPressed: isEntityUuid(clinic.id)
-                                  ? onRequestAction
-                                  : null,
-                              icon: Icons.chat_bubble_outline,
-                            )
-                          : SilverButton(
-                              label: loc.tr('request_consultation'),
-                              onPressed: onRequest,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final hasRequest =
+                            onRequestAction != null || onRequest != null;
+                        final stacked =
+                            constraints.maxWidth < 300 ||
+                            MediaQuery.textScalerOf(context).scale(1) > 1.3;
+                        final actionWidth = stacked || !hasRequest
+                            ? constraints.maxWidth
+                            : (constraints.maxWidth - 8) / 2;
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            if (hasRequest)
+                              SizedBox(
+                                width: actionWidth,
+                                child: onRequestAction != null
+                                    ? AsyncActionButton(
+                                        label: loc.tr('request_consultation'),
+                                        onPressed: isEntityUuid(clinic.id)
+                                            ? onRequestAction
+                                            : null,
+                                        icon: Icons.chat_bubble_outline,
+                                      )
+                                    : SilverButton(
+                                        label: loc.tr('request_consultation'),
+                                        onPressed: onRequest,
+                                      ),
+                              ),
+                            SizedBox(
+                              width: actionWidth,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextButton.icon(
+                                      onPressed: onTap,
+                                      icon: const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 17,
+                                      ),
+                                      label: Text(
+                                        loc.isArabic
+                                            ? 'اكتشف العيادة'
+                                            : 'Explore clinic',
+                                      ),
+                                    ),
+                                  ),
+                                  if (onContact != null)
+                                    IconButton(
+                                      onPressed: onContact,
+                                      tooltip: loc.tr('contact_btn'),
+                                      icon: const Icon(
+                                        Icons.phone_outlined,
+                                        size: 20,
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton.icon(
-                            onPressed: onTap,
-                            icon: const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 17,
-                            ),
-                            label: Text(
-                              loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
-                            ),
-                          ),
-                        ),
-                        if (onContact != null)
-                          IconButton(
-                            onPressed: onContact,
-                            tooltip: loc.tr('contact_btn'),
-                            icon: const Icon(Icons.phone_outlined, size: 20),
-                          ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ],
