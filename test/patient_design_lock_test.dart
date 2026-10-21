@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/clinics/presentation/widgets/google_clinic_rating.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'dart:async';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
@@ -164,6 +166,52 @@ void main() {
         }),
       );
       await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'Google badge gives localized progress, prevents duplicates and recovers from map failure',
+    (tester) async {
+      unawaited(LocaleService().setLanguage(AppLanguage.english));
+      var completion = Completer<bool>();
+      var calls = 0;
+      final clinic = ClinicModel.fromJson({
+        'id': '11111111-1111-4111-8111-111111111111',
+        'name_en': 'Test clinic',
+        'google_rating': 4.6,
+        'google_reviews_count': 123,
+        'google_maps_url':
+            'https://www.google.com/maps/search/?api=1&query=Dubai',
+      });
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: GoogleClinicRating(
+              clinic: clinic,
+              openMap: (_) {
+                calls++;
+                return completion.future;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byType(InkWell));
+      expect(calls, 1);
+      await tester.pump();
+      expect(find.text('Opening Maps'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      completion.complete(false);
+      await tester.pumpAndSettle();
+      expect(find.text('Maps could not open. Tap to retry.'), findsOneWidget);
+      completion = Completer<bool>();
+      await tester.tap(find.byType(InkWell));
+      expect(calls, 2);
+      completion.complete(true);
+      await tester.pumpAndSettle();
+      expect(find.text('4.6'), findsOneWidget);
+      expect(find.text('Maps could not open. Tap to retry.'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

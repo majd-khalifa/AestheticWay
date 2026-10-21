@@ -6,6 +6,8 @@ import subprocess
 from pathlib import Path
 
 files = [
+    "assets/fonts/patient/PlayfairDisplay.ttf",
+    "assets/fonts/patient/NotoSansArabic.ttf",
     "test/fixtures/fonts/DejaVuSans.ttf",
     "test/fixtures/fonts/DejaVuSans-Bold.ttf",
     "test/fixtures/media/packaging_fixture.png",

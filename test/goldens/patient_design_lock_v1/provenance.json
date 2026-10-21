@@ -5,10 +5,23 @@
   "framework": "2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa",
   "engine": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
   "linux_capture": "local native Linux Flutter tester",
-  "windows_capture": "Pending native CI review; never substitute Linux raster",
-  "comparison": "Exact native pixels plus shared geometry/styles at 1/64dp; no tolerance",
+  "windows_capture": "Native Windows Server 2022 CI, manually reviewed all four images",
+  "comparison": "Exact native pixels plus shared geometry/styles at 1/16dp; no tolerance",
   "fonts": {
     "NotoSansArabic.ttf": "63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e",
     "PlayfairDisplay.ttf": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6"
-  }
+  },
+  "native_ci_capture_run": "https://github.com/majd-khalifa/AestheticWay/actions/runs/39592014240",
+  "capture_source_commit": "54c8c95ca6ef9768a036ed09986fdc173672fa3b",
+  "raster_sha256": {
+    "linux/patient_clinic_dark_ar.png": "29b95e751e5f8c62e95e71c05433f1a050822eeac44d5f9e3ef613af9a5efc3c",
+    "linux/patient_clinic_light_ar.png": "8863e5f1e9fede4cc68197bbd571295ba3b3cfc271acbe8a7d92db9a8096192c",
+    "linux/patient_clinic_dark_en.png": "e8f036eee1b16eecb20cb11a91ebb8685cb89d1a232d2158b79d2fbbc0a8e5f4",
+    "linux/patient_clinic_light_en.png": "9ae545033fb2a2fcea7154e77c648fb815aea847bc52fc947d0edbf3afd0d9e7",
+    "windows/patient_clinic_dark_ar.png": "00a6ffbd1bdbacb430107eb18c627b709b630f4805d8d11a4cbcd43ae74f120a",
+    "windows/patient_clinic_light_ar.png": "0f6b944bd9596e5428f41c55c964e5f962caf3ce07ff8e5790ab106d539d21c5",
+    "windows/patient_clinic_dark_en.png": "842b72f9bac43810edd554ce109eefbf73d0ebaac6f3f8949cfb8812b4a9c499",
+    "windows/patient_clinic_light_en.png": "f98f67bb483d854d391545c5df385fafcffcbfb0b8d6a13f1096685f325086ce"
+  },
+  "shared_layout_precision": "1/16dp, measured Arabic text rounding variance 1/64dp; exact native rasters unchanged"
 }

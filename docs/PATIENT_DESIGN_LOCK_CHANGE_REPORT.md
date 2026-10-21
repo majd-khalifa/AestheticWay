@@ -47,11 +47,11 @@ These previews are **synthetic test data, not production evidence**. Clinic/offe
 
 ## Functional, security and performance preservation
 
-The redesign retains session/JWT epoch checks, stale-result cancellation, role boundaries, consent, secure token storage, API transport/retry rules, bounded/coalesced reads, 20-record pagination, search debounce, image decode/cache limits and video lifecycle. No Clinic Portal or Super Admin feature file, Django file, signing configuration or release credential was modified. New assertions verify patient-theme scope, genuine gallery decoding/selection, bounded missing media and profile progress/duplicate guards. The 78-render matrix also rejects patient tier labels. Existing navigation, offer-to-lead, stale async, media decode, security and performance tests remain active.
+The redesign retains session/JWT epoch checks, stale-result cancellation, role boundaries, consent, secure token storage, API transport/retry rules, bounded/coalesced reads, 20-record pagination, search debounce, image decode/cache limits and video lifecycle. No Clinic Portal or Super Admin feature file, Django file, signing configuration or release credential was modified. New assertions verify patient-theme scope, genuine gallery decoding/selection, bounded missing media and profile progress/duplicate guards and Google-rating-to-Maps progress/failure recovery. The 78-render matrix also rejects patient tier labels. Existing navigation, offer-to-lead, stale async, media decode, security and performance tests remain active.
 
 ## Verification and remaining limits
 
-- Flutter 3.41.5 / Dart 3.11.3. Local native Linux: `dart format`, `flutter analyze` (zero issues), full `flutter test` (**548 passing**), and 78 preview tests pass.
+- Flutter 3.41.5 / Dart 3.11.3. Local native Linux: `dart format`, `flutter analyze` (zero issues), full `flutter test` (**549 passing**), and 78 preview tests pass.
 - Historical clinic goldens, including `clinic_profile_v2`, are preserved. The intentional production design uses `patient_design_lock_v1`: exact native rasters plus shared geometry/style snapshots, without tolerance/skip. Native Windows baseline review is tracked in its provenance file; Linux target-platform variants are not native Windows verification.
 - [Bilingual backend handoff](PATIENT_DESIGN_LOCK_BACKEND_HANDOFF_FOR_ALI.md) distinguishes verified archive contracts from unverified live API/storage/Google deployment and includes a public-only PowerShell diagnostics script.
 - Live API reads were blocked by this environment's proxy, not an observed Django denial. No live media persistence, production image decode or Google sync success is claimed. The unavailable live JSON does not block the completed layout work.
