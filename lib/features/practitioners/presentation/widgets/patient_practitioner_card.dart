@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/practitioner_badge.dart';
+import '../../../../core/widgets/async_action_button.dart';
 import '../../models/practitioner_model.dart';
 
 class PatientPractitionerCard extends StatelessWidget {
@@ -12,10 +13,12 @@ class PatientPractitionerCard extends StatelessWidget {
     required this.practitioner,
     required this.onTap,
     this.onInquiry,
+    this.onInquiryAction,
   });
   final PractitionerModel practitioner;
   final VoidCallback onTap;
   final VoidCallback? onInquiry;
+  final AsyncPatientAction? onInquiryAction;
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
@@ -26,7 +29,7 @@ class PatientPractitionerCard extends StatelessWidget {
     final specialty = loc.isArabic ? p.specialtyAr : p.specialtyEn;
     return LuxuryCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(14),
       borderRadius: 22,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -37,8 +40,8 @@ class PatientPractitionerCard extends StatelessWidget {
               LuxuryImage(
                 imageUrl: p.avatarUrl,
                 fallbackLogoUrl: p.clinicLogoUrl,
-                width: 78,
-                height: 102,
+                width: resolveImageProvider(p.avatarUrl) == null ? 48 : 90,
+                height: resolveImageProvider(p.avatarUrl) == null ? 48 : 120,
                 fit: BoxFit.cover,
                 borderRadius: BorderRadius.circular(14),
                 placeholderIcon: Icons.person_outline,
@@ -92,7 +95,16 @@ class PatientPractitionerCard extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 12),
-          if (onInquiry != null)
+          if (onInquiryAction != null)
+            AsyncActionButton(
+              label: loc.tr('request_consultation'),
+              loadingLabel: loc.isArabic
+                  ? 'جارٍ فتح الاستشارة'
+                  : 'Opening consultation',
+              onPressed: onInquiryAction,
+              icon: Icons.chat_bubble_outline,
+            )
+          else if (onInquiry != null)
             FilledButton.icon(
               onPressed: onInquiry,
               icon: const Icon(Icons.chat_bubble_outline, size: 18),

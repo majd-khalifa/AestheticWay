@@ -32,6 +32,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void _onSendResetCode() async {
+    if (_isLoading) return;
     final loc = LocaleService();
     if (!_formKey.currentState!.validate()) return;
 

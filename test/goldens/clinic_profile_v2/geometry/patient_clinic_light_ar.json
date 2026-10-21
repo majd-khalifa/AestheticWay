@@ -1,0 +1,390 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "text": [
+    {
+      "text": "عيادة مميزة",
+      "rect": [
+        197.1875,
+        82.703125,
+        64.109375,
+        16.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 11.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4286604821,
+      "direction": "rtl"
+    },
+    {
+      "text": "عيادة الاختبار للتجميل الطبي والأمراض الجلدية",
+      "rect": [
+        38.703125,
+        105.703125,
+        222.59375,
+        93.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 23.0,
+      "height": 1.35,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "دبي",
+      "rect": [
+        239.5,
+        204.703125,
+        21.796875,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "rtl"
+    },
+    {
+      "text": "4.7",
+      "rect": [
+        158.671875,
+        240.203125,
+        21.125,
+        17.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 11.5,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4286067983,
+      "direction": "rtl"
+    },
+    {
+      "text": "Google",
+      "rect": [
+        184.796875,
+        241.203125,
+        36.765625,
+        15.0
+      ],
+      "family": "PatientGolden",
+      "weight": 500,
+      "size": 10.0,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "rtl"
+    },
+    {
+      "text": "(125)",
+      "rect": [
+        224.5625,
+        241.203125,
+        28.140625,
+        15.0
+      ],
+      "family": "PatientGolden",
+      "weight": 500,
+      "size": 10.0,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4281549141,
+      "direction": "rtl"
+    },
+    {
+      "text": "طلب موعد استشارة",
+      "rect": [
+        113.15625,
+        303.703125,
+        138.671875,
+        18.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294967295,
+      "direction": "rtl"
+    },
+    {
+      "text": "جارٍ إتمام الطلب",
+      "rect": [
+        124.828125,
+        303.703125,
+        112.34375,
+        18.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294967295,
+      "direction": "rtl"
+    },
+    {
+      "text": "خرائط Google",
+      "rect": [
+        221.421875,
+        350.703125,
+        91.875,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 500,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.1,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "نبذة والموقع",
+      "rect": [
+        276.421875,
+        434.40625,
+        81.578125,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4286604821,
+      "direction": "rtl"
+    },
+    {
+      "text": "الكادر الطبي",
+      "rect": [
+        163.5,
+        434.40625,
+        80.921875,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "rtl"
+    },
+    {
+      "text": "العلاجات والخدمات",
+      "rect": [
+        12.828125,
+        434.40625,
+        118.671875,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "rtl"
+    },
+    {
+      "text": "العروض",
+      "rect": [
+        -69.5,
+        434.40625,
+        50.328125,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "rtl"
+    },
+    {
+      "text": "عن العيادة",
+      "rect": [
+        40.703125,
+        507.09375,
+        308.59375,
+        33.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 23.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "معلومات طبية من عيادة اختبار اصطناعية.",
+      "rect": [
+        40.703125,
+        550.09375,
+        308.59375,
+        26.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 15.0,
+      "height": 1.7,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "فرع الاختبار 1",
+      "rect": [
+        40.703125,
+        589.203125,
+        268.59375,
+        24.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 16.0,
+      "height": 1.5,
+      "spacing": 0.5,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "",
+      "rect": [
+        40.703125,
+        613.203125,
+        268.59375,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "فرع الاختبار 2",
+      "rect": [
+        40.703125,
+        661.203125,
+        268.59375,
+        24.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 16.0,
+      "height": 1.5,
+      "spacing": 0.5,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "",
+      "rect": [
+        40.703125,
+        685.203125,
+        268.59375,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "rtl"
+    },
+    {
+      "text": "ملف العيادة",
+      "rect": [
+        134.765625,
+        12.5,
+        120.46875,
+        31.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 21.0,
+      "height": 1.5,
+      "spacing": 0.0,
+      "color": 4278849047,
+      "direction": "rtl"
+    }
+  ],
+  "icons": [
+    {
+      "glyph": 983508,
+      "family": "MaterialIcons",
+      "rect": [
+        142.671875,
+        242.203125,
+        13.0,
+        13.0
+      ],
+      "size": 13.0,
+      "color": 4294286859
+    },
+    {
+      "glyph": 57685,
+      "family": "MaterialIcons",
+      "rect": [
+        259.84375,
+        304.203125,
+        17.0,
+        17.0
+      ],
+      "size": 17.0,
+      "color": 4294967295
+    },
+    {
+      "glyph": 61870,
+      "family": "MaterialIcons",
+      "rect": [
+        321.296875,
+        351.703125,
+        18.0,
+        18.0
+      ],
+      "size": 18.0,
+      "color": 4278849047
+    },
+    {
+      "glyph": 61411,
+      "family": "MaterialIcons",
+      "rect": [
+        325.296875,
+        600.09375,
+        24.0,
+        24.0
+      ],
+      "size": 24.0,
+      "color": 4278849047
+    },
+    {
+      "glyph": 61411,
+      "family": "MaterialIcons",
+      "rect": [
+        325.296875,
+        672.09375,
+        24.0,
+        24.0
+      ],
+      "size": 24.0,
+      "color": 4278849047
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "results": [
+    {
+      "logo": {
+        "supplied": false,
+        "kind": "absent",
+        "resolved_http": false,
+        "has_query": false
+      },
+      "cover_image": {
+        "supplied": true,
+        "kind": "network_or_storage",
+        "resolved_http": true,
+        "has_query": false
+      },
+      "image_url": {
+        "supplied": true,
+        "kind": "network_or_storage",
+        "resolved_http": true,
+        "has_query": true
+      },
+      "avatar_url": {
+        "supplied": false,
+        "kind": "absent",
+        "resolved_http": false,
+        "has_query": false
+      },
+      "video_url": {
+        "supplied": true,
+        "kind": "network_or_storage",
+        "resolved_http": true,
+        "has_query": false
+      }
+    }
+  ]
+}

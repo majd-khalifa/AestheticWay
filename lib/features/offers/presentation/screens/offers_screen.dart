@@ -1,22 +1,17 @@
 import '../widgets/patient_offer_card.dart';
+import '../offer_actions.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
 import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
-import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
 import '../../../clinics/data/clinics_repository.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/utils/entity_id.dart';
-import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
-import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profile_screen.dart';
 
 /// Screen 1/8: Exclusive Aesthetic Offers & Packages
 /// Powered by live API: GET /api/v1/offers/
@@ -94,67 +89,6 @@ class _OffersScreenState extends State<OffersScreen> {
       _paging.refresh(query: {'search': _searchQuery});
 
   Future<void> _loadMoreOffers() => _paging.loadMore();
-
-  Future<void> _handleClaimOffer(OfferModel offer) async {
-    final auth = await GuestAuthGuard.requireAuth(
-      context,
-      reasonTitle: LocaleService().tr('offer_claim'),
-      reasonSubtitle: LocaleService().isArabic
-          ? 'سجّل دخولك برقم الهاتف للاستفادة من باقة العرض'
-          : 'Sign in to inquire about this offer',
-    );
-    if (!auth || !mounted) return;
-
-    if (!isEntityUuid(offer.clinicId) || !isEntityUuid(offer.id)) {
-      _showUnavailable();
-      return;
-    }
-    try {
-      final clinic = await (widget.clinicsRepository ?? ClinicsRepository())
-          .getClinicDetail(offer.clinicId);
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        LuxuryPageRoute(
-          page: AppointmentRequestScreen(
-            clinic: clinic,
-            selectedOfferTitle: LocaleService().isArabic
-                ? offer.titleAr
-                : offer.titleEn,
-            selectedOfferId: offer.id,
-          ),
-        ),
-      );
-    } catch (_) {
-      if (mounted) _showUnavailable();
-    }
-  }
-
-  void _showUnavailable() => showAppSnackBar(
-    context,
-    LocaleService().isArabic
-        ? 'تعذر تحميل العيادة، حاول مجدداً'
-        : 'Clinic unavailable. Please try again.',
-    type: AppSnackBarType.error,
-  );
-  Future<void> _navigateToClinic(
-    String clinicId, {
-    String? clinicNameAr,
-    String? clinicNameEn,
-  }) async {
-    try {
-      final clinic = await (widget.clinicsRepository ?? ClinicsRepository())
-          .getClinicDetail(clinicId);
-      if (mounted) {
-        Navigator.push(
-          context,
-          LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
-        );
-      }
-    } catch (_) {
-      if (mounted) _showUnavailable();
-    }
-  }
 
   void _onSearchChanged(String value) {
     _searchQuery = value.trim();
@@ -266,7 +200,7 @@ class _OffersScreenState extends State<OffersScreen> {
 
                   // Offers Content Area
                   Expanded(
-                    child: _isLoading && _offers == null
+                    child: _isLoading
                         ? const LuxuryListSkeleton(
                             itemCount: 4,
                             cardHeight: 140,
@@ -315,11 +249,20 @@ class _OffersScreenState extends State<OffersScreen> {
                                 padding: const EdgeInsets.only(bottom: 20),
                                 child: PatientOfferCard(
                                   offer: offer,
-                                  onInquiry: () => _handleClaimOffer(offer),
-                                  onClinicTap: () => _navigateToClinic(
-                                    offer.clinicId,
-                                    clinicNameAr: offer.clinicNameAr,
-                                    clinicNameEn: offer.clinicNameEn,
+                                  onInquiryAction: (action) => openOfferClinic(
+                                    context,
+                                    offer,
+                                    action,
+                                    widget.clinicsRepository ??
+                                        ClinicsRepository(),
+                                    inquire: true,
+                                  ),
+                                  onClinicAction: (action) => openOfferClinic(
+                                    context,
+                                    offer,
+                                    action,
+                                    widget.clinicsRepository ??
+                                        ClinicsRepository(),
                                   ),
                                 ),
                               );

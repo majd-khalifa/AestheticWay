@@ -6,6 +6,7 @@ import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
+import '../../../../core/widgets/async_action_button.dart';
 import '../../models/clinic_model.dart';
 import 'google_clinic_rating.dart';
 
@@ -15,6 +16,7 @@ class PatientClinicCard extends StatelessWidget {
     required this.clinic,
     required this.onTap,
     this.onRequest,
+    this.onRequestAction,
     this.onContact,
     this.showCover = true,
   });
@@ -22,6 +24,7 @@ class PatientClinicCard extends StatelessWidget {
   final bool showCover;
   final VoidCallback onTap;
   final VoidCallback? onRequest, onContact;
+  final AsyncPatientAction? onRequestAction;
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
@@ -42,9 +45,12 @@ class PatientClinicCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (showCover)
-              PatientMediaBanner(source: clinic.coverImageUrl, height: 156),
+              PatientMediaBanner(
+                source: clinic.primaryPhotoUrl,
+                aspectRatio: 3 / 2,
+              ),
             Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -59,8 +65,8 @@ class PatientClinicCard extends StatelessWidget {
                         ),
                         child: LuxuryImage(
                           imageUrl: clinic.logoUrl,
-                          width: 60,
-                          height: 60,
+                          width: 44,
+                          height: 44,
                           fit: BoxFit.contain,
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -115,8 +121,19 @@ class PatientClinicCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  if (onRequest != null)
+                  const SizedBox(height: 12),
+                  if (onRequestAction != null)
+                    AsyncActionButton(
+                      label: loc.tr('request_consultation'),
+                      loadingLabel: loc.isArabic
+                          ? 'جارٍ فتح الاستشارة'
+                          : 'Opening consultation',
+                      icon: Icons.chat_bubble_outline,
+                      onPressed: isEntityUuid(clinic.id)
+                          ? onRequestAction
+                          : null,
+                    )
+                  else if (onRequest != null)
                     FilledButton.icon(
                       onPressed: isEntityUuid(clinic.id) ? onRequest : null,
                       icon: const Icon(Icons.chat_bubble_outline, size: 18),

@@ -48,15 +48,20 @@ class FeaturedAdApiModel {
   });
 
   factory FeaturedAdApiModel.fromJson(Map<String, dynamic> json) {
+    final video = ApiConfig.firstMediaUrl([json['video_url']]);
+    final image = ApiConfig.firstMediaUrl([json['image_url'], json['image']]);
+    // Some serializers expose the video media_asset through both URL fields.
+    // A video file is not a poster; retain a distinct real poster if supplied.
+    final videoAsset = json['media_type']?.toString().toLowerCase() == 'video';
     return FeaturedAdApiModel(
       id: json['id']?.toString() ?? '',
-      image: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
+      image: videoAsset && image == video ? '' : image,
       link: json['link'] as String? ?? '',
       clinic: json['clinic'] is Map<String, dynamic>
           ? ClinicModel.fromJson(json['clinic'] as Map<String, dynamic>)
           : null,
       subscriptionTier: json['subscription_tier']?.toString() ?? 'basic',
-      videoUrl: ApiConfig.firstMediaUrl([json['video_url']]),
+      videoUrl: video,
     );
   }
 }

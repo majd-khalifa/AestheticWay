@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import '../localization/app_locale.dart';
 
 enum SilverButtonVariant { primary, secondary, champagneAccent, textOnly }
 
@@ -17,6 +18,7 @@ class SilverButton extends StatelessWidget {
     this.borderRadius = 14,
     this.padding,
     this.isLoading = false,
+    this.loadingLabel,
   });
   final String label;
   final VoidCallback? onPressed;
@@ -27,6 +29,7 @@ class SilverButton extends StatelessWidget {
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
   final bool isLoading;
+  final String? loadingLabel;
   @override
   Widget build(BuildContext context) {
     final dark = AppColors.isDark(context);
@@ -57,7 +60,9 @@ class SilverButton extends StatelessWidget {
         backgroundColor: background,
         foregroundColor: foreground,
         elevation: 0,
-        disabledBackgroundColor: background.withValues(alpha: 0.45),
+        disabledBackgroundColor: isLoading
+            ? background
+            : background.withValues(alpha: 0.45),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
           side: variant == SilverButtonVariant.secondary
@@ -65,37 +70,88 @@ class SilverButton extends StatelessWidget {
               : BorderSide.none,
         ),
       ),
-      child: isLoading
-          ? SizedBox.square(
-              dimension: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: foreground,
-                semanticsLabel: label,
-              ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 17),
-                  const SizedBox(width: 8),
-                ],
-                Flexible(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.button.copyWith(
-                      color: foreground,
-                      fontWeight: FontWeight.w600,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ExcludeSemantics(
+            excluding: isLoading,
+            child: IgnorePointer(
+              ignoring: isLoading,
+              child: Opacity(
+                opacity: isLoading ? 0 : 1,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 17),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.button.copyWith(
+                          color: foreground,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
+          ),
+          ExcludeSemantics(
+            excluding: !isLoading,
+            child: IgnorePointer(
+              ignoring: !isLoading,
+              child: Opacity(
+                opacity: isLoading ? 1 : 0,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox.square(
+                      dimension: 20,
+                      child: isLoading
+                          ? CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: foreground,
+                              semanticsLabel:
+                                  loadingLabel ??
+                                  (LocaleService().isArabic
+                                      ? 'جارٍ إتمام الطلب'
+                                      : 'Please wait'),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: ExcludeSemantics(
+                        child: Text(
+                          loadingLabel ??
+                              (LocaleService().isArabic
+                                  ? 'جارٍ إتمام الطلب'
+                                  : 'Please wait'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.button.copyWith(
+                            color: foreground,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
     return isFullWidth
         ? SizedBox(width: double.infinity, child: button)

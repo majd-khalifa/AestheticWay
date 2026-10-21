@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onLogin() async {
+    if (_isLoading) return;
     final loc = LocaleService();
     if (!_formKey.currentState!.validate()) return;
 

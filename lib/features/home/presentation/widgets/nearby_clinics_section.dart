@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/async_action_button.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../clinics/models/clinic_model.dart';
 import '../../../clinics/presentation/widgets/patient_clinic_card.dart';
 
 /// Nearby Verified Clinics Section with Breathable Luxury Cards & Dual-Theme Adaptation
 class NearbyClinicsSection extends StatelessWidget {
+  final Future<void> Function(ClinicModel, AsyncActionScope)? onRequestAction;
   final List<ClinicModel> clinics;
   final ValueChanged<ClinicModel> onClinicTap;
-  final ValueChanged<ClinicModel> onRequestTap;
+  final ValueChanged<ClinicModel>? onRequestTap;
   final ValueChanged<ClinicModel> onContactTap;
 
   const NearbyClinicsSection({
     super.key,
     required this.clinics,
     required this.onClinicTap,
-    required this.onRequestTap,
+    this.onRequestTap,
     required this.onContactTap,
+    this.onRequestAction,
   });
 
   @override
@@ -38,7 +41,12 @@ class NearbyClinicsSection extends StatelessWidget {
               child: PatientClinicCard(
                 clinic: clinic,
                 onTap: () => onClinicTap(clinic),
-                onRequest: () => onRequestTap(clinic),
+                onRequest: onRequestTap == null
+                    ? null
+                    : () => onRequestTap!(clinic),
+                onRequestAction: onRequestAction == null
+                    ? null
+                    : (action) => onRequestAction!(clinic, action),
                 onContact: () => onContactTap(clinic),
               ),
             ),

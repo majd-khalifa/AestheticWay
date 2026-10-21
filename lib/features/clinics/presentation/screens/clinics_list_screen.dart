@@ -517,11 +517,13 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                       ),
                       onContact: () =>
                           ContactOptionsSheet.show(context, clinic),
-                      onRequest: () async {
-                        final auth = await GuestAuthGuard.requireAuth(
-                          context,
-                          reasonTitle: loc.tr('request_consultation'),
-                          reasonSubtitle: loc.tr('request_consultation'),
+                      onRequestAction: (action) async {
+                        final auth = await action.wait(
+                          GuestAuthGuard.requireAuth(
+                            context,
+                            reasonTitle: loc.tr('request_consultation'),
+                            reasonSubtitle: loc.tr('request_consultation'),
+                          ),
                         );
                         if (auth && context.mounted) {
                           Navigator.push(

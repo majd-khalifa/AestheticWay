@@ -6,7 +6,7 @@ import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
-import 'package:aesthetic_way/core/widgets/silver_button.dart';
+import 'package:aesthetic_way/core/widgets/async_action_button.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -102,13 +102,18 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
     }
   }
 
-  Future<void> _handleBookLead(BuildContext context) async {
-    final auth = await GuestAuthGuard.requireAuth(
-      context,
-      reasonTitle: LocaleService().tr('request_with_doctor'),
-      reasonSubtitle: LocaleService().isArabic
-          ? 'سجّل دخولك برقم الهاتف لطلب استشارة مع الممارس'
-          : 'Login with phone number to request a consultation lead with practitioner',
+  Future<void> _handleBookLead(
+    BuildContext context,
+    AsyncActionScope action,
+  ) async {
+    final auth = await action.wait(
+      GuestAuthGuard.requireAuth(
+        context,
+        reasonTitle: LocaleService().tr('request_with_doctor'),
+        reasonSubtitle: LocaleService().isArabic
+            ? 'سجّل دخولك برقم الهاتف لطلب استشارة مع الممارس'
+            : 'Login with phone number to request a consultation lead with practitioner',
+      ),
     );
     if (!auth || !context.mounted) return;
 
@@ -407,12 +412,12 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
               ),
             ),
           // Lead Request CTA
-          SilverButton(
+          AsyncActionButton(
             label: loc.tr('request_with_doctor'),
             icon: Icons.chat_bubble_outline,
             isFullWidth: true,
             onPressed: _clinic != null && isEntityUuid(_clinic!.id)
-                ? () => _handleBookLead(context)
+                ? (action) => _handleBookLead(context, action)
                 : null,
           ),
           const SizedBox(height: 30),

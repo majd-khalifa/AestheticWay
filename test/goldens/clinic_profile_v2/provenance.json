@@ -1,0 +1,26 @@
+{
+  "capture_source_commit": "17abbf96a8d87a10c7de02f416830853f243c270",
+  "native_ci_run": "https://github.com/majd-khalifa/AestheticWay/actions/runs/39562770335",
+  "sdk": {
+    "flutter": "3.41.5",
+    "dart": "3.11.3",
+    "framework": "2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa",
+    "engine": "052f31d115eceda8cbff1b3481fcde4330c4ae12"
+  },
+  "native_owners": {
+    "linux": "Linux software Flutter tester; confirmed on ubuntu-24.04",
+    "windows": "Native Windows Server 2022 Flutter tester"
+  },
+  "raster_sha256": {
+    "linux/patient_clinic_dark_ar.png": "a9dc3f6c6dfb59b1db1516faabac1f42808ad13ffc598e6dc42de39ff3fe9e18",
+    "linux/patient_clinic_dark_en.png": "408b5bb217cfd829ad6fe993a80d2b093307b4e2b5a9f22eddb2dab57e0c084c",
+    "linux/patient_clinic_light_ar.png": "6fef42b1f9c8659b53820022ec345d41469d017b7b59f31427a44670f3d02b2a",
+    "linux/patient_clinic_light_en.png": "d1df3bb12a0b8be43fcd4c0dfc309a2bd25c09e2a5105193f755ff02b189a3ca",
+    "windows/patient_clinic_dark_ar.png": "a219ffcc4360a186891e5b49459b27bf7c58dd7571a120ef6d007a701ba0482a",
+    "windows/patient_clinic_dark_en.png": "0f37b40396cfa7431d0c863c7631b5aa251ae8719d19dc6351c26e57fbe9202b",
+    "windows/patient_clinic_light_ar.png": "ffac1d33e989beb042e8264cd7931dcf20a00817b0edf4100baa2eb1296307ad",
+    "windows/patient_clinic_light_en.png": "e7dda2e4b1bc1a8a8ec7de8c2ec9df4a3aa86d22eb59e392bc7e4fae8ebf617d"
+  },
+  "comparison": "exact native pixels plus a common geometry/style contract; no tolerance",
+  "windows_independent_captures_byte_identical": true
+}

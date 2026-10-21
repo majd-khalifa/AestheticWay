@@ -1,5 +1,5 @@
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/utils/entity_id.dart';
+import '../../../../core/widgets/async_action_button.dart';
+import '../../../offers/presentation/offer_actions.dart';
 import 'dart:async';
 import 'package:aesthetic_way/core/data/single_flight.dart';
 import 'package:flutter/material.dart';
@@ -137,13 +137,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _handleAppointmentLeadRequest(ClinicModel clinic) async {
-    final auth = await GuestAuthGuard.requireAuth(
-      context,
-      reasonTitle: LocaleService().tr('request_consultation'),
-      reasonSubtitle: LocaleService().isArabic
-          ? 'سجل دخولك برقم الهاتف لإرسال طلبك للعيادة'
-          : 'Login with phone number to submit your lead',
+  Future<void> _handleAppointmentLeadRequest(
+    ClinicModel clinic,
+    AsyncActionScope action,
+  ) async {
+    final auth = await action.wait(
+      GuestAuthGuard.requireAuth(
+        context,
+        reasonTitle: LocaleService().tr('request_consultation'),
+        reasonSubtitle: LocaleService().isArabic
+            ? 'سجل دخولك برقم الهاتف لإرسال طلبك للعيادة'
+            : 'Login with phone number to submit your lead',
+      ),
     );
     if (!auth || !mounted) return;
 
@@ -157,34 +162,14 @@ class _HomeScreenState extends State<HomeScreen> {
     ContactOptionsSheet.show(context, clinic);
   }
 
-  void _handleOfferTap(OfferModel offer) async {
-    final loc = LocaleService();
-    if (!isEntityUuid(offer.clinicId) || !isEntityUuid(offer.id)) return;
-    try {
-      final clinic = await _clinicsRepository.getClinicDetail(offer.clinicId);
-      if (!mounted) return;
-      Navigator.push(
+  Future<void> _handleOfferTap(OfferModel offer, AsyncActionScope action) =>
+      openOfferClinic(
         context,
-        LuxuryPageRoute(
-          page: AppointmentRequestScreen(
-            clinic: clinic,
-            selectedOfferId: offer.id,
-            selectedOfferTitle: loc.isArabic ? offer.titleAr : offer.titleEn,
-          ),
-        ),
+        offer,
+        action,
+        _clinicsRepository,
+        inquire: true,
       );
-    } catch (_) {
-      if (mounted) {
-        showAppSnackBar(
-          context,
-          loc.isArabic
-              ? 'تعذر تحميل العيادة. حاول فتح العرض مجدداً.'
-              : 'Unable to load the clinic. Please try the offer again.',
-          type: AppSnackBarType.error,
-        );
-      }
-    }
-  }
 
   void _handleCategoryTap(CategoryItem category) {
     switch (category.id) {
@@ -359,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ads: topAds,
               placements: partners.map((partner) => partner.placement).toList(),
               onClinicTap: _navigateToClinicProfile,
-              onRequestAppointmentTap: _handleAppointmentLeadRequest,
+              onRequestAction: _handleAppointmentLeadRequest,
               onContactTap: _handleContact,
             ),
           ),
@@ -393,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: ActiveOffersSection(
               offers: offersList,
-              onOfferTap: _handleOfferTap,
+              onOfferAction: _handleOfferTap,
             ),
           ),
 
@@ -406,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: NearbyClinicsSection(
               clinics: nearbyList,
               onClinicTap: _navigateToClinicProfile,
-              onRequestTap: _handleAppointmentLeadRequest,
+              onRequestAction: _handleAppointmentLeadRequest,
               onContactTap: _handleContact,
             ),
           ),
