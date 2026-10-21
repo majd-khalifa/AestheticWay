@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/async_action_button.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../offers/presentation/widgets/patient_offer_card.dart';
@@ -9,10 +10,12 @@ class ActiveOffersSection extends StatelessWidget {
   const ActiveOffersSection({
     super.key,
     required this.offers,
-    required this.onOfferTap,
+    this.onOfferTap,
+    this.onOfferAction,
   });
+  final Future<void> Function(OfferModel, AsyncActionScope)? onOfferAction;
   final List<OfferModel> offers;
-  final ValueChanged<OfferModel> onOfferTap;
+  final ValueChanged<OfferModel>? onOfferTap;
   @override
   Widget build(BuildContext context) {
     if (offers.isEmpty) return const SizedBox.shrink();
@@ -50,7 +53,12 @@ class ActiveOffersSection extends StatelessWidget {
                     child: PatientOfferCard(
                       offer: offer,
                       compact: true,
-                      onInquiry: () => onOfferTap(offer),
+                      onInquiry: onOfferTap == null
+                          ? null
+                          : () => onOfferTap!(offer),
+                      onInquiryAction: onOfferAction == null
+                          ? null
+                          : (action) => onOfferAction!(offer, action),
                     ),
                   ),
                 ),

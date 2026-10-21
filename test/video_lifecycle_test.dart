@@ -7,6 +7,7 @@ import 'package:aesthetic_way/features/home/presentation/widgets/featured_ads_ca
 
 class TrackingVideoPlatform extends VideoPlayerPlatform {
   int created = 0;
+  Duration position = Duration.zero;
   bool delayInitialization = false;
   final calls = <String>[];
   final streams = <int, StreamController<VideoEvent>>{};
@@ -46,9 +47,10 @@ class TrackingVideoPlatform extends VideoPlayerPlatform {
   @override
   Future<void> setMixWithOthers(bool mixWithOthers) async {}
   @override
-  Future<void> seekTo(int playerId, Duration position) async {}
+  Future<void> seekTo(int playerId, Duration position) async =>
+      calls.add('seek:$playerId:${position.inSeconds}');
   @override
-  Future<Duration> getPosition(int playerId) async => Duration.zero;
+  Future<Duration> getPosition(int playerId) async => position;
   @override
   Widget buildView(int playerId) => const ColoredBox(color: Colors.black);
 }
@@ -66,6 +68,99 @@ void main() {
     for (final stream in fake.streams.values) {
       await stream.close();
     }
+  });
+  testWidgets(
+    'video with no poster has real bounds and starts only the active slide',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ListView(
+            children: const [
+              FeaturedAdSlideMedia(
+                imageUrl: null,
+                videoUrl: 'https://test.invalid/a.mp4',
+              ),
+              FeaturedAdSlideMedia(
+                imageUrl: null,
+                videoUrl: 'https://test.invalid/b.mp4',
+                isActive: false,
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final size = tester.getSize(find.byType(FeaturedAdSlideMedia).first);
+      expect(size.height, greaterThan(0));
+      expect(size.width / size.height, closeTo(16 / 9, .01));
+      expect(fake.created, 1);
+      expect(fake.calls, contains('play:0'));
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+    },
+  );
+  testWidgets(
+    'reduced motion retains a poster state until explicit play and supports pause',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(800, 600),
+              disableAnimations: true,
+            ),
+            child: ListView(
+              children: const [
+                FeaturedAdSlideMedia(
+                  imageUrl: null,
+                  videoUrl: 'https://test.invalid/a.mp4',
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(fake.created, 0);
+      final play = find.byIcon(Icons.play_arrow);
+      await tester.tap(play);
+      await tester.pumpAndSettle();
+      expect(fake.created, 1);
+      expect(fake.calls, contains('play:0'));
+      await tester.tap(find.byIcon(Icons.pause));
+      await tester.pumpAndSettle();
+      // video_player releases the platform player after its event subscription.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+      expect(fake.calls, containsAll(['pause:0', 'dispose:0']));
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+    },
+  );
+  testWidgets('playback seeks to zero at the 15-second policy boundary', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          children: const [
+            FeaturedAdSlideMedia(
+              imageUrl: null,
+              videoUrl: 'https://test.invalid/a.mp4',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    fake.position = const Duration(seconds: 15);
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+    expect(fake.calls, contains('seek:0:0'));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
   testWidgets(
     'inactive slides allocate no codec, active slide pauses and disposes when tab hides',
@@ -133,8 +228,11 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      // Initialization is deliberately unresolved. Assert its visible progress
+      // without waiting for an indeterminate spinner to settle.
+      await tester.pump();
       expect(fake.created, 1);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
       scroll.jumpTo(800);
       await tester.pump();
       fake.initialize(0);

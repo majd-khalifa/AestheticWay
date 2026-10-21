@@ -620,7 +620,8 @@ void main() {
       final provider =
           tester.widget<Image>(find.byType(Image).first).image as ResizeImage;
       expect(provider.width, 480);
-      expect(provider.height, 540);
+      // A 160-wide studio frame is 200 high (4:5), at DPR 3.
+      expect(provider.height, 600);
       expect(provider.policy, ResizeImagePolicy.fit);
       await tester.pumpWidget(const SizedBox());
     },

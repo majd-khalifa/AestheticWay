@@ -102,6 +102,7 @@ class _OtpScreenState extends State<OtpScreen> {
   String get _otpCode => _controllers.map((c) => c.text).join();
 
   void _verifyOtp() async {
+    if (_isLoading) return;
     final loc = LocaleService();
     final code = _otpCode;
 
@@ -468,10 +469,13 @@ class _OtpScreenState extends State<OtpScreen> {
                         : TextButton.icon(
                             onPressed: _isResending ? null : _onResendOtp,
                             icon: _isResending
-                                ? const SizedBox(
-                                    width: 14,
-                                    height: 14,
+                                ? SizedBox(
+                                    width: 16,
+                                    height: 16,
                                     child: CircularProgressIndicator(
+                                      semanticsLabel: loc.isArabic
+                                          ? 'جارٍ إعادة إرسال الرمز'
+                                          : 'Resending code',
                                       strokeWidth: 2,
                                       color: AppColors.accentChampagne,
                                     ),

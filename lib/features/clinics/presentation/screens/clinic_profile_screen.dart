@@ -14,7 +14,7 @@ import '../../../../core/widgets/luxury_animations.dart';
 import '../../../../core/widgets/luxury_empty_state.dart';
 import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/pagination_footer.dart';
-import '../../../../core/widgets/silver_button.dart';
+import '../../../../core/widgets/async_action_button.dart';
 import '../../../appointment_lead/presentation/screens/appointment_request_screen.dart';
 import '../../../offers/data/offers_repository.dart';
 import '../../../offers/models/offer_model.dart';
@@ -133,7 +133,8 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
     }
   }
 
-  Future<void> _request({
+  Future<void> _request(
+    AsyncActionScope action, {
     PractitionerModel? practitioner,
     OfferModel? offer,
     TreatmentModel? treatment,
@@ -143,10 +144,12 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
       return;
     }
     final loc = LocaleService();
-    final auth = await GuestAuthGuard.requireAuth(
-      context,
-      reasonTitle: loc.tr('request_consultation'),
-      reasonSubtitle: loc.tr('request_consultation'),
+    final auth = await action.wait(
+      GuestAuthGuard.requireAuth(
+        context,
+        reasonTitle: loc.tr('request_consultation'),
+        reasonSubtitle: loc.tr('request_consultation'),
+      ),
     );
     if (!auth || !mounted) return;
     Navigator.push(
@@ -214,24 +217,26 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
             if (images.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 18),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final image in images)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 10),
-                          child: SizedBox(
-                            width: MediaQuery.sizeOf(context).width - 40,
-                            child: PatientMediaBanner(
-                              source: image,
-                              height: 180,
-                              borderRadius: BorderRadius.circular(22),
+                child: LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final image in images)
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 10),
+                            child: SizedBox(
+                              width: constraints.maxWidth,
+                              child: PatientMediaBanner(
+                                source: image,
+                                aspectRatio: 16 / 9,
+                                borderRadius: BorderRadius.circular(22),
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -315,12 +320,12 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  SilverButton(
+                  AsyncActionButton(
                     label: loc.tr('request_consultation'),
                     icon: Icons.chat_bubble_outline,
                     isFullWidth: true,
                     onPressed: isEntityUuid(clinic.id)
-                        ? () => _request()
+                        ? (action) => _request(action)
                         : null,
                   ),
                   if (!isEntityUuid(clinic.id))
@@ -486,7 +491,8 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         page: PractitionerProfileScreen(practitioner: p),
                       ),
                     ),
-                    onInquiry: () => _request(practitioner: p),
+                    onInquiryAction: (action) =>
+                        _request(action, practitioner: p),
                   ),
                 ),
               _footer(_staff),
@@ -520,7 +526,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: PatientOfferCard(
                     offer: o,
-                    onInquiry: () => _request(offer: o),
+                    onInquiryAction: (action) => _request(action, offer: o),
                   ),
                 ),
               _footer(_offers),

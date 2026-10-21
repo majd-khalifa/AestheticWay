@@ -106,6 +106,11 @@ class ClinicModel {
   final String descriptionEn;
   final String coverImageUrl;
   final List<String> galleryImages;
+
+  /// Photography only: a logo must never masquerade as a clinic cover.
+  String get primaryPhotoUrl => coverImageUrl.trim().isNotEmpty
+      ? coverImageUrl
+      : galleryImages.where((url) => url.trim().isNotEmpty).firstOrNull ?? '';
   final String logoUrl;
   final double rating;
   final int reviewCount;

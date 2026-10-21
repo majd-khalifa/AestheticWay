@@ -47,6 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _onRegister() async {
+    if (_isLoading) return;
     final loc = LocaleService();
     if (!_formKey.currentState!.validate()) return;
 

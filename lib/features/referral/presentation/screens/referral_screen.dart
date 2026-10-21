@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/async_action_button.dart';
+import '../../../../core/widgets/silver_button.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/auth/guest_auth_guard.dart';
@@ -27,8 +29,8 @@ class _ReferralScreenState extends State<ReferralScreen> {
     });
   }
 
-  Future<void> _copy(String link) async {
-    await Clipboard.setData(ClipboardData(text: link));
+  Future<void> _copy(String link, AsyncActionScope action) async {
+    await action.wait(Clipboard.setData(ClipboardData(text: link)));
     if (!mounted) return;
     showAppSnackBar(
       context,
@@ -36,18 +38,21 @@ class _ReferralScreenState extends State<ReferralScreen> {
     );
   }
 
-  Future<void> _share(String link) async {
+  Future<void> _share(String link, AsyncActionScope action) async {
     final message = LocaleService().isArabic
         ? 'اكتشف عيادات التجميل والجلدية مع AESTHETIC WAY\n$link'
         : 'Discover medical aesthetics with AESTHETIC WAY\n$link';
     try {
-      final opened = await launchUrl(
-        Uri.https('wa.me', '/', {'text': message}),
-        mode: LaunchMode.externalApplication,
+      final opened = await action.wait(
+        launchUrl(
+          Uri.https('wa.me', '/', {'text': message}),
+          mode: LaunchMode.externalApplication,
+        ),
       );
-      if (!opened) await _copy(link);
+      if (!opened) await _copy(link, action);
     } catch (_) {
-      await _copy(link);
+      action.ensureCurrent();
+      await _copy(link, action);
     }
   }
 
@@ -122,25 +127,24 @@ class _ReferralScreenState extends State<ReferralScreen> {
                               spacing: 8,
                               runSpacing: 8,
                               children: [
-                                OutlinedButton.icon(
+                                AsyncActionButton(
+                                  variant: SilverButtonVariant.secondary,
                                   onPressed: link.isEmpty
                                       ? null
-                                      : () => _copy(link),
-                                  icon: const Icon(Icons.copy_outlined),
-                                  label: Text(
-                                    loc.isArabic ? 'نسخ الرابط' : 'Copy link',
-                                  ),
+                                      : (action) => _copy(link, action),
+                                  icon: Icons.copy_outlined,
+                                  label: loc.isArabic
+                                      ? 'نسخ الرابط'
+                                      : 'Copy link',
                                 ),
-                                FilledButton.tonalIcon(
+                                AsyncActionButton(
                                   onPressed: link.isEmpty
                                       ? null
-                                      : () => _share(link),
-                                  icon: const Icon(Icons.share_outlined),
-                                  label: Text(
-                                    loc.isArabic
-                                        ? 'مشاركة عبر واتساب'
-                                        : 'Share via WhatsApp',
-                                  ),
+                                      : (action) => _share(link, action),
+                                  icon: Icons.share_outlined,
+                                  label: loc.isArabic
+                                      ? 'مشاركة عبر واتساب'
+                                      : 'Share via WhatsApp',
                                 ),
                               ],
                             ),

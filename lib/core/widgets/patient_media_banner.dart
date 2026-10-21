@@ -8,10 +8,14 @@ class PatientMediaBanner extends StatelessWidget {
     super.key,
     required this.source,
     this.height = 180,
+    this.aspectRatio,
+    this.semanticLabel,
     this.borderRadius = BorderRadius.zero,
   });
   final String? source;
   final double height;
+  final double? aspectRatio;
+  final String? semanticLabel;
   final BorderRadius borderRadius;
   @override
   Widget build(BuildContext context) {
@@ -19,20 +23,28 @@ class PatientMediaBanner extends StatelessWidget {
     if (provider == null) return const SizedBox.shrink();
     return ClipRRect(
       borderRadius: borderRadius,
-      child: Image(
-        key: ValueKey(provider),
-        image: boundedImageDecode(
-          computeSafeCacheWidth(
-            context,
-            MediaQuery.sizeOf(context).width,
-            height,
-          ),
-          provider,
-        ),
-        width: double.infinity,
-        height: height,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.hasBoundedWidth
+              ? constraints.maxWidth
+              : MediaQuery.sizeOf(context).width;
+          final displayHeight = aspectRatio == null
+              ? height
+              : width / aspectRatio!;
+          return Image(
+            key: ValueKey(provider),
+            image: boundedImageDecode(
+              computeSafeCacheWidth(context, width, displayHeight),
+              provider,
+            ),
+            width: double.infinity,
+            height: displayHeight,
+            fit: BoxFit.cover,
+            semanticLabel: semanticLabel,
+            excludeFromSemantics: semanticLabel == null,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }

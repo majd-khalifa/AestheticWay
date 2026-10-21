@@ -3,18 +3,23 @@ import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
+import '../../../../core/widgets/async_action_button.dart';
+import '../../../../core/widgets/silver_button.dart';
 import '../../models/offer_model.dart';
 
 class PatientOfferCard extends StatelessWidget {
   const PatientOfferCard({
     super.key,
     required this.offer,
-    required this.onInquiry,
+    this.onInquiry,
+    this.onInquiryAction,
+    this.onClinicAction,
     this.onClinicTap,
     this.compact = false,
   });
   final OfferModel offer;
-  final VoidCallback onInquiry;
+  final VoidCallback? onInquiry;
+  final AsyncPatientAction? onInquiryAction, onClinicAction;
   final VoidCallback? onClinicTap;
   final bool compact;
   @override
@@ -32,16 +37,25 @@ class PatientOfferCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PatientMediaBanner(
-              source: offer.imageUrl,
-              height: compact ? 150 : 190,
-            ),
+            PatientMediaBanner(source: offer.imageUrl, aspectRatio: 16 / 9),
             Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (clinic.isNotEmpty)
+                  if (clinic.isNotEmpty && onClinicAction != null)
+                    AsyncActionButton(
+                      label: clinic,
+                      loadingLabel: loc.isArabic
+                          ? 'جارٍ تحميل العيادة'
+                          : 'Loading clinic',
+                      errorLabel: loc.isArabic
+                          ? 'تعذر تحميل العيادة. حاول مجدداً.'
+                          : 'Clinic unavailable. Please try again.',
+                      onPressed: onClinicAction,
+                      variant: SilverButtonVariant.textOnly,
+                    )
+                  else if (clinic.isNotEmpty)
                     Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: InkWell(
@@ -73,8 +87,8 @@ class PatientOfferCard extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         description!,
-                        maxLines: compact ? 2 : null,
-                        overflow: compact ? TextOverflow.ellipsis : null,
+                        maxLines: compact ? 2 : 3,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: AppColors.subtext(context),
                           fontSize: 13,
@@ -132,11 +146,24 @@ class PatientOfferCard extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 14),
-                  FilledButton.icon(
-                    onPressed: onInquiry,
-                    icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                    label: Text(loc.tr('offer_claim')),
-                  ),
+                  if (onInquiryAction != null)
+                    AsyncActionButton(
+                      label: loc.tr('offer_claim'),
+                      loadingLabel: loc.isArabic
+                          ? 'جارٍ تحميل العيادة'
+                          : 'Loading clinic',
+                      errorLabel: loc.isArabic
+                          ? 'تعذر تحميل العيادة. حاول مجدداً.'
+                          : 'Clinic unavailable. Please try again.',
+                      onPressed: onInquiryAction,
+                      icon: Icons.chat_bubble_outline,
+                    )
+                  else
+                    FilledButton.icon(
+                      onPressed: onInquiry,
+                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                      label: Text(loc.tr('offer_claim')),
+                    ),
                 ],
               ),
             ),
