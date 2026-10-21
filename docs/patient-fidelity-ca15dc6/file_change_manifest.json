@@ -15,12 +15,12 @@
     {
       "status": "A",
       "path": "assets/fonts/patient/OFL-NotoSansArabic.txt",
-      "sha256": "07fc70bfeb985cc1a87a8587d0a0c80bab11c86c9dc3fd95b6f0cb332f983e96"
+      "sha256": "df5143cdf3380169f2d03bf6d2cd243e85621fd097e608c3607cf7f9c9884ae6"
     },
     {
       "status": "A",
       "path": "assets/fonts/patient/OFL-PlayfairDisplay.txt",
-      "sha256": "566be814f8e96e93dfa16101331557eb6b5467e9e03f627c0910fe93ca12300e"
+      "sha256": "0bb2b43ffd21233963b5d0c0eb6f1abffa776ec53c56131b5818708f2730ffd6"
     },
     {
       "status": "A",
@@ -35,7 +35,7 @@
     {
       "status": "A",
       "path": "docs/PATIENT_CA15DC6_CONTRACT_REVIEW_FOR_ALI.md",
-      "sha256": "3d60b24d0efa2370e7eb0d977f1e2c769bb165a46fe8af92766b2154ea47ba55"
+      "sha256": "b8c31ae00f563440e1a254711e122f198347880cabef3cefa1681f4293423370"
     },
     {
       "status": "A",
@@ -50,7 +50,7 @@
     {
       "status": "A",
       "path": "docs/PATIENT_REFERENCE_FIDELITY_RECOVERY_REPORT.md",
-      "sha256": "1214b0b77e6eb51c1990c50d2e9c57f04f1294fae95ab382a8fdeae797d3492d"
+      "sha256": "daeea5f14bade18647651e7c82c1f81136cc99fde1e20def0dd8e60f8bdcb111"
     },
     {
       "status": "A",
@@ -1085,7 +1085,7 @@
     {
       "status": "A",
       "path": "docs/patient-fidelity-ca15dc6/capture_manifest.json",
-      "sha256": "456a9adf2bc6586b8681d1de713b8d94e35ce1f609ca0a96a1a101c2b7d4c03a"
+      "sha256": "79190c814552ed97467c89416fe7732bf30e046a4c58a629f6df8b2b90286bd8"
     },
     {
       "status": "A",
@@ -1136,6 +1136,11 @@
       "status": "A",
       "path": "docs/patient-fidelity-ca15dc6/comparisons/matrix_offers_to_consultation.jpg",
       "sha256": "0f3378bc76fd1817edfefc3deec65b63378911adbab72b26682d13ce73696f59"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/file_change_manifest.json",
+      "sha256": null
     },
     {
       "status": "A",
@@ -2355,7 +2360,7 @@
     {
       "status": "A",
       "path": "test/fixtures/media/LICENSE-flutter-gallery-assets.txt",
-      "sha256": "7bbee97ff6d9a19cf7c1ee7b0bd25b5d1d5735fc9a2202d7d903fdbb29c199b3"
+      "sha256": "6b167c9b0d8e9b17fd2b9eeaac9518ad29f9896e6d793202c738c8db43b1c2d9"
     },
     {
       "status": "A",
@@ -2445,7 +2450,7 @@
     {
       "status": "A",
       "path": "test/goldens/patient_reference_fidelity_v2/README.md",
-      "sha256": "8e108bb27927d94a8b9417c3864a80f416f130eda720b4fa69b15f232b5536bc"
+      "sha256": "456764f493c952e9226a037b73c19187ec9f40433ded03e73f8b739460428f37"
     },
     {
       "status": "A",
@@ -2488,6 +2493,31 @@
       "sha256": "b15b74e915dc86a19d607b8670ee2e38c5ef1ec2edaeb947767a218a838fb744"
     },
     {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/provenance.json",
+      "sha256": "4845c99bef19376a4ed7e1655f1fbeac9f214220f3b3058301ab4e6c9c30ba28"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_dark_ar.png",
+      "sha256": "196216c434f77b6c9359d534a91bc5aaf5a6225107965b590457036c8037d69f"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_dark_en.png",
+      "sha256": "343bf670997a9f777bbb0d6e99710ca35b75debce7555fd808f6bb21b53c53f7"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_light_ar.png",
+      "sha256": "9b97ddf94db7c4c49aabb6a99dbf10fb206f267300db8ae161975d1c30aa2e8b"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_light_en.png",
+      "sha256": "0702770fb43adcc75993389dc731abf2703c829658faecada16e76bc9fdd18cf"
+    },
+    {
       "status": "M",
       "path": "test/media_first_previews_test.dart",
       "sha256": "8f327ed3d70093d87a9feff38b15efa499de3fdb66e6ce2767fbb079c936d564"
@@ -2500,7 +2530,7 @@
     {
       "status": "A",
       "path": "test/patient_ca15dc6_contract_test.dart",
-      "sha256": "7c4b42186ee48f0b5d8f5a435c0c2db3ee7312fdc1b4197beeaf5ad9373c2a93"
+      "sha256": "f7e50a3511c815bbfd0ed5d3c7e1df2efe5b2a8f67d33b660c8f81b2629b4198"
     },
     {
       "status": "A",
@@ -2550,9 +2580,19 @@
       "sha256": "b943e0d62479bd428f772c53a0e54c5c4151148df6015c4eed6187bcbea7f3a3"
     },
     {
+      "status": "M",
+      "path": "assets/fonts/patient/OFL-NotoSansArabic.txt",
+      "sha256": "df5143cdf3380169f2d03bf6d2cd243e85621fd097e608c3607cf7f9c9884ae6"
+    },
+    {
+      "status": "M",
+      "path": "assets/fonts/patient/OFL-PlayfairDisplay.txt",
+      "sha256": "0bb2b43ffd21233963b5d0c0eb6f1abffa776ec53c56131b5818708f2730ffd6"
+    },
+    {
       "status": "A",
       "path": "docs/PATIENT_CA15DC6_CONTRACT_REVIEW_FOR_ALI.md",
-      "sha256": "3d60b24d0efa2370e7eb0d977f1e2c769bb165a46fe8af92766b2154ea47ba55"
+      "sha256": "b8c31ae00f563440e1a254711e122f198347880cabef3cefa1681f4293423370"
     },
     {
       "status": "M",
@@ -2567,7 +2607,7 @@
     {
       "status": "A",
       "path": "docs/PATIENT_REFERENCE_FIDELITY_RECOVERY_REPORT.md",
-      "sha256": "1214b0b77e6eb51c1990c50d2e9c57f04f1294fae95ab382a8fdeae797d3492d"
+      "sha256": "daeea5f14bade18647651e7c82c1f81136cc99fde1e20def0dd8e60f8bdcb111"
     },
     {
       "status": "A",
@@ -2582,7 +2622,7 @@
     {
       "status": "A",
       "path": "docs/patient-fidelity-ca15dc6/capture_manifest.json",
-      "sha256": "456a9adf2bc6586b8681d1de713b8d94e35ce1f609ca0a96a1a101c2b7d4c03a"
+      "sha256": "79190c814552ed97467c89416fe7732bf30e046a4c58a629f6df8b2b90286bd8"
     },
     {
       "status": "A",
@@ -2633,6 +2673,11 @@
       "status": "A",
       "path": "docs/patient-fidelity-ca15dc6/comparisons/matrix_offers_to_consultation.jpg",
       "sha256": "0f3378bc76fd1817edfefc3deec65b63378911adbab72b26682d13ce73696f59"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/file_change_manifest.json",
+      "sha256": null
     },
     {
       "status": "A",
@@ -3737,7 +3782,7 @@
     {
       "status": "A",
       "path": "test/fixtures/media/LICENSE-flutter-gallery-assets.txt",
-      "sha256": "7bbee97ff6d9a19cf7c1ee7b0bd25b5d1d5735fc9a2202d7d903fdbb29c199b3"
+      "sha256": "6b167c9b0d8e9b17fd2b9eeaac9518ad29f9896e6d793202c738c8db43b1c2d9"
     },
     {
       "status": "A",
@@ -3757,7 +3802,7 @@
     {
       "status": "A",
       "path": "test/goldens/patient_reference_fidelity_v2/README.md",
-      "sha256": "8e108bb27927d94a8b9417c3864a80f416f130eda720b4fa69b15f232b5536bc"
+      "sha256": "456764f493c952e9226a037b73c19187ec9f40433ded03e73f8b739460428f37"
     },
     {
       "status": "A",
@@ -3800,6 +3845,31 @@
       "sha256": "b15b74e915dc86a19d607b8670ee2e38c5ef1ec2edaeb947767a218a838fb744"
     },
     {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/provenance.json",
+      "sha256": "4845c99bef19376a4ed7e1655f1fbeac9f214220f3b3058301ab4e6c9c30ba28"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_dark_ar.png",
+      "sha256": "196216c434f77b6c9359d534a91bc5aaf5a6225107965b590457036c8037d69f"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_dark_en.png",
+      "sha256": "343bf670997a9f777bbb0d6e99710ca35b75debce7555fd808f6bb21b53c53f7"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_light_ar.png",
+      "sha256": "9b97ddf94db7c4c49aabb6a99dbf10fb206f267300db8ae161975d1c30aa2e8b"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/windows/patient_clinic_light_en.png",
+      "sha256": "0702770fb43adcc75993389dc731abf2703c829658faecada16e76bc9fdd18cf"
+    },
+    {
       "status": "M",
       "path": "test/media_first_previews_test.dart",
       "sha256": "8f327ed3d70093d87a9feff38b15efa499de3fdb66e6ce2767fbb079c936d564"
@@ -3807,7 +3877,7 @@
     {
       "status": "A",
       "path": "test/patient_ca15dc6_contract_test.dart",
-      "sha256": "7c4b42186ee48f0b5d8f5a435c0c2db3ee7312fdc1b4197beeaf5ad9373c2a93"
+      "sha256": "f7e50a3511c815bbfd0ed5d3c7e1df2efe5b2a8f67d33b660c8f81b2629b4198"
     },
     {
       "status": "M",

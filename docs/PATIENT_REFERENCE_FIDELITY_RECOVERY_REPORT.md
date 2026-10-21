@@ -56,7 +56,15 @@ Final results and native CI evidence are recorded below after execution. Exact n
 
 See [complete change manifest](patient-fidelity-ca15dc6/file_change_manifest.json) for cumulative PR10 and this recovery's paths/hashes. Manifest hashing excludes itself to avoid a circular digest.
 
-- Local native Linux / Flutter3.41.5 / Dart3.11.3: **573/573 tests passed**, analyzer **zero issues**, `dart format .` completed, `git diff --check` clean. The24 new tests cover response mappings, gallery-only consultation decoding, honest single-photo controls, real portrait decoding at four widths/both themes/languages/160% text, guarded practitioner lead routing and the lazy/shared offer preview.
+- Local native Linux / Flutter3.41.5 / Dart3.11.3: **577/577 tests passed**, analyzer **zero issues**, `dart format .` completed, `git diff --check` clean. The28 new tests cover response mappings, gallery-only consultation decoding, honest single-photo controls, real portrait decoding at four widths/both themes/languages/160% text, guarded practitioner lead routing, the lazy/shared offer preview and four localized/theme keyboard-inset/large-text/semantics cases.
 - Focused render/responsive run:106 passing (78 preview cases plus28 existing responsive/golden/flow cases);102 PNGs per before/revised capture. Native glyph raster ownership remains separate from Android/Windows TargetPlatform variants.
 - Offline public PowerShell redaction regression passes in local PowerShell7.5.4. No live API request, credential, patient record or raw signed media URL is required by that test.
-- Native Windows CI review/verification is pending the candidate artifact from this recovery commit; its result is not inferred from Linux. Final native CI evidence will be appended after capture review.
+- All four native Windows candidate PNGs were visually reviewed from [capture run39620681391](https://github.com/majd-khalifa/AestheticWay/actions/runs/39620681391); all common geometry/style JSONs match Linux exactly, and their native rasters have separate ownership. That initial Windows run passed172 focused tests and failed8 only for absent new baseline files;8 candidate tests passed. Ubuntu passed573 tests and analysis on that commit. The subsequent native full-suite verification after baseline adoption, including the four new keyboard tests, is published in PR10 Checks and the PR description; do not mistake the initial capture run for final Windows approval.
+
+Reproduce the actual revised captures (test-only data):
+
+```sh
+flutter test test/media_first_previews_test.dart --update-goldens --dart-define=MEDIA_FIRST_CAPTURE_DIR=/absolute/output/path
+```
+
+On Windows use a forward-slash path such as `C:/temp/aw-previews`. This writes candidate preview files, not approval of committed goldens. Final verification remains `dart format .`, `flutter analyze`, `flutter test`, and `git diff origin/main --check`.

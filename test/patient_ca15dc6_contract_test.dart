@@ -398,4 +398,65 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  for (final dark in [false, true]) {
+    for (final arabic in [false, true]) {
+      testWidgets(
+        'Consultation CTA remains reachable above keyboard dark=$dark rtl=$arabic at 160%',
+        (tester) async {
+          tester.view.devicePixelRatio = 1;
+          tester.view.physicalSize = const Size(320, 700);
+          tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+          tester.view.viewPadding = const FakeViewPadding(bottom: 24);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetViewInsets);
+          addTearDown(tester.view.resetViewPadding);
+          final semantics = tester.ensureSemantics();
+
+          unawaited(
+            LocaleService().setLanguage(
+              arabic ? AppLanguage.arabic : AppLanguage.english,
+            ),
+          );
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: const TextScaler.linear(1.6),
+                  disableAnimations: true,
+                ),
+                child: Directionality(
+                  textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
+                  child: child!,
+                ),
+              ),
+              home: AppointmentRequestScreen(clinic: patientClinic()),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final label = LocaleService().tr('submit_lead_btn');
+          final button = find.ancestor(
+            of: find.text(label),
+            matching: find.byType(FilledButton),
+          );
+          await tester.scrollUntilVisible(
+            button,
+            240,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.pumpAndSettle();
+          final bounds = tester.getRect(button);
+          expect(bounds.bottom, lessThanOrEqualTo(420));
+          expect(bounds.top, greaterThanOrEqualTo(56));
+          expect(
+            tester.getSemantics(button).getSemanticsData().label,
+            contains(label),
+          );
+          expect(tester.takeException(), isNull);
+          semantics.dispose();
+        },
+      );
+    }
+  }
 }

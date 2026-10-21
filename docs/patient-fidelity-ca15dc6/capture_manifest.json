@@ -384,5 +384,14 @@
     "previews/before/profile_media_dark_en_scrolled.png": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929",
     "previews/before/profile_media_light_en.png": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440",
     "previews/before/profile_media_light_en_scrolled.png": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
-  }
+  },
+  "fixture_sha256": {
+    "test/fixtures/media/LICENSE-flutter-gallery-assets.txt": "6b167c9b0d8e9b17fd2b9eeaac9518ad29f9896e6d793202c738c8db43b1c2d9",
+    "test/fixtures/media/README.md": "dea8b6044b25e997572d59902f802af1a52a87f169ae492f3414ecaf2520b9d1",
+    "test/fixtures/media/fragrance_photo.jpg": "462925474f485d1e16f3912984422bcb399e102ce5e0404d72bf0a6ce1590896",
+    "test/fixtures/media/packaging_fixture.png": "fca97465eed8e4f3544344055564d0cec4cf6d1f5466b8ed16e797731986095e",
+    "test/fixtures/media/portrait_frame_fixture.png": "95a8497c397dbb8642524c5868d241314658d2fb27fc0fa6ddaf2df3e1ea71af",
+    "test/fixtures/media/portrait_photo.png": "de0f9c8ce3f8295fbb02f783d266bd28735d43453fec5cbf189b930010661e49"
+  },
+  "harness_sha256": "8f327ed3d70093d87a9feff38b15efa499de3fdb66e6ce2767fbb079c936d564"
 }
