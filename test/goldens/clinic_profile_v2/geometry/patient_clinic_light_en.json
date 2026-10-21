@@ -1,0 +1,390 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "text": [
+    {
+      "text": "FEATURED CLINIC",
+      "rect": [
+        128.703125,
+        82.703125,
+        112.359375,
+        16.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 11.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4286604821,
+      "direction": "ltr"
+    },
+    {
+      "text": "Fixture Medical Aesthetics & Dermatology Clinic",
+      "rect": [
+        128.703125,
+        105.703125,
+        222.59375,
+        124.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 23.0,
+      "height": 1.35,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "Dubai",
+      "rect": [
+        128.703125,
+        235.703125,
+        42.265625,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "ltr"
+    },
+    {
+      "text": "4.7",
+      "rect": [
+        153.296875,
+        271.203125,
+        21.125,
+        17.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 11.5,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4286067983,
+      "direction": "ltr"
+    },
+    {
+      "text": "Google",
+      "rect": [
+        179.421875,
+        272.203125,
+        36.765625,
+        15.0
+      ],
+      "family": "PatientGolden",
+      "weight": 500,
+      "size": 10.0,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "ltr"
+    },
+    {
+      "text": "(125)",
+      "rect": [
+        219.1875,
+        272.203125,
+        28.140625,
+        15.0
+      ],
+      "family": "PatientGolden",
+      "weight": 500,
+      "size": 10.0,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4281549141,
+      "direction": "ltr"
+    },
+    {
+      "text": "Request Consultation",
+      "rect": [
+        120.578125,
+        334.703125,
+        173.828125,
+        18.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294967295,
+      "direction": "ltr"
+    },
+    {
+      "text": "Please wait",
+      "rect": [
+        162.609375,
+        334.703125,
+        92.78125,
+        18.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294967295,
+      "direction": "ltr"
+    },
+    {
+      "text": "Google Maps",
+      "rect": [
+        76.703125,
+        381.703125,
+        91.765625,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 500,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.1,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "About & Map",
+      "rect": [
+        32.0,
+        465.40625,
+        97.921875,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4286604821,
+      "direction": "ltr"
+    },
+    {
+      "text": "Medical Staff",
+      "rect": [
+        161.921875,
+        465.40625,
+        99.890625,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "ltr"
+    },
+    {
+      "text": "Treatments",
+      "rect": [
+        293.8125,
+        465.40625,
+        85.71875,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "ltr"
+    },
+    {
+      "text": "Offers",
+      "rect": [
+        411.53125,
+        465.40625,
+        46.828125,
+        19.0
+      ],
+      "family": "PatientGolden",
+      "weight": 600,
+      "size": 13.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4280166715,
+      "direction": "ltr"
+    },
+    {
+      "text": "About the clinic",
+      "rect": [
+        40.703125,
+        538.09375,
+        308.59375,
+        33.0
+      ],
+      "family": "serif",
+      "weight": 400,
+      "size": 23.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "Medical information supplied by this fixture clinic.",
+      "rect": [
+        40.703125,
+        581.09375,
+        308.59375,
+        52.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 15.0,
+      "height": 1.7,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "Fixture branch 1",
+      "rect": [
+        80.703125,
+        646.203125,
+        268.59375,
+        24.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 16.0,
+      "height": 1.5,
+      "spacing": 0.5,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "",
+      "rect": [
+        80.703125,
+        670.203125,
+        268.59375,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "Fixture branch 2",
+      "rect": [
+        80.703125,
+        718.203125,
+        268.59375,
+        24.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 16.0,
+      "height": 1.5,
+      "spacing": 0.5,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "",
+      "rect": [
+        80.703125,
+        742.203125,
+        268.59375,
+        20.0
+      ],
+      "family": "PatientGolden",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4278849047,
+      "direction": "ltr"
+    },
+    {
+      "text": "Clinic profile",
+      "rect": [
+        120.734375,
+        12.5,
+        148.53125,
+        31.0
+      ],
+      "family": "PatientGolden",
+      "weight": 700,
+      "size": 21.0,
+      "height": 1.5,
+      "spacing": 0.0,
+      "color": 4278849047,
+      "direction": "ltr"
+    }
+  ],
+  "icons": [
+    {
+      "glyph": 983508,
+      "family": "MaterialIcons",
+      "rect": [
+        137.296875,
+        273.203125,
+        13.0,
+        13.0
+      ],
+      "size": 13.0,
+      "color": 4294286859
+    },
+    {
+      "glyph": 57685,
+      "family": "MaterialIcons",
+      "rect": [
+        95.578125,
+        335.203125,
+        17.0,
+        17.0
+      ],
+      "size": 17.0,
+      "color": 4294967295
+    },
+    {
+      "glyph": 61870,
+      "family": "MaterialIcons",
+      "rect": [
+        50.703125,
+        382.703125,
+        18.0,
+        18.0
+      ],
+      "size": 18.0,
+      "color": 4278849047
+    },
+    {
+      "glyph": 61411,
+      "family": "MaterialIcons",
+      "rect": [
+        40.703125,
+        657.09375,
+        24.0,
+        24.0
+      ],
+      "size": 24.0,
+      "color": 4278849047
+    },
+    {
+      "glyph": 61411,
+      "family": "MaterialIcons",
+      "rect": [
+        40.703125,
+        729.09375,
+        24.0,
+        24.0
+      ],
+      "size": 24.0,
+      "color": 4278849047
+    }
+  ]
+}

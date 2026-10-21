@@ -68,13 +68,41 @@ unchanged; reviewed v2 candidates have a separate owned directory and provenance
 README. The change from the old Linux fixture pixels is intentional fixture
 typography normalization, not acceptance of arbitrary Windows percentage error.
 
-The user supplied mismatch percentages but no native actual/diff PNGs. Their
-exact differing pixels cannot be independently attributed to a particular glyph
-or rasterizer from percentages alone. The controlled source findings above are
-confirmed; native evidence is needed to confirm the complete residual cause.
-The new native Linux/Windows CI matrix records the matching SDK and fixture
-hashes, runs comparisons/full tests, and uploads candidate renders/diffs for that
-purpose. CI candidate generation never updates committed baselines or changes a
+Native CI supplied actual/diff PNGs after the first follow-up. The SDK and
+font/media fixture hashes match Linux exactly, yet native Windows retained:
+
+| V2 comparison against Linux | Different pixels |
+|---|---|
+| English Light | 11,783 (3.58%) |
+| English Dark | 11,697 (3.55%) |
+| Arabic Light | 7,791 (2.37%) |
+| Arabic Dark | 7,714 (2.34%) |
+
+The isolated diffs follow glyph/icon outlines. Logos and bottom background
+regions are pixel-identical. Separate native Windows comparisons and capture
+runs produce byte-identical PNGs. This confirms residual **native rasterizer**
+differences after controlling fonts, SDK, density and viewport. Pinning inputs
+alone cannot make a Linux raster baseline universal.
+
+The reliable strategy now combines exact native-owned `linux/` and `windows/`
+raster baselines with one common `geometry/` snapshot per theme/language. Bounds,
+font/style/color/direction properties of every Text and Icon must match that
+shared contract. Geometry records 1/64 dp layout precision; all raster comparisons
+still use zero tolerance. Missing native baselines fail. The Windows baselines
+come from CI run 39562770335 at source `17abbf9`; all four were visually reviewed
+against Linux and their diffs before copying. Original Linux PNGs are untouched.
+No production UX was changed to force raster similarity.
+
+The first native run also found a new negative test deleting a corrupt native
+file while a decode buffer still held a Windows file lock. That negative fixture
+now reads and closes the native file before handing real invalid bytes to the
+real decoder through its FileImage proxy. The decode-failure assertion remains;
+no test is skipped and no placeholder substitutes for pixels.
+
+The user initially supplied mismatch percentages but no native actual/diff PNGs. Percentages alone could not establish the cause; the native evidence above now
+distinguishes it from font/viewport fixture leakage. The native Linux/Windows CI
+matrix records SDK/fixture hashes, runs comparisons/full tests, and uploads
+candidate renders/diffs for ongoing review. CI candidate generation never updates committed baselines or changes a
 failed comparison into a pass.
 
 ## Validation and boundaries
@@ -82,8 +110,11 @@ failed comparison into a pass.
 Linux verification completed: all **508 tests pass** (the existing 496 plus
 12 new harness cases), `flutter analyze` reports **0 issues**, Dart formatting
 and `git diff --check` pass. All 42 media previews and eight exact v2 golden
-variants pass. Native Linux/Windows CI evidence is pending the branch push;
-that result will be recorded separately rather than inferred from Linux.
+variants pass. CI run 39562770335 confirms Ubuntu full-suite success and all six formerly
+failing media previews on native Windows. Windows found the residual raster
+ownership and negative-fixture cleanup issues described above. The corrected
+native-host baselines/common-geometry follow-up is undergoing final verification;
+its result is recorded separately rather than inferred from Linux.
 
 Only tests, test fixtures, CI and verification tooling/documentation are in
 scope. Production Flutter code, Django and release-signing files remain

@@ -9,18 +9,21 @@ import 'support/patient_visual_harness.dart';
 /// Deterministically reproduces a pending FakeAsync file load on every host.
 /// Bytes still come from the real native filesystem and Flutter's real decoder.
 class _DeferredFile implements File {
-  _DeferredFile(this.file);
+  _DeferredFile(this.file, {this.deferred = true});
   final File file;
+  final bool deferred;
   @override
   String get path => file.path;
   @override
   Future<int> length() async {
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-    return file.length();
+    if (deferred) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    return file.lengthSync();
   }
 
   @override
-  Future<Uint8List> readAsBytes() => file.readAsBytes();
+  Future<Uint8List> readAsBytes() async => file.readAsBytesSync();
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -39,6 +42,17 @@ void main() {
         File(canonical),
       ).obtainKey(ImageConfiguration.empty);
       expect(warm, isNot(mounted));
+      final fixture = File(
+        'test/fixtures/media/packaging_fixture.png',
+      ).absolute;
+      final actualWarm = FileImage(fixture);
+      final actualMounted = FileImage(File.fromUri(fixture.uri));
+      expect(
+        actualWarm == actualMounted,
+        !Platform.isWindows,
+        reason:
+            'Native Windows normalizes the mixed-separator URI path; POSIX retains the same key.',
+      );
     },
   );
 
@@ -157,8 +171,11 @@ void main() {
       addTearDown(() => directory.deleteSync(recursive: true));
       await tester.pumpWidget(
         MaterialApp(
-          home: Image.file(
-            file,
+          home: Image(
+            // Read and close the native file before decoding invalid bytes.
+            // A corrupt memory-mapped ImmutableBuffer can retain a Windows
+            // file lock beyond the failed decode; that is not this assertion.
+            image: FileImage(_DeferredFile(file, deferred: false)),
             errorBuilder: (_, _, _) => const Text('Fallback'),
           ),
         ),

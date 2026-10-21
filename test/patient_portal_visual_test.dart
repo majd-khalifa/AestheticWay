@@ -1,5 +1,6 @@
 import 'support/settle_preview_images.dart';
 import 'support/patient_visual_harness.dart';
+import 'support/clinic_golden_geometry.dart';
 import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'dart:async';
 import 'dart:io';
@@ -341,6 +342,10 @@ void main() {
             );
             await tester.pumpAndSettle();
             await settlePreviewImages(tester);
+            expectClinicGoldenGeometry(
+              tester,
+              'patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}',
+            );
             await expectLater(
               find.byType(Scaffold),
               matchesGoldenFile(
@@ -348,7 +353,7 @@ void main() {
                       'PATIENT_GOLDEN_CAPTURE_DIR',
                     ).isEmpty
                     ? Uri.parse(
-                        'goldens/clinic_profile_v2/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                        'goldens/clinic_profile_v2/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
                       )
                     : Directory(
                         const String.fromEnvironment(

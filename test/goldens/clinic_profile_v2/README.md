@@ -1,6 +1,6 @@
 # Clinic profile golden ownership, v2
 
-These four fixtures use a pinned **test-only** Android presentation on both
+These fixtures use a pinned **test-only** Android presentation on both
 `TargetPlatform.android` and `TargetPlatform.windows` test variants. A variant
 changes framework defaults; it does not emulate another native renderer.
 
@@ -28,6 +28,21 @@ asset registration, widget, theme or signing configuration is changed.
 
 ## Review and comparison
 
+`linux/` owns the reviewed Linux renders; `windows/` owns native Windows
+Server 2022 renders from [CI run 39562770335](https://github.com/majd-khalifa/AestheticWay/actions/runs/39562770335),
+source commit `17abbf96a8d87a10c7de02f416830853f243c270`. Fonts and SDK hashes
+match, but native font/icon rasterization still differs. Independent Windows
+captures were byte-identical. See `provenance.json` for hashes.
+
+`geometry/` contains **one common** theme/language contract for text/icon bounds,
+fonts, styles, colors and directions. Every native host must match it; layout is
+recorded at 1/64 dp precision to avoid floating-point JSON noise. This is an
+additional assertion, not a raster threshold. Pixel comparison stays exact.
+
+Native OS selection uses `dart:io Platform.operatingSystem`, not the simulated
+TargetPlatformVariant. Missing/unsupported host baselines fail; there is no Linux
+fallback on Windows and no automatic approval of an unknown renderer.
+
 Normal runs use Flutter's exact comparator: no tolerance, skip, host-name
 fallback or automatic baseline generation. Missing baselines fail. CI runs on
 native Linux and Windows with the same SDK, uploads environment/fixture hashes,
@@ -44,7 +59,8 @@ flutter test test/patient_portal_visual_test.dart --plain-name "Clinic profile g
 
 Use a native Windows directory when running on Windows. Review all themes and
 languages, actual pixel diffs and the environment manifest before copying an
-approved candidate here. CI cannot approve its own output. A native-renderer
+approved candidate into its native host directory. Keep the common geometry
+contract in sync only when a reviewed layout change requires it. CI cannot approve its own output. A native-renderer
 difference must be investigated from its PNG/diff; it must never be converted
 into a percentage allowance. Native verification results and limits belong in
 [the regression report](../../../docs/PR9_WINDOWS_TEST_REGRESSION_REPORT.md).
