@@ -1,8 +1,6 @@
 name: Flutter visual regressions
 
 on:
-  push:
-    branches: [codex/media-first-luxury-interaction-polish]
   pull_request:
     paths:
       - 'test/**'
@@ -49,14 +47,14 @@ jobs:
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Capture candidates for review only
-        if: always()
+        if: always() && !cancelled()
         run: >-
           flutter test test/patient_portal_visual_test.dart
           --plain-name "Clinic profile golden" --update-goldens
           --dart-define=PATIENT_GOLDEN_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
           --reporter expanded
       - name: Upload native evidence and failure diffs
-        if: always()
+        if: always() && !cancelled()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: patient-visual-${{ runner.os }}

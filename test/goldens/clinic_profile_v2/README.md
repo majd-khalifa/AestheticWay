@@ -23,6 +23,11 @@ V2 pins:
 | DejaVuSans-Bold.ttf | `a4c5bc453ca281d90ea079e596da7ae0dfeb5777497c29ec254e76d97ff6f890` |
 | SDK MaterialIcons-Regular.otf | `d9865b671a09d683d13a863089d8825e0f61a37696ce5d7d448bc8023aa62453` |
 
+Both native owners passed all eight exact raster tests and the shared geometry
+contract in [verification run 39564633002](https://github.com/majd-khalifa/AestheticWay/actions/runs/39564633002).
+The full suites passed 508/508 on both Ubuntu 24.04 and Windows Server 2022.
+This does not certify an untested Windows build or SDK.
+
 The existing DejaVu license covers both font fixtures. No production font,
 asset registration, widget, theme or signing configuration is changed.
 

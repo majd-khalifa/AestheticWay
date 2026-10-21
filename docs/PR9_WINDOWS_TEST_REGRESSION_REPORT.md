@@ -107,14 +107,31 @@ failed comparison into a pass.
 
 ## Validation and boundaries
 
-Linux verification completed: all **508 tests pass** (the existing 496 plus
-12 new harness cases), `flutter analyze` reports **0 issues**, Dart formatting
-and `git diff --check` pass. All 42 media previews and eight exact v2 golden
-variants pass. CI run 39562770335 confirms Ubuntu full-suite success and all six formerly
-failing media previews on native Windows. Windows found the residual raster
-ownership and negative-fixture cleanup issues described above. The corrected
-native-host baselines/common-geometry follow-up is undergoing final verification;
-its result is recorded separately rather than inferred from Linux.
+Final code verification is recorded in [CI run 39564633002](https://github.com/majd-khalifa/AestheticWay/actions/runs/39564633002),
+source commit `0e24036293b4e14847cf33d03fe09bc83f4ee1e1`:
+
+| Actual execution environment | Focused tests | Analyze | Full suite |
+|---|---|---|---|
+| Native Ubuntu 24.04 runner | 120 passed | 0 issues | **508 passed, 0 failed** |
+| Native Windows Server 2022 runner | 120 passed | 0 issues | **508 passed, 0 failed** |
+| Local Linux execution workspace | Passed | 0 issues | **508 passed, 0 failed** |
+
+The existing 496 tests are retained with 12 new harness cases. All 42 media
+previews, eight exact native raster comparisons, shared geometry/style contracts
+and genuine image decoding pass. Dart format checks 208 files with 0 changes;
+`git diff --check` passes. The original four Linux PNGs remain byte-for-byte
+unchanged. The native candidate capture step also passes all eight variants.
+
+CI is PR-triggered with a read-only contents token. It avoids duplicate push/PR
+cancellation and does not attempt captures from cancelled, partially initialized
+jobs. Candidate generation remains separate from committed expectations.
+
+**Limits:** this is genuine native Windows execution in a GitHub-hosted Server
+2022 VM, not merely a TargetPlatform simulation. The user's own Windows
+workstation has not been rerun here; other Windows builds or a different SDK
+need their own verification. No physical Android/iOS device validation was
+performed. These are test-infrastructure changes, not production media/CDN
+verification.
 
 Only tests, test fixtures, CI and verification tooling/documentation are in
 scope. Production Flutter code, Django and release-signing files remain
