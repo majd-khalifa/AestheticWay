@@ -1,6 +1,6 @@
 # Offline privacy regression: no HTTP request is made by this test.
 $ErrorActionPreference = 'Stop'
-$script:Requests = @()
+$testProbe = @{ Requests = [Collections.Generic.List[string]]::new() }
 $testId = '11111111-1111-4111-8111-111111111111'
 $record = @{
     id = $testId; full_name = 'PRIVATE_SENTINEL'; phone = '+971501234567'; email = 'PRIVATE_SENTINEL@example.test'
@@ -10,7 +10,7 @@ $record = @{
 }
 function Invoke-RestMethod {
     param($Uri, $Method, $MaximumRedirection, $TimeoutSec)
-    $script:Requests += [string]$Uri
+    $testProbe.Requests.Add([string]$Uri)
     if ($Method -ne 'Get' -or $Uri.Host -ne 'aestheticway.ae' -or $MaximumRedirection -ne 0) { throw 'Unsafe request' }
     if ($Uri.AbsolutePath.EndsWith('/home/feed/')) { return @{ nearby_clinics = @($record); featured_ads = @() } }
     if ($Uri.Query) { return @{ results = @($record) } }
@@ -22,7 +22,7 @@ try {
     $raw = [IO.File]::ReadAllText($destination)
     if ($raw.Contains('PRIVATE_SENTINEL') -or $raw.Contains('+971501234567') -or $raw.Contains('signature=')) { throw 'Sensitive response data escaped the allowlist' }
     $summary = $raw | ConvertFrom-Json
-    if ($script:Requests.Count -ne 3 -or $summary.detail.clinic.google_rating -ne 4.6 -or $summary.detail.clinic.google_reviews_count -ne 123) { throw 'Public contract summary is incomplete' }
+    if ($testProbe.Requests.Count -ne 3 -or $summary.detail.clinic.google_rating -ne 4.6 -or $summary.detail.clinic.google_reviews_count -ne 123) { throw ('Public contract summary is incomplete: requests={0}, rating={1}, count={2}' -f $testProbe.Requests.Count, $summary.detail.clinic.google_rating, $summary.detail.clinic.google_reviews_count) }
     if (!$summary.detail.clinic.logo.query_omitted -or !$summary.detail.clinic.logo.path_redacted -or $summary.detail.clinic.logo.path_sha256.Length -ne 64) { throw 'Media redaction failed' }
     Write-Output 'Offline public-contract privacy regression passed.'
 } finally { if (Test-Path $destination) { Remove-Item $destination } }
