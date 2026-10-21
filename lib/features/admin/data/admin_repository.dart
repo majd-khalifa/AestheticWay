@@ -1,3 +1,4 @@
+import '../../../core/auth/session_snapshot.dart';
 import '../../../core/data/paged_collection.dart';
 import '../../../core/network/api_exception.dart';
 import 'package:dio/dio.dart';
@@ -162,10 +163,12 @@ class AdminRepository {
 
   /// Atomically provision a new Clinic and its initial Administrator
   Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {
+    final session = SessionSnapshot();
     final payload = await _buildPayload(
       data,
       fileKeys: ['logo', 'cover_image', 'video_ad_file'],
     );
+    session.ensureCurrent();
     final response = await _api.post(ApiConfig.adminClinics, data: payload);
     return response.data as Map<String, dynamic>? ?? {};
   }
@@ -196,11 +199,13 @@ class AdminRepository {
     String id,
     Map<String, dynamic> data,
   ) async {
+    final session = SessionSnapshot();
     final payload = await _buildPayload(
       data,
       fileKeys: ['logo', 'cover_image', 'video_ad_file'],
       clinicId: id,
     );
+    session.ensureCurrent();
     final response = await _api.patch(
       ApiConfig.adminClinicDetail(id),
       data: payload,

@@ -9,7 +9,9 @@ class TokenStorage {
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.unlocked_this_device,
+    ),
   );
 
   Future<void>? _writeTail;
@@ -59,12 +61,13 @@ class TokenStorage {
         _storage.read(key: _keyUserData),
       ]);
       if (version != _credentialVersion || epoch != _sessionEpoch) return;
-      _cachedAccessToken = values[0];
-      _cachedRefreshToken = values[1];
       final rawUser = values[2];
-      _cachedUserData = rawUser != null && rawUser.isNotEmpty
+      final user = rawUser != null && rawUser.isNotEmpty
           ? jsonDecode(rawUser) as Map<String, dynamic>
           : null;
+      _cachedAccessToken = values[0];
+      _cachedRefreshToken = values[1];
+      _cachedUserData = user;
     } catch (_) {
       /* A locked keychain leaves the session unauthenticated. */
     } finally {
@@ -110,7 +113,8 @@ class TokenStorage {
   Future<void> saveUser(Map<String, dynamic> userJson) {
     _initialized = true;
     if (_cachedUserData?['id'] != userJson['id'] ||
-        _cachedUserData?['phone'] != userJson['phone']) {
+        _cachedUserData?['phone'] != userJson['phone'] ||
+        _cachedUserData?['role'] != userJson['role']) {
       _sessionEpoch++;
     }
     _cachedUserData = Map.of(userJson);
@@ -119,7 +123,8 @@ class TokenStorage {
   }
 
   /// Get cached user data
-  Map<String, dynamic>? getUser() => _cachedUserData;
+  Map<String, dynamic>? getUser() =>
+      _cachedUserData == null ? null : Map.unmodifiable(_cachedUserData!);
 
   /// Get user role string (e.g. 'patient', 'clinic_admin', 'clinic_staff', 'super_admin')
   String? getUserRole() => _cachedUserData?['role']?.toString();

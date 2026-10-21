@@ -881,6 +881,9 @@ void main() {
       });
       await tester.pumpAndSettle();
       expect(find.text('Clinic & Admin Provisioned'), findsOneWidget);
+      expect(find.text('Server-issued-secret'), findsNothing);
+      await tester.tap(find.byTooltip('Reveal temporary password'));
+      await tester.pump();
       expect(find.text('Server-issued-secret'), findsOneWidget);
       expect(
         (repository.payload!['admin_user'] as Map)['phone'],
@@ -1123,6 +1126,9 @@ void main() {
       repository.reject = false;
       await tester.tap(find.text('Confirm Reset'));
       await tester.pumpAndSettle();
+      expect(find.text('Server-reset-secret'), findsNothing);
+      await tester.tap(find.byTooltip('Reveal temporary password'));
+      await tester.pump();
       expect(find.text('Server-reset-secret'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       await tester.tap(find.text('Done'));

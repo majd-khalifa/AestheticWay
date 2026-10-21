@@ -76,27 +76,11 @@ class LeadsRepository {
     } on ApiException {
       rethrow;
     } on DioException catch (dioErr) {
-      final res = dioErr.response;
-      if (res != null && res.data is Map) {
-        final map = res.data as Map<String, dynamic>;
-        final detail = map['detail']?.toString();
-        if (detail != null && detail.isNotEmpty) {
-          throw ApiException(message: detail, statusCode: res.statusCode);
-        }
-        final error = map['error'];
-        if (error is Map && error['message'] != null) {
-          throw ApiException(
-            message: error['message'].toString(),
-            statusCode: res.statusCode,
-          );
-        }
-      }
-      throw ApiException(
-        message: dioErr.message ?? 'Failed to submit appointment request',
-        statusCode: res?.statusCode,
+      throw ApiException.fromDioError(dioErr);
+    } catch (_) {
+      throw const ApiException(
+        message: 'Unable to submit this inquiry. Please try again.',
       );
-    } catch (e) {
-      throw ApiException(message: e.toString());
     }
   }
 

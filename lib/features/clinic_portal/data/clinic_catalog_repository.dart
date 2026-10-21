@@ -1,3 +1,4 @@
+import '../../../core/auth/session_snapshot.dart';
 import 'package:aesthetic_way/features/treatments/data/category_repository.dart';
 import 'package:aesthetic_way/features/treatments/models/category_model.dart';
 import '../../../core/data/paged_collection.dart';
@@ -126,11 +127,13 @@ class ClinicCatalogRepository {
   Future<PractitionerModel> createPractitioner(
     Map<String, dynamic> data,
   ) async {
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       data,
       imageKey: 'avatar',
       mediaType: 'practitioner_avatar',
     );
+    session.ensureCurrent();
     final response = await _api.post(
       ApiConfig.clinicPractitioners,
       data: _catalogPayload(payload),
@@ -142,11 +145,13 @@ class ClinicCatalogRepository {
     String id,
     Map<String, dynamic> data,
   ) async {
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       data,
       imageKey: 'avatar',
       mediaType: 'practitioner_avatar',
     );
+    session.ensureCurrent();
     final response = await _api.patch(
       ApiConfig.clinicPractitionerDetail(id),
       data: _catalogPayload(payload),
@@ -278,11 +283,13 @@ class ClinicCatalogRepository {
   }
 
   Future<OfferModel> createOffer(Map<String, dynamic> data) async {
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       data,
       imageKey: 'image',
       mediaType: 'offer_image',
     );
+    session.ensureCurrent();
     final response = await _api.post(
       ApiConfig.clinicOffers,
       data: _catalogPayload(payload),
@@ -291,11 +298,13 @@ class ClinicCatalogRepository {
   }
 
   Future<OfferModel> updateOffer(String id, Map<String, dynamic> data) async {
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       data,
       imageKey: 'image',
       mediaType: 'offer_image',
     );
+    session.ensureCurrent();
     final response = await _api.patch(
       ApiConfig.clinicOfferDetail(id),
       data: _catalogPayload(payload),
@@ -350,11 +359,13 @@ class ClinicCatalogRepository {
             sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
       imageKey: 'image',
       mediaType: 'product_image',
     );
+    session.ensureCurrent();
     final response = await _api.post(
       ApiConfig.clinicProducts,
       data: _catalogPayload(payload),
@@ -372,11 +383,13 @@ class ClinicCatalogRepository {
             sanitized['price'].toString().trim().isEmpty)) {
       sanitized.remove('price');
     }
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
       imageKey: 'image',
       mediaType: 'product_image',
     );
+    session.ensureCurrent();
     final response = await _api.patch(
       ApiConfig.clinicProductDetail(id),
       data: _catalogPayload(payload),
@@ -422,11 +435,13 @@ class ClinicCatalogRepository {
       sanitized['cover_image'] = sanitized['image'];
     }
     sanitized.remove('image');
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
       imageKey: 'cover_image',
       mediaType: 'article_cover',
     );
+    session.ensureCurrent();
     final response = await _api.post(
       ApiConfig.clinicArticles,
       data: _catalogPayload(payload),
@@ -443,11 +458,13 @@ class ClinicCatalogRepository {
       sanitized['cover_image'] = sanitized['image'];
     }
     sanitized.remove('image');
+    final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
       imageKey: 'cover_image',
       mediaType: 'article_cover',
     );
+    session.ensureCurrent();
     final response = await _api.patch(
       ApiConfig.clinicArticleDetail(id),
       data: _catalogPayload(payload),
@@ -498,11 +515,13 @@ class ClinicCatalogRepository {
   }
 
   Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
+    final session = SessionSnapshot();
     final requestData = await _buildPayload(
       data,
       fileKeys: ['logo', 'cover_image', 'video_ad_file'],
     );
 
+    session.ensureCurrent();
     final response = await _api.patch(
       ApiConfig.clinicProfile,
       data: requestData,

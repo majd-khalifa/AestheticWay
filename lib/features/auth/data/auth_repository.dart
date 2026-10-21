@@ -1,6 +1,7 @@
-import '../../clinic_portal/services/clinic_portal_service.dart';
-import '../../admin/services/admin_portal_service.dart';
-import '../../referral/services/referral_service.dart';
+import 'package:dio/dio.dart';
+import '../../../core/auth/session_changed_exception.dart';
+import '../../../core/network/api_transport_policy.dart';
+import '../../../core/network/api_exception.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -33,6 +34,79 @@ class AuthRepository {
 
   final ApiClient _api;
   final TokenStorage _tokenStorage;
+  static int _authenticationAttempt = 0;
+  (int, int) _snapshot() =>
+      (_tokenStorage.sessionEpoch, AuthState().sessionEpoch);
+  void _check((int, int) stamp) {
+    if (stamp != _snapshot()) throw const SessionChangedException();
+  }
+
+  void _validateUser(UserModel user) {
+    if (user.id.isEmpty ||
+        ![
+          'patient',
+          'clinic_admin',
+          'clinic_staff',
+          'super_admin',
+        ].contains(user.role)) {
+      throw const ApiException(
+        message: 'Unable to verify account identity. Please sign in again.',
+      );
+    }
+  }
+
+  Future<void> _storeUser(UserModel user, (int, int) stamp) async {
+    _check(stamp);
+    _validateUser(user);
+    final saving = _tokenStorage.saveUser(user.toJson());
+    final next = _snapshot();
+    await saving;
+    _check(next);
+  }
+
+  Future<void> _acceptAuthentication(
+    AuthResponse response,
+    (int, int) stamp,
+    int attempt,
+  ) async {
+    _check(stamp);
+    _validateUser(response.user);
+    if (attempt != _authenticationAttempt ||
+        response.accessToken.isEmpty ||
+        response.refreshToken.isEmpty) {
+      throw const SessionChangedException();
+    }
+    final clearing = _tokenStorage.clear();
+    AuthState().logout();
+    var current = _snapshot();
+    await clearing;
+    _check(current);
+    if (attempt != _authenticationAttempt) {
+      throw const SessionChangedException();
+    }
+    await _tokenStorage.saveTokens(
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+    );
+    _check(current);
+    if (attempt != _authenticationAttempt) {
+      throw const SessionChangedException();
+    }
+    final saving = _tokenStorage.saveUser(response.user.toJson());
+    current = _snapshot();
+    await saving;
+    _check(current);
+    if (attempt != _authenticationAttempt) {
+      throw const SessionChangedException();
+    }
+    AuthState().login(
+      name: response.user.fullName,
+      phone: response.user.phone,
+      email: response.user.email ?? '',
+      role: response.user.role,
+      isVerified: response.user.isVerified,
+    );
+  }
 
   /// Preserve international E.164 numbers; assume UAE only for local input.
   static String normalizePhone(String phone) {
@@ -88,7 +162,8 @@ class AuthRepository {
     required String purpose, // 'registration' | 'login' | 'password_reset'
   }) async {
     final normalized = normalizePhone(phone);
-
+    final stamp = _snapshot();
+    final attempt = ++_authenticationAttempt;
     final response = await _api.post(
       ApiConfig.verifyOtp,
       data: {
@@ -102,20 +177,7 @@ class AuthRepository {
 
     if (purpose == 'registration' || purpose == 'login') {
       final authResponse = AuthResponse.fromJson(data);
-      await _tokenStorage.saveTokens(
-        accessToken: authResponse.accessToken,
-        refreshToken: authResponse.refreshToken,
-      );
-      await _tokenStorage.saveUser(authResponse.user.toJson());
-
-      // Update global AuthState
-      AuthState().login(
-        name: authResponse.user.fullName,
-        phone: authResponse.user.phone,
-        email: authResponse.user.email ?? '',
-        role: authResponse.user.role,
-        isVerified: authResponse.user.isVerified,
-      );
+      await _acceptAuthentication(authResponse, stamp, attempt);
 
       return authResponse;
     }
@@ -128,6 +190,8 @@ class AuthRepository {
     required String identifier,
     required String password,
   }) async {
+    final stamp = _snapshot();
+    final attempt = ++_authenticationAttempt;
     final trimmed = identifier.trim();
     final normalizedIdentifier = trimmed.contains('@')
         ? trimmed
@@ -141,20 +205,7 @@ class AuthRepository {
     final authResponse = AuthResponse.fromJson(
       response.data as Map<String, dynamic>,
     );
-    await _tokenStorage.saveTokens(
-      accessToken: authResponse.accessToken,
-      refreshToken: authResponse.refreshToken,
-    );
-    await _tokenStorage.saveUser(authResponse.user.toJson());
-
-    // Update global AuthState
-    AuthState().login(
-      name: authResponse.user.fullName,
-      phone: authResponse.user.phone,
-      email: authResponse.user.email ?? '',
-      role: authResponse.user.role,
-      isVerified: authResponse.user.isVerified,
-    );
+    await _acceptAuthentication(authResponse, stamp, attempt);
 
     return authResponse;
   }
@@ -202,39 +253,62 @@ class AuthRepository {
 
   /// Logout, deactivate push token, and revoke refresh token on backend
   Future<void> logout() async {
-    ClinicPortalService().clearSession();
-    AdminPortalService().clearSession();
-    ReferralService().clearSession();
+    ++_authenticationAttempt;
+    final access = _tokenStorage.currentAccessToken;
+    final refresh = _tokenStorage.currentRefreshToken;
+    final base = ApiConfig.baseUrl;
+    final device = DeviceTokenService().getSavedToken();
+    final deviceClearing = DeviceTokenService().clearLocalToken();
+    // Invalidate locally before any network wait. A new login must not be erased
+    // when an old logout/revocation eventually finishes.
+    final clearing = _tokenStorage.clear();
+    AuthState().logout();
+    final deviceToken = await device;
+    await deviceClearing;
+    await clearing;
+    if (access == null || refresh == null) return;
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: base,
+        followRedirects: false,
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),
+        headers: {
+          'Authorization': 'Bearer $access',
+          'Accept': 'application/json',
+        },
+      ),
+    );
     try {
-      await DeviceTokenService().deactivateCurrentDevice();
-    } catch (_) {}
-
-    final refreshToken = await _tokenStorage.getRefreshToken();
-    if (refreshToken != null && refreshToken.isNotEmpty) {
-      try {
-        // Logout body strictly requires "refresh_token": "<token>"
-        await _api.post(
-          ApiConfig.logout,
-          data: {'refresh_token': refreshToken},
-        );
-      } catch (_) {
-        // Ignore backend errors during logout cleanup
+      if (!ApiTransportPolicy.permits(
+        Uri.parse(base).resolve(ApiConfig.logout),
+        base,
+      )) {
+        return;
       }
-    }
-    try {
-      await _tokenStorage.clear();
+      // Dedicated captured credentials; never attach a newer account's token or
+      // run the shared refresh flow for this already-invalidated session.
+      if (deviceToken?.isNotEmpty == true) {
+        try {
+          await dio.delete(
+            ApiConfig.notificationDeviceDeactivate(deviceToken!),
+          );
+        } catch (_) {}
+      }
+      await dio.post(ApiConfig.logout, data: {'refresh_token': refresh});
+    } catch (_) {
+      // Local logout still succeeds offline; server expiry/revocation is required.
     } finally {
-      AuthState().logout();
+      dio.close(force: true);
     }
   }
 
   /// Get current user profile from server (GET /api/v1/auth/me/)
   Future<UserModel> getMe() async {
+    final stamp = _snapshot();
     final response = await _api.get(ApiConfig.me);
     final user = UserModel.fromJson(response.data as Map<String, dynamic>);
-    try {
-      await _tokenStorage.saveUser(user.toJson());
-    } catch (_) {}
+    await _storeUser(user, stamp);
     AuthState().login(
       name: user.fullName,
       phone: user.phone,
@@ -252,6 +326,7 @@ class AuthRepository {
     String? email,
     String? phone,
   }) async {
+    final stamp = _snapshot();
     final payload = <String, dynamic>{'full_name': fullName.trim()};
 
     if (email != null) {
@@ -267,13 +342,12 @@ class AuthRepository {
 
     final response = await _api.patch(ApiConfig.me, data: payload);
     final user = UserModel.fromJson(response.data as Map<String, dynamic>);
-    try {
-      await _tokenStorage.saveUser(user.toJson());
-    } catch (_) {}
-    AuthState().updateProfile(
+    await _storeUser(user, stamp);
+    AuthState().login(
       name: user.fullName,
       phone: user.phone,
       email: user.email ?? '',
+      role: user.role,
       isVerified: user.isVerified,
     );
     return user;
@@ -293,10 +367,12 @@ class AuthRepository {
     required String newPhone,
     required String code,
   }) async {
+    final stamp = _snapshot();
     final response = await _api.post(
       ApiConfig.authPhoneChangeConfirm,
       data: {'new_phone': normalizePhone(newPhone), 'code': code.trim()},
     );
+    _check(stamp);
     // Refresh user profile after confirmation
     try {
       await getMe();
@@ -318,10 +394,12 @@ class AuthRepository {
     required String newEmail,
     required String code,
   }) async {
+    final stamp = _snapshot();
     final response = await _api.post(
       ApiConfig.authEmailChangeConfirm,
       data: {'new_email': newEmail.trim().toLowerCase(), 'code': code.trim()},
     );
+    _check(stamp);
     // Refresh user profile after confirmation
     try {
       await getMe();

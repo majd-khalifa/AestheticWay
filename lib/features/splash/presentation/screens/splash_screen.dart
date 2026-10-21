@@ -1,3 +1,5 @@
+import '../../../auth/data/auth_repository.dart';
+import '../../../../core/auth/session_snapshot.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
@@ -11,7 +13,8 @@ import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.da
 
 /// Screen 1: Luxury Splash Screen with Official Brand Logo & Onboarding-Aware Navigation
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({super.key, this.authRepository});
+  final AuthRepository? authRepository;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -46,11 +49,22 @@ class _SplashScreenState extends State<SplashScreen>
     _timer = Timer(const Duration(milliseconds: 1600), _navigateNext);
   }
 
-  void _navigateNext() {
+  Future<void> _navigateNext() async {
     if (!mounted || _hasNavigated) return;
     _hasNavigated = true;
     _timer?.cancel();
 
+    // Cached roles are presentation hints, never proof of a live session.
+    // Verify the current identity (including refresh/revocation) before portals.
+    if (AuthState().isLoggedIn) {
+      final session = SessionSnapshot();
+      try {
+        await (widget.authRepository ?? AuthRepository()).getMe();
+      } catch (_) {
+        if (mounted && session.isCurrent) AuthState().logout();
+      }
+      if (!mounted || !session.isCurrent) return;
+    }
     final hasSeenOnboarding = OnboardingService().hasSeenOnboarding;
     Widget nextScreen;
 

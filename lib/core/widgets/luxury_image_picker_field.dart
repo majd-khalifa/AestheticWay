@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/app_colors.dart';
@@ -83,6 +84,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
         maxWidth: 1200,
         maxHeight: 1200,
         imageQuality: 78,
+        requestFullMetadata: false,
       );
 
       if (!mounted || !widget.enabled) return;
@@ -93,7 +95,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
         widget.onImageSelected(file.path);
       }
     } catch (e) {
-      debugPrint('[LuxuryImagePickerField] Error picking image: $e');
+      if (kDebugMode) debugPrint('[image_picker] Selection failed');
     }
   }
 

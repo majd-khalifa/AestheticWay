@@ -30,9 +30,12 @@ class AestheticWayApp extends StatelessWidget {
     final themeService = ThemeService();
 
     return ListenableBuilder(
-      listenable: Listenable.merge([localeService, themeService]),
+      listenable: Listenable.merge([localeService, themeService, AuthState()]),
       builder: (context, _) {
         return MaterialApp(
+          // Destroy every old route/dialog (including private lead snapshots)
+          // whenever login, logout, account switching or role changes occur.
+          key: ValueKey('session-${AuthState().sessionEpoch}'),
           title: 'AESTHETIC WAY',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,

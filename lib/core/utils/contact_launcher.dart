@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:url_launcher/url_launcher.dart';
 
 /// Direct Contact Launcher (Call & WhatsApp)
@@ -37,14 +36,7 @@ abstract class ContactLauncher {
   /// Initiates a direct phone call to clinic, practitioner or platform support
   static Future<bool> makePhoneCall(String phoneNumber) async {
     final cleanPhone = normalizePhoneForDial(phoneNumber);
-    if (cleanPhone.isEmpty) {
-      if (kDebugMode) {
-        debugPrint(
-          '[ContactLauncher.makePhoneCall] Failed: phone field is empty (raw="$phoneNumber").',
-        );
-      }
-      return false;
-    }
+    if (cleanPhone.isEmpty) return false;
     final uri = Uri(scheme: 'tel', path: cleanPhone);
     try {
       if (await canLaunchUrl(uri)) {
@@ -52,9 +44,6 @@ abstract class ContactLauncher {
       }
       return await launchUrl(uri);
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[ContactLauncher.makePhoneCall] Failed to launch $uri: $e');
-      }
       return false;
     }
   }
@@ -66,14 +55,7 @@ abstract class ContactLauncher {
         'مرحباً، أود الاستفسار عن الخدمات والعيادة عبر تطبيق AESTHETIC WAY.',
   }) async {
     final cleanPhone = normalizePhoneForWhatsApp(phoneNumber);
-    if (cleanPhone.isEmpty) {
-      if (kDebugMode) {
-        debugPrint(
-          '[ContactLauncher.openWhatsApp] Failed: whatsapp/phone field is empty (raw="$phoneNumber").',
-        );
-      }
-      return false;
-    }
+    if (cleanPhone.isEmpty) return false;
     final encodedMessage = Uri.encodeComponent(message);
     final url = 'https://wa.me/$cleanPhone?text=$encodedMessage';
     final uri = Uri.parse(url);
@@ -83,9 +65,6 @@ abstract class ContactLauncher {
       }
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[ContactLauncher.openWhatsApp] Failed to launch $uri: $e');
-      }
       return false;
     }
   }

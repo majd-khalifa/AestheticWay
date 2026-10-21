@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import 'token_storage.dart';
@@ -41,12 +42,14 @@ class AuthState extends ChangeNotifier {
     String role = 'patient',
     bool isVerified = false,
   }) {
-    if (_isLoggedIn && (_userPhone != phone || _userRole != role)) {
+    final changed = !_isLoggedIn || _userPhone != phone || _userRole != role;
+    if (_isLoggedIn && changed) {
       ClinicPortalService().clearSession();
       AdminPortalService().clearSession();
       ReferralService().clearSession();
+      _favoriteClinicIds.clear();
     }
-    ++_sessionEpoch;
+    if (changed) ++_sessionEpoch;
     _isLoggedIn = true;
     _userName = name;
     _userPhone = phone;
@@ -72,6 +75,11 @@ class AuthState extends ChangeNotifier {
   }
 
   void logout() {
+    if (TokenStorage().currentAccessToken != null ||
+        TokenStorage().currentRefreshToken != null ||
+        TokenStorage().getUser() != null) {
+      unawaited(TokenStorage().clear());
+    }
     // Also cover forced logout after token refresh fails.
     ClinicPortalService().clearSession();
     AdminPortalService().clearSession();

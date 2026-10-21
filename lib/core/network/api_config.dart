@@ -247,7 +247,7 @@ class ApiConfig {
   // Notifications & Device Push Endpoints (Always with trailing slash!)
   static const String notificationDevices = 'notifications/devices/';
   static String notificationDeviceDeactivate(String token) =>
-      'notifications/devices/$token/';
+      'notifications/devices/${Uri.encodeComponent(token)}/';
 
   // Super Admin Portal Endpoints (Always with trailing slash!)
   static const String adminDashboard = 'admin/dashboard/';
