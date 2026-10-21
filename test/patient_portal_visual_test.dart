@@ -1,15 +1,15 @@
 import 'support/settle_preview_images.dart';
+import 'support/patient_visual_harness.dart';
+import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
-import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 import 'package:aesthetic_way/features/articles/data/articles_repository.dart';
 import 'package:aesthetic_way/features/articles/models/article_model.dart';
@@ -184,20 +184,28 @@ class _Auth implements AuthRepository {
   });
 }
 
-Widget _app(Widget screen, bool dark, bool arabic, {double scale = 1.6}) {
+Widget _app(
+  Widget screen,
+  bool dark,
+  bool arabic, {
+  double scale = 1.6,
+  bool canonical = false,
+}) {
   final theme = dark ? AppTheme.darkTheme : AppTheme.lightTheme;
   return MaterialApp(
-    theme: theme.copyWith(
-      platform: TargetPlatform.android,
-      visualDensity: VisualDensity.standard,
-      materialTapTargetSize: MaterialTapTargetSize.padded,
-      textTheme: theme.textTheme.apply(fontFamily: 'PatientPreview'),
-      appBarTheme: theme.appBarTheme.copyWith(
-        titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(
-          fontFamily: 'PatientPreview',
-        ),
-      ),
-    ),
+    theme: canonical
+        ? patientVisualTheme(dark: dark)
+        : theme.copyWith(
+            platform: TargetPlatform.android,
+            visualDensity: VisualDensity.standard,
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            textTheme: theme.textTheme.apply(fontFamily: 'PatientPreview'),
+            appBarTheme: theme.appBarTheme.copyWith(
+              titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(
+                fontFamily: 'PatientPreview',
+              ),
+            ),
+          ),
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(
         context,
@@ -213,16 +221,7 @@ Widget _app(Widget screen, bool dark, bool arabic, {double scale = 1.6}) {
 
 void main() {
   setUpAll(() async {
-    final bytes = File('test/fixtures/fonts/DejaVuSans.ttf').readAsBytesSync();
-    await (FontLoader(
-      'PatientPreview',
-    )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
-    await (FontLoader(
-      'serif',
-    )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
-    await (FontLoader(
-      'MaterialIcons',
-    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    await loadPatientVisualFonts();
   });
   tearDown(() {
     ReferralService().resetTestingState();
@@ -316,6 +315,10 @@ void main() {
         testWidgets(
           'Clinic profile golden ${dark ? 'dark' : 'light'} ${arabic ? 'ar' : 'en'} host ${host.name}',
           (tester) async {
+            tester.view.devicePixelRatio = 3;
+            tester.view.physicalSize = const Size(1170, 2532);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            addTearDown(tester.view.resetPhysicalSize);
             await tester.binding.setSurfaceSize(const Size(390, 844));
             addTearDown(() => tester.binding.setSurfaceSize(null));
             unawaited(
@@ -333,13 +336,27 @@ void main() {
               treatmentsRepository: TreatmentsRepository(apiClient: client),
               offersRepository: OffersRepository(apiClient: client),
             );
-            await tester.pumpWidget(_app(screen, dark, arabic, scale: 1));
+            await tester.pumpWidget(
+              _app(screen, dark, arabic, scale: 1, canonical: true),
+            );
             await tester.pumpAndSettle();
             await settlePreviewImages(tester);
             await expectLater(
               find.byType(Scaffold),
               matchesGoldenFile(
-                'goldens/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                const String.fromEnvironment(
+                      'PATIENT_GOLDEN_CAPTURE_DIR',
+                    ).isEmpty
+                    ? Uri.parse(
+                        'goldens/clinic_profile_v2/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                      )
+                    : Directory(
+                        const String.fromEnvironment(
+                          'PATIENT_GOLDEN_CAPTURE_DIR',
+                        ),
+                      ).uri.resolve(
+                        'patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                      ),
               ),
             );
             await tester.tap(find.text(LocaleService().tr('tab_staff')));

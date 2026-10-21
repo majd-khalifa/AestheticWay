@@ -1,7 +1,6 @@
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'support/settle_preview_images.dart';
 import 'package:aesthetic_way/core/widgets/async_action_button.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 // Synthetic public data only. Photographic previews reuse the existing onboarding
 // clinic image; this file never supplies media or invented records to production.
 import 'dart:async';
@@ -183,54 +182,8 @@ void main() {
           );
           testWidgets('Media-first preview ${entry.$1}', (tester) async {
             populated = media;
-            // FileImage IO must start outside WidgetTester's fake async zone.
-            // Warm the exact bounded decoder keys; assertions below still await
-            // real decoded frames and reject unreadable fixtures.
-            if (media) {
-              await tester.runAsync(() async {
-                final providers = [
-                  boundedImageDecode(
-                    (348.6 * tester.view.devicePixelRatio).round(),
-                    FileImage(
-                      File(
-                        'test/fixtures/media/packaging_fixture.png',
-                      ).absolute,
-                    ),
-                    maxHeight: (360 * tester.view.devicePixelRatio).round(),
-                  ),
-                  boundedImageDecode(
-                    (90 * tester.view.devicePixelRatio).round().clamp(
-                      100,
-                      1080,
-                    ),
-                    FileImage(
-                      File(
-                        'test/fixtures/media/portrait_frame_fixture.png',
-                      ).absolute,
-                    ),
-                  ),
-                ];
-                for (final provider in providers) {
-                  final ready = Completer<void>();
-                  final stream = provider.resolve(ImageConfiguration.empty);
-                  late ImageStreamListener listener;
-                  listener = ImageStreamListener(
-                    (_, _) {
-                      if (!ready.isCompleted) ready.complete();
-                    },
-                    onError: (Object e, StackTrace? stack) {
-                      if (!ready.isCompleted) ready.completeError(e, stack);
-                    },
-                  );
-                  stream.addListener(listener);
-                  try {
-                    await ready.future;
-                  } finally {
-                    stream.removeListener(listener);
-                  }
-                }
-              });
-            }
+            tester.view.devicePixelRatio = 3;
+            addTearDown(tester.view.resetDevicePixelRatio);
             tester.view.physicalSize = const Size(1170, 2532);
             addTearDown(tester.view.resetPhysicalSize);
             await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -287,6 +240,40 @@ void main() {
             );
             await tester.pumpAndSettle();
             await settlePreviewImages(tester);
+            if (media && (screen == 'products' || screen == 'practitioners')) {
+              final fixture = screen == 'products'
+                  ? 'packaging_fixture.png'
+                  : 'portrait_frame_fixture.png';
+              final expected = File.fromUri(
+                File('test/fixtures/media/$fixture').absolute.uri,
+              );
+              final primary = find.byWidgetPredicate(
+                (widget) =>
+                    widget is Image &&
+                    widget.image is ResizeImage &&
+                    (widget.image as ResizeImage).imageProvider is FileImage &&
+                    ((widget.image as ResizeImage).imageProvider as FileImage)
+                            .file
+                            .path ==
+                        expected.path,
+              );
+              expect(
+                primary,
+                findsOneWidget,
+                reason:
+                    'The actual file-URI fixture must render, not the brand fallback.',
+              );
+              final pixels = tester
+                  .widget<RawImage>(
+                    find.descendant(
+                      of: primary,
+                      matching: find.byType(RawImage),
+                    ),
+                  )
+                  .image!;
+              expect(pixels.width, greaterThan(0));
+              expect(pixels.height, greaterThan(0));
+            }
             if (screen == 'busy') {
               await tester.tap(find.byType(FilledButton).first);
               await tester.pump(const Duration(milliseconds: 100));

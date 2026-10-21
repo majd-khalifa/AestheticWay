@@ -1,5 +1,10 @@
 # Media-first visual acceptance
 
+Windows test-harness follow-up: see [PR9_WINDOWS_TEST_REGRESSION_REPORT.md](PR9_WINDOWS_TEST_REGRESSION_REPORT.md).
+It replaces the original manual fixture prewarm with actual mounted-provider
+decoding and introduces separately reviewed, font-owned clinic goldens. The
+original media-first captures and validation below describe commit `f357f96`.
+
 Reviewed 21 October 2026 (Asia/Damascus). Branch: `codex/media-first-luxury-interaction-polish`, stacked on `codex/performance-latency-readiness` at `242aa8763a4f170cafa6f81c0f978b2998113092`.
 
 Targeted component changes preserve the existing Patient, Clinic and Super Admin work. No Django, release signing, security/session architecture, pagination, debounce or API backpressure implementation was changed. No PR is merged by this task.

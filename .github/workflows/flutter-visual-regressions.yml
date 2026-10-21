@@ -1,0 +1,68 @@
+name: Flutter visual regressions
+
+on:
+  push:
+    branches: [codex/media-first-luxury-interaction-polish]
+  pull_request:
+    paths:
+      - 'test/**'
+      - 'lib/**'
+      - 'pubspec.*'
+      - '.github/workflows/flutter-visual-regressions.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  regressions:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.41.5'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Record native renderer provenance
+        run: |
+          flutter --version --machine > visual-flutter-version.json
+          python tool/visual_test_manifest.py > visual-manifest.json
+      - name: Focused real-decoding and golden regressions
+        run: >-
+          flutter test test/preview_image_settling_test.dart
+          test/media_first_previews_test.dart test/patient_portal_visual_test.dart
+          test/image_display_regression_test.dart --reporter expanded
+      - run: flutter analyze
+      - name: Full suite
+        run: flutter test --reporter expanded
+      - name: Capture candidates for review only
+        if: always()
+        run: >-
+          flutter test test/patient_portal_visual_test.dart
+          --plain-name "Clinic profile golden" --update-goldens
+          --dart-define=PATIENT_GOLDEN_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
+          --reporter expanded
+      - name: Upload native evidence and failure diffs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: patient-visual-${{ runner.os }}
+          retention-days: 14
+          path: |
+            visual-flutter-version.json
+            visual-manifest.json
+            test/failures/**
+            ${{ runner.temp }}/patient-golden-candidates/**
