@@ -1,3 +1,4 @@
+import '../../../core/utils/source_text.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 
 /// Medical Aesthetic Awareness & Knowledge Guide Article
@@ -25,6 +26,7 @@ class ArticleModel {
   final String categoryAr;
   final String categoryEn;
   final DateTime publishedAt;
+  final bool hasPublicationDate;
   final bool isPublished;
   final bool isApprovedByAdmin;
   final String status;
@@ -52,6 +54,7 @@ class ArticleModel {
     this.categoryAr = '',
     this.categoryEn = '',
     required this.publishedAt,
+    this.hasPublicationDate = true,
     this.isPublished = true,
     this.isApprovedByAdmin = true,
     this.status = 'active',
@@ -109,6 +112,7 @@ class ArticleModel {
       categoryAr: categoryAr ?? this.categoryAr,
       categoryEn: categoryEn ?? this.categoryEn,
       publishedAt: publishedAt ?? this.publishedAt,
+      hasPublicationDate: publishedAt != null || hasPublicationDate,
       isPublished: isPublished ?? this.isPublished,
       isApprovedByAdmin: isApprovedByAdmin ?? this.isApprovedByAdmin,
       status: status ?? this.status,
@@ -132,12 +136,15 @@ class ArticleModel {
     final rawStatus = json['status']?.toString().toLowerCase() ?? 'active';
     final isPublishedVal = json['is_published'] as bool? ?? true;
 
-    final titleEnVal = json['title_en'] as String? ?? '';
+    final titleEnVal = firstSourceText([json['title_en'], json['title_ar']]);
     final titleArVal = (json['title_ar'] as String? ?? '').trim().isNotEmpty
         ? json['title_ar'] as String
         : titleEnVal;
 
-    final contentEnVal = json['content_en'] as String? ?? '';
+    final contentEnVal = firstSourceText([
+      json['content_en'],
+      json['content_ar'],
+    ]);
     final contentArVal = (json['content_ar'] as String? ?? '').trim().isNotEmpty
         ? json['content_ar'] as String
         : contentEnVal;
@@ -189,6 +196,9 @@ class ArticleModel {
       }(),
       categoryAr: json['category_ar'] as String? ?? '',
       categoryEn: json['category_en'] as String? ?? '',
+      hasPublicationDate:
+          DateTime.tryParse('${json['published_at'] ?? json['created_at']}') !=
+          null,
       publishedAt: json['published_at'] != null
           ? DateTime.tryParse(json['published_at'].toString()) ?? DateTime.now()
           : (json['created_at'] != null

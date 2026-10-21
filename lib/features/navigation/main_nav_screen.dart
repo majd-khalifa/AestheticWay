@@ -71,13 +71,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
     final screens = <WidgetBuilder>[
       (context) => HomeScreen(
+        onNavigateToTab: _onTabTapped,
         onNavigateToClinics: (categoryFilter) {
-          Navigator.push(
-            context,
-            LuxuryPageRoute(
-              page: ClinicsListScreen(initialCategory: categoryFilter),
-            ),
-          );
+          _onTabTapped(1);
         },
       ),
       (context) => const ClinicsListScreen(),
@@ -106,7 +102,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
             },
             child: Scaffold(
               backgroundColor: AppColors.bg(context),
-              extendBody: true,
+              extendBody: false,
               body: LazyTabStack(index: _currentIndex, builders: screens),
               bottomNavigationBar: SafeArea(
                 child: Container(
@@ -246,6 +242,7 @@ class _FloatingNavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
+          constraints: const BoxConstraints(minHeight: 48),
           padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
             color: isSelected

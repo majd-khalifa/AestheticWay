@@ -4,6 +4,24 @@ import 'clinic_location.dart';
 
 /// Google Maps Deep-Linking Engine
 abstract class MapsLauncher {
+  static Uri? verifiedPlaceUri({
+    double? latitude,
+    double? longitude,
+    String? googleMapsUrl,
+    String? placeId,
+  }) {
+    final stored = verifiedGoogleMapsUri(googleMapsUrl);
+    if (stored != null) return stored;
+    final point = ClinicCoordinates.parse(latitude, longitude);
+    final place = placeId?.trim() ?? '';
+    if (point == null && place.isEmpty) return null;
+    return Uri.https('www.google.com', '/maps/search/', {
+      'api': '1',
+      'query': point == null ? place : '${point.latitude},${point.longitude}',
+      if (place.isNotEmpty) 'query_place_id': place,
+    });
+  }
+
   static Uri? verifiedDirectionsUri({
     double? latitude,
     double? longitude,

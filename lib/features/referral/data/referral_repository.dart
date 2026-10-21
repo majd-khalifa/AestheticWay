@@ -18,35 +18,11 @@ class ReferralRepository {
     return PatientReferralStatusModel.fromJson(data as Map<String, dynamic>);
   }
 
-  /// Collect a 15% discount code by consuming 500 points
-  Future<CollectCodeResult> collectDiscountCode() async {
-    final response = await _api.post(ApiConfig.referralCollect);
-    final body = response.data;
-    final data = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
-    return CollectCodeResult.fromJson(data as Map<String, dynamic>);
-  }
-
-  /// Clinic Portal: Verify a patient's 15% referral discount code
-  /// POST /api/v1/clinic-portal/discount-codes/verify/
-  Future<Map<String, dynamic>> verifyClinicDiscountCode(String code) async {
-    final response = await _api.post(
-      ApiConfig.clinicDiscountVerify,
-      data: {'code': code.trim()},
-    );
-    final body = response.data;
-    final data = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
-    return data is Map<String, dynamic> ? data : <String, dynamic>{};
-  }
-
-  /// Clinic Portal: Redeem a patient's 15% referral discount code
-  /// POST /api/v1/clinic-portal/discount-codes/redeem/
-  Future<Map<String, dynamic>> redeemClinicDiscountCode(String code) async {
-    final response = await _api.post(
-      ApiConfig.clinicDiscountRedeem,
-      data: {'code': code.trim()},
-    );
-    final body = response.data;
-    final data = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
-    return data is Map<String, dynamic> ? data : <String, dynamic>{};
-  }
+  // Kept as disabled source-compatibility shims while Django retires these routes.
+  Future<CollectCodeResult> collectDiscountCode() =>
+      Future.error(UnsupportedError('Referral redemption has been retired'));
+  Future<Map<String, dynamic>> verifyClinicDiscountCode(String code) =>
+      Future.error(UnsupportedError('Referral redemption has been retired'));
+  Future<Map<String, dynamic>> redeemClinicDiscountCode(String code) =>
+      Future.error(UnsupportedError('Referral redemption has been retired'));
 }

@@ -1,12 +1,10 @@
+import '../widgets/patient_practitioner_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
-import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/practitioners/data/practitioners_repository.dart';
 import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
@@ -336,130 +334,17 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
 
                               final p = filteredList[index];
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: LuxuryCard(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      LuxuryPageRoute(
-                                        page: PractitionerProfileScreen(
-                                          practitioner: p,
-                                          practitionersRepository: _repository,
-                                        ),
+                                padding: const EdgeInsets.only(bottom: 18),
+                                child: PatientPractitionerCard(
+                                  practitioner: p,
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    LuxuryPageRoute(
+                                      page: PractitionerProfileScreen(
+                                        practitioner: p,
+                                        practitionersRepository: _repository,
                                       ),
-                                    );
-                                  },
-                                  padding: const EdgeInsets.all(14),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      LuxuryImage(
-                                        imageUrl: p.avatarUrl,
-                                        fallbackLogoUrl: p.clinicLogoUrl,
-                                        width: 68,
-                                        height: 68,
-                                        borderRadius: BorderRadius.circular(14),
-                                        placeholderIcon: Icons.person_rounded,
-                                        iconSize: 30,
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                PractitionerBadge(type: p.type),
-                                                Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 12,
-                                                  color: AppColors.mutedText(
-                                                    context,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              loc.isArabic
-                                                  ? p.nameAr
-                                                  : p.nameEn,
-                                              style: AppTypography.cardTitle
-                                                  .copyWith(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: isDark
-                                                        ? AppColors
-                                                              .silverPrimary
-                                                        : AppColors
-                                                              .lightTextPrimary,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              loc.isArabic
-                                                  ? p.specialtyAr
-                                                  : p.specialtyEn,
-                                              style: AppTypography.caption
-                                                  .copyWith(
-                                                    color: AppColors.goldText(
-                                                      context,
-                                                    ),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 11.5,
-                                                  ),
-                                            ),
-                                            if (p.clinicNameAr.isNotEmpty ||
-                                                (p.clinicNameEn?.isNotEmpty ??
-                                                    false)) ...[
-                                              const SizedBox(height: 6),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.apartment_rounded,
-                                                    size: 13,
-                                                    color: AppColors.mutedText(
-                                                      context,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Expanded(
-                                                    child: Text(
-                                                      loc.isArabic
-                                                          ? (p
-                                                                    .clinicNameAr
-                                                                    .isNotEmpty
-                                                                ? p.clinicNameAr
-                                                                : (p.clinicNameEn ??
-                                                                      ''))
-                                                          : (p.clinicNameEn ??
-                                                                p.clinicNameAr),
-                                                      style: AppTypography
-                                                          .caption
-                                                          .copyWith(
-                                                            color:
-                                                                AppColors.mutedText(
-                                                                  context,
-                                                                ),
-                                                            fontSize: 11,
-                                                          ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               );

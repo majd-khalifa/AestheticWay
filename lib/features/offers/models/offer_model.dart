@@ -1,3 +1,4 @@
+import '../../../core/utils/source_text.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 
 class OfferModel {
@@ -122,9 +123,9 @@ class OfferModel {
     }
 
     // Days remaining and dates from starts_at / ends_at
-    int days = 7;
-    String validText = 'ساري لفترة محدودة';
-    String validTextEn = 'Limited time offer';
+    int days = 0;
+    String validText = '';
+    String validTextEn = '';
     DateTime? sAt;
     DateTime? eAt;
 
@@ -159,8 +160,8 @@ class OfferModel {
 
     return OfferModel(
       id: json['id']?.toString() ?? '',
-      titleAr: json['title_ar'] ?? json['title_en'] ?? '',
-      titleEn: json['title_en'] ?? json['title_ar'] ?? '',
+      titleAr: firstSourceText([json['title_ar'], json['title_en']]),
+      titleEn: firstSourceText([json['title_en'], json['title_ar']]),
       clinicId: clinicObj != null
           ? clinicObj['id']?.toString() ?? ''
           : (json['clinic_id']?.toString() ?? ''),
@@ -177,8 +178,14 @@ class OfferModel {
       validUntilText: validText,
       validUntilTextEn: validTextEn,
       daysRemaining: days,
-      termsAr: json['description_ar'] ?? 'تطبق الشروط والأحكام الطبية',
-      termsEn: json['description_en'] ?? 'Medical terms and conditions apply',
+      termsAr: firstSourceText([
+        json['description_ar'],
+        json['description_en'],
+      ]),
+      termsEn: firstSourceText([
+        json['description_en'],
+        json['description_ar'],
+      ]),
       imageUrl: img,
       status: json['status']?.toString() ?? 'active',
       isActive: json['is_active'] is bool ? json['is_active'] as bool : true,

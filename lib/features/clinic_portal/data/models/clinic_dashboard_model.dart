@@ -54,16 +54,21 @@ class ClinicDashboardModel {
       newLeads: (leads['new'] as num?)?.toInt() ?? 0,
       contactedLeads: (leads['contacted'] as num?)?.toInt() ?? 0,
       closedLeads: (leads['closed'] as num?)?.toInt() ?? 0,
-      conversionRate: (leads['conversion_rate_percentage'] as num?)?.toDouble() ?? 0.0,
+      conversionRate:
+          (leads['conversion_rate_percentage'] as num?)?.toDouble() ?? 0.0,
       whatsappTaps: (interactions['whatsapp_taps'] as num?)?.toInt() ?? 0,
       callTaps: (interactions['call_taps'] as num?)?.toInt() ?? 0,
       mapsTaps: (interactions['maps_taps'] as num?)?.toInt() ?? 0,
       profileViews: (interactions['profile_views'] as num?)?.toInt() ?? 0,
-      activePractitionersCount: (catalog['active_practitioners_count'] as num?)?.toInt() ?? 0,
-      activeTreatmentsCount: (catalog['active_treatments_count'] as num?)?.toInt() ?? 0,
+      activePractitionersCount:
+          (catalog['active_practitioners_count'] as num?)?.toInt() ?? 0,
+      activeTreatmentsCount:
+          (catalog['active_treatments_count'] as num?)?.toInt() ?? 0,
       activeOffersCount: (catalog['active_offers_count'] as num?)?.toInt() ?? 0,
-      activeProductsCount: (catalog['active_products_count'] as num?)?.toInt() ?? 0,
-      publishedArticlesCount: (catalog['published_articles_count'] as num?)?.toInt() ?? 0,
+      activeProductsCount:
+          (catalog['active_products_count'] as num?)?.toInt() ?? 0,
+      publishedArticlesCount:
+          (catalog['published_articles_count'] as num?)?.toInt() ?? 0,
     );
   }
 }

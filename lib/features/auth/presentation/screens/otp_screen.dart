@@ -1,3 +1,5 @@
+import 'login_screen.dart';
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -52,7 +54,10 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   // 6 digits required by Django backend (apps.accounts)
-  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   int _resendSeconds = 60;
@@ -103,7 +108,9 @@ class _OtpScreenState extends State<OtpScreen> {
     if (code.length < 6) {
       showAppSnackBar(
         context,
-        loc.isArabic ? 'يرجى إدخال كود التحقق المكون من 6 أرقام' : 'Please enter the 6-digit verification code',
+        loc.isArabic
+            ? 'يرجى إدخال كود التحقق المكون من 6 أرقام'
+            : 'Please enter the 6-digit verification code',
         type: AppSnackBarType.error,
       );
       return;
@@ -158,47 +165,42 @@ class _OtpScreenState extends State<OtpScreen> {
         type: AppSnackBarType.success,
       );
 
-        // Role-based routing
-        final role = authResponse?.user.role ?? 'patient';
-        Widget targetScreen;
-        if (role == 'super_admin') {
-          targetScreen = const AdminMainNavScreen();
-        } else if (role == 'clinic_admin' || role == 'clinic_staff') {
-          targetScreen = const ClinicMainNavScreen();
-        } else {
-          targetScreen = const MainNavScreen();
-        }
+      // Role-based routing
+      final role = authResponse?.user.role ?? '';
+      Widget targetScreen;
+      if (role == 'super_admin') {
+        targetScreen = const AdminMainNavScreen();
+      } else if (role == 'clinic_admin' || role == 'clinic_staff') {
+        targetScreen = const ClinicMainNavScreen();
+      } else if (role == 'patient') {
+        targetScreen = const MainNavScreen();
+      } else {
+        AuthState().logout();
+        targetScreen = const LoginScreen();
+      }
 
-        Navigator.of(context).pushAndRemoveUntil(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
-            transitionDuration: const Duration(milliseconds: 400),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-          ),
-          (route) => false,
-        );
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+        (route) => false,
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      showAppSnackBar(
-        context,
-        e.toString(),
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
     }
   }
 
@@ -223,7 +225,9 @@ class _OtpScreenState extends State<OtpScreen> {
       _startCountdown();
       showAppSnackBar(
         context,
-        loc.isArabic ? 'تم إرسال كود جديد إلى هاتفك' : 'A new code has been sent',
+        loc.isArabic
+            ? 'تم إرسال كود جديد إلى هاتفك'
+            : 'A new code has been sent',
         type: AppSnackBarType.info,
       );
     } on ApiException catch (e) {
@@ -231,21 +235,13 @@ class _OtpScreenState extends State<OtpScreen> {
       setState(() {
         _isResending = false;
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isResending = false;
       });
-      showAppSnackBar(
-        context,
-        e.toString(),
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
     }
   }
 
@@ -264,13 +260,17 @@ class _OtpScreenState extends State<OtpScreen> {
             title: Text(
               loc.tr('otp_title'),
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
                 size: 18,
               ),
               onPressed: () => Navigator.pop(context),
@@ -289,9 +289,13 @@ class _OtpScreenState extends State<OtpScreen> {
                       height: 76,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                        color: isDark
+                            ? AppColors.cardSurfaceHover
+                            : AppColors.lightCardSurfaceHover,
                         border: Border.all(
-                          color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.35 : 0.5),
+                          color: AppColors.accentChampagne.withValues(
+                            alpha: isDark ? 0.35 : 0.5,
+                          ),
                         ),
                       ),
                       child: const Center(
@@ -332,7 +336,10 @@ class _OtpScreenState extends State<OtpScreen> {
 
                   // 6 Digit Input Boxes Card
                   LuxuryCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 24,
+                    ),
                     child: Column(
                       children: [
                         Directionality(
@@ -352,13 +359,19 @@ class _OtpScreenState extends State<OtpScreen> {
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.silverPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                   decoration: InputDecoration(
                                     counterText: '',
                                     filled: true,
-                                    fillColor: isDark ? AppColors.backgroundDeep : AppColors.lightBackground,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                    fillColor: isDark
+                                        ? AppColors.backgroundDeep
+                                        : AppColors.lightBackground,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10),
                                       borderSide: BorderSide(
@@ -381,7 +394,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                       _focusNodes[index - 1].requestFocus();
                                     }
                                     // Auto-trigger verify when last box is filled
-                                    if (val.isNotEmpty && index == 5 && _otpCode.length == 6) {
+                                    if (val.isNotEmpty &&
+                                        index == 5 &&
+                                        _otpCode.length == 6) {
                                       _verifyOtp();
                                     }
                                   },
@@ -394,12 +409,19 @@ class _OtpScreenState extends State<OtpScreen> {
 
                         // Developer Helper Notice
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.accentChampagne.withValues(alpha: 0.12),
+                            color: AppColors.accentChampagne.withValues(
+                              alpha: 0.12,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: AppColors.accentChampagne.withValues(alpha: 0.3),
+                              color: AppColors.accentChampagne.withValues(
+                                alpha: 0.3,
+                              ),
                               width: 0.8,
                             ),
                           ),
@@ -449,9 +471,16 @@ class _OtpScreenState extends State<OtpScreen> {
                                 ? const SizedBox(
                                     width: 14,
                                     height: 14,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentChampagne),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.accentChampagne,
+                                    ),
                                   )
-                                : const Icon(Icons.refresh_rounded, size: 16, color: AppColors.accentChampagne),
+                                : const Icon(
+                                    Icons.refresh_rounded,
+                                    size: 16,
+                                    color: AppColors.accentChampagne,
+                                  ),
                             label: Text(
                               loc.tr('resend_code'),
                               style: AppTypography.caption.copyWith(

@@ -48,7 +48,8 @@ class ApiException implements Exception {
 
     if (error.type == DioExceptionType.connectionError) {
       return ApiException(
-        message: 'تعذر الاتصال بالخادم. تأكد من تشغيل السيرفر المحلي أو الاتصال بالشبكة.',
+        message:
+            'تعذر الاتصال بالخادم. تأكد من تشغيل السيرفر المحلي أو الاتصال بالشبكة.',
         statusCode: statusCode,
         errorCode: 'CONNECTION_ERROR',
       );
@@ -63,7 +64,9 @@ class ApiException implements Exception {
         rawBackendMsg = errObj['message']?.toString();
 
         if (errObj['fields'] is Map<String, dynamic>) {
-          fieldErrors = _extractFieldErrors(errObj['fields'] as Map<String, dynamic>);
+          fieldErrors = _extractFieldErrors(
+            errObj['fields'] as Map<String, dynamic>,
+          );
         }
 
         if (fieldErrors != null && fieldErrors.isNotEmpty) {
@@ -76,7 +79,9 @@ class ApiException implements Exception {
       else if (data['fields'] is Map<String, dynamic>) {
         errorCode = data['code']?.toString() ?? 'VALIDATION_ERROR';
         rawBackendMsg = data['message']?.toString();
-        fieldErrors = _extractFieldErrors(data['fields'] as Map<String, dynamic>);
+        fieldErrors = _extractFieldErrors(
+          data['fields'] as Map<String, dynamic>,
+        );
         message = _formatFieldErrorsMessage(fieldErrors);
       }
       // 3. Simple DRF detail: {"detail": "..."}
@@ -103,7 +108,9 @@ class ApiException implements Exception {
     }
 
     // Special fallback for 422 Unprocessable Entity
-    if (statusCode == 422 && (message.contains('حدث خطأ غير متوقع') || message.contains('unexpected error'))) {
+    if (statusCode == 422 &&
+        (message.contains('حدث خطأ غير متوقع') ||
+            message.contains('unexpected error'))) {
       if (rawBackendMsg != null && rawBackendMsg.isNotEmpty) {
         message = _localizeBackendMessage(rawBackendMsg);
       } else {
@@ -134,12 +141,16 @@ class ApiException implements Exception {
     );
   }
 
-  static Map<String, List<String>> _extractFieldErrors(Map<String, dynamic> map) {
+  static Map<String, List<String>> _extractFieldErrors(
+    Map<String, dynamic> map,
+  ) {
     final result = <String, List<String>>{};
     map.forEach((key, val) {
       if (key == 'code' || key == 'message' || key == 'status_code') return;
       if (val is List) {
-        final list = val.map((e) => _localizeBackendMessage(e.toString())).toList();
+        final list = val
+            .map((e) => _localizeBackendMessage(e.toString()))
+            .toList();
         if (list.isNotEmpty) result[key] = list;
       } else if (val is String && val.isNotEmpty) {
         result[key] = [_localizeBackendMessage(val)];
@@ -239,9 +250,13 @@ class ApiException implements Exception {
       case 'sponsor_company':
         return isArabic ? 'الشركة الراعية' : 'Sponsor Company';
       case 'brand_name_en':
-        return isArabic ? 'اسم العلامة التجارية بالإنجليزية' : 'Brand Name (English)';
+        return isArabic
+            ? 'اسم العلامة التجارية بالإنجليزية'
+            : 'Brand Name (English)';
       case 'brand_name_ar':
-        return isArabic ? 'اسم العلامة التجارية بالعربية' : 'Brand Name (Arabic)';
+        return isArabic
+            ? 'اسم العلامة التجارية بالعربية'
+            : 'Brand Name (Arabic)';
       case 'admin_user':
         return isArabic ? 'بيانات المشرف' : 'Admin User';
       case 'admin_user.full_name':
@@ -292,38 +307,62 @@ class ApiException implements Exception {
     final isArabic = LocaleService().isArabic;
 
     // Common DRF validation message localizations
-    if (lower.contains('this field is required') || lower.contains('this field may not be null')) {
+    if (lower.contains('this field is required') ||
+        lower.contains('this field may not be null')) {
       return isArabic ? 'هذا الحقل مطلوب' : 'This field is required.';
     }
     if (lower.contains('this field may not be blank')) {
-      return isArabic ? 'هذا الحقل لا يمكن تركه فارغاً' : 'This field may not be blank.';
+      return isArabic
+          ? 'هذا الحقل لا يمكن تركه فارغاً'
+          : 'This field may not be blank.';
     }
-    if (lower.contains('not a file') || lower.contains('submitted data was not a file')) {
-      return isArabic ? 'الملف المرفق غير صالح، يرجى اختيار ملف صورة صحيح' : 'The submitted data was not a valid file.';
+    if (lower.contains('not a file') ||
+        lower.contains('submitted data was not a file')) {
+      return isArabic
+          ? 'الملف المرفق غير صالح، يرجى اختيار ملف صورة صحيح'
+          : 'The submitted data was not a valid file.';
     }
     if (lower.contains('enter a valid url')) {
       return isArabic ? 'يرجى إدخال رابط إنترنت صالح' : 'Enter a valid URL.';
     }
-    if (lower.contains('enter a valid date/time') || lower.contains('enter a valid datetime') || lower.contains('valid date')) {
-      return isArabic ? 'يرجى إدخال تاريخ ووقت صالح' : 'Enter a valid date/time.';
+    if (lower.contains('enter a valid date/time') ||
+        lower.contains('enter a valid datetime') ||
+        lower.contains('valid date')) {
+      return isArabic
+          ? 'يرجى إدخال تاريخ ووقت صالح'
+          : 'Enter a valid date/time.';
     }
-    if (lower.contains('cannot be earlier than') || (lower.contains('end date') && lower.contains('start date'))) {
-      return isArabic ? 'تاريخ نهاية العرض لا يمكن أن يكون قبل تاريخ البداية' : 'Offer end date cannot be earlier than start date.';
+    if (lower.contains('cannot be earlier than') ||
+        (lower.contains('end date') && lower.contains('start date'))) {
+      return isArabic
+          ? 'تاريخ نهاية العرض لا يمكن أن يكون قبل تاريخ البداية'
+          : 'Offer end date cannot be earlier than start date.';
     }
     if (lower.contains('valid integer') || lower.contains('valid number')) {
-      return isArabic ? 'يرجى إدخال رقم صحيح صالح' : 'A valid number is required.';
+      return isArabic
+          ? 'يرجى إدخال رقم صحيح صالح'
+          : 'A valid number is required.';
     }
     if (lower.contains('greater than or equal to 0')) {
-      return isArabic ? 'يجب أن تكون القيمة أكبر من أو تساوي 0' : 'Value must be 0 or greater.';
+      return isArabic
+          ? 'يجب أن تكون القيمة أكبر من أو تساوي 0'
+          : 'Value must be 0 or greater.';
     }
     if (lower.contains('no more than') && lower.contains('character')) {
-      return isArabic ? 'تم تجاوز الحد الأقصى المسموح به لعدد الأحرف' : 'Exceeded maximum allowed characters.';
+      return isArabic
+          ? 'تم تجاوز الحد الأقصى المسموح به لعدد الأحرف'
+          : 'Exceeded maximum allowed characters.';
     }
     if (lower.contains('at least') && lower.contains('character')) {
-      return isArabic ? 'عدد الأحرف أقل من الحد الأدنى المطلوب' : 'Fewer characters than minimum required.';
+      return isArabic
+          ? 'عدد الأحرف أقل من الحد الأدنى المطلوب'
+          : 'Fewer characters than minimum required.';
     }
-    if (lower.contains('object does not exist') || lower.contains('invalid pk')) {
-      return isArabic ? 'العنصر المختار غير موجود أو تم حذفه' : 'Selected item does not exist.';
+    if (lower.contains('object does not exist') ||
+        lower.contains('invalid pk')) {
+      return isArabic
+          ? 'العنصر المختار غير موجود أو تم حذفه'
+          : 'Selected item does not exist.';
     }
     if (lower.contains('expected a list of items')) {
       return isArabic ? 'صيغة البيانات غير صحيحة' : 'Invalid data format.';
@@ -346,16 +385,23 @@ class ApiException implements Exception {
         lower.contains('no active otp found')) {
       return 'لا يوجد رمز تحقق نشط لهذا الرقم أو انتهت صلاحيته، يرجى طلب رمز جديد';
     }
-    if (lower.contains('invalid otp') || lower.contains('incorrect otp') || lower.contains('otp_invalid')) {
+    if (lower.contains('invalid otp') ||
+        lower.contains('incorrect otp') ||
+        lower.contains('otp_invalid')) {
       return 'رمز التحقق غير صحيح، يرجى التأكد وإعادة المحاولة';
     }
     if (lower.contains('expired') || lower.contains('otp_expired')) {
       return 'انتهت صلاحية رمز التحقق، يرجى طلب رمز جديد';
     }
-    if (lower.contains('locked') || lower.contains('too many failed') || lower.contains('otp_locked')) {
+    if (lower.contains('locked') ||
+        lower.contains('too many failed') ||
+        lower.contains('otp_locked')) {
       return 'تم قفل الحساب مؤقتاً لكثرة المحاولات الخاطئة، يرجى المحاولة بعد 30 دقيقة';
     }
-    if (lower.contains('wait') && (lower.contains('second') || lower.contains('cooldown') || lower.contains('otp_rate_limit'))) {
+    if (lower.contains('wait') &&
+        (lower.contains('second') ||
+            lower.contains('cooldown') ||
+            lower.contains('otp_rate_limit'))) {
       return 'يرجى الانتظار قليلاً قبل طلب رمز تحقق جديد';
     }
 
@@ -374,15 +420,18 @@ class ApiException implements Exception {
     }
 
     // Phone validation errors
-    if (lower.contains('phone') && (lower.contains('already exists') || lower.contains('exists'))) {
+    if (lower.contains('phone') &&
+        (lower.contains('already exists') || lower.contains('exists'))) {
       return 'رقم الهاتف مسجل بالفعل في حساب آخر';
     }
-    if (lower.contains('invalid phone') || lower.contains('cannot parse phone')) {
+    if (lower.contains('invalid phone') ||
+        lower.contains('cannot parse phone')) {
       return 'صيغة رقم الهاتف غير صحيحة، يرجى إدخال رقم إماراتي صحيح';
     }
 
     // Email validation errors
-    if (lower.contains('email') && (lower.contains('already exists') || lower.contains('exists'))) {
+    if (lower.contains('email') &&
+        (lower.contains('already exists') || lower.contains('exists'))) {
       return 'البريد الإلكتروني مسجل بالفعل في حساب آخر';
     }
     if (lower.contains('valid email')) {
@@ -390,12 +439,14 @@ class ApiException implements Exception {
     }
 
     // Referral code validation errors
-    if (lower.contains('referral') && (lower.contains('invalid') || lower.contains('not found'))) {
+    if (lower.contains('referral') &&
+        (lower.contains('invalid') || lower.contains('not found'))) {
       return 'كود الإحالة غير صالح أو غير موجود';
     }
 
     // Credentials / Login errors
-    if (lower.contains('invalid credentials') || lower.contains('no active account')) {
+    if (lower.contains('invalid credentials') ||
+        lower.contains('no active account')) {
       return 'بيانات الدخول غير صحيحة، تأكد من رقم الهاتف/البريد وكلمة المرور';
     }
 
@@ -414,19 +465,25 @@ class ApiException implements Exception {
         (lower.contains('recent') && lower.contains('request'))) {
       return 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل';
     }
-    if (lower.contains('too many requests') || lower.contains('throttled') || lower.contains('request was throttled')) {
+    if (lower.contains('too many requests') ||
+        lower.contains('throttled') ||
+        lower.contains('request was throttled')) {
       return 'تم إرسال طلب مشابه مؤخرًا. يرجى المحاولة بعد قليل';
     }
-    if (lower.contains('consent must be accepted') || lower.contains('consent_accepted')) {
+    if (lower.contains('consent must be accepted') ||
+        lower.contains('consent_accepted')) {
       return 'يرجى الموافقة على مشاركة البيانات مع العيادة لمتابعة الطلب';
     }
-    if (lower.contains('practitioner is not assigned to the selected treatment')) {
+    if (lower.contains(
+      'practitioner is not assigned to the selected treatment',
+    )) {
       return 'الممارس المختار غير مخصص لتقديم هذا العلاج';
     }
     if (lower.contains('branch does not belong')) {
       return 'الفرع المختار لا يتبع لهذه العيادة';
     }
-    if (lower.contains('offer is expired') || lower.contains('not yet active')) {
+    if (lower.contains('offer is expired') ||
+        lower.contains('not yet active')) {
       return 'هذا العرض غير متاح حالياً أو انتهت صلاحيته';
     }
 

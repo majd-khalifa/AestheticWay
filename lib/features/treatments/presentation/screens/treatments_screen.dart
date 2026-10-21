@@ -1,3 +1,4 @@
+import '../../../../core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_picker.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
@@ -15,15 +16,17 @@ import 'package:aesthetic_way/features/treatments/presentation/screens/treatment
 /// Screen 2 & 5: Treatments & Plastic Surgery Directory
 class TreatmentsScreen extends StatefulWidget {
   final String? initialCategory;
+  final TreatmentsRepository? repository;
 
-  const TreatmentsScreen({super.key, this.initialCategory});
+  const TreatmentsScreen({super.key, this.initialCategory, this.repository});
 
   @override
   State<TreatmentsScreen> createState() => _TreatmentsScreenState();
 }
 
 class _TreatmentsScreenState extends State<TreatmentsScreen> {
-  final TreatmentsRepository _repository = TreatmentsRepository();
+  late final TreatmentsRepository _repository =
+      widget.repository ?? TreatmentsRepository();
   late String _selectedCategory;
   String _searchQuery = '';
   late final PagedCollection<TreatmentModel> _paging;
@@ -59,17 +62,25 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
         if (!mounted) return;
         if (_selectedCategory != 'all' && _categoryUuid == null) {
           var match = categories
-              .where((c) => c['slug'] == _selectedCategory)
+              .where(
+                (c) =>
+                    c['slug'] == _selectedCategory ||
+                    '${c['name_en']}'.toLowerCase() ==
+                        _selectedCategory.toLowerCase(),
+              )
               .firstOrNull;
           if (match == null) {
             final matches = await _repository.getCategories(
               search: _selectedCategory.replaceAll('-', ' '),
             );
-            match =
-                matches
-                    .where((c) => c['slug'] == _selectedCategory)
-                    .firstOrNull ??
-                matches.firstOrNull;
+            match = matches
+                .where(
+                  (c) =>
+                      c['slug'] == _selectedCategory ||
+                      '${c['name_en']}'.toLowerCase() ==
+                          _selectedCategory.toLowerCase(),
+                )
+                .firstOrNull;
             categories = [
               ...categories,
               ...matches.where(
@@ -168,7 +179,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Container(
-                    height: 44,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(14),
@@ -330,92 +341,22 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                         )
                       : filteredTreatments.isEmpty
                       ? RefreshIndicator(
-                          color: AppColors.accentChampagne,
                           onRefresh: _loadData,
                           child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             children: [
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.15,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                child: LuxuryCard(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 36,
-                                    horizontal: 20,
-                                  ),
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.accentChampagne
-                                                .withValues(alpha: 0.12),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.spa_outlined,
-                                            size: 36,
-                                            color: AppColors.accentChampagne,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 14),
-                                        Text(
-                                          loc.isArabic
-                                              ? 'لا توجد علاجات متاحة حالياً'
-                                              : 'No treatments available',
-                                          style: AppTypography.cardTitle
-                                              .copyWith(
-                                                color: isDark
-                                                    ? AppColors.silverPrimary
-                                                    : AppColors
-                                                          .lightTextPrimary,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          loc.isArabic
-                                              ? 'سيتم إضافة خدمات تجميلية وجلدية جديدة قريباً'
-                                              : 'New cosmetic and derma treatments will be listed soon',
-                                          style: AppTypography.caption.copyWith(
-                                            color: AppColors.mutedText(context),
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        ElevatedButton.icon(
-                                          onPressed: _loadData,
-                                          icon: const Icon(
-                                            Icons.refresh_rounded,
-                                            size: 16,
-                                          ),
-                                          label: Text(
-                                            loc.isArabic ? 'تحديث' : 'Refresh',
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: isDark
-                                                ? AppColors.silverPrimary
-                                                : AppColors.lightTextPrimary,
-                                            foregroundColor: isDark
-                                                ? AppColors.backgroundDeep
-                                                : Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                              LuxuryEmptyState(
+                                icon: Icons.medical_services_outlined,
+                                title: loc.isArabic
+                                    ? 'لا توجد إجراءات منشورة'
+                                    : 'No treatments published',
+                                subtitle: loc.isArabic
+                                    ? 'جرّب تصنيفاً آخر أو استفسر من العيادات عن الخدمات المتاحة.'
+                                    : 'Try another category or ask a clinic about available services.',
+                                actionLabel: loc.isArabic
+                                    ? 'إعادة تحميل الدليل'
+                                    : 'Reload directory',
+                                onAction: _loadData,
                               ),
                             ],
                           ),

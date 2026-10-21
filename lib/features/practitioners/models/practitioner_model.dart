@@ -1,3 +1,4 @@
+import '../../../core/utils/source_text.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 
 /// Practitioner types strictly defined in AESTHETIC WAY
@@ -48,6 +49,7 @@ class PractitionerModel {
   final String nameAr;
   final String nameEn;
   final PractitionerType type;
+  final bool hasKnownType;
   final String specialtyAr;
   final String specialtyEn;
   final String classificationAr; // e.g. استشاري أول جلدية وتجميل
@@ -74,6 +76,7 @@ class PractitionerModel {
     required this.nameAr,
     required this.nameEn,
     required this.type,
+    this.hasKnownType = true,
     required this.specialtyAr,
     required this.specialtyEn,
     required this.classificationAr,
@@ -127,6 +130,7 @@ class PractitionerModel {
       nameAr: nameAr ?? this.nameAr,
       nameEn: nameEn ?? this.nameEn,
       type: type ?? this.type,
+      hasKnownType: type != null || hasKnownType,
       specialtyAr: specialtyAr ?? this.specialtyAr,
       specialtyEn: specialtyEn ?? this.specialtyEn,
       classificationAr: classificationAr ?? this.classificationAr,
@@ -242,36 +246,57 @@ class PractitionerModel {
 
     return PractitionerModel(
       id: json['id']?.toString() ?? '',
-      nameAr: json['name_ar'] ?? json['name_en'] ?? '',
-      nameEn: json['name_en'] ?? json['name_ar'] ?? '',
+      nameAr: firstSourceText([json['name_ar'], json['name_en']]),
+      nameEn: firstSourceText([json['name_en'], json['name_ar']]),
       type: pType,
-      specialtyAr: json['speciality_ar'] ?? json['title_ar'] ?? 'تجميل وجلدية',
-      specialtyEn:
-          json['speciality_en'] ??
-          json['title_en'] ??
-          'Aesthetic & Dermatology',
-      classificationAr:
-          json['title_ar'] ?? json['speciality_ar'] ?? 'ممارس معتمد',
-      classificationEn:
-          json['title_en'] ?? json['speciality_en'] ?? 'Certified Practitioner',
+      hasKnownType: const [
+        'doctor',
+        'nurse',
+        'licensed_professional',
+      ].contains(rawType),
+      specialtyAr: firstSourceText([
+        json['speciality_ar'],
+        json['speciality_en'],
+        json['title_ar'],
+        json['title_en'],
+      ]),
+      specialtyEn: firstSourceText([
+        json['speciality_en'],
+        json['speciality_ar'],
+        json['title_en'],
+        json['title_ar'],
+      ]),
+      classificationAr: firstSourceText([
+        json['title_ar'],
+        json['title_en'],
+        json['speciality_ar'],
+        json['speciality_en'],
+      ]),
+      classificationEn: firstSourceText([
+        json['title_en'],
+        json['title_ar'],
+        json['speciality_en'],
+        json['speciality_ar'],
+      ]),
       licenseAuthority: json['license_authority']?.toString() ?? '',
       licenseNumber: json['license_number']?.toString() ?? '',
       avatarUrl: ApiConfig.firstMediaUrl([
         json['avatar_url'],
         json['photo_url'],
+        json['profile_image_url'],
         json['avatar'],
       ]),
       yearsOfExperience:
           (json['years_of_experience'] ?? json['experience_years']) is int
           ? (json['years_of_experience'] ?? json['experience_years']) as int
-          : 5,
-      rating: double.tryParse(json['rating']?.toString() ?? '') ?? 4.9,
+          : 0,
+      rating: double.tryParse(json['rating']?.toString() ?? '') ?? 0.0,
       reviewCount: json['review_count'] is int
           ? json['review_count'] as int
           : 0,
       languages: json['languages'] != null
           ? List<String>.from(json['languages'] as List)
-          : const ['العربية', 'English'],
+          : const [],
       clinicId: resolvedClinicId,
       clinicNameAr: resolvedClinicNameAr,
       clinicNameEn: resolvedClinicNameEn,

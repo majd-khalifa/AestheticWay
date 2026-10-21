@@ -127,7 +127,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Container(
-                    height: 44,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(14),
@@ -275,40 +275,47 @@ class _ProductsScreenState extends State<ProductsScreen> {
       );
     }
 
+    final columns =
+        filteredProducts.length == 1 ||
+            MediaQuery.sizeOf(context).width < 380 ||
+            MediaQuery.textScalerOf(context).scale(1) > 1.3
+        ? 1
+        : 2;
     return CustomScrollView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount:
-                  MediaQuery.sizeOf(context).width < 350 ||
-                      MediaQuery.textScalerOf(context).scale(1) > 1.3
-                  ? 1
-                  : 2,
-              mainAxisExtent:
-                  340 +
-                  (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0, 2) *
-                      90,
-              crossAxisSpacing: 18,
-              mainAxisSpacing: 24,
-            ),
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final product = filteredProducts[index];
-              return _ProductCard(
-                product: product,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(
-                      page: ProductDetailScreen(product: product),
+          padding: const EdgeInsets.all(20),
+          sliver: SliverList.builder(
+            itemCount: (filteredProducts.length / columns).ceil(),
+            itemBuilder: (context, row) => Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var col = 0; col < columns; col++) ...[
+                    if (col > 0) const SizedBox(width: 16),
+                    Expanded(
+                      child: row * columns + col >= filteredProducts.length
+                          ? const SizedBox.shrink()
+                          : _ProductCard(
+                              product: filteredProducts[row * columns + col],
+                              onTap: () => Navigator.push(
+                                context,
+                                LuxuryPageRoute(
+                                  page: ProductDetailScreen(
+                                    product:
+                                        filteredProducts[row * columns + col],
+                                  ),
+                                ),
+                              ),
+                            ),
                     ),
-                  );
-                },
-              );
-            }, childCount: filteredProducts.length),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
         SliverToBoxAdapter(
@@ -342,13 +349,13 @@ class _ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: BrandProductMedia(product: product)),
+              BrandProductMedia(product: product),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (brand.isNotEmpty) ...[
+                    if (brand.isNotEmpty && product.imageUrl.isNotEmpty) ...[
                       Text(
                         brand,
                         maxLines: 1,
@@ -369,8 +376,32 @@ class _ProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.text(context),
-                        fontSize: 14,
-                        height: 1.5,
+                        fontSize: 18,
+                        height: 1.4,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (product.sponsorCompany?.trim().isNotEmpty == true &&
+                        product.sponsorCompany != brand)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          '${locale.isArabic ? 'برعاية' : 'Presented by'} ${product.sponsorCompany}',
+                          style: TextStyle(
+                            color: AppColors.subtext(context),
+                            fontSize: 11,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    Text(
+                      locale.isArabic
+                          ? 'اكتشف العلامة ←'
+                          : 'Explore the brand →',
+                      style: TextStyle(
+                        color: AppColors.goldText(context),
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

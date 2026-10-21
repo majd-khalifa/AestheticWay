@@ -63,10 +63,14 @@ class MediaUploadService {
       }
       return <String, dynamic>{};
     } on DioException catch (e) {
-      debugPrint('[MediaUploadService] Upload failed: $e');
+      if (kDebugMode) {
+        debugPrint(
+          '[media_upload] failed status=${e.response?.statusCode} type=${e.type.name}',
+        );
+      }
       throw ApiException.fromDioError(e);
     } catch (e) {
-      debugPrint('[MediaUploadService] Unexpected upload error: $e');
+      if (kDebugMode) debugPrint('[media_upload] failed type=${e.runtimeType}');
       if (e is ApiException) rethrow;
       throw ApiException(message: e.toString());
     }

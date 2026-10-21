@@ -1,5 +1,5 @@
+import '../../../core/utils/entity_id.dart';
 import '../../../core/data/paged_collection.dart';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
@@ -22,11 +22,9 @@ class LeadSubmitResult {
   });
 
   factory LeadSubmitResult.fromJson(Map<String, dynamic> json) {
-    DateTime dt = DateTime.now();
-    if (json['created_at'] != null) {
-      try {
-        dt = DateTime.parse(json['created_at'].toString());
-      } catch (_) {}
+    final dt = DateTime.tryParse(json['created_at']?.toString() ?? '');
+    if (dt == null) {
+      throw const FormatException('Missing server request timestamp');
     }
     return LeadSubmitResult(
       success: json['success'] == true,
@@ -55,41 +53,27 @@ class LeadsRepository {
 
   /// Submits an appointment request (lead) to the backend
   Future<LeadSubmitResult> createLead(Map<String, dynamic> payload) async {
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      final isRealClinicUuid = RegExp(
-        r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-      ).hasMatch(payload['clinic']?.toString() ?? '');
-      if (!isRealClinicUuid) {
-        notifyLeadsUpdated();
-        return LeadSubmitResult(
-          success: true,
-          leadReference: '#REQ-12345',
-          confirmationMessage:
-              'Your request has been sent and the clinic will contact you',
-          createdAt: DateTime.now(),
-        );
-      }
+    if (!isEntityUuid(payload['clinic']?.toString()) &&
+        !(payload['lead_type'] == 'product_inquiry' &&
+            isEntityUuid(payload['product']?.toString()))) {
+      throw const ApiException(
+        message: 'A valid inquiry destination is required.',
+        statusCode: 400,
+      );
     }
-
     try {
       final response = await _apiClient.post(ApiConfig.leads, data: payload);
 
       final data = response.data as Map<String, dynamic>;
       final result = LeadSubmitResult.fromJson(data);
-      notifyLeadsUpdated();
-      return result;
-    } on ApiException catch (e) {
-      if (Platform.environment.containsKey('FLUTTER_TEST') &&
-          e.errorCode == 'CONNECTION_ERROR') {
-        notifyLeadsUpdated();
-        return LeadSubmitResult(
-          success: true,
-          leadReference: '#REQ-12345',
-          confirmationMessage:
-              'Your request has been sent and the clinic will contact you',
-          createdAt: DateTime.now(),
+      if (!result.success || result.leadReference.trim().isEmpty) {
+        throw const ApiException(
+          message: 'The server did not confirm this request.',
         );
       }
+      notifyLeadsUpdated();
+      return result;
+    } on ApiException {
       rethrow;
     } on DioException catch (dioErr) {
       final res = dioErr.response;
@@ -121,10 +105,6 @@ class LeadsRepository {
     String? status,
     int page = 1,
   }) async {
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      return [];
-    }
-
     final Map<String, dynamic> queryParams = {};
     if (status != null && status.isNotEmpty) {
       queryParams['status'] = status;
@@ -143,11 +123,7 @@ class LeadsRepository {
         AppointmentRequestModel.fromJson,
         page: page,
       );
-    } on ApiException catch (e) {
-      if (Platform.environment.containsKey('FLUTTER_TEST') &&
-          e.errorCode == 'CONNECTION_ERROR') {
-        return [];
-      }
+    } on ApiException {
       rethrow;
     }
   }

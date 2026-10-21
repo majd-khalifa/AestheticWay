@@ -14,11 +14,7 @@ class ResetPasswordScreen extends StatefulWidget {
   final String? phone;
   final String? otpCode;
 
-  const ResetPasswordScreen({
-    super.key,
-    this.phone,
-    this.otpCode,
-  });
+  const ResetPasswordScreen({super.key, this.phone, this.otpCode});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -92,7 +88,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
       Navigator.of(context).pushAndRemoveUntil(
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const LoginScreen(),
           transitionDuration: const Duration(milliseconds: 400),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
@@ -111,22 +108,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           );
         }
       });
-      showAppSnackBar(
-        context,
-        e.message,
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.message, type: AppSnackBarType.error);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
         _serverErrorMessage = e.toString();
       });
-      showAppSnackBar(
-        context,
-        e.toString(),
-        type: AppSnackBarType.error,
-      );
+      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
     }
   }
 
@@ -145,7 +134,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             title: Text(
               loc.tr('reset_title'),
               style: AppTypography.screenTitle.copyWith(
-                color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.silverPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
           ),
@@ -164,9 +155,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         height: 76,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                          color: isDark
+                              ? AppColors.cardSurfaceHover
+                              : AppColors.lightCardSurfaceHover,
                           border: Border.all(
-                            color: AppColors.accentChampagne.withValues(alpha: isDark ? 0.35 : 0.5),
+                            color: AppColors.accentChampagne.withValues(
+                              alpha: isDark ? 0.35 : 0.5,
+                            ),
                           ),
                         ),
                         child: const Center(
@@ -196,18 +191,27 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     // Server Error Banner
                     if (_serverErrorMessage != null) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.errorRed.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.4)),
+                          border: Border.all(
+                            color: AppColors.errorRed.withValues(alpha: 0.4),
+                          ),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Padding(
                               padding: EdgeInsets.only(top: 2),
-                              child: Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 20),
+                              child: Icon(
+                                Icons.error_outline_rounded,
+                                color: AppColors.errorRed,
+                                size: 20,
+                              ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -231,12 +235,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           _serverErrorMessage!.contains('OTP') ||
                           _serverErrorMessage!.contains('otp'))
                         Align(
-                          alignment: loc.isArabic ? Alignment.centerRight : Alignment.centerLeft,
+                          alignment: loc.isArabic
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                           child: TextButton.icon(
                             onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.arrow_back, size: 15, color: AppColors.accentChampagne),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              size: 15,
+                              color: AppColors.accentChampagne,
+                            ),
                             label: Text(
-                              loc.isArabic ? 'العودة لتعديل أو إعادة إرسال رمز التحقق' : 'Return to edit or resend verification code',
+                              loc.isArabic
+                                  ? 'العودة لتعديل أو إعادة إرسال رمز التحقق'
+                                  : 'Return to edit or resend verification code',
                               style: TextStyle(
                                 color: AppColors.goldText(context),
                                 fontSize: 12,
@@ -260,18 +272,29 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.left,
                             style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.textPrimary
+                                  : AppColors.lightTextPrimary,
                               fontSize: 13.5,
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
                               labelText: loc.tr('new_password_label'),
                               hintText: loc.tr('password_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: AppColors.mutedText(context), size: 19),
+                              labelStyle: TextStyle(
+                                color: AppColors.mutedText(context),
+                                fontSize: 12.5,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.lock_outline_rounded,
+                                color: AppColors.mutedText(context),
+                                size: 19,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscureNewPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  _obscureNewPassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                   color: AppColors.mutedText(context),
                                   size: 18,
                                 ),
@@ -282,15 +305,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 },
                               ),
                               filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              fillColor: isDark
+                                  ? AppColors.cardSurfaceHover
+                                  : AppColors.lightCardSurfaceHover,
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                borderSide: BorderSide(
+                                  color: AppColors.border(context),
+                                  width: 0.8,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                  color: isDark
+                                      ? AppColors.silverPrimary
+                                      : AppColors.primarySoftNavy,
                                   width: 1.4,
                                 ),
                               ),
@@ -299,7 +329,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               if (val == null || val.trim().length < 8) {
                                 return loc.tr('val_password_short');
                               }
-                              if (_serverFieldErrors.containsKey('new_password')) {
+                              if (_serverFieldErrors.containsKey(
+                                'new_password',
+                              )) {
                                 return _serverFieldErrors['new_password'];
                               }
                               return null;
@@ -314,37 +346,56 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.left,
                             style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.textPrimary
+                                  : AppColors.lightTextPrimary,
                               fontSize: 13.5,
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
                               labelText: loc.tr('confirm_new_password_label'),
                               hintText: loc.tr('password_hint'),
-                              labelStyle: TextStyle(color: AppColors.mutedText(context), fontSize: 12.5),
-                              prefixIcon: Icon(Icons.lock_reset_rounded, color: AppColors.mutedText(context), size: 19),
+                              labelStyle: TextStyle(
+                                color: AppColors.mutedText(context),
+                                fontSize: 12.5,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.lock_reset_rounded,
+                                color: AppColors.mutedText(context),
+                                size: 19,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                   color: AppColors.mutedText(context),
                                   size: 18,
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                    _obscureConfirmPassword =
+                                        !_obscureConfirmPassword;
                                   });
                                 },
                               ),
                               filled: true,
-                              fillColor: isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover,
+                              fillColor: isDark
+                                  ? AppColors.cardSurfaceHover
+                                  : AppColors.lightCardSurfaceHover,
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.border(context), width: 0.8),
+                                borderSide: BorderSide(
+                                  color: AppColors.border(context),
+                                  width: 0.8,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy,
+                                  color: isDark
+                                      ? AppColors.silverPrimary
+                                      : AppColors.primarySoftNavy,
                                   width: 1.4,
                                 ),
                               ),

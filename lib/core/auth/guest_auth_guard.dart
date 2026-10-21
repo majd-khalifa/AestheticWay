@@ -11,6 +11,8 @@ class AuthState extends ChangeNotifier {
   factory AuthState() => _instance;
   AuthState._internal();
 
+  int _sessionEpoch = 0;
+  int get sessionEpoch => _sessionEpoch;
   bool _isLoggedIn = false;
   String _userName = '';
   String _userPhone = '';
@@ -30,7 +32,7 @@ class AuthState extends ChangeNotifier {
   bool get isSuperAdmin => _userRole == 'super_admin';
   bool get isClinicAdmin => _userRole == 'clinic_admin';
   bool get isClinicStaff => _userRole == 'clinic_staff';
-  bool get isPatient => _userRole == 'patient' || _userRole.isEmpty;
+  bool get isPatient => _userRole == 'patient';
 
   void login({
     required String name,
@@ -44,6 +46,7 @@ class AuthState extends ChangeNotifier {
       AdminPortalService().clearSession();
       ReferralService().clearSession();
     }
+    ++_sessionEpoch;
     _isLoggedIn = true;
     _userName = name;
     _userPhone = phone;
@@ -73,6 +76,7 @@ class AuthState extends ChangeNotifier {
     ClinicPortalService().clearSession();
     AdminPortalService().clearSession();
     ReferralService().clearSession();
+    ++_sessionEpoch;
     _isLoggedIn = false;
     _userName = '';
     _userPhone = '';
@@ -89,11 +93,12 @@ class AuthState extends ChangeNotifier {
     final hasToken = await TokenStorage().hasToken();
     final user = TokenStorage().getUser();
     if (hasToken && user != null) {
+      ++_sessionEpoch;
       _isLoggedIn = true;
       _userName = user['full_name']?.toString() ?? '';
       _userPhone = user['phone']?.toString() ?? '';
       _userEmail = user['email']?.toString() ?? '';
-      _userRole = user['role']?.toString() ?? 'patient';
+      _userRole = user['role']?.toString() ?? '';
       _isVerified = user['is_verified'] == true;
       notifyListeners();
     }
@@ -120,7 +125,7 @@ class GuestAuthGuard {
     String? reasonSubtitle,
   }) async {
     if (AuthState().isLoggedIn) {
-      return true;
+      return AuthState().isPatient;
     }
 
     // In mandatory auth mode, if session is ever lost, redirect cleanly to LoginScreen and clear stack

@@ -32,11 +32,19 @@ class FeaturedAdApiModel {
   final String id;
   final String image;
   final String link;
+  final ClinicModel? clinic;
+  final String subscriptionTier;
+  final String videoUrl;
+  bool get isSponsored =>
+      ['vip', 'featured'].contains(subscriptionTier.trim().toLowerCase());
 
   const FeaturedAdApiModel({
     required this.id,
     required this.image,
     required this.link,
+    this.clinic,
+    this.subscriptionTier = 'basic',
+    this.videoUrl = '',
   });
 
   factory FeaturedAdApiModel.fromJson(Map<String, dynamic> json) {
@@ -44,8 +52,25 @@ class FeaturedAdApiModel {
       id: json['id']?.toString() ?? '',
       image: ApiConfig.firstMediaUrl([json['image_url'], json['image']]),
       link: json['link'] as String? ?? '',
+      clinic: json['clinic'] is Map<String, dynamic>
+          ? ClinicModel.fromJson(json['clinic'] as Map<String, dynamic>)
+          : null,
+      subscriptionTier: json['subscription_tier']?.toString() ?? 'basic',
+      videoUrl: ApiConfig.firstMediaUrl([json['video_url']]),
     );
   }
+}
+
+/// A genuine paid placement or a publicly listed premium subscription clinic.
+/// A subscription partner never becomes a fabricated advertisement record.
+class HomePartner {
+  const HomePartner({required this.clinic, this.placement});
+  final ClinicModel clinic;
+  final FeaturedAdApiModel? placement;
+  bool get isAdvertisement => placement != null;
+  bool get isVip => placement != null
+      ? placement!.subscriptionTier.trim().toLowerCase() == 'vip'
+      : clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
 }
 
 class HomeFeedModel {
@@ -53,12 +78,35 @@ class HomeFeedModel {
   final List<CategoryApiModel> categories;
   final List<OfferModel> activeOffers;
   final List<ClinicModel> nearbyClinics;
+  final List<ClinicModel> partnerClinics;
+  final bool partnerDirectoryUnavailable;
+
+  List<HomePartner> get premiumPartners {
+    final partners = <HomePartner>[
+      for (final ad in featuredAds)
+        if (ad.isSponsored && ad.clinic != null)
+          HomePartner(clinic: ad.clinic!, placement: ad),
+    ];
+    final advertised = partners.map((p) => p.clinic.id).toSet();
+    for (final clinic in [...partnerClinics, ...nearbyClinics]) {
+      if (clinic.isEligibleForTopCarousel && advertised.add(clinic.id)) {
+        partners.add(HomePartner(clinic: clinic));
+      }
+    }
+    // Stable priority: preserve server display order within each tier.
+    return [
+      ...partners.where((p) => p.isVip),
+      ...partners.where((p) => !p.isVip),
+    ];
+  }
 
   const HomeFeedModel({
     required this.featuredAds,
     required this.categories,
     required this.activeOffers,
     required this.nearbyClinics,
+    this.partnerClinics = const [],
+    this.partnerDirectoryUnavailable = false,
   });
 
   factory HomeFeedModel.fromJson(Map<String, dynamic> json) {

@@ -79,11 +79,7 @@ class PagedCollection<T> extends ChangeNotifier {
     if (sameQuery && isLoaded && !force) return Future.value();
     _debounce?.cancel();
     if (!sameQuery) {
-      isLoaded = false;
-      _page = 0;
-      total = null;
-    }
-    if (!sameQuery) {
+      items.clear();
       isLoaded = false;
       _page = 0;
       total = null;
@@ -128,6 +124,11 @@ class PagedCollection<T> extends ChangeNotifier {
     ++_requestId;
     _firstFlight = null;
     _nextFlight = null;
+    if (!mapEquals(query, _query)) {
+      items.clear();
+      total = null;
+      _page = 0;
+    }
     _query = Map.of(query);
     isLoading = true;
     isLoadingMore = false;
@@ -139,7 +140,6 @@ class PagedCollection<T> extends ChangeNotifier {
 
   Future<void> loadMore() {
     if (_disposed || isLoading || !hasMore) return Future.value();
-    if (!isLoaded) return refresh();
     if (!isLoaded) return refresh();
     if (_nextFlight != null) return _nextFlight!;
     isLoadingMore = true;

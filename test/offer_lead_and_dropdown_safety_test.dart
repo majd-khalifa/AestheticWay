@@ -1,3 +1,6 @@
+import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
+import 'package:aesthetic_way/features/offers/models/offer_model.dart';
+import 'support/patient_fixtures.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/features/practitioners/data/practitioners_repository.dart';
@@ -26,7 +29,7 @@ void main() {
 
   group('Dropdown Safety & Offer Lead Tests', () {
     final mockData = MockDataService();
-    final testClinic = mockData.clinics.first;
+    final testClinic = mockData.clinics.first.copyWith(id: patientClinicId);
 
     testWidgets(
       'AppointmentRequestScreen handles arbitrary unlisted service name without DropdownButton crash',
@@ -88,7 +91,21 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.darkTheme,
-            home: OffersScreen(initialOffers: MockDataService().offers),
+            home: OffersScreen(
+              initialOffers: [
+                MockDataService().offers.first.copyWith(
+                  id: patientOfferId,
+                  clinicId: patientClinicId,
+                ),
+              ],
+              clinicsRepository: FixtureClinicsRepository(testClinic),
+              repository: _FixtureOffersRepository([
+                MockDataService().offers.first.copyWith(
+                  id: patientOfferId,
+                  clinicId: patientClinicId,
+                ),
+              ]),
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -96,7 +113,7 @@ void main() {
         expect(find.byType(OffersScreen), findsOneWidget);
 
         // Find first "طلب بالعرض" button
-        final claimButtons = find.text('طلب بالعرض');
+        final claimButtons = find.text(LocaleService().tr('offer_claim'));
         expect(claimButtons, findsWidgets);
 
         await tester.tap(claimButtons.first);
@@ -119,6 +136,7 @@ void main() {
             home: AppointmentRequestScreen(
               clinic: testClinic,
               selectedOfferTitle: 'عرض الهيدرافاشيال الفاخر',
+              leadsRepository: FixtureLeadsRepository(),
             ),
           ),
         );
@@ -320,4 +338,16 @@ class FixturePractitionersRepository extends PractitionersRepository {
     raw.whereType<Map<String, dynamic>>().map(PractitionerModel.fromJson),
     hasMore: false,
   );
+}
+
+class _FixtureOffersRepository extends OffersRepository {
+  _FixtureOffersRepository(this.items);
+  final List<OfferModel> items;
+  @override
+  Future<List<OfferModel>> getOffers({
+    String? clinicId,
+    String? search,
+    int page = 1,
+    int pageSize = 20,
+  }) async => PageItems(items, hasMore: false, total: items.length);
 }

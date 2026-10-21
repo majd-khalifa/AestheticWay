@@ -28,7 +28,7 @@ abstract class AppColors {
   // ==========================================
   // LIGHT THEME TOKENS (Soft Light Luxury)
   // ==========================================
-  static const Color lightBackground = Color(0xFFF4F6FA); // Soft Light Canvas
+  static const Color lightBackground = Color(0xFFF7F5F1); // Soft Light Canvas
   static const Color lightCardSurface = Color(0xFFFFFFFF); // Pure White Card
   static const Color lightCardSurfaceHover = Color(0xFFEEF2F6);
   static const Color lightCardSurfaceSubtle = Color(0xFFF8FAFC);

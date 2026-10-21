@@ -1,4 +1,4 @@
-import 'dart:math';
+import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -8,7 +8,6 @@ import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
-import 'package:aesthetic_way/core/widgets/app_snackbar.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -21,20 +20,20 @@ import 'package:aesthetic_way/features/appointment_lead/presentation/screens/app
 /// Strictly omits practitioner selector, branch selector, and appointment date/time-window selectors.
 class ProductInquiryBottomSheet extends StatefulWidget {
   final ProductModel product;
-  final ClinicModel clinic;
+  final ClinicModel? clinic;
   final LeadsRepository? leadsRepository;
 
   const ProductInquiryBottomSheet({
     super.key,
     required this.product,
-    required this.clinic,
+    this.clinic,
     this.leadsRepository,
   });
 
   static Future<void> show(
     BuildContext context, {
     required ProductModel product,
-    required ClinicModel clinic,
+    ClinicModel? clinic,
     LeadsRepository? leadsRepository,
   }) {
     return showModalBottomSheet(
@@ -61,9 +60,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
   final TextEditingController _notesController = TextEditingController();
   late final LeadsRepository _leadsRepository;
 
-  bool _consentAccepted = true;
+  bool _consentAccepted = false;
   bool _isSubmitting = false;
-  String? _rateLimitError;
+  String? _submissionError;
 
   @override
   void initState() {
@@ -74,11 +73,9 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
       text: auth.isLoggedIn ? auth.userName : '',
     );
 
-    String initialPhone = '';
-    if (auth.isLoggedIn && auth.userPhone.isNotEmpty) {
-      initialPhone = LuxuryPhoneInputField.extractLocalDigits(auth.userPhone);
-    }
-    _phoneController = TextEditingController(text: initialPhone);
+    _phoneController = TextEditingController(
+      text: auth.isLoggedIn ? auth.userPhone : '',
+    );
   }
 
   @override
@@ -90,23 +87,27 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
   }
 
   Future<void> _submitProductInquiry() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting ||
+        !isEntityUuid(widget.product.id) ||
+        !AuthState().isLoggedIn ||
+        !AuthState().isPatient) {
+      return;
+    }
+    final sessionEpoch = AuthState().sessionEpoch;
     final loc = LocaleService();
     if (!_formKey.currentState!.validate()) return;
     if (!_consentAccepted) {
-      showAppSnackBar(
-        context,
-        loc.isArabic
-            ? 'يرجى الموافقة على مشاركة البيانات مع العيادة لإرسال الاستفسار'
-            : 'Please accept consent to share your contact details with the clinic',
-        type: AppSnackBarType.error,
+      setState(
+        () => _submissionError = loc.isArabic
+            ? 'يرجى الموافقة على مشاركة البيانات لإرسال الاستفسار'
+            : 'Please accept consent to share your contact details for this inquiry',
       );
       return;
     }
 
     setState(() {
       _isSubmitting = true;
-      _rateLimitError = null;
+      _submissionError = null;
     });
 
     final rawPhone = _phoneController.text.trim();
@@ -117,10 +118,10 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
         : widget.product.nameEn;
     final clinicId = widget.product.clinicId.trim().isNotEmpty
         ? widget.product.clinicId.trim()
-        : widget.clinic.id;
+        : widget.clinic?.id ?? '';
 
     final payload = <String, dynamic>{
-      'clinic': clinicId,
+      if (isEntityUuid(clinicId)) 'clinic': clinicId,
       'product': widget.product.id,
       'lead_type': 'product_inquiry',
       'service_name': productName,
@@ -133,20 +134,24 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
 
     try {
       final result = await _leadsRepository.createLead(payload);
-      if (!mounted) return;
+      if (!result.success || result.leadReference.isEmpty) {
+        throw const ApiException(
+          message: 'The server did not confirm this inquiry.',
+        );
+      }
+      if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
 
       setState(() {
         _isSubmitting = false;
       });
 
       final request = AppointmentRequestModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        referenceCode: result.leadReference.isNotEmpty
-            ? result.leadReference
-            : '#REQ-${10000 + Random().nextInt(89999)}',
+        id: result.leadReference,
+        referenceCode: result.leadReference,
         clinicId: clinicId,
-        clinicNameAr: widget.clinic.nameAr,
-        clinicNameEn: widget.clinic.nameEn,
+        clinicNameAr: (widget.clinic?.nameAr ?? widget.product.clinicNameAr),
+        clinicNameEn:
+            (widget.clinic?.nameEn ?? widget.product.clinicNameEn ?? ''),
         branchNameAr: '',
         branchNameEn: '',
         serviceNameAr: widget.product.nameAr,
@@ -171,7 +176,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
         ),
       );
     } on ApiException catch (e) {
-      if (!mounted) return;
+      if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
       final is429 =
           e.statusCode == 429 ||
           e.message.toLowerCase().contains('already submitted') ||
@@ -200,24 +205,16 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
 
       setState(() {
         _isSubmitting = false;
-        if (is429) {
-          _rateLimitError = friendlyMessage;
-        }
+        _submissionError = friendlyMessage;
       });
-
-      showAppSnackBar(context, friendlyMessage, type: AppSnackBarType.error);
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
       setState(() {
         _isSubmitting = false;
-      });
-      showAppSnackBar(
-        context,
-        loc.isArabic
+        _submissionError = loc.isArabic
             ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى'
-            : 'Failed to send inquiry. Please try again.',
-        type: AppSnackBarType.error,
-      );
+            : 'Failed to send inquiry. Please try again.';
+      });
     }
   }
 
@@ -227,8 +224,8 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
     final isDark = AppColors.isDark(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final clinicName = loc.isArabic
-        ? widget.clinic.nameAr
-        : widget.clinic.nameEn;
+        ? (widget.clinic?.nameAr ?? widget.product.clinicNameAr)
+        : (widget.clinic?.nameEn ?? widget.product.clinicNameEn ?? '');
 
     return Directionality(
       textDirection: loc.textDirection,
@@ -318,39 +315,29 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.storefront_rounded,
-                                    size: 13,
-                                    color: AppColors.accentChampagne,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      clinicName,
-                                      style: AppTypography.caption.copyWith(
-                                        color: AppColors.subtext(context),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                              if (clinicName.isNotEmpty)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.business_outlined,
+                                      size: 13,
+                                      color: AppColors.accentChampagne,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              if (widget.product.price > 0) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${widget.product.price.toInt()} ${loc.tr("currency_aed")}',
-                                  style: TextStyle(
-                                    color: AppColors.goldText(context),
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13,
-                                  ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        clinicName,
+                                        style: AppTypography.caption.copyWith(
+                                          color: AppColors.subtext(context),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
                             ],
                           ),
                         ),
@@ -359,7 +346,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                   ),
                   const SizedBox(height: 16),
 
-                  if (_rateLimitError != null) ...[
+                  if (_submissionError != null) ...[
                     Container(
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(bottom: 14),
@@ -380,7 +367,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              _rateLimitError!,
+                              _submissionError!,
                               style: TextStyle(
                                 color: AppColors.text(context),
                                 fontSize: 12.5,
@@ -518,8 +505,8 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                           ),
                           child: Text(
                             loc.isArabic
-                                ? 'أوافق على مشاركة اسمي ورقم هاتفي مع العيادة للتواصل معي بخصوص هذا المنتج'
-                                : 'I agree to share my name and phone number with the clinic to contact me regarding this product',
+                                ? 'أوافق على مشاركة اسمي ورقم هاتفي لمتابعة الاستفسار عن هذا المنتج'
+                                : 'I agree to share my name and phone number for follow-up about this product',
                             style: AppTypography.caption.copyWith(
                               color: AppColors.subtext(context),
                               fontSize: 11.5,

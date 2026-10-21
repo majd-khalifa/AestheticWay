@@ -32,21 +32,28 @@ class SupportInfoModel {
   }
 
   factory SupportInfoModel.fromJson(Map<String, dynamic> json) {
-    final phone = json['phone']?.toString().trim() ?? ContactLauncher.platformSupportPhone;
+    final phone =
+        json['phone']?.toString().trim() ??
+        ContactLauncher.platformSupportPhone;
     final whatsapp = json['whatsapp']?.toString().trim() ?? phone;
     return SupportInfoModel(
       phone: phone.isNotEmpty ? phone : ContactLauncher.platformSupportPhone,
-      phoneDisplay: (json['phone_display']?.toString().trim().isNotEmpty ?? false)
+      phoneDisplay:
+          (json['phone_display']?.toString().trim().isNotEmpty ?? false)
           ? json['phone_display']!.toString().trim()
           : ContactLauncher.platformSupportPhoneDisplay,
-      whatsapp: whatsapp.isNotEmpty ? whatsapp : ContactLauncher.platformSupportPhone,
+      whatsapp: whatsapp.isNotEmpty
+          ? whatsapp
+          : ContactLauncher.platformSupportPhone,
       email: json['email']?.toString().trim().isNotEmpty == true
           ? json['email']!.toString().trim()
           : 'support@aestheticway.ae',
-      workingHoursAr: json['working_hours_ar']?.toString().trim().isNotEmpty == true
+      workingHoursAr:
+          json['working_hours_ar']?.toString().trim().isNotEmpty == true
           ? json['working_hours_ar']!.toString().trim()
           : 'يومياً: 9:00 ص - 9:00 م',
-      workingHoursEn: json['working_hours_en']?.toString().trim().isNotEmpty == true
+      workingHoursEn:
+          json['working_hours_en']?.toString().trim().isNotEmpty == true
           ? json['working_hours_en']!.toString().trim()
           : 'Daily: 9:00 AM - 9:00 PM',
     );

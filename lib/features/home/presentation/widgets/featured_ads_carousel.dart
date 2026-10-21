@@ -1,11 +1,14 @@
+import '../../data/models/home_feed_model.dart';
 import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:aesthetic_way/core/widgets/viewport_activity.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
-import 'package:aesthetic_way/core/widgets/rating_chip.dart';
+import '../../../../core/widgets/content_sized_page_view.dart';
+import '../../../../core/widgets/patient_media_banner.dart';
+import '../../../clinics/presentation/widgets/google_clinic_rating.dart';
+import '../../../../core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -13,6 +16,7 @@ import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 /// Top Featured / Sponsored Clinics Auto Carousel (Luxury B2B Subscription Priority)
 class FeaturedAdsCarousel extends StatefulWidget {
   final List<ClinicModel> ads;
+  final List<FeaturedAdApiModel?>? placements;
   final ValueChanged<ClinicModel> onClinicTap;
   final ValueChanged<ClinicModel> onRequestAppointmentTap;
   final ValueChanged<ClinicModel> onContactTap;
@@ -20,6 +24,7 @@ class FeaturedAdsCarousel extends StatefulWidget {
   const FeaturedAdsCarousel({
     super.key,
     required this.ads,
+    this.placements,
     required this.onClinicTap,
     required this.onRequestAppointmentTap,
     required this.onContactTap,
@@ -41,6 +46,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
       const AlwaysStoppedAnimation<double>(0);
   bool _tabActive = true;
   bool _foreground = true;
+  bool _reduceMotion = false;
 
   @override
   void initState() {
@@ -55,6 +61,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
     _tabActive =
         TabActivity.isActive(context) &&
         (ModalRoute.isCurrentOf(context) ?? true);
@@ -69,7 +76,11 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
 
   void _startAutoScroll() {
     _autoScrollTimer?.cancel();
-    if (widget.ads.length <= 1 || !_tabActive || !_foreground || !_inViewport) {
+    if (widget.ads.length <= 1 ||
+        !_tabActive ||
+        !_foreground ||
+        !_inViewport ||
+        _reduceMotion) {
       return;
     }
 
@@ -115,7 +126,6 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final isDark = AppColors.isDark(context);
 
     if (widget.ads.isEmpty) {
       return const SizedBox.shrink();
@@ -130,71 +140,27 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: AppColors.accentChampagne.withValues(
-                          alpha: isDark ? 0.12 : 0.18,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.accentChampagne.withValues(
-                            alpha: 0.4,
-                          ),
-                          width: 0.7,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.workspace_premium_rounded,
-                        size: 15,
-                        color: AppColors.accentChampagne,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      loc.tr('featured_partners'),
-                      style: AppTypography.cardTitle.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? AppColors.silverPrimary
-                            : AppColors.lightTextPrimary,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-                // Slide indicator pill
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.cardSurfaceHover
-                        : AppColors.lightCardSurfaceHover,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.border(context),
-                      width: 0.7,
-                    ),
-                  ),
+                Expanded(
                   child: Text(
-                    '${_currentIndex + 1} / ${widget.ads.length}',
-                    style: AppTypography.caption.copyWith(
-                      color: isDark
-                          ? AppColors.silverSecondary
-                          : AppColors.lightTextSecondary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                    loc.tr('featured_partners'),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontFamily: loc.isArabic ? null : 'serif',
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.text(context),
                     ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${_currentIndex + 1} / ${widget.ads.length}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.subtext(context),
                   ),
                 ),
               ],
@@ -211,66 +177,57 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
               }
               return false;
             },
-            child: SizedBox(
-              height: 268,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: widget.ads.length,
-                onPageChanged: (idx) {
-                  setState(() {
-                    _currentIndex = idx;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final clinic = widget.ads[index];
-                  return _FeaturedAdCard(
-                    clinic: clinic,
-                    loc: loc,
-                    sheenAnimation: _sheenController,
-                    isActive: _currentIndex == index,
-                    onTap: () => widget.onClinicTap(clinic),
-                    onRequestTap: () => widget.onRequestAppointmentTap(clinic),
-                    onContactTap: () => widget.onContactTap(clinic),
-                  );
-                },
+            child: ContentSizedPageView(
+              controller: _pageController,
+              itemCount: widget.ads.length,
+              onPageChanged: (index) => setState(() => _currentIndex = index),
+              itemBuilder: (context, index) => _FeaturedAdCard(
+                clinic: widget.ads[index],
+                placement: widget.placements?[index],
+                loc: loc,
+                sheenAnimation: _sheenController,
+                isActive: _currentIndex == index,
+                onTap: () => widget.onClinicTap(widget.ads[index]),
+                onRequestTap: () =>
+                    widget.onRequestAppointmentTap(widget.ads[index]),
+                onContactTap: () => widget.onContactTap(widget.ads[index]),
               ),
             ),
           ),
           const SizedBox(height: 10),
 
-          // Animated Expanding Dots Indicator
           if (widget.ads.length > 1)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(widget.ads.length, (index) {
-                final isSelected = _currentIndex == index;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 260),
-                  curve: Curves.easeOutCubic,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  width: isSelected ? 24 : 6,
-                  height: 4.5,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: isSelected
-                        ? AppColors.accentChampagne
-                        : (isDark
-                              ? AppColors.silverBorder.withValues(alpha: 0.25)
-                              : AppColors.lightBorder),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.accentChampagne.withValues(
-                                alpha: 0.45,
-                              ),
-                              blurRadius: 8,
-                              spreadRadius: 1,
-                            ),
-                          ]
-                        : null,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(
+                  widget.ads.length,
+                  (index) => Semantics(
+                    selected: _currentIndex == index,
+                    label: loc.isArabic
+                        ? 'إعلان ${index + 1}'
+                        : 'Partner placement ${index + 1}',
+                    child: TextButton(
+                      onPressed: () => _pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      ),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        width: _currentIndex == index ? 24 : 6,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: _currentIndex == index
+                              ? AppColors.goldText(context)
+                              : AppColors.border(context),
+                        ),
+                      ),
+                    ),
                   ),
-                );
-              }),
+                ),
+              ),
             ),
         ],
       ),
@@ -280,6 +237,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
 
 class _FeaturedAdCard extends StatefulWidget {
   final ClinicModel clinic;
+  final FeaturedAdApiModel? placement;
   final LocaleService loc;
   final Animation<double> sheenAnimation;
   final bool isActive;
@@ -289,6 +247,7 @@ class _FeaturedAdCard extends StatefulWidget {
 
   const _FeaturedAdCard({
     required this.clinic,
+    this.placement,
     required this.loc,
     required this.sheenAnimation,
     required this.isActive,
@@ -302,353 +261,154 @@ class _FeaturedAdCard extends StatefulWidget {
 }
 
 class _FeaturedAdCardState extends State<_FeaturedAdCard> {
-  bool _isPressed = false;
-
+  String get _image => widget.placement?.image.isNotEmpty == true
+      ? widget.placement!.image
+      : widget.clinic.coverImageUrl;
+  String? get _video => widget.placement != null
+      ? widget.placement!.videoUrl
+      : widget.clinic.subscriptionTier == SubscriptionTier.vipPlatinum
+      ? widget.clinic.videoUrl
+      : null;
   @override
   Widget build(BuildContext context) {
-    final clinic = widget.clinic;
+    final vip = widget.placement != null
+        ? widget.placement!.subscriptionTier.trim().toLowerCase() == 'vip'
+        : widget.clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
     final loc = widget.loc;
-    final isDark = AppColors.isDark(context);
-    final isVip = clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedScale(
-        scale: _isPressed ? 0.975 : 1.0,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOutCubic,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.cardSurface : AppColors.lightCardSurface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isVip
-                  ? AppColors.accentChampagne.withValues(
-                      alpha: isDark ? 0.6 : 0.8,
-                    )
-                  : (isDark
-                        ? AppColors.silverBorder.withValues(alpha: 0.22)
-                        : AppColors.lightBorder),
-              width: isVip ? 1.0 : 0.8,
-            ),
-            boxShadow: isDark
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: _isPressed ? 0.28 : 0.48,
-                      ),
-                      blurRadius: _isPressed ? 10 : 22,
-                      offset: Offset(0, _isPressed ? 3 : 8),
-                      spreadRadius: _isPressed ? -3 : -1,
-                    ),
-                    if (isVip)
-                      BoxShadow(
-                        color: AppColors.accentChampagne.withValues(
-                          alpha: 0.16,
-                        ),
-                        blurRadius: 20,
-                        spreadRadius: 1,
-                      ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: const Color(
-                        0xFF0F172A,
-                      ).withValues(alpha: _isPressed ? 0.05 : 0.09),
-                      blurRadius: _isPressed ? 8 : 18,
-                      offset: Offset(0, _isPressed ? 2 : 6),
-                      spreadRadius: _isPressed ? -2 : 0,
-                    ),
-                    if (isVip)
-                      BoxShadow(
-                        color: AppColors.accentChampagne.withValues(alpha: 0.2),
-                        blurRadius: 16,
-                        spreadRadius: 1,
-                      ),
-                  ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(17.2),
-            child: Stack(
-              children: [
-                Column(
+    final badge = vip ? 'VIP' : (loc.isArabic ? 'مميز' : 'FEATURED');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 0, 6, 8),
+      child: LuxuryCard(
+        padding: EdgeInsets.zero,
+        isVip: true,
+        borderRadius: 24,
+        gradient: AppColors.isDark(context)
+            ? AppColors.vipCardGradient
+            : AppColors.vipCardGradientLight,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FeaturedAdSlideMedia(
+                imageUrl: _image,
+                videoUrl: _video,
+                fallbackLogoUrl: widget.clinic.logoUrl,
+                isActive: widget.isActive,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Top Cinematic Image / Short Video Area (up to 15s muted) with Minimal Info & Badges
-                    Expanded(
-                      flex: 14,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          FeaturedAdSlideMedia(
-                            imageUrl: clinic.coverImageUrl,
-                            fallbackLogoUrl: clinic.logoUrl,
-                            videoUrl: clinic.hasVideoAd
-                                ? clinic.videoUrl
-                                : null,
-                            isActive: widget.isActive,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
                           ),
-                          // Deep 3-Stop Gradient for Maximum Typography Readability
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.black.withValues(alpha: 0.5),
-                                  Colors.transparent,
-                                  const Color(
-                                    0xFF050811,
-                                  ).withValues(alpha: 0.96),
-                                ],
-                                stops: const [0.0, 0.38, 1.0],
-                              ),
-                            ),
+                          decoration: BoxDecoration(
+                            color: AppColors.goldText(
+                              context,
+                            ).withValues(alpha: .1),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          // Top Rating Badge on left/right according to RTL
-                          Positioned(
-                            top: 10,
-                            left: 10,
-                            child: RatingChip(
-                              rating: clinic.rating,
-                              reviewCount: clinic.reviewCount,
-                              isCompact: true,
-                              showGoogleSource: true,
+                          child: Text(
+                            badge,
+                            style: TextStyle(
+                              color: AppColors.goldText(context),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
                             ),
-                          ),
-                          // Muted Video Badge when clinic slide has a short video ad
-                          if (clinic.hasVideoAd)
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: Container(
-                                key: const Key('featured_ad_video_badge'),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.65),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.accentChampagne.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    width: 0.7,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.videocam_outlined,
-                                      size: 12,
-                                      color: AppColors.accentChampagne,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(
-                                      Icons.volume_off_rounded,
-                                      size: 11,
-                                      color: Colors.white70,
-                                    ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      loc.isArabic ? 'فيديو 15ث' : '15s Video',
-                                      style: AppTypography.badge.copyWith(
-                                        color: Colors.white,
-                                        fontSize: 9.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          // Bottom Meta inside Image
-                          Positioned(
-                            bottom: 8,
-                            right: 14,
-                            left: 14,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                                  style: AppTypography.heroTitle.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16.5,
-                                    letterSpacing: 0.1,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if ((loc.isArabic
-                                        ? clinic.areaAr
-                                        : clinic.areaEn)
-                                    .trim()
-                                    .isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.location_on_outlined,
-                                        size: 12,
-                                        color: AppColors.accentChampagne,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          loc.isArabic
-                                              ? clinic.areaAr
-                                              : clinic.areaEn,
-                                          style: AppTypography.caption.copyWith(
-                                            color: Colors.white70,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Bottom Action Bar: Telegram-style Single Primary + Secondary Contact Button
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.cardSurfaceSubtle
-                            : AppColors.lightCardSurfaceSubtle,
-                        border: Border(
-                          top: BorderSide(
-                            color: AppColors.border(context),
-                            width: 0.75,
                           ),
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          // Secondary Outline Contact Button
-                          IconButton(
-                            onPressed: widget.onContactTap,
-                            icon: Icon(
-                              Icons.headset_mic_outlined,
-                              size: 18,
-                              color: isDark
-                                  ? AppColors.silverSecondary
-                                  : AppColors.lightTextPrimary,
-                            ),
-                            tooltip: loc.tr('contact_btn'),
-                            style: IconButton.styleFrom(
-                              backgroundColor: isDark
-                                  ? AppColors.cardSurfaceHover
-                                  : AppColors.lightCardSurfaceHover,
-                              padding: const EdgeInsets.all(8),
-                              visualDensity: VisualDensity.compact,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(
-                                  color: AppColors.border(context),
-                                  width: 0.8,
-                                ),
-                              ),
+                        if (_video?.isNotEmpty == true)
+                          Text(
+                            loc.isArabic ? 'فيديو 15 ثانية' : '15s Video',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.subtext(context),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          // Primary Solid Telegram-style Button
-                          Expanded(
-                            child: SizedBox(
-                              height: 40,
-                              child: ElevatedButton.icon(
-                                onPressed: widget.onRequestTap,
-                                icon: Icon(
-                                  Icons.calendar_month_outlined,
-                                  size: 15,
-                                  color: isDark
-                                      ? AppColors.backgroundDeep
-                                      : Colors.white,
-                                ),
-                                label: Text(
-                                  loc.tr('request_appointment'),
-                                  style: AppTypography.button.copyWith(
-                                    color: isDark
-                                        ? AppColors.backgroundDeep
-                                        : Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isDark
-                                      ? AppColors.silverPrimary
-                                      : AppColors.lightTextPrimary,
-                                  elevation: 2,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                        Text(
+                          widget.placement != null
+                              ? (loc.isArabic
+                                    ? 'إعلان مدفوع'
+                                    : 'Sponsored placement')
+                              : (loc.isArabic
+                                    ? 'عيادة شريكة'
+                                    : 'Partner clinic'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.subtext(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LuxuryImage(
+                          imageUrl: widget.clinic.logoUrl,
+                          width: 54,
+                          height: 54,
+                          fit: BoxFit.contain,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                loc.isArabic
+                                    ? widget.clinic.nameAr
+                                    : widget.clinic.nameEn,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  height: 1.3,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.text(context),
                                 ),
                               ),
-                            ),
+                              if (widget.clinic.city.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    widget.clinic.city,
+                                    style: TextStyle(
+                                      color: AppColors.subtext(context),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              GoogleClinicRating(clinic: widget.clinic),
+                            ],
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: widget.onRequestTap,
+                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                      label: Text(loc.tr('request_consultation')),
+                    ),
+                    TextButton(
+                      onPressed: widget.onTap,
+                      child: Text(
+                        loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
                       ),
                     ),
                   ],
                 ),
-
-                // Subtle Luxury Sheen sweeping over active card
-                if (widget.isActive)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: AnimatedBuilder(
-                        animation: widget.sheenAnimation,
-                        builder: (context, _) {
-                          final value = widget.sheenAnimation.value;
-                          return FractionallySizedBox(
-                            alignment: Alignment(-2.0 + (value * 4.0), 0.0),
-                            widthFactor: 0.4,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.transparent,
-                                    (isVip
-                                            ? AppColors.accentChampagne
-                                            : AppColors.silverPrimary)
-                                        .withValues(alpha: 0.07),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -656,10 +416,6 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
   }
 }
 
-/// Media renderer for VIP / Featured Ad slides:
-/// - If [videoUrl] is null or empty: renders [LuxuryImage] (existing behavior).
-/// - If [videoUrl] is present: initializes muted [VideoPlayerController], loops within 15 seconds,
-///   and gracefully falls back to [LuxuryImage] (cover image or luxury placeholder) if video initialization or playback fails.
 class FeaturedAdSlideMedia extends StatefulWidget {
   static const Duration maxVideoDuration = Duration(seconds: 15);
 
@@ -808,23 +564,20 @@ class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
 
   @override
   Widget build(BuildContext context) {
-    Widget media = LuxuryImage(
-      imageUrl: widget.imageUrl,
-      fallbackLogoUrl: widget.fallbackLogoUrl,
-      fit: BoxFit.cover,
-      placeholderIcon: Icons.local_hospital_outlined,
-      iconSize: 42,
-    );
+    Widget media = PatientMediaBanner(source: widget.imageUrl, height: 185);
     if (_isVideoInitialized && !_hasVideoError && _controller != null) {
       final size = _controller!.value.size;
-      media = ClipRect(
-        child: FittedBox(
-          fit: BoxFit.cover,
-          clipBehavior: Clip.hardEdge,
-          child: SizedBox(
-            width: size.width > 0 ? size.width : 16,
-            height: size.height > 0 ? size.height : 9,
-            child: VideoPlayer(_controller!),
+      media = SizedBox(
+        height: 185,
+        child: ClipRect(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox(
+              width: size.width > 0 ? size.width : 16,
+              height: size.height > 0 ? size.height : 9,
+              child: VideoPlayer(_controller!),
+            ),
           ),
         ),
       );

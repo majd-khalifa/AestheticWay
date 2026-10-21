@@ -27,9 +27,11 @@ class MockDataService extends ChangeNotifier {
   List<PractitionerModel> get practitioners => _practitioners;
   List<TreatmentModel> get treatments => _treatments;
   List<OfferModel> get offers => _offers;
-  List<ProductModel> get products => _products.where((p) => p.isPublishedByAdmin).toList();
+  List<ProductModel> get products =>
+      _products.where((p) => p.isPublishedByAdmin).toList();
   List<ProductModel> get allProductsForAdmin => _products;
-  List<ArticleModel> get articles => _articles.where((a) => a.isPublished && a.isApprovedByAdmin).toList();
+  List<ArticleModel> get articles =>
+      _articles.where((a) => a.isPublished && a.isApprovedByAdmin).toList();
   List<ArticleModel> get allArticlesForAdmin => _articles;
   List<AppointmentRequestModel> get appointmentRequests => _appointmentRequests;
 
@@ -39,22 +41,22 @@ class MockDataService extends ChangeNotifier {
 
   /// Filter Skin Experts (Nurses & Certified Dermal / Laser Specialists)
   List<PractitionerModel> get skinExperts => _practitioners.where((p) {
-        return p.type == PractitionerType.nurse ||
-            p.type == PractitionerType.licensedProfessional ||
-            p.specialtyAr.contains('بشرة') ||
-            p.specialtyAr.contains('ليزر') ||
-            p.specialtyEn.toLowerCase().contains('skin') ||
-            p.specialtyEn.toLowerCase().contains('laser');
-      }).toList();
+    return p.type == PractitionerType.nurse ||
+        p.type == PractitionerType.licensedProfessional ||
+        p.specialtyAr.contains('بشرة') ||
+        p.specialtyAr.contains('ليزر') ||
+        p.specialtyEn.toLowerCase().contains('skin') ||
+        p.specialtyEn.toLowerCase().contains('laser');
+  }).toList();
 
   /// Filter Plastic Surgery Treatments
   List<TreatmentModel> get plasticSurgeryTreatments => _treatments.where((t) {
-        return t.categoryAr.contains('جراحة') ||
-            t.categoryEn.toLowerCase().contains('surgery') ||
-            t.nameAr.contains('شد') ||
-            t.nameAr.contains('أنف') ||
-            t.nameAr.contains('شفط');
-      }).toList();
+    return t.categoryAr.contains('جراحة') ||
+        t.categoryEn.toLowerCase().contains('surgery') ||
+        t.nameAr.contains('شد') ||
+        t.nameAr.contains('أنف') ||
+        t.nameAr.contains('شفط');
+  }).toList();
 
   /// Top Carousel Ads sorted strictly by B2B Subscription Priority:
   /// VIP Platinum Partner first (slots 1 & 2), followed by Featured Partner (slots 3+)
@@ -253,7 +255,12 @@ class MockDataService extends ChangeNotifier {
           ),
         ],
         practitionerIds: ['dr-reem', 'nurse-nour', 'nurse-layla'],
-        treatmentIds: ['botox-allergan', 'hydrafacial-royal', 'profhilo-lift', 'morpehus8-glow'],
+        treatmentIds: [
+          'botox-allergan',
+          'hydrafacial-royal',
+          'profhilo-lift',
+          'morpehus8-glow',
+        ],
         featuredOffers: ['offer-glow-summer'],
       ),
       ClinicModel(
@@ -307,7 +314,12 @@ class MockDataService extends ChangeNotifier {
           ),
         ],
         practitionerIds: ['dr-khalil', 'spec-dina', 'spec-sara'],
-        treatmentIds: ['rhinoplasty-sculpt', 'blepharoplasty-lift', 'vaser-lipo', 'profhilo-lift'],
+        treatmentIds: [
+          'rhinoplasty-sculpt',
+          'blepharoplasty-lift',
+          'vaser-lipo',
+          'profhilo-lift',
+        ],
         featuredOffers: ['offer-botox-package'],
       ),
       ClinicModel(
@@ -360,7 +372,12 @@ class MockDataService extends ChangeNotifier {
           ),
         ],
         practitionerIds: ['dr-khalil', 'nurse-nour', 'spec-dina'],
-        treatmentIds: ['rhinoplasty-sculpt', 'vaser-lipo', 'facelift-mini', 'hydrafacial-royal'],
+        treatmentIds: [
+          'rhinoplasty-sculpt',
+          'vaser-lipo',
+          'facelift-mini',
+          'hydrafacial-royal',
+        ],
         featuredOffers: ['offer-glow-summer'],
       ),
       ClinicModel(
@@ -1189,8 +1206,10 @@ class MockDataService extends ChangeNotifier {
     _articles = [
       ArticleModel(
         id: 'art-botox-vs-filler',
-        titleAr: 'الفروقات الطبية الدقيقة بين البوتوكس والفيلر: كيف تختارين الإجراء الأنسب لملامحك؟',
-        titleEn: 'Botox vs Dermal Fillers: Clinical Differences & Choosing the Right Treatment for You',
+        titleAr:
+            'الفروقات الطبية الدقيقة بين البوتوكس والفيلر: كيف تختارين الإجراء الأنسب لملامحك؟',
+        titleEn:
+            'Botox vs Dermal Fillers: Clinical Differences & Choosing the Right Treatment for You',
         coverImageUrl:
             'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
         summaryAr:
@@ -1225,7 +1244,8 @@ Harmonious integration of both modalities tailored to your facial anatomy yields
         authorDoctorNameAr: 'د. ريم الخالد',
         authorDoctorNameEn: 'Dr. Reem Al Khaled',
         authorDoctorSpecialtyAr: 'استشاري أمراض جلدية وطب تجميلي',
-        authorDoctorSpecialtyEn: 'Consultant Dermatologist & Aesthetic Medicine',
+        authorDoctorSpecialtyEn:
+            'Consultant Dermatologist & Aesthetic Medicine',
         authorDoctorAvatar:
             'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80',
         clinicId: 'kaya-jumeirah',
@@ -1237,8 +1257,10 @@ Harmonious integration of both modalities tailored to your facial anatomy yields
       ),
       ArticleModel(
         id: 'art-laser-care',
-        titleAr: 'بروتوكول العناية بالبشرة بعد جلسات الليزر: نصائح لتجنب التصبغات وتسريع التعافي',
-        titleEn: 'Post-Laser Clinical Skincare Protocol: Preventing Hyperpigmentation & Optimizing Healing',
+        titleAr:
+            'بروتوكول العناية بالبشرة بعد جلسات الليزر: نصائح لتجنب التصبغات وتسريع التعافي',
+        titleEn:
+            'Post-Laser Clinical Skincare Protocol: Preventing Hyperpigmentation & Optimizing Healing',
         coverImageUrl:
             'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
         summaryAr:
@@ -1285,8 +1307,10 @@ Avoid AHA/BHA and retinoids for 5 to 7 days post-treatment.
       ),
       ArticleModel(
         id: 'art-skin-boosters',
-        titleAr: 'إبر النضارة والبروفايلو: الثورة الجديدة لترطيب الجلد العميق بدون زيادة في الحجم',
-        titleEn: 'Profhilo & Skin Boosters: The New Era of Deep Hydration Without Unnatural Volume',
+        titleAr:
+            'إبر النضارة والبروفايلو: الثورة الجديدة لترطيب الجلد العميق بدون زيادة في الحجم',
+        titleEn:
+            'Profhilo & Skin Boosters: The New Era of Deep Hydration Without Unnatural Volume',
         coverImageUrl:
             'https://images.unsplash.com/photo-1512290900672-1f02e604ec22?auto=format&fit=crop&w=800&q=80',
         summaryAr:
@@ -1311,7 +1335,8 @@ Profhilo bioremodeling represents an innovative approach for deep dermal hydrati
         authorDoctorNameAr: 'د. أحمد المنصوري',
         authorDoctorNameEn: 'Dr. Ahmed Al Mansoori',
         authorDoctorSpecialtyAr: 'استشاري طب تجميلي ونحت وجه',
-        authorDoctorSpecialtyEn: 'Consultant Aesthetic Medicine & Facial Sculpting',
+        authorDoctorSpecialtyEn:
+            'Consultant Aesthetic Medicine & Facial Sculpting',
         authorDoctorAvatar:
             'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80',
         clinicId: 'bateen-derma-abudhabi',
@@ -1323,8 +1348,10 @@ Profhilo bioremodeling represents an innovative approach for deep dermal hydrati
       ),
       ArticleModel(
         id: 'art-plastic-rhino',
-        titleAr: 'جراحة تجميل الأنف الحديثة: كيف تحققين نتائج طبيعية ومتناسقة مع ملامح الوجه؟',
-        titleEn: 'Modern Aesthetic Rhinoplasty: Achieving Natural Balance & Optimal Nasal Harmony',
+        titleAr:
+            'جراحة تجميل الأنف الحديثة: كيف تحققين نتائج طبيعية ومتناسقة مع ملامح الوجه؟',
+        titleEn:
+            'Modern Aesthetic Rhinoplasty: Achieving Natural Balance & Optimal Nasal Harmony',
         coverImageUrl:
             'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
         summaryAr:

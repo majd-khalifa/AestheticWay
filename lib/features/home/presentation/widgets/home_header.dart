@@ -50,7 +50,9 @@ class HomeHeader extends StatelessWidget {
                   loc.tr('select_city'),
                   style: AppTypography.cardTitle.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.silverPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -78,7 +80,8 @@ class HomeHeader extends StatelessWidget {
                   title: loc.isArabic
                       ? 'أبوظبي (البطين، الكورنيش، جزيرة المارية)'
                       : 'Abu Dhabi (Al Bateen, Corniche, Al Maryah)',
-                  isSelected: selectedCity == 'أبوظبي' || selectedCity == 'Abu Dhabi',
+                  isSelected:
+                      selectedCity == 'أبوظبي' || selectedCity == 'Abu Dhabi',
                   onTap: () {
                     onCityChanged('أبوظبي');
                     Navigator.pop(ctx);
@@ -103,44 +106,71 @@ class HomeHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 1. Official Brand Logo (assets/images/aesthetic_way_logo.png)
-          const AppBrandLogo.header(height: 46, width: 104),
-
-          // 2. City Selector (No heart/favorite icon on Home header per client spec)
-          GestureDetector(
-            onTap: () => _showCityPicker(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: AppColors.surface(context),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: AppColors.border(context),
-                  width: 0.8,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppBrandLogo.header(height: 46, width: 46),
+              const SizedBox(width: 8),
+              Text(
+                'AESTHETIC\nWAY',
+                style: TextStyle(
+                  color: AppColors.text(context),
+                  fontSize: 11,
+                  height: 1.5,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 14,
-                    color: isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary,
+            ],
+          ),
+          const SizedBox(width: 12),
+
+          // 2. City Selector (No heart/favorite icon on Home header per client spec)
+          Flexible(
+            child: GestureDetector(
+              onTap: () => _showCityPicker(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surface(context),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: AppColors.border(context),
+                    width: 0.8,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _displayCityLabel(loc),
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.text(context),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
                     ),
-                  ),
-                  const SizedBox(width: 2),
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 16,
-                    color: AppColors.mutedText(context),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        _displayCityLabel(loc),
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.text(context),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 16,
+                      color: AppColors.mutedText(context),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -172,29 +202,43 @@ class _CityOptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.15 : 0.12)
-              : (isDark ? AppColors.cardSurfaceHover : AppColors.lightCardSurfaceHover),
+              ? AppColors.accentChampagne.withValues(
+                  alpha: isDark ? 0.15 : 0.12,
+                )
+              : (isDark
+                    ? AppColors.cardSurfaceHover
+                    : AppColors.lightCardSurfaceHover),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.accentChampagne : AppColors.border(context),
+            color: isSelected
+                ? AppColors.accentChampagne
+                : AppColors.border(context),
             width: isSelected ? 1.2 : 0.8,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected
-                    ? AppColors.goldText(context)
-                    : (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 13,
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isSelected
+                      ? AppColors.goldText(context)
+                      : (isDark
+                            ? AppColors.silverPrimary
+                            : AppColors.lightTextPrimary),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 13,
+                ),
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: AppColors.accentChampagne, size: 18),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.accentChampagne,
+                size: 18,
+              ),
           ],
         ),
       ),

@@ -1,3 +1,7 @@
+import '../../../../core/widgets/patient_media_banner.dart';
+import '../../../../core/utils/entity_id.dart';
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../practitioners/data/practitioners_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -19,117 +23,45 @@ import 'package:aesthetic_way/features/appointment_lead/presentation/screens/app
 class ArticleDetailScreen extends StatelessWidget {
   final ArticleModel article;
   final ClinicsRepository? clinicsRepository;
+  final PractitionersRepository? practitionersRepository;
 
   const ArticleDetailScreen({
     super.key,
     required this.article,
     this.clinicsRepository,
+    this.practitionersRepository,
   });
 
-  PractitionerModel? _resolveAuthorPractitioner() {
-    if (article.authorDoctorNameEn.isNotEmpty ||
-        article.authorDoctorNameAr.isNotEmpty) {
-      return PractitionerModel(
-        id: article.authorDoctorId.isNotEmpty
-            ? article.authorDoctorId
-            : 'doc-id',
-        nameAr: article.authorDoctorNameAr.isNotEmpty
-            ? article.authorDoctorNameAr
-            : article.authorDoctorNameEn,
-        nameEn: article.authorDoctorNameEn.isNotEmpty
-            ? article.authorDoctorNameEn
-            : article.authorDoctorNameAr,
-        type: PractitionerType.doctor,
-        specialtyAr: article.authorDoctorSpecialtyAr.isNotEmpty
-            ? article.authorDoctorSpecialtyAr
-            : 'استشاري طب تجميلي',
-        specialtyEn: article.authorDoctorSpecialtyEn.isNotEmpty
-            ? article.authorDoctorSpecialtyEn
-            : 'Aesthetic Specialist',
-        classificationAr: article.authorDoctorSpecialtyAr,
-        classificationEn: article.authorDoctorSpecialtyEn,
-        licenseAuthority: '',
-        licenseNumber: '',
-        avatarUrl: article.authorDoctorAvatar,
-        yearsOfExperience: 10,
-        rating: 4.9,
-        reviewCount: 15,
-        clinicId: article.clinicId,
-        clinicNameAr: article.clinicNameAr,
-        clinicNameEn: article.clinicNameEn,
-        aboutAr: '',
-        languages: const ['العربية', 'English'],
-        procedures: const [],
-      );
+  Future<PractitionerModel?> _resolveAuthorPractitioner() async {
+    if (!isEntityUuid(article.authorDoctorId)) return null;
+    try {
+      final author =
+          await (practitionersRepository ?? PractitionersRepository())
+              .getPractitionerDetail(article.authorDoctorId);
+      return author.clinicId == article.clinicId ? author : null;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
-  Future<ClinicModel> _resolveClinic() async {
-    if (article.clinicId.trim().isNotEmpty) {
-      try {
-        final repo = clinicsRepository ?? ClinicsRepository();
-        return await repo.getClinicDetail(article.clinicId);
-      } catch (_) {}
-    }
-
-    if (article.clinicNameAr.isNotEmpty ||
-        (article.clinicNameEn?.isNotEmpty ?? false)) {
-      return ClinicModel(
-        id: article.clinicId.isNotEmpty ? article.clinicId : 'clinic-id',
-        nameAr: article.clinicNameAr.isNotEmpty
-            ? article.clinicNameAr
-            : (article.clinicNameEn ?? ''),
-        nameEn: article.clinicNameEn ?? article.clinicNameAr,
-        descriptionAr: '',
-        descriptionEn: '',
-        coverImageUrl: article.coverImageUrl,
-        galleryImages: const [],
-        logoUrl: article.coverImageUrl,
-        rating: 4.9,
-        reviewCount: 0,
-        subscriptionTier: SubscriptionTier.basic,
-        licenseAuthority: '',
-        licenseNumber: '',
-        city: 'Dubai',
-        areaAr: 'دبي',
-        areaEn: 'Dubai',
-        addressAr: 'دبي',
-        addressEn: 'Dubai',
-        distanceKm: 0,
-        mainPhone: '+971500000000',
-        receptionPhone: '+971500000000',
-        whatsapp: '+971500000000',
-        latitude: 25.2048,
-        longitude: 55.2708,
-        workingHoursAr: '10:00 ص - 9:00 م',
-        workingHoursEn: '10:00 AM - 9:00 PM',
-        branches: const [],
-        practitionerIds: const [],
-        treatmentIds: const [],
-        featuredOffers: const [],
+  Future<ClinicModel?> _resolveClinic() async {
+    if (!isEntityUuid(article.clinicId)) return null;
+    try {
+      return await (clinicsRepository ?? ClinicsRepository()).getClinicDetail(
+        article.clinicId,
       );
+    } catch (_) {
+      return null;
     }
-
-    return const ClinicModel(
-      id: 'clinic-id',
-      nameAr: 'العيادة الطبية المعتمدة',
-      nameEn: 'Accredited Medical Clinic',
-      descriptionAr: '',
-      descriptionEn: '',
-      coverImageUrl: '',
-      galleryImages: [],
-      logoUrl: '',
-      rating: 4.9,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      city: 'Dubai',
-      areaAr: 'دبي',
-      areaEn: 'Dubai',
-      addressAr: 'دبي',
-      addressEn: 'Dubai',
-    );
   }
+
+  void _unavailable(BuildContext context) => showAppSnackBar(
+    context,
+    LocaleService().isArabic
+        ? 'تعذر التحقق من الكاتب والعيادة. حاول مجدداً.'
+        : 'Author or clinic unavailable. Please try again.',
+    type: AppSnackBarType.error,
+  );
 
   Future<void> _handleBookLead(BuildContext context) async {
     final auth = await GuestAuthGuard.requireAuth(
@@ -142,8 +74,13 @@ class ArticleDetailScreen extends StatelessWidget {
     if (!auth || !context.mounted) return;
 
     final clinic = await _resolveClinic();
-    final doctor = _resolveAuthorPractitioner();
+    final doctor = await _resolveAuthorPractitioner();
 
+    if (!context.mounted) return;
+    if (clinic == null || doctor == null) {
+      _unavailable(context);
+      return;
+    }
     if (context.mounted) {
       Navigator.push(
         context,
@@ -161,7 +98,6 @@ class ArticleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
-    final doctor = _resolveAuthorPractitioner();
     final categoryLabel = loc.isArabic
         ? article.categoryAr
         : article.categoryEn;
@@ -173,8 +109,8 @@ class ArticleDetailScreen extends StatelessWidget {
         : (loc.isArabic
               ? (article.clinicNameAr.isNotEmpty
                     ? article.clinicNameAr
-                    : 'أستيتك واي')
-              : (article.clinicNameEn ?? 'Aesthetic Way'));
+                    : 'الكاتب غير محدد')
+              : (article.clinicNameEn ?? 'Author not provided'));
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
@@ -204,14 +140,10 @@ class ArticleDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // Cover Image
-          LuxuryImage(
-            imageUrl: article.coverImageUrl,
-            fallbackLogoUrl: article.clinicLogoUrl,
-            height: 200,
-            width: double.infinity,
+          PatientMediaBanner(
+            source: article.coverImageUrl,
+            height: 190,
             borderRadius: BorderRadius.circular(18),
-            placeholderIcon: Icons.article_outlined,
-            iconSize: 48,
           ),
           const SizedBox(height: 16),
 
@@ -249,7 +181,7 @@ class ArticleDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    loc.tr('article_read_time'),
+                    '${((loc.isArabic ? article.contentAr : article.contentEn).split(RegExp(r"\s+")).where((word) => word.isNotEmpty).length / 180).ceil().clamp(1, 999)} ${loc.isArabic ? 'دقيقة قراءة' : 'min read'}',
                     style: TextStyle(
                       color: AppColors.mutedText(context),
                       fontSize: 11,
@@ -277,16 +209,22 @@ class ArticleDetailScreen extends StatelessWidget {
 
           // Doctor Author Card (Clickable to doctor profile)
           LuxuryCard(
-            onTap: () {
-              if (doctor != null) {
-                Navigator.push(
-                  context,
-                  LuxuryPageRoute(
-                    page: PractitionerProfileScreen(practitioner: doctor),
-                  ),
-                );
-              }
-            },
+            onTap: !isEntityUuid(article.authorDoctorId)
+                ? null
+                : () async {
+                    final doctor = await _resolveAuthorPractitioner();
+                    if (!context.mounted) return;
+                    if (doctor == null) {
+                      _unavailable(context);
+                      return;
+                    }
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(
+                        page: PractitionerProfileScreen(practitioner: doctor),
+                      ),
+                    );
+                  },
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
@@ -358,13 +296,14 @@ class ArticleDetailScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                Text(
-                  DateFormat('yyyy/MM/dd').format(article.publishedAt),
-                  style: TextStyle(
-                    color: AppColors.mutedText(context),
-                    fontSize: 10,
+                if (article.hasPublicationDate)
+                  Text(
+                    DateFormat('yyyy/MM/dd').format(article.publishedAt),
+                    style: TextStyle(
+                      color: AppColors.mutedText(context),
+                      fontSize: 10,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -379,7 +318,7 @@ class ArticleDetailScreen extends StatelessWidget {
                 Text(
                   loc.isArabic ? article.contentAr : article.contentEn,
                   style: AppTypography.bodyLarge.copyWith(
-                    fontSize: 14,
+                    fontSize: 16,
                     height: 1.8,
                     color: isDark
                         ? AppColors.silverSecondary
@@ -394,10 +333,14 @@ class ArticleDetailScreen extends StatelessWidget {
           // Lead Consultation Action Button
           SilverButton(
             label: loc.tr('article_consult_author_btn'),
-            icon: Icons.calendar_month_outlined,
+            icon: Icons.chat_bubble_outline,
             isFullWidth: true,
             height: 48,
-            onPressed: () => _handleBookLead(context),
+            onPressed:
+                isEntityUuid(article.clinicId) &&
+                    isEntityUuid(article.authorDoctorId)
+                ? () => _handleBookLead(context)
+                : null,
           ),
           const SizedBox(height: 24),
         ],

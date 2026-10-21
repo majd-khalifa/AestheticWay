@@ -32,43 +32,49 @@ void main() {
       expect(serialized['total_requests'], 24);
     });
 
-    test('ClinicBadgeCountsModel handles string counts and missing keys safely', () {
-      final json = {
-        'new_requests': '5',
-        'contacted_requests': '12',
-        'total_requests': '17',
-      };
+    test(
+      'ClinicBadgeCountsModel handles string counts and missing keys safely',
+      () {
+        final json = {
+          'new_requests': '5',
+          'contacted_requests': '12',
+          'total_requests': '17',
+        };
 
-      final model = ClinicBadgeCountsModel.fromJson(json);
+        final model = ClinicBadgeCountsModel.fromJson(json);
 
-      expect(model.newRequests, 5);
-      expect(model.unreadRequests, 5); // Fallback to new_requests
-      expect(model.contactedRequests, 12);
-      expect(model.closedRequests, 0);
-      expect(model.totalRequests, 17);
-    });
+        expect(model.newRequests, 5);
+        expect(model.unreadRequests, 5); // Fallback to new_requests
+        expect(model.contactedRequests, 12);
+        expect(model.closedRequests, 0);
+        expect(model.totalRequests, 17);
+      },
+    );
 
-    test('ClinicModel parses google_rating and google_reviews_count from live backend serializer', () {
-      final json = {
-        'id': 'clinic-dubai-1',
-        'name_en': 'Aesthetic Way Clinic Downtown',
-        'name_ar': 'عيادة إستيتك واي داون تاون',
-        'google_rating': '4.9',
-        'google_reviews_count': 128,
-        'google_maps_url': 'https://maps.google.com/?cid=12345',
-        'is_featured': true,
-      };
+    test(
+      'ClinicModel parses google_rating and google_reviews_count from live backend serializer',
+      () {
+        final json = {
+          'id': 'clinic-dubai-1',
+          'name_en': 'Aesthetic Way Clinic Downtown',
+          'name_ar': 'عيادة إستيتك واي داون تاون',
+          'google_rating': '4.9',
+          'google_reviews_count': 128,
+          'google_maps_url': 'https://maps.google.com/?cid=12345',
+          'is_featured': true,
+        };
 
-      final clinic = ClinicModel.fromJson(json);
+        final clinic = ClinicModel.fromJson(json);
 
-      expect(clinic.rating, 4.9);
-      expect(clinic.googleRating, 4.9);
-      expect(clinic.reviewCount, 128);
-      expect(clinic.googleReviewsCount, 128);
-      expect(clinic.googleMapsUrl, 'https://maps.google.com/?cid=12345');
-    });
+        expect(clinic.rating, 4.9);
+        expect(clinic.googleRating, 4.9);
+        expect(clinic.reviewCount, 128);
+        expect(clinic.googleReviewsCount, 128);
+        expect(clinic.googleMapsUrl, 'https://maps.google.com/?cid=12345');
+      },
+    );
 
-    test('ClinicModel fallback parses legacy rating and review_count keys', () {
+    test('ClinicModel never labels legacy ratings as Google data', () {
       final json = {
         'id': 'clinic-dubai-2',
         'name_en': 'Legacy Clinic',
@@ -79,107 +85,135 @@ void main() {
 
       final clinic = ClinicModel.fromJson(json);
 
-      expect(clinic.rating, 4.7);
-      expect(clinic.googleRating, 4.7);
-      expect(clinic.reviewCount, 56);
-      expect(clinic.googleReviewsCount, 56);
+      expect(clinic.rating, 0);
+      expect(clinic.googleRating, 0);
+      expect(clinic.reviewCount, 0);
+      expect(clinic.googleReviewsCount, 0);
     });
 
-    test('ClinicPortalService integrates badgeCounts into telemetry getters', () {
-      final service = ClinicPortalService();
-      service.resetTestingState();
+    test(
+      'ClinicPortalService integrates badgeCounts into telemetry getters',
+      () {
+        final service = ClinicPortalService();
+        service.resetTestingState();
 
-      expect(service.newLeadsCount, 0);
+        expect(service.newLeadsCount, 0);
 
-      // Inject badge counts
-      final badges = ClinicBadgeCountsModel.fromJson({
-        'new_requests': 9,
-        'unread_requests': 9,
-        'contacted_requests': 15,
-        'closed_requests': 4,
-        'total_requests': 28,
-      });
+        // Inject badge counts
+        final badges = ClinicBadgeCountsModel.fromJson({
+          'new_requests': 9,
+          'unread_requests': 9,
+          'contacted_requests': 15,
+          'closed_requests': 4,
+          'total_requests': 28,
+        });
 
-      // Verify that when badgeCounts is populated, it takes precedence
-      expect(badges.unreadRequests, 9);
-      expect(badges.contactedRequests, 15);
-      expect(badges.closedRequests, 4);
-      expect(badges.totalRequests, 28);
-    });
+        // Verify that when badgeCounts is populated, it takes precedence
+        expect(badges.unreadRequests, 9);
+        expect(badges.contactedRequests, 15);
+        expect(badges.closedRequests, 4);
+        expect(badges.totalRequests, 28);
+      },
+    );
 
-    test('Clinic lead pagination handles both results envelope and raw list without TypeError', () {
-      final dynamic paginatedEnvelope = {
-        'count': 1,
-        'next': null,
-        'previous': null,
-        'results': [
+    test(
+      'Clinic lead pagination handles both results envelope and raw list without TypeError',
+      () {
+        final dynamic paginatedEnvelope = {
+          'count': 1,
+          'next': null,
+          'previous': null,
+          'results': [
+            {
+              'id': 'lead-1',
+              'patient_name': 'Sarah Al Hashimi',
+              'phone': '+971501234567',
+              'status': 'new',
+              'preferred_time': 'morning',
+              'created_at': '2026-10-02T10:00:00Z',
+            },
+          ],
+        };
+
+        final dynamic rawList = [
           {
-            'id': 'lead-1',
-            'patient_name': 'Sarah Al Hashimi',
-            'phone': '+971501234567',
-            'status': 'new',
-            'preferred_time': 'morning',
-            'created_at': '2026-10-02T10:00:00Z',
-          }
-        ],
-      };
+            'id': 'lead-2',
+            'patient_name': 'Fatima Al Mansoori',
+            'phone': '+971509876543',
+            'status': 'contacted',
+            'preferred_time': 'evening',
+            'created_at': '2026-10-02T11:00:00Z',
+          },
+        ];
 
-      final dynamic rawList = [
-        {
-          'id': 'lead-2',
-          'patient_name': 'Fatima Al Mansoori',
-          'phone': '+971509876543',
-          'status': 'contacted',
-          'preferred_time': 'evening',
-          'created_at': '2026-10-02T11:00:00Z',
-        }
-      ];
+        // Simulate parsing paginated envelope
+        final itemsFromEnvelope =
+            (paginatedEnvelope is Map &&
+                paginatedEnvelope.containsKey('results'))
+            ? (paginatedEnvelope['results'] as List<dynamic>?) ?? []
+            : (paginatedEnvelope is List ? paginatedEnvelope : <dynamic>[]);
+        final leadsFromEnvelope = itemsFromEnvelope
+            .whereType<Map<String, dynamic>>()
+            .map((m) => AppointmentRequestModel.fromJson(m))
+            .toList();
 
-      // Simulate parsing paginated envelope
-      final itemsFromEnvelope = (paginatedEnvelope is Map && paginatedEnvelope.containsKey('results'))
-          ? (paginatedEnvelope['results'] as List<dynamic>?) ?? []
-          : (paginatedEnvelope is List ? paginatedEnvelope : <dynamic>[]);
-      final leadsFromEnvelope = itemsFromEnvelope
-          .whereType<Map<String, dynamic>>()
-          .map((m) => AppointmentRequestModel.fromJson(m))
-          .toList();
+        expect(leadsFromEnvelope.length, 1);
+        expect(leadsFromEnvelope.first.id, 'lead-1');
+        expect(leadsFromEnvelope.first.patientFullName, 'Sarah Al Hashimi');
 
-      expect(leadsFromEnvelope.length, 1);
-      expect(leadsFromEnvelope.first.id, 'lead-1');
-      expect(leadsFromEnvelope.first.patientFullName, 'Sarah Al Hashimi');
+        // Simulate parsing direct raw list
+        final itemsFromRaw = (rawList is Map && rawList.containsKey('results'))
+            ? (rawList['results'] as List<dynamic>?) ?? []
+            : (rawList is List ? rawList : <dynamic>[]);
+        final leadsFromRaw = itemsFromRaw
+            .whereType<Map<String, dynamic>>()
+            .map((m) => AppointmentRequestModel.fromJson(m))
+            .toList();
 
-      // Simulate parsing direct raw list
-      final itemsFromRaw = (rawList is Map && rawList.containsKey('results'))
-          ? (rawList['results'] as List<dynamic>?) ?? []
-          : (rawList is List ? rawList : <dynamic>[]);
-      final leadsFromRaw = itemsFromRaw
-          .whereType<Map<String, dynamic>>()
-          .map((m) => AppointmentRequestModel.fromJson(m))
-          .toList();
+        expect(leadsFromRaw.length, 1);
+        expect(leadsFromRaw.first.id, 'lead-2');
+        expect(leadsFromRaw.first.patientFullName, 'Fatima Al Mansoori');
+      },
+    );
 
-      expect(leadsFromRaw.length, 1);
-      expect(leadsFromRaw.first.id, 'lead-2');
-      expect(leadsFromRaw.first.patientFullName, 'Fatima Al Mansoori');
-    });
+    test(
+      'ApiConfig has all new backend routes properly mapped with trailing slashes',
+      () {
+        expect(ApiConfig.clinicBadges, 'clinic-portal/badges/');
+        expect(ApiConfig.notificationDevices, 'notifications/devices/');
+        expect(
+          ApiConfig.notificationDeviceDeactivate('sample_fcm_token'),
+          'notifications/devices/sample_fcm_token/',
+        );
+        expect(
+          ApiConfig.authPhoneChangeRequest,
+          'auth/me/phone/change/request/',
+        );
+        expect(
+          ApiConfig.authPhoneChangeConfirm,
+          'auth/me/phone/change/confirm/',
+        );
+        expect(
+          ApiConfig.authEmailChangeRequest,
+          'auth/me/email/change/request/',
+        );
+        expect(
+          ApiConfig.authEmailChangeConfirm,
+          'auth/me/email/change/confirm/',
+        );
+      },
+    );
 
-    test('ApiConfig has all new backend routes properly mapped with trailing slashes', () {
-      expect(ApiConfig.clinicBadges, 'clinic-portal/badges/');
-      expect(ApiConfig.notificationDevices, 'notifications/devices/');
-      expect(ApiConfig.notificationDeviceDeactivate('sample_fcm_token'),
-          'notifications/devices/sample_fcm_token/');
-      expect(ApiConfig.authPhoneChangeRequest, 'auth/me/phone/change/request/');
-      expect(ApiConfig.authPhoneChangeConfirm, 'auth/me/phone/change/confirm/');
-      expect(ApiConfig.authEmailChangeRequest, 'auth/me/email/change/request/');
-      expect(ApiConfig.authEmailChangeConfirm, 'auth/me/email/change/confirm/');
-    });
+    test(
+      'DeviceTokenService provides singleton instance and safe execution',
+      () async {
+        final service = DeviceTokenService();
+        expect(service, isNotNull);
 
-    test('DeviceTokenService provides singleton instance and safe execution', () async {
-      final service = DeviceTokenService();
-      expect(service, isNotNull);
-
-      // Verify empty token handling
-      final emptyResult = await service.registerDeviceToken(token: '   ');
-      expect(emptyResult, isFalse);
-    });
+        // Verify empty token handling
+        final emptyResult = await service.registerDeviceToken(token: '   ');
+        expect(emptyResult, isFalse);
+      },
+    );
   });
 }

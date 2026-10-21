@@ -1,3 +1,5 @@
+import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/patient_media_banner.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
 import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
@@ -131,7 +132,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Container(
-                    height: 44,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: AppColors.surface(context),
                       borderRadius: BorderRadius.circular(14),
@@ -311,16 +312,10 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LuxuryImage(
-                  imageUrl: article.coverImageUrl,
-                  fallbackLogoUrl: article.clinicLogoUrl,
-                  height: 150,
-                  width: double.infinity,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  placeholderIcon: Icons.article_outlined,
-                  iconSize: 36,
+                PatientMediaBanner(
+                  source: article.coverImageUrl,
+                  height: 190,
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(14),
@@ -351,15 +346,16 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                               ),
                             ),
                           const Spacer(),
-                          Text(
-                            DateFormat(
-                              'yyyy/MM/dd',
-                            ).format(article.publishedAt),
-                            style: TextStyle(
-                              color: AppColors.mutedText(context),
-                              fontSize: 10.5,
+                          if (article.hasPublicationDate)
+                            Text(
+                              DateFormat(
+                                'yyyy/MM/dd',
+                              ).format(article.publishedAt),
+                              style: TextStyle(
+                                color: AppColors.mutedText(context),
+                                fontSize: 10.5,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 8),

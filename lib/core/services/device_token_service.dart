@@ -40,7 +40,8 @@ class DeviceTokenService {
     final cleanToken = token.trim();
     if (cleanToken.isEmpty) return false;
 
-    final resolvedPlatform = platform?.toLowerCase().trim() ?? _detectPlatform();
+    final resolvedPlatform =
+        platform?.toLowerCase().trim() ?? _detectPlatform();
 
     final payload = {
       'token': cleanToken,
@@ -49,10 +50,7 @@ class DeviceTokenService {
     };
 
     try {
-      await _api.post(
-        ApiConfig.notificationDevices,
-        data: payload,
-      );
+      await _api.post(ApiConfig.notificationDevices, data: payload);
 
       _lastRegisteredToken = cleanToken;
       try {

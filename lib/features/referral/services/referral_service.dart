@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/referral_repository.dart';
 import '../models/referral_model.dart';
 
-/// Referral & Rewards Service managing invites, milestone calculations, and 15% discount codes
+/// Account-scoped invitation status. No reward redemption is performed by Flutter.
 class ReferralService extends ChangeNotifier {
   static final ReferralService _instance = ReferralService._internal();
   factory ReferralService() => _instance;
@@ -20,7 +20,7 @@ class ReferralService extends ChangeNotifier {
   String? _errorMessage;
 
   // Fallback demo data for offline state & test safety
-  String _fallbackReferralCode = 'AW-DUBAI-88';
+  String _fallbackReferralCode = '';
   int _fallbackSuccessfulInvites = 0;
   int _fallbackBonusPoints = 0;
   int _fallbackConsumedPoints = 0;
@@ -37,9 +37,6 @@ class ReferralService extends ChangeNotifier {
     int? testPoints,
   }) {
     _mockMode = true;
-    if (_issuedCodes.isEmpty) {
-      _initFallbackData();
-    }
     if (testStatus != null) {
       _statusModel = testStatus;
     }
@@ -98,7 +95,7 @@ class ReferralService extends ChangeNotifier {
     if (_statusModel?.inviteLink.isNotEmpty == true) {
       return _statusModel!.inviteLink;
     }
-    return 'https://aestheticway.ae/invite/$userReferralCode';
+    return '';
   }
 
   int get successfulInvites =>
@@ -150,8 +147,8 @@ class ReferralService extends ChangeNotifier {
     if (count < 20) {
       final remaining = 20 - count;
       return isArabic
-          ? '$count استخدموا كودك · باقي $remaining دعوة للحصول على 100 نقطة'
-          : '$count used your code · $remaining more invites to earn 100 pts';
+          ? '$count دعوة ناجحة · باقي $remaining دعوة للحصول على 100 نقطة'
+          : '$count successful invites · $remaining more invites to earn 100 pts';
     } else if (count < 35) {
       final remaining = 35 - count;
       return isArabic
@@ -164,28 +161,19 @@ class ReferralService extends ChangeNotifier {
           : '$count successful invites · $remaining more invites to earn +250 pts';
     } else {
       return isArabic
-          ? 'أكملت كل العتبات · يمكنك استبدال النقاط عند توفر 500+'
-          : 'All invite milestones completed · Redeem when you reach 500+ pts';
+          ? 'أكملت جميع مراحل الدعوات'
+          : 'All invitation milestones completed';
     }
   }
 
-  bool get canCollectDiscountCode =>
-      _statusModel?.canCollectCode ?? (currentPoints >= 500);
-
-  List<ReferralDiscountCode> get userCodes {
-    if (_statusModel != null && _statusModel!.discountCodes.isNotEmpty) {
-      return _statusModel!.discountCodes;
-    }
-    return _issuedCodes.where((c) => c.userId == 'current_user').toList();
-  }
-
-  List<ReferralDiscountCode> get allPlatformCodes =>
-      List.unmodifiable(_issuedCodes);
+  // Disabled compatibility entry points: never expose or invoke retired operations.
+  bool get canCollectDiscountCode => false;
+  List<ReferralDiscountCode> get userCodes => const [];
+  List<ReferralDiscountCode> get allPlatformCodes => const [];
 
   bool isMilestoneAwarded(int requiredInvites) {
     if (_statusModel != null) {
-      return _statusModel!.milestones[requiredInvites.toString()] == true ||
-          successfulInvites >= requiredInvites;
+      return _statusModel!.milestones[requiredInvites.toString()] == true;
     }
     return successfulInvites >= requiredInvites;
   }
@@ -209,51 +197,11 @@ class ReferralService extends ChangeNotifier {
     ReferralMilestone(
       requiredInvites: 50,
       pointsAwarded: 250,
-      titleAr: '50 دعوة → +250 نقطة (إجمالي 525 نقطة — تفعيل كود 15%)',
-      titleEn: '50 Invites → +250 pts (Total 525 pts — Unlocks 15% Code)',
+      titleAr: '50 دعوة → +250 نقطة',
+      titleEn: '50 Invites → +250 pts',
       icon: Icons.card_giftcard_outlined,
     ),
   ];
-
-  void _initFallbackData() {
-    _fallbackReferralCode = 'AW-DUBAI-88';
-    _fallbackSuccessfulInvites = 0;
-    _fallbackBonusPoints = 0;
-    _fallbackConsumedPoints = 0;
-    _issuedCodes.clear();
-    _issuedCodes.addAll([
-      ReferralDiscountCode(
-        code: 'AW-15-4819',
-        discountPercent: 15.0,
-        status: ReferralCodeStatus.available,
-        userId: 'current_user',
-        userName: 'سارة المنصوري',
-        createdAt: DateTime.now().subtract(const Duration(days: 3)),
-        expiresAt: DateTime.now().add(const Duration(days: 57)),
-      ),
-      ReferralDiscountCode(
-        code: 'AW-15-2094',
-        discountPercent: 15.0,
-        status: ReferralCodeStatus.used,
-        userId: 'user_ahmed',
-        userName: 'أحمد الظاهري',
-        createdAt: DateTime.now().subtract(const Duration(days: 12)),
-        expiresAt: DateTime.now().add(const Duration(days: 48)),
-        usedAt: DateTime.now().subtract(const Duration(days: 2)),
-        usedClinicId: 'elegance-downtown',
-        usedClinicName: 'مركز الأناقة الطبي للجلدية والتجميل',
-      ),
-      ReferralDiscountCode(
-        code: 'AW-15-7731',
-        discountPercent: 15.0,
-        status: ReferralCodeStatus.available,
-        userId: 'user_reem',
-        userName: 'ريم الكعبي',
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        expiresAt: DateTime.now().add(const Duration(days: 55)),
-      ),
-    ]);
-  }
 
   /// Fetch live referral status from backend API
   final _statusFlights = SingleFlight();
@@ -289,282 +237,33 @@ class ReferralService extends ChangeNotifier {
     }
   }
 
-  /// Collect / Redeem 500 points for a 15% Discount Code
-  Future<ReferralDiscountCode> collectDiscountCode({
-    String userName = 'سارة المنصوري',
-  }) async {
-    final sessionEpoch = _sessionEpoch;
-    if (_mockMode) {
-      final randomSuffix = (1000 + Random().nextInt(9000)).toString();
-      final newCode = 'AW-15-$randomSuffix';
-      _fallbackConsumedPoints += 500;
-
-      final discountCode = ReferralDiscountCode(
-        code: newCode,
-        discountPercent: 15.0,
-        status: ReferralCodeStatus.available,
-        userId: 'current_user',
-        userName: userName,
-        createdAt: DateTime.now(),
-        expiresAt: DateTime.now().add(const Duration(days: 90)),
-      );
-
-      _issuedCodes.insert(0, discountCode);
-      notifyListeners();
-      return discountCode;
-    }
-
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final result = await _inSession(
-        _repository.collectDiscountCode(),
-        sessionEpoch,
-      );
-
-      // Refetch live status to sync ledger & codes accurately
-      try {
-        final refreshedStatus = await _inSession(
-          _repository.getMyReferralStatus(),
-          sessionEpoch,
-        );
-        _statusModel = refreshedStatus;
-      } catch (_) {
-        if (sessionEpoch != _sessionEpoch) {
-          rethrow;
-        }
-        if (_statusModel != null) {
-          final newCodeObj = ReferralDiscountCode(
-            code: result.code,
-            status: ReferralCodeStatus.available,
-            createdAt: DateTime.now(),
-            expiresAt:
-                result.expiresAt ??
-                DateTime.now().add(const Duration(days: 90)),
-          );
-          _statusModel = PatientReferralStatusModel(
-            referralCode: _statusModel!.referralCode,
-            successfulInvitesCount: _statusModel!.successfulInvitesCount,
-            totalSuccessfulInvites: _statusModel!.totalSuccessfulInvites,
-            currentPoints: result.remainingPoints,
-            pointsToCollect: _statusModel!.pointsToCollect,
-            canCollectCode: result.remainingPoints >= 500,
-            pointsExpire: _statusModel!.pointsExpire,
-            milestones: _statusModel!.milestones,
-            discountCodes: [newCodeObj, ..._statusModel!.discountCodes],
-          );
-        }
-      }
-
-      final collectedCodeObj = ReferralDiscountCode(
-        code: result.code,
-        status: ReferralCodeStatus.available,
-        createdAt: DateTime.now(),
-        expiresAt:
-            result.expiresAt ?? DateTime.now().add(const Duration(days: 90)),
-      );
-
-      _issuedCodes.insert(0, collectedCodeObj);
-      _errorMessage = null;
-      notifyListeners();
-      return collectedCodeObj;
-    } catch (e) {
-      if (sessionEpoch != _sessionEpoch) {
-        rethrow;
-      }
-      _errorMessage = e.toString();
-      notifyListeners();
-      rethrow;
-    } finally {
-      if (sessionEpoch == _sessionEpoch) {
-        _isLoading = false;
-        notifyListeners();
-      }
-    }
-  }
-
-  /// Verify discount code entered in Clinic Portal (sync fallback for mock mode)
-  ReferralDiscountCode? verifyCode(String rawCode) {
-    final clean = rawCode.trim().toUpperCase();
-    try {
-      return _issuedCodes.firstWhere((c) => c.code.toUpperCase() == clean);
-    } catch (_) {
-      try {
-        return _statusModel?.discountCodes.firstWhere(
-          (c) => c.code.toUpperCase() == clean,
-        );
-      } catch (_) {
-        return null;
-      }
-    }
-  }
-
-  /// Verify discount code via Live Clinic Portal API (or mock mode in tests)
-  Future<ReferralDiscountCode?> verifyClinicCodeLive(String rawCode) async {
-    final sessionEpoch = _sessionEpoch;
-    final clean = rawCode.trim().toUpperCase();
-    if (_mockMode) {
-      return verifyCode(clean);
-    }
-
-    try {
-      final res = await _inSession(
-        _repository.verifyClinicDiscountCode(clean),
-        sessionEpoch,
-      );
-      final isValid = res['is_valid'] == true;
-      final statusStr = res['status']?.toString().toLowerCase() ?? '';
-      final codeStr = res['code']?.toString() ?? clean;
-      if (!isValid && statusStr.isEmpty) {
-        return null;
-      }
-
-      final status = (isValid || statusStr == 'available')
-          ? ReferralCodeStatus.available
-          : (statusStr == 'expired'
-                ? ReferralCodeStatus.expired
-                : ReferralCodeStatus.used);
-
-      final verifiedCode = ReferralDiscountCode(
-        code: codeStr,
-        discountPercent: 15.0,
-        status: status,
-        userId: res['user_id']?.toString() ?? 'patient',
-        userName:
-            res['patient_name']?.toString() ??
-            res['user_name']?.toString() ??
-            'مريض معتمد',
-        createdAt:
-            DateTime.tryParse(res['created_at']?.toString() ?? '') ??
-            DateTime.now(),
-        expiresAt:
-            DateTime.tryParse(res['expires_at']?.toString() ?? '') ??
-            DateTime.now().add(const Duration(days: 60)),
-        usedClinicName: res['redeemed_clinic']?.toString(),
-      );
-
-      final existingIdx = _issuedCodes.indexWhere(
-        (c) => c.code.toUpperCase() == clean,
-      );
-      if (existingIdx != -1) {
-        _issuedCodes[existingIdx] = verifiedCode;
-      } else {
-        _issuedCodes.insert(0, verifiedCode);
-      }
-      notifyListeners();
-      return verifiedCode;
-    } catch (_) {
-      if (sessionEpoch != _sessionEpoch) {
-        return null;
-      }
-      return verifyCode(clean);
-    }
-  }
-
-  /// Mark discount code as used by a specific clinic (sync fallback for mock mode)
+  Future<ReferralDiscountCode> collectDiscountCode({String userName = ''}) =>
+      Future.error(UnsupportedError('Referral redemption has been retired'));
+  ReferralDiscountCode? verifyCode(String rawCode) => null;
+  Future<ReferralDiscountCode?> verifyClinicCodeLive(String rawCode) async =>
+      null;
   bool redeemCode({
     required String code,
     required String clinicId,
     required String clinicName,
-  }) {
-    final clean = code.trim().toUpperCase();
-    final index = _issuedCodes.indexWhere((c) => c.code.toUpperCase() == clean);
-    if (index != -1) {
-      final existing = _issuedCodes[index];
-      if (existing.status != ReferralCodeStatus.available) return false;
-
-      _issuedCodes[index] = existing.copyWith(
-        status: ReferralCodeStatus.used,
-        usedAt: DateTime.now(),
-        usedClinicId: clinicId,
-        usedClinicName: clinicName,
-      );
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  /// Redeem discount code via Live Clinic Portal API (or mock mode in tests)
+  }) => false;
   Future<bool> redeemClinicCodeLive({
     required String code,
     required String clinicId,
     required String clinicName,
-  }) async {
-    final sessionEpoch = _sessionEpoch;
-    final clean = code.trim().toUpperCase();
-    if (_mockMode) {
-      return redeemCode(
-        code: clean,
-        clinicId: clinicId,
-        clinicName: clinicName,
-      );
-    }
+  }) async => false;
 
-    try {
-      final res = await _inSession(
-        _repository.redeemClinicDiscountCode(clean),
-        sessionEpoch,
-      );
-      final success = res['success'] == true;
-      if (success) {
-        final redeemedClinic = res['redeemed_clinic']?.toString() ?? clinicName;
-        final index = _issuedCodes.indexWhere(
-          (c) => c.code.toUpperCase() == clean,
-        );
-        if (index != -1) {
-          _issuedCodes[index] = _issuedCodes[index].copyWith(
-            status: ReferralCodeStatus.used,
-            usedAt: DateTime.now(),
-            usedClinicId: clinicId,
-            usedClinicName: redeemedClinic,
-          );
-        } else {
-          _issuedCodes.insert(
-            0,
-            ReferralDiscountCode(
-              code: clean,
-              discountPercent: 15.0,
-              status: ReferralCodeStatus.used,
-              userId: 'patient',
-              userName: 'مريض معتمد',
-              createdAt: DateTime.now(),
-              expiresAt: DateTime.now().add(const Duration(days: 60)),
-              usedAt: DateTime.now(),
-              usedClinicId: clinicId,
-              usedClinicName: redeemedClinic,
-            ),
-          );
-        }
-        notifyListeners();
-        return true;
-      }
-      return false;
-    } catch (_) {
-      if (sessionEpoch != _sessionEpoch) {
-        return false;
-      }
-      return false;
-    }
-  }
-
-  /// Register an invite (e.g. from registration screen)
-  void registerInvite({String? referralCode}) {
-    _fallbackSuccessfulInvites += 1;
-    notifyListeners();
-  }
-
-  /// Add demo invites for presentation testing
+  @visibleForTesting
   void addDemoInvites(int count) {
-    _fallbackSuccessfulInvites += count;
+    if (!_mockMode) return;
+    _fallbackSuccessfulInvites += max(0, count);
     notifyListeners();
   }
 
-  /// Fast-track points for live demonstration
+  @visibleForTesting
   void addDemoPoints(int points) {
-    _fallbackBonusPoints += points;
+    if (!_mockMode) return;
+    _fallbackBonusPoints += max(0, points);
     notifyListeners();
   }
 }

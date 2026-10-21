@@ -1,3 +1,4 @@
+import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -17,20 +18,30 @@ import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profi
 /// Treatment / Procedure Detail Screen with full medical description & clinic booking lead
 class TreatmentDetailScreen extends StatefulWidget {
   final TreatmentModel treatment;
+  final TreatmentsRepository? treatmentsRepository;
+  final ClinicsRepository? clinicsRepository;
 
-  const TreatmentDetailScreen({super.key, required this.treatment});
+  const TreatmentDetailScreen({
+    super.key,
+    required this.treatment,
+    this.treatmentsRepository,
+    this.clinicsRepository,
+  });
 
   @override
   State<TreatmentDetailScreen> createState() => _TreatmentDetailScreenState();
 }
 
 class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
-  final TreatmentsRepository _treatmentsRepository = TreatmentsRepository();
-  final ClinicsRepository _clinicsRepository = ClinicsRepository();
+  late final TreatmentsRepository _treatmentsRepository =
+      widget.treatmentsRepository ?? TreatmentsRepository();
+  late final ClinicsRepository _clinicsRepository =
+      widget.clinicsRepository ?? ClinicsRepository();
 
   late TreatmentModel _treatment;
   List<ClinicModel> _availableClinics = [];
   bool _isLoading = true;
+  bool _loadFailed = false;
 
   @override
   void initState() {
@@ -40,61 +51,26 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   }
 
   Future<void> _loadDetails() async {
+    setState(() {
+      _isLoading = true;
+      _loadFailed = false;
+    });
     try {
       final detail = await _treatmentsRepository.getTreatmentDetail(
         widget.treatment.id,
       );
-      if (detail != null && mounted) {
-        setState(() {
-          _treatment = detail;
-        });
-      }
-    } catch (_) {}
-
-    try {
-      final clinics = await _clinicsRepository.getClinics();
       if (!mounted) return;
-      final matched = clinics.where((c) {
-        return c.id == _treatment.clinicId ||
-            c.treatmentIds.contains(_treatment.id);
-      }).toList();
-
-      setState(() {
-        if (matched.isNotEmpty) {
-          _availableClinics = matched;
-        } else if (clinics.isNotEmpty) {
-          _availableClinics = [clinics.first];
-        }
-        _isLoading = false;
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      if (detail != null) setState(() => _treatment = detail);
+      final clinicId = _treatment.clinicId;
+      if (isEntityUuid(clinicId)) {
+        final clinic = await _clinicsRepository.getClinicDetail(clinicId!);
+        if (mounted) setState(() => _availableClinics = [clinic]);
       }
+    } catch (_) {
+      if (mounted) setState(() => _loadFailed = true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  ClinicModel _resolvePrimaryClinic() {
-    if (_availableClinics.isNotEmpty) {
-      return _availableClinics.first;
-    }
-    return ClinicModel(
-      id: _treatment.clinicId ?? '',
-      nameAr: _treatment.clinicNameAr ?? 'العيادة الطبية',
-      nameEn: _treatment.clinicNameEn ?? 'Medical Clinic',
-      descriptionAr: '',
-      descriptionEn: '',
-      coverImageUrl: '',
-      galleryImages: const [],
-      logoUrl: '',
-      rating: 4.9,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      city: 'دبي',
-      areaAr: 'الإمارات',
-      areaEn: 'UAE',
-      addressAr: 'الإمارات العربية المتحدة',
-    );
   }
 
   Future<void> _handleBookLead(BuildContext context, ClinicModel clinic) async {
@@ -113,6 +89,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         LuxuryPageRoute(
           page: AppointmentRequestScreen(
             clinic: clinic,
+            preselectedTreatmentId: _treatment.id,
             preselectedServiceName: LocaleService().isArabic
                 ? _treatment.nameAr
                 : _treatment.nameEn,
@@ -126,17 +103,15 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   Widget build(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
-    final primaryClinic = _resolvePrimaryClinic();
-    final clinicsToShow = _availableClinics.isNotEmpty
-        ? _availableClinics
-        : [primaryClinic];
+    final primaryClinic = _availableClinics.firstOrNull;
+    final clinicsToShow = _availableClinics;
 
     return Scaffold(
       backgroundColor: AppColors.bg(context),
       appBar: AppBar(
         backgroundColor: AppColors.bg(context),
         title: Text(
-          loc.isArabic ? _treatment.nameAr : _treatment.nameEn,
+          loc.isArabic ? 'تفاصيل الإجراء' : 'Treatment details',
           style: AppTypography.screenTitle.copyWith(
             color: isDark
                 ? AppColors.silverPrimary
@@ -304,8 +279,8 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
           // Available in Clinics Section
           Text(
             loc.isArabic
-                ? 'العيادات المعتمدة الموفرة للإجراء'
-                : 'Accredited Clinics Providing this Procedure',
+                ? 'العيادة الموفرة للإجراء'
+                : 'Clinic providing this treatment',
             style: AppTypography.cardTitle.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -399,13 +374,25 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
 
           const SizedBox(height: 16),
 
+          if (_loadFailed || (!_isLoading && primaryClinic == null))
+            TextButton.icon(
+              onPressed: _loadDetails,
+              icon: const Icon(Icons.sync),
+              label: Text(
+                loc.isArabic
+                    ? 'العيادة غير متوفرة، أعد المحاولة'
+                    : 'Clinic unavailable. Try again',
+              ),
+            ),
           // Primary Lead Action Button
           SilverButton(
             label: loc.tr('request_this_treatment'),
-            icon: Icons.calendar_month_outlined,
+            icon: Icons.chat_bubble_outline,
             isFullWidth: true,
             height: 48,
-            onPressed: () => _handleBookLead(context, primaryClinic),
+            onPressed: primaryClinic == null
+                ? null
+                : () => _handleBookLead(context, primaryClinic),
           ),
           const SizedBox(height: 24),
         ],

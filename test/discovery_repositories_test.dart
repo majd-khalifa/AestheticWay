@@ -75,7 +75,7 @@ void main() {
 
       expect(feed.nearbyClinics.length, 1);
       expect(feed.nearbyClinics.first.rating, 4.9);
-      expect(feed.nearbyClinics.first.isEligibleForTopCarousel, isTrue);
+      expect(feed.nearbyClinics.first.isEligibleForTopCarousel, isFalse);
     });
 
     test('ClinicModel correctly maps branches, coordinates and contacts', () {

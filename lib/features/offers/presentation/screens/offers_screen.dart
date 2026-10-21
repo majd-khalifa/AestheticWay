@@ -1,11 +1,10 @@
+import '../widgets/patient_offer_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
-import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
@@ -13,8 +12,9 @@ import 'package:aesthetic_way/core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/offers/models/offer_model.dart';
 import 'package:aesthetic_way/features/offers/data/offers_repository.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
-import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import '../../../clinics/data/clinics_repository.dart';
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/utils/entity_id.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profile_screen.dart';
 
@@ -22,15 +22,23 @@ import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profi
 /// Powered by live API: GET /api/v1/offers/
 class OffersScreen extends StatefulWidget {
   final List<OfferModel>? initialOffers;
+  final ClinicsRepository? clinicsRepository;
+  final OffersRepository? repository;
 
-  const OffersScreen({super.key, this.initialOffers});
+  const OffersScreen({
+    super.key,
+    this.initialOffers,
+    this.clinicsRepository,
+    this.repository,
+  });
 
   @override
   State<OffersScreen> createState() => _OffersScreenState();
 }
 
 class _OffersScreenState extends State<OffersScreen> {
-  final OffersRepository _offersRepository = OffersRepository();
+  late final OffersRepository _offersRepository =
+      widget.repository ?? OffersRepository();
 
   final ScrollController _scrollController = ScrollController();
   late final PagedCollection<OfferModel> _paging;
@@ -93,69 +101,59 @@ class _OffersScreenState extends State<OffersScreen> {
       reasonTitle: LocaleService().tr('offer_claim'),
       reasonSubtitle: LocaleService().isArabic
           ? 'سجّل دخولك برقم الهاتف للاستفادة من باقة العرض'
-          : 'Login with phone number to claim this offer lead',
+          : 'Sign in to inquire about this offer',
     );
     if (!auth || !mounted) return;
 
-    final clinic = ClinicModel(
-      id: offer.clinicId,
-      nameAr: offer.clinicNameAr,
-      nameEn: offer.clinicNameEn ?? offer.clinicNameAr,
-      descriptionAr: offer.termsAr,
-      descriptionEn: offer.termsEn ?? '',
-      coverImageUrl: offer.imageUrl,
-      galleryImages: isValidNetworkImageUrl(offer.imageUrl)
-          ? [offer.imageUrl]
-          : const [],
-      logoUrl: offer.imageUrl,
-      rating: 0.0,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      city: 'Dubai',
-      areaAr: '',
-      addressAr: '',
-    );
-
-    Navigator.push(
-      context,
-      LuxuryPageRoute(
-        page: AppointmentRequestScreen(
-          clinic: clinic,
-          selectedOfferTitle: LocaleService().isArabic
-              ? offer.titleAr
-              : offer.titleEn,
-          selectedOfferId: offer.id,
+    if (!isEntityUuid(offer.clinicId) || !isEntityUuid(offer.id)) {
+      _showUnavailable();
+      return;
+    }
+    try {
+      final clinic = await (widget.clinicsRepository ?? ClinicsRepository())
+          .getClinicDetail(offer.clinicId);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        LuxuryPageRoute(
+          page: AppointmentRequestScreen(
+            clinic: clinic,
+            selectedOfferTitle: LocaleService().isArabic
+                ? offer.titleAr
+                : offer.titleEn,
+            selectedOfferId: offer.id,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (_) {
+      if (mounted) _showUnavailable();
+    }
   }
 
-  void _navigateToClinic(
+  void _showUnavailable() => showAppSnackBar(
+    context,
+    LocaleService().isArabic
+        ? 'تعذر تحميل العيادة، حاول مجدداً'
+        : 'Clinic unavailable. Please try again.',
+    type: AppSnackBarType.error,
+  );
+  Future<void> _navigateToClinic(
     String clinicId, {
     String? clinicNameAr,
     String? clinicNameEn,
-  }) {
-    final clinic = ClinicModel(
-      id: clinicId,
-      nameAr: clinicNameAr ?? 'العيادة التجميلية',
-      nameEn: clinicNameEn ?? 'Aesthetic Clinic',
-      descriptionAr: '',
-      descriptionEn: '',
-      coverImageUrl: '',
-      galleryImages: const [],
-      logoUrl: '',
-      rating: 0.0,
-      reviewCount: 0,
-      subscriptionTier: SubscriptionTier.basic,
-      city: 'Dubai',
-      areaAr: '',
-      addressAr: '',
-    );
-
-    Navigator.push(
-      context,
-      LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
-    );
+  }) async {
+    try {
+      final clinic = await (widget.clinicsRepository ?? ClinicsRepository())
+          .getClinicDetail(clinicId);
+      if (mounted) {
+        Navigator.push(
+          context,
+          LuxuryPageRoute(page: ClinicProfileScreen(clinic: clinic)),
+        );
+      }
+    } catch (_) {
+      if (mounted) _showUnavailable();
+    }
   }
 
   void _onSearchChanged(String value) {
@@ -314,231 +312,14 @@ class _OffersScreenState extends State<OffersScreen> {
                               }
                               final offer = filteredOffers[index];
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: LuxuryCard(
-                                  padding: EdgeInsets.zero,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Offer Image & Discount Badge
-                                      Stack(
-                                        children: [
-                                          LuxuryImage(
-                                            imageUrl: offer.imageUrl,
-                                            fallbackLogoUrl:
-                                                offer.clinicLogoUrl,
-                                            height: 160,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
-                                            borderRadius:
-                                                const BorderRadius.vertical(
-                                                  top: Radius.circular(16),
-                                                ),
-                                            placeholderIcon:
-                                                Icons.local_offer_rounded,
-                                          ),
-                                          if (offer.discountPercentage > 0)
-                                            Positioned(
-                                              top: 12,
-                                              right: loc.isArabic ? 12 : null,
-                                              left: loc.isArabic ? null : 12,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 5,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      AppColors.accentChampagne,
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black
-                                                          .withValues(
-                                                            alpha: 0.3,
-                                                          ),
-                                                      blurRadius: 6,
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Text(
-                                                  '${loc.tr("save_prefix")} ${offer.discountPercentage}%',
-                                                  style: const TextStyle(
-                                                    color: AppColors
-                                                        .backgroundDeep,
-                                                    fontWeight: FontWeight.w900,
-                                                    fontSize: 11.5,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-
-                                      // Details Body
-                                      Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Clinic Name Clickable Link
-                                            GestureDetector(
-                                              onTap: () => _navigateToClinic(
-                                                offer.clinicId,
-                                                clinicNameAr:
-                                                    offer.clinicNameAr,
-                                                clinicNameEn:
-                                                    offer.clinicNameEn,
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.apartment_rounded,
-                                                    size: 14,
-                                                    color: AppColors
-                                                        .accentChampagne,
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  Expanded(
-                                                    child: Text(
-                                                      loc.isArabic
-                                                          ? offer.clinicNameAr
-                                                          : (offer.clinicNameEn ??
-                                                                offer
-                                                                    .clinicNameAr),
-                                                      style: TextStyle(
-                                                        color:
-                                                            AppColors.goldText(
-                                                              context,
-                                                            ),
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-
-                                            // Title
-                                            Text(
-                                              loc.isArabic
-                                                  ? offer.titleAr
-                                                  : offer.titleEn,
-                                              style: AppTypography.cardTitle
-                                                  .copyWith(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: isDark
-                                                        ? AppColors
-                                                              .silverPrimary
-                                                        : AppColors
-                                                              .lightTextPrimary,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 8),
-
-                                            // Terms / Description
-                                            Text(
-                                              (loc.isArabic
-                                                      ? offer.termsAr
-                                                      : offer.termsEn) ??
-                                                  '',
-                                              style: AppTypography.bodyMedium
-                                                  .copyWith(
-                                                    fontSize: 12,
-                                                    color: AppColors.mutedText(
-                                                      context,
-                                                    ),
-                                                    height: 1.45,
-                                                  ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 12),
-
-                                            // Price & Action Row
-                                            Row(
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          '${offer.offerPrice.toInt()} ${loc.tr("currency_aed")}',
-                                                          style: TextStyle(
-                                                            color: isDark
-                                                                ? AppColors
-                                                                      .silverPrimary
-                                                                : AppColors
-                                                                      .lightTextPrimary,
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w900,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        Text(
-                                                          '${offer.originalPrice.toInt()} ${loc.tr("currency_aed")}',
-                                                          style: TextStyle(
-                                                            color:
-                                                                AppColors.mutedText(
-                                                                  context,
-                                                                ),
-                                                            fontSize: 12,
-                                                            decoration:
-                                                                TextDecoration
-                                                                    .lineThrough,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 2),
-                                                    Text(
-                                                      (loc.isArabic
-                                                          ? offer.validUntilText
-                                                          : (offer.validUntilTextEn ??
-                                                                offer
-                                                                    .validUntilText)),
-                                                      style: TextStyle(
-                                                        color:
-                                                            AppColors.goldText(
-                                                              context,
-                                                            ),
-                                                        fontSize: 10.5,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                const Spacer(),
-                                                SilverButton(
-                                                  label: loc.tr('offer_claim'),
-                                                  icon: Icons.send_rounded,
-                                                  height: 38,
-                                                  onPressed: () =>
-                                                      _handleClaimOffer(offer),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                padding: const EdgeInsets.only(bottom: 20),
+                                child: PatientOfferCard(
+                                  offer: offer,
+                                  onInquiry: () => _handleClaimOffer(offer),
+                                  onClinicTap: () => _navigateToClinic(
+                                    offer.clinicId,
+                                    clinicNameAr: offer.clinicNameAr,
+                                    clinicNameEn: offer.clinicNameEn,
                                   ),
                                 ),
                               );

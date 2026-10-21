@@ -1,4 +1,7 @@
+import '../../../core/utils/source_text.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
+import 'package:aesthetic_way/core/utils/clinic_location.dart';
+import 'package:aesthetic_way/core/utils/maps_launcher.dart';
 
 /// Subscription tier for B2B clinic listing priority
 enum SubscriptionTier {
@@ -38,7 +41,7 @@ class ClinicBranch {
     required this.id,
     required this.nameAr,
     required this.nameEn,
-    this.city = 'Dubai',
+    this.city = '',
     required this.areaAr,
     required this.areaEn,
     required this.addressAr,
@@ -56,13 +59,13 @@ class ClinicBranch {
   factory ClinicBranch.fromJson(Map<String, dynamic> json) {
     return ClinicBranch(
       id: json['id']?.toString() ?? '',
-      nameAr: json['name_ar'] ?? json['name_en'] ?? '',
-      nameEn: json['name_en'] ?? json['name_ar'] ?? '',
-      city: json['city']?.toString() ?? 'Dubai',
-      areaAr: json['address_ar'] ?? '',
-      areaEn: json['address_en'] ?? '',
-      addressAr: json['address_ar'] ?? '',
-      addressEn: json['address_en'] ?? '',
+      nameAr: firstSourceText([json['name_ar'], json['name_en']]),
+      nameEn: firstSourceText([json['name_en'], json['name_ar']]),
+      city: json['city']?.toString() ?? '',
+      areaAr: firstSourceText([json['address_ar'], json['address_en']]),
+      areaEn: firstSourceText([json['address_en'], json['address_ar']]),
+      addressAr: firstSourceText([json['address_ar'], json['address_en']]),
+      addressEn: firstSourceText([json['address_en'], json['address_ar']]),
       phone: json['phone']?.toString() ?? '',
       distanceKm: 0.0,
       latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
@@ -166,13 +169,13 @@ class ClinicModel {
     this.googlePlaceId,
     this.latitude = 0.0,
     this.longitude = 0.0,
-    this.workingHoursAr = 'من الإثنين إلى السبت: 9:00 ص - 9:00 م',
-    this.workingHoursEn = 'Mon - Sat: 9:00 AM - 9:00 PM',
+    this.workingHoursAr = '',
+    this.workingHoursEn = '',
     this.branches = const [],
     this.practitionerIds = const [],
     this.treatmentIds = const [],
     this.featuredOffers = const [],
-    this.isVerified = true,
+    this.isVerified = false,
     this.slug,
     this.googleMapsUrl,
     this.videoUrl,
@@ -184,7 +187,16 @@ class ClinicModel {
   });
 
   factory ClinicModel.fromJson(Map<String, dynamic> json) {
-    final bool isFeatured = json['is_featured'] == true;
+    final tier = json['subscription_tier']?.toString().toLowerCase();
+    final googleRating = double.tryParse('${json['google_rating']}');
+    final googleCount = int.tryParse('${json['google_reviews_count']}');
+    final validRating =
+        googleRating != null &&
+        googleRating.isFinite &&
+        googleRating >= 1 &&
+        googleRating <= 5 &&
+        (json['google_reviews_count'] == null ||
+            (googleCount != null && googleCount > 0));
     final branchesRaw = json['branches'] as List<dynamic>?;
     final branchesList = branchesRaw != null
         ? branchesRaw
@@ -225,17 +237,14 @@ class ClinicModel {
               .toList()
         : <String>[];
 
-    final rawVideoUrl =
-        (json['video_ad_file'] ??
-                json['video_url'] ??
-                json['promo_video_url'] ??
-                json['featured_video_url'] ??
-                json['ad_video_url'])
-            ?.toString()
-            .trim();
-    final resolvedVideoUrl = rawVideoUrl != null && rawVideoUrl.isNotEmpty
-        ? ApiConfig.resolveUrl(rawVideoUrl)
-        : null;
+    final video = ApiConfig.firstMediaUrl([
+      json['video_ad_file'],
+      json['video_url'],
+      json['promo_video_url'],
+      json['featured_video_url'],
+      json['ad_video_url'],
+    ]);
+    final resolvedVideoUrl = video.isEmpty ? null : video;
     final hasVideoUrl = resolvedVideoUrl != null && resolvedVideoUrl.isNotEmpty;
     final rawMediaType = json['media_type']?.toString().trim().toLowerCase();
     final resolvedMediaType = (rawMediaType == 'video' || hasVideoUrl)
@@ -244,34 +253,34 @@ class ClinicModel {
 
     return ClinicModel(
       id: json['id']?.toString() ?? '',
-      nameAr: json['name_ar'] ?? json['name_en'] ?? '',
-      nameEn: json['name_en'] ?? json['name_ar'] ?? '',
-      descriptionAr: json['description_ar'] ?? '',
-      descriptionEn: json['description_en'] ?? '',
+      nameAr: firstSourceText([json['name_ar'], json['name_en']]),
+      nameEn: firstSourceText([json['name_en'], json['name_ar']]),
+      descriptionAr: firstSourceText([
+        json['description_ar'],
+        json['description_en'],
+      ]),
+      descriptionEn: firstSourceText([
+        json['description_en'],
+        json['description_ar'],
+      ]),
       coverImageUrl: cover,
       galleryImages: gallery,
       logoUrl: logo,
-      rating:
-          double.tryParse(json['google_rating']?.toString() ?? '') ??
-          double.tryParse(json['rating']?.toString() ?? '') ??
-          0.0,
-      reviewCount: (json['google_reviews_count'] is int)
-          ? json['google_reviews_count'] as int
-          : (json['review_count'] is int)
-          ? json['review_count'] as int
-          : int.tryParse(json['google_reviews_count']?.toString() ?? '') ??
-                int.tryParse(json['review_count']?.toString() ?? '') ??
-                0,
-      subscriptionTier: isFeatured
-          ? SubscriptionTier.vipPlatinum
-          : SubscriptionTier.basic,
+      rating: validRating ? googleRating : 0,
+      reviewCount: validRating && googleCount != null ? googleCount : 0,
+      subscriptionTier: switch (tier) {
+        'vip' || 'vip_platinum' => SubscriptionTier.vipPlatinum,
+        'featured' => SubscriptionTier.featured,
+        _ => SubscriptionTier.basic,
+      },
+      isVerified: json['is_verified'] == true,
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       licenseNumber: json['license_number']?.toString() ?? '',
-      city: json['city']?.toString() ?? 'Dubai',
-      areaAr: json['address_ar'] ?? json['city'] ?? '',
-      areaEn: json['address_en'] ?? json['city'] ?? '',
-      addressAr: json['address_ar'] ?? '',
-      addressEn: json['address_en'] ?? '',
+      city: json['city']?.toString() ?? '',
+      areaAr: json['area_ar'] ?? '',
+      areaEn: json['area_en'] ?? '',
+      addressAr: firstSourceText([json['address_ar'], json['address_en']]),
+      addressEn: firstSourceText([json['address_en'], json['address_ar']]),
       distanceKm: double.tryParse(json['distance']?.toString() ?? '') ?? 0.0,
       mainPhone: json['phone']?.toString() ?? '',
       receptionPhone: json['phone']?.toString() ?? '',
@@ -279,10 +288,8 @@ class ClinicModel {
       googlePlaceId: json['google_place_id']?.toString(),
       latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
       longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
-      workingHoursAr:
-          json['working_hours_ar'] ?? 'من الإثنين إلى السبت: 9:00 ص - 9:00 م',
-      workingHoursEn:
-          json['working_hours_en'] ?? 'Mon - Sat: 9:00 AM - 9:00 PM',
+      workingHoursAr: json['working_hours_ar'] ?? '',
+      workingHoursEn: json['working_hours_en'] ?? '',
       branches: branchesList,
       practitionerIds: practitionerIds,
       treatmentIds: treatmentIds,
@@ -290,7 +297,7 @@ class ClinicModel {
       googleMapsUrl: json['google_maps_url']?.toString(),
       videoUrl: hasVideoUrl ? resolvedVideoUrl : null,
       mediaType: resolvedMediaType,
-      setupStatus: json['setup_status']?.toString() ?? 'approved',
+      setupStatus: json['setup_status']?.toString() ?? 'unknown',
       hasBranchDirectory: json['branches_directory_url'] != null,
       rawPractitioners: practitionersRaw,
       rawTreatments: treatmentsRaw,
@@ -311,17 +318,24 @@ class ClinicModel {
       ? receptionPhone.trim()
       : mainPhone.trim();
 
-  bool get hasPhone => effectivePhone.isNotEmpty;
+  bool get hasPhone =>
+      RegExp(r'^\+?[0-9][0-9 ()-]{6,20}$').hasMatch(effectivePhone);
 
   bool get hasWhatsapp {
     final clean = whatsapp.trim().replaceAll(RegExp(r'[^0-9]'), '');
     return clean.length >= 7;
   }
 
-  bool get hasMapLocation =>
-      (googleMapsUrl != null &&
-          googleMapsUrl!.trim().toLowerCase().startsWith('http')) ||
-      (latitude != 0.0 && longitude != 0.0);
+  Uri? get mapsUri => MapsLauncher.verifiedPlaceUri(
+    latitude: latitude,
+    longitude: longitude,
+    googleMapsUrl: googleMapsUrl,
+    placeId: googlePlaceId,
+  );
+  bool get hasMapLocation => mapsUri != null;
+  bool get hasGoogleRating => rating.isFinite && rating >= 1 && rating <= 5;
+  ClinicCoordinates? get coordinates =>
+      ClinicCoordinates.parse(latitude, longitude);
 
   ClinicModel copyWith({
     String? id,

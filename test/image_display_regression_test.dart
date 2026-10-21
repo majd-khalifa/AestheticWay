@@ -44,13 +44,21 @@ class _Upload implements MediaUploadService {
 class _Images implements HttpClient {
   final requests = <String>[];
   final Map<String, int> statuses = {};
+  final Map<String, List<int>> bytes = {};
+  final Map<String, String> contentTypes = {};
   final Map<String, Completer<HttpClientResponse>> pending = {};
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
     requests.add(url.toString());
     return _Request(
       pending[url.toString()]?.future ??
-          Future.value(_Response(statuses[url.toString()] ?? 200)),
+          Future.value(
+            _Response(
+              statuses[url.toString()] ?? 200,
+              data: bytes[url.toString()],
+              contentType: contentTypes[url.toString()],
+            ),
+          ),
     );
   }
 
@@ -68,11 +76,16 @@ class _Request implements HttpClientRequest {
 }
 
 class _Response extends Stream<List<int>> implements HttpClientResponse {
-  _Response(this.statusCode);
+  _Response(this.statusCode, {List<int>? data, String? contentType})
+    : data = data ?? _png,
+      headers = _ImageHeaders(contentType ?? 'image/png');
+  final List<int> data;
+  @override
+  final HttpHeaders headers;
   @override
   final int statusCode;
   @override
-  int get contentLength => _png.length;
+  int get contentLength => data.length;
   @override
   HttpClientResponseCompressionState get compressionState =>
       HttpClientResponseCompressionState.notCompressed;
@@ -82,12 +95,21 @@ class _Response extends Stream<List<int>> implements HttpClientResponse {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
-  }) => Stream<List<int>>.value(_png).listen(
+  }) => Stream<List<int>>.value(data).listen(
     onData,
     onError: onError,
     onDone: onDone,
     cancelOnError: cancelOnError,
   );
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _ImageHeaders implements HttpHeaders {
+  _ImageHeaders(this.type);
+  final String type;
+  @override
+  ContentType? get contentType => ContentType.parse(type);
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -312,6 +334,88 @@ void main() {
       },
     );
   }
+  for (final scenario in [
+    'expired signature',
+    'server failure',
+    'empty body',
+    'corrupt body',
+    'HTML body',
+  ]) {
+    testWidgets('Actual image decoding falls back safely for $scenario', (
+      tester,
+    ) async {
+      final client = _Images();
+      const source = 'https://storage.example/test.png?X-Amz-Signature=fixture';
+      client.statuses[source] = scenario == 'expired signature'
+          ? 403
+          : scenario == 'server failure'
+          ? 500
+          : 200;
+      client.bytes[source] = scenario == 'empty body'
+          ? []
+          : utf8.encode('<html>unavailable</html>');
+      debugNetworkImageHttpClientProvider = () => client;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LuxuryImage(
+              imageUrl: source,
+              width: 80,
+              height: 80,
+              customPlaceholder: Icon(
+                Icons.error,
+                key: Key('bad-bytes-fallback'),
+              ),
+            ),
+          ),
+        ),
+      );
+      final provider = tester.widget<Image>(find.byType(Image).first).image;
+      await tester.runAsync(() async {
+        final failed = Completer<void>();
+        final stream = provider.resolve(ImageConfiguration.empty);
+        final listener = ImageStreamListener(
+          (_, _) => failed.completeError(StateError('Invalid bytes decoded')),
+          onError: (_, _) {
+            if (!failed.isCompleted) failed.complete();
+          },
+        );
+        stream.addListener(listener);
+        try {
+          await failed.future.timeout(const Duration(seconds: 3));
+        } finally {
+          stream.removeListener(listener);
+        }
+      });
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('bad-bytes-fallback')), findsOneWidget);
+      // The explicit error observer can re-resolve an evicted failed image.
+      expect(client.requests, isNotEmpty);
+      expect(client.requests.every((request) => request == source), isTrue);
+      expect(client.requests.length, lessThanOrEqualTo(2));
+      expect(tester.takeException(), isNull);
+      debugNetworkImageHttpClientProvider = null;
+    });
+  }
+  testWidgets(
+    'Valid PNG bytes still decode when HTTP content type is incorrect',
+    (tester) async {
+      final client = _Images()..contentTypes[_signed] = 'text/plain';
+      debugNetworkImageHttpClientProvider = () => client;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: LuxuryImage(imageUrl: _signed, width: 80, height: 80),
+          ),
+        ),
+      );
+      await _decoded(tester);
+      expect(find.byType(RawImage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      debugNetworkImageHttpClientProvider = null;
+    },
+  );
+
   testWidgets(
     'pending request shows no fallback; a replacement recovers after load error',
     (tester) async {

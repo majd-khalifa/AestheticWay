@@ -24,25 +24,23 @@ class LuxuryErrorView extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isDark ? const Color(0xFF161E2E) : const Color(0xFFE2E8F0),
+                color: isDark
+                    ? const Color(0xFF161E2E)
+                    : const Color(0xFFE2E8F0),
                 border: Border.all(
                   color: AppColors.border(context),
                   width: 1.2,
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 36,
-                color: AppColors.accentChampagne,
-              ),
+              child: Icon(icon, size: 28, color: AppColors.accentChampagne),
             ),
             const SizedBox(height: 16),
             Text(

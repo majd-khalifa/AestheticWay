@@ -1,3 +1,5 @@
+import '../../../../core/utils/entity_id.dart';
+import '../../../../core/utils/clinic_location.dart';
 import '../../../clinics/data/clinics_repository.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
@@ -6,7 +8,6 @@ import '../../../treatments/models/treatment_model.dart';
 import '../../../practitioners/data/practitioners_repository.dart';
 import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -29,6 +30,7 @@ class AppointmentRequestScreen extends StatefulWidget {
   final ClinicModel clinic;
   final PractitionerModel? preselectedPractitioner;
   final String? preselectedServiceName;
+  final String? preselectedTreatmentId;
   final String? selectedOfferTitle;
   final String? selectedOfferId;
   final LeadsRepository? leadsRepository;
@@ -40,6 +42,7 @@ class AppointmentRequestScreen extends StatefulWidget {
     required this.clinic,
     this.preselectedPractitioner,
     this.preselectedServiceName,
+    this.preselectedTreatmentId,
     this.selectedOfferTitle,
     this.selectedOfferId,
     this.leadsRepository,
@@ -59,6 +62,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   final TextEditingController _notesController = TextEditingController();
   late final LeadsRepository _leadsRepository;
 
+  ClinicBranch? _selectedBranch;
+  PractitionerModel? _selectedPractitioner;
   String? _selectedBranchId;
   String? _selectedTreatment;
   String? _selectedPractitionerId;
@@ -76,6 +81,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         map[b.id] = b;
       }
     }
+    if (_selectedBranch != null) map[_selectedBranch!.id] = _selectedBranch!;
     return map;
   }
 
@@ -98,6 +104,15 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         }
       }
     }
+    final preselected = widget.preselectedPractitioner;
+    if (preselected != null &&
+        preselected.clinicId == widget.clinic.id &&
+        isEntityUuid(preselected.id)) {
+      map[preselected.id] = preselected;
+    }
+    if (_selectedPractitioner != null) {
+      map[_selectedPractitioner!.id] = _selectedPractitioner!;
+    }
     return map;
   }
 
@@ -110,26 +125,21 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       text: auth.isLoggedIn ? auth.userName : '',
     );
 
-    // Clean local phone digits without country code prefix
-    String initialPhone = '';
-    if (auth.isLoggedIn && auth.userPhone.isNotEmpty) {
-      final clean = auth.userPhone.replaceAll(RegExp(r'[^0-9]'), '');
-      if (clean.startsWith('971')) {
-        initialPhone = clean.substring(3);
-      } else if (clean.startsWith('0')) {
-        initialPhone = clean.substring(1);
-      } else {
-        initialPhone = clean;
-      }
-    }
-    _phoneController = TextEditingController(text: initialPhone);
+    _phoneController = TextEditingController(
+      text: auth.isLoggedIn ? auth.userPhone : '',
+    );
 
     if (widget.clinic.branches.isNotEmpty) {
       _selectedBranchId = widget.clinic.branches.first.id;
     }
 
-    _selectedPractitionerId = widget.preselectedPractitioner?.id;
-    _selectedPractitionerLabel = LocaleService().isArabic
+    final preselected = widget.preselectedPractitioner;
+    _selectedPractitionerId = preselected?.clinicId == widget.clinic.id
+        ? preselected?.id
+        : null;
+    _selectedPractitionerLabel = _selectedPractitionerId == null
+        ? null
+        : LocaleService().isArabic
         ? widget.preselectedPractitioner?.nameAr
         : widget.preselectedPractitioner?.nameEn;
 
@@ -161,6 +171,11 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       }
     }
 
+    if (isEntityUuid(widget.preselectedTreatmentId) &&
+        widget.preselectedServiceName != null) {
+      _treatmentNameToId[widget.preselectedServiceName!] =
+          widget.preselectedTreatmentId!;
+    }
     if (widget.preselectedServiceName != null &&
         widget.preselectedServiceName!.isNotEmpty) {
       _selectedTreatment = widget.preselectedServiceName;
@@ -178,7 +193,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
   }
 
   void _submitLeadRequest() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || !isEntityUuid(widget.clinic.id)) return;
+    if (!AuthState().isLoggedIn || !AuthState().isPatient) return;
+    final sessionEpoch = AuthState().sessionEpoch;
     final loc = LocaleService();
     if (!_formKey.currentState!.validate()) {
       return;
@@ -218,7 +235,6 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
       'service_name': actualServiceName,
       'patient_name': _nameController.text.trim(),
       'patient_phone': formattedPhone,
-      'preferred_time_window': '',
     };
 
     final isUuid = RegExp(
@@ -259,16 +275,19 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
     try {
       final result = await _leadsRepository.createLead(payload);
 
-      if (!mounted) return;
+      if (!result.success || result.leadReference.trim().isEmpty) {
+        throw const ApiException(
+          message: 'The server did not confirm this request.',
+        );
+      }
+      if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
       setState(() {
         _isSubmitting = false;
       });
 
       final request = AppointmentRequestModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        referenceCode: result.leadReference.isNotEmpty
-            ? result.leadReference
-            : '#REQ-${10000 + Random().nextInt(89999)}',
+        id: result.leadReference,
+        referenceCode: result.leadReference,
         clinicId: widget.clinic.id,
         clinicNameAr: widget.clinic.nameAr,
         clinicNameEn: widget.clinic.nameEn,
@@ -299,7 +318,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
         ),
       );
     } on ApiException catch (e) {
-      if (!mounted) return;
+      if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
       final is429 =
           e.statusCode == 429 ||
           e.message.contains('already submitted') ||
@@ -334,7 +353,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
           : e.message;
       showAppSnackBar(context, errorMessage, type: AppSnackBarType.error);
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || sessionEpoch != AuthState().sessionEpoch) return;
       setState(() {
         _isSubmitting = false;
       });
@@ -572,7 +591,13 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${widget.clinic.city} • ${loc.isArabic ? widget.clinic.areaAr : widget.clinic.areaEn}',
+                            formatClinicLocation(
+                              widget.clinic.city,
+                              loc.isArabic
+                                  ? widget.clinic.areaAr
+                                  : widget.clinic.areaEn,
+                              arabic: loc.isArabic,
+                            ),
                             style: AppTypography.caption.copyWith(
                               color: AppColors.mutedText(context),
                             ),
@@ -586,23 +611,9 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
               const SizedBox(height: 16),
 
               // Branch Selector
-              if (branchMap.isNotEmpty) ...[
-                Text(
-                  loc.tr('select_branch'),
-                  style: AppTypography.cardTitle.copyWith(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                LuxuryCard(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 3,
-                  ),
+              if (branchMap.length > 1) ...[
+                Padding(
+                  padding: EdgeInsets.zero,
                   child: PagedEntityField<ClinicBranch>(
                     label: loc.tr('select_branch'),
                     hint: loc.isArabic ? 'ابحث عن الفرع' : 'Search branches',
@@ -639,29 +650,18 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                         total: all.length,
                       );
                     },
-                    onChanged: (b) => setState(() => _selectedBranchId = b?.id),
+                    onChanged: (b) => setState(() {
+                      _selectedBranch = b;
+                      _selectedBranchId = b?.id;
+                    }),
                   ),
                 ),
                 const SizedBox(height: 14),
               ],
 
               // Service / Treatment Selection
-              Text(
-                loc.tr('select_service'),
-                style: AppTypography.cardTitle.copyWith(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.silverPrimary
-                      : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              LuxuryCard(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 3,
-                ),
+              Padding(
+                padding: EdgeInsets.zero,
                 child: PagedEntityField<TreatmentModel>(
                   label: loc.tr('select_service'),
                   hint: loc.isArabic
@@ -693,22 +693,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
 
               // Preferred Practitioner (Optional)
               ...[
-                Text(
-                  loc.tr('select_practitioner'),
-                  style: AppTypography.cardTitle.copyWith(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                LuxuryCard(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 3,
-                  ),
+                Padding(
+                  padding: EdgeInsets.zero,
                   child: PagedEntityField<PractitionerModel>(
                     label: loc.tr('select_practitioner'),
                     hint: loc.isArabic
@@ -736,6 +722,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                               search: search,
                             ),
                     onChanged: (p) => setState(() {
+                      _selectedPractitioner = p;
                       _selectedPractitionerId = p?.id;
                       _selectedPractitionerLabel = p == null
                           ? null
@@ -928,14 +915,22 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Telegram-like Smooth Submit Button
+              if (!isEntityUuid(widget.clinic.id))
+                Text(
+                  loc.isArabic
+                      ? 'العيادة غير متاحة لاستقبال الطلبات'
+                      : 'This clinic is unavailable for inquiries',
+                ),
+              // Submit the inquiry only after explicit consent.
               SilverButton(
                 label: loc.tr('submit_lead_btn'),
                 icon: Icons.send_rounded,
                 isFullWidth: true,
                 height: 48,
                 isLoading: _isSubmitting,
-                onPressed: _isSubmitting ? null : _submitLeadRequest,
+                onPressed: _isSubmitting || !isEntityUuid(widget.clinic.id)
+                    ? null
+                    : _submitLeadRequest,
               ),
               const SizedBox(height: 24),
             ],

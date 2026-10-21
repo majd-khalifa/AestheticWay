@@ -19,7 +19,9 @@ class RatingChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (rating <= 0.0) return const SizedBox.shrink();
+    if (!rating.isFinite || rating < 1 || rating > 5) {
+      return const SizedBox.shrink();
+    }
 
     final isDark = AppColors.isDark(context);
 
@@ -40,9 +42,10 @@ class RatingChip extends StatelessWidget {
           width: 0.6,
         ),
       ),
-      child: Row(
+      child: Wrap(
         textDirection: TextDirection.ltr,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 3,
         children: [
           const Icon(Icons.star_rounded, size: 13, color: AppColors.starGold),
           const SizedBox(width: 3),
