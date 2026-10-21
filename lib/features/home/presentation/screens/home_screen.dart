@@ -69,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedCity = city;
       _isLoading = true;
+      // A different city must not continue displaying the old city's records.
+      _feed = null;
     });
     _cityDebounce = Timer(const Duration(milliseconds: 350), _loadFeed);
   }
@@ -105,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
-      _feed = null;
     });
 
     try {

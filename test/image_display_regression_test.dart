@@ -549,7 +549,9 @@ void main() {
           reason: '$kind: $source',
         );
         await tester.runAsync(() async {
-          final provider = ResizeImage.resizeIfNeeded(100, null, primary!);
+          // Warm the same bounded decoder/cache key used by LuxuryImage before
+          // entering the fake widget clock. Real decoding remains mandatory.
+          final provider = boundedImageDecode(100, primary!);
           final stream = provider.resolve(ImageConfiguration.empty);
           final done = Completer<void>();
           final listener = ImageStreamListener(

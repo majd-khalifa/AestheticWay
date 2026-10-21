@@ -1552,6 +1552,10 @@ void main() {
       expect(find.text('Categories unavailable'), findsWidgets);
       fail = false;
       await tester.tap(find.text('Retry').first);
+      await tester.pump();
+      expect(reads, 1); // Immediate taps respect the read-failure backoff.
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.text('Retry').first);
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('Recovered category'),

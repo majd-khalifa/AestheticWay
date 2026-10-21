@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-20",
+  "baseline_commit": "811b1bbcaf62906f19c851145777a72412266a82",
+  "environment": "Headless Linux Flutter widget/unit engine; virtual delays and mock HTTP, not device/remote performance",
+  "before": [
+    {
+      "scenario": "home_dependency",
+      "virtual_ms": 250,
+      "requests": 2,
+      "feed_delay_ms": 100,
+      "directory_delay_ms": 150
+    },
+    {
+      "scenario": "identical_get_burst",
+      "callers": 20,
+      "adapter_requests": 20
+    },
+    {
+      "scenario": "failed_scroll_burst",
+      "attempts": 10,
+      "loader_failures": 10,
+      "retained_records": 20
+    },
+    {
+      "scenario": "products_first_page",
+      "server_records": 520,
+      "requested_page_size": 20,
+      "adapter_requests": 1,
+      "fixture_json_utf8_bytes": 3772,
+      "mounted_cards": 4
+    },
+    {
+      "scenario": "card_decode_budget",
+      "logical_width": 160,
+      "dpr": 3,
+      "provider_decode_width": 1080
+    }
+  ],
+  "after": [
+    {
+      "scenario": "card_decode_budget",
+      "logical_width": 160,
+      "dpr": 3,
+      "provider_decode_width": 480
+    },
+    {
+      "scenario": "home_dependency",
+      "virtual_ms": 150,
+      "requests": 2,
+      "feed_delay_ms": 100,
+      "directory_delay_ms": 150
+    },
+    {
+      "scenario": "identical_get_burst",
+      "callers": 20,
+      "adapter_requests": 1
+    },
+    {
+      "scenario": "failed_scroll_burst",
+      "attempts": 10,
+      "loader_failures": 1,
+      "retained_records": 20
+    },
+    {
+      "scenario": "products_first_page",
+      "server_records": 520,
+      "requested_page_size": 20,
+      "adapter_requests": 1,
+      "fixture_json_utf8_bytes": 3772,
+      "mounted_cards": 4
+    }
+  ],
+  "unmeasured": [
+    "Android/iOS startup",
+    "real API latency",
+    "frame jank/FPS",
+    "app process memory",
+    "production/CDN bytes",
+    "representative server capacity"
+  ],
+  "verification": {
+    "flutter_test_passed": 436,
+    "flutter_analyze_issues": 0,
+    "formatted_files": 200,
+    "backend_reference_hashes_unchanged": 1258,
+    "load_harness_http_requests": 0
+  }
+}

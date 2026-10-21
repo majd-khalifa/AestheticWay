@@ -27,7 +27,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
   late final LeadsRepository _leadsRepository;
   int _selectedFilterIndex = 0; // 0: All, 1: Sent, 2: Contacted, 3: Closed
   late final PagedCollection<AppointmentRequestModel> _paging;
-  bool get _isLoading => _paging.isLoading;
+  bool get _isLoading => _paging.isLoading && _paging.items.isEmpty;
   String? get _errorMessage => _paging.items.isEmpty ? _paging.error : null;
   List<AppointmentRequestModel> get _allRequests => _paging.items;
   void _pageChanged() {

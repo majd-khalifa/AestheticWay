@@ -21,13 +21,12 @@ class PatientMediaBanner extends StatelessWidget {
       borderRadius: borderRadius,
       child: Image(
         key: ValueKey(provider),
-        image: ResizeImage.resizeIfNeeded(
+        image: boundedImageDecode(
           computeSafeCacheWidth(
             context,
             MediaQuery.sizeOf(context).width,
             height,
           ),
-          null,
           provider,
         ),
         width: double.infinity,

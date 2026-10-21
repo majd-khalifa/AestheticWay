@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../localization/app_locale.dart';
+import 'retry_after.dart';
 
 /// Standard API Exception with localized error parsing and field-level breakdown
 class ApiException implements Exception {
@@ -9,6 +10,8 @@ class ApiException implements Exception {
   final Map<String, List<String>>? fieldErrors;
   final String? originalBackendMessage;
   final dynamic rawData;
+  final Duration? retryAfter;
+  final bool isCancelled;
 
   const ApiException({
     required this.message,
@@ -17,6 +20,8 @@ class ApiException implements Exception {
     this.fieldErrors,
     this.originalBackendMessage,
     this.rawData,
+    this.retryAfter,
+    this.isCancelled = false,
   });
 
   /// Get first error message for a specific field, if present
@@ -29,6 +34,19 @@ class ApiException implements Exception {
 
   factory ApiException.fromDioError(DioException error) {
     int? statusCode = error.response?.statusCode;
+    Duration? retryAfter;
+    // A misconfigured proxy can repeat this header. Do not let Dio.value throw
+    // while handling an error; conservatively honor the longest valid delay.
+    for (final header
+        in error.response?.headers['retry-after'] ?? const <String>[]) {
+      final delay = parseRetryAfter(header);
+      if (delay != null && (retryAfter == null || delay > retryAfter)) {
+        retryAfter = delay;
+      }
+    }
+    if (error.type == DioExceptionType.cancel) {
+      return const ApiException(message: '', isCancelled: true);
+    }
     String? errorCode;
     String? rawBackendMsg;
     String message = LocaleService().isArabic
@@ -64,6 +82,7 @@ class ApiException implements Exception {
             : 'The service is temporarily unavailable. Please try again.',
         statusCode: statusCode,
         errorCode: 'SERVER_ERROR',
+        retryAfter: retryAfter,
       );
     }
     final data = error.response?.data;
@@ -167,6 +186,7 @@ class ApiException implements Exception {
       fieldErrors: fieldErrors,
       originalBackendMessage: null,
       rawData: null,
+      retryAfter: retryAfter,
     );
   }
 

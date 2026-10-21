@@ -427,6 +427,7 @@ void main() {
       expect(find.text('No medical staff published'), findsNothing);
       expect(find.text('Could not load. Try again'), findsOneWidget);
       client.fail = false;
+      await tester.pump(const Duration(seconds: 1));
       await tester.tap(find.text('Could not load. Try again'));
       await tester.pumpAndSettle();
       expect(find.text('Fixture Practitioner'), findsOneWidget);
@@ -507,6 +508,10 @@ void main() {
       expect(find.text('No clinics available'), findsNothing);
       client.fail = false;
       client.empty = true;
+      await tester.tap(find.text('Try Again'));
+      await tester.pump();
+      expect(find.text('Unable to load data'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
       await tester.tap(find.text('Try Again'));
       await tester.pumpAndSettle();
       expect(find.text('No clinics available'), findsOneWidget);

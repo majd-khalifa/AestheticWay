@@ -172,8 +172,10 @@ void main() {
     'pagination retries failed page without duplicates and honors next=null',
     () async {
       var failed = false;
+      var now = DateTime.utc(2026, 10, 20);
       final calls = <int>[];
       final page = PagedCollection<int>(
+        now: () => now,
         keyOf: (i) => '$i',
         loader: (number, _) async {
           calls.add(number);
@@ -191,6 +193,9 @@ void main() {
       await page.loadMore();
       expect(page.currentPage, 1);
       expect(page.error, isNotNull);
+      await page.loadMore();
+      expect(calls, [1, 2]);
+      now = now.add(const Duration(seconds: 1));
       await page.loadMore();
       await page.loadMore();
       expect(calls, [1, 2, 2]);

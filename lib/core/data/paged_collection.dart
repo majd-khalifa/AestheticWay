@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
+import 'package:clock/clock.dart';
 import '../network/api_exception.dart';
+import '../localization/app_locale.dart';
 
 const catalogPageSize = 20;
 
@@ -50,11 +52,26 @@ typedef PageLoader<T> =
 
 /// One page request at a time per query; newer queries invalidate older responses.
 class PagedCollection<T> extends ChangeNotifier {
-  PagedCollection({required this.loader, required this.keyOf, List<T>? items})
-    : items = items ?? <T>[];
+  PagedCollection({
+    required this.loader,
+    required this.keyOf,
+    List<T>? items,
+    DateTime Function()? now,
+  }) : items = items ?? <T>[],
+       _now = now ?? clock.now;
   final PageLoader<T> loader;
   final String Function(T) keyOf;
   final List<T> items;
+  final DateTime Function() _now;
+  DateTime? _retryAt;
+  int _failures = 0;
+  DateTime? get retryNotBefore => _retryAt;
+  bool get _coolingDown => _retryAt?.isAfter(_now()) ?? false;
+  void _resetBackoff() {
+    _failures = 0;
+    _retryAt = null;
+  }
+
   Map<String, dynamic> _query = {};
   Future<void>? _firstFlight;
   Future<void>? _nextFlight;
@@ -76,9 +93,11 @@ class PagedCollection<T> extends ChangeNotifier {
     final nextQuery = Map<String, dynamic>.of(query ?? _query);
     final sameQuery = mapEquals(nextQuery, _query);
     if (sameQuery && _firstFlight != null) return _firstFlight!;
+    if (sameQuery && _coolingDown) return Future.value();
     if (sameQuery && isLoaded && !force) return Future.value();
     _debounce?.cancel();
     if (!sameQuery) {
+      _resetBackoff();
       items.clear();
       isLoaded = false;
       _page = 0;
@@ -90,7 +109,7 @@ class PagedCollection<T> extends ChangeNotifier {
     isLoadingMore = false;
     isLoading = true;
     error = null;
-    hasMore = true;
+    if (!sameQuery || !isLoaded) hasMore = true;
     _notify();
     final flight = _fetch(1, requestId);
     _firstFlight = flight;
@@ -109,6 +128,7 @@ class PagedCollection<T> extends ChangeNotifier {
     isLoading = false;
     isLoadingMore = false;
     error = null;
+    _resetBackoff();
     final before = items.length;
     change(items);
     if (total != null) {
@@ -125,6 +145,7 @@ class PagedCollection<T> extends ChangeNotifier {
     _firstFlight = null;
     _nextFlight = null;
     if (!mapEquals(query, _query)) {
+      _resetBackoff();
       items.clear();
       total = null;
       _page = 0;
@@ -139,7 +160,9 @@ class PagedCollection<T> extends ChangeNotifier {
   }
 
   Future<void> loadMore() {
-    if (_disposed || isLoading || !hasMore) return Future.value();
+    if (_disposed || isLoading || !hasMore || _coolingDown) {
+      return Future.value();
+    }
     if (!isLoaded) return refresh();
     if (_nextFlight != null) return _nextFlight!;
     isLoadingMore = true;
@@ -171,12 +194,29 @@ class PagedCollection<T> extends ChangeNotifier {
       _page = page;
       isLoaded = true;
       error = null;
+      _resetBackoff();
     } catch (e) {
       if (_disposed || requestId != _requestId) return;
       if (page > 1 && e is ApiException && e.statusCode == 404) {
         hasMore = false;
+      } else if (e is ApiException && e.isCancelled) {
+        // Query/session cancellation is lifecycle control, not server failure.
+        error = null;
       } else {
-        error = e is ApiException ? e.message : e.toString();
+        error = e is ApiException
+            ? e.message
+            : LocaleService().isArabic
+            ? 'تعذر تحميل المحتوى. يرجى المحاولة مرة أخرى.'
+            : 'Unable to load content. Please try again.';
+        final seconds = 1 << _failures.clamp(0, 5);
+        _failures++;
+        var delay = Duration(seconds: seconds.clamp(1, 30));
+        if (e is ApiException &&
+            e.retryAfter != null &&
+            e.retryAfter! > delay) {
+          delay = e.retryAfter!;
+        }
+        _retryAt = _now().add(delay);
       }
     } finally {
       if (!_disposed && requestId == _requestId) {
@@ -201,6 +241,7 @@ class PagedCollection<T> extends ChangeNotifier {
     hasMore = true;
     total = null;
     error = null;
+    _resetBackoff();
     _notify();
   }
 
