@@ -1,3 +1,5 @@
+> **Superseded contract findings:** see [ca15dc6 review](PATIENT_CA15DC6_CONTRACT_REVIEW_FOR_ALI.md). The cover-only gallery and video-poster ambiguity described below are historical and resolved in the newly supplied source. Live deployment remains unverified. / نتائج العقد أدناه تاريخية؛ راجع التقرير المحدّث.
+
 # Patient design reference lock — backend handoff / تسليم اعتماد التصميم إلى علي
 
 Reviewed 21 October 2026, Asia/Damascus. Django is read-only. Source archive SHA-256: `d3a676d464a75805651bbdef7b91d184e6dd6d02b75953267efe7418e7a28f22` (641 files). This is source-contract evidence, not proof of deployment.

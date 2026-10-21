@@ -6,8 +6,8 @@ import 'package:aesthetic_way/features/profile/presentation/screens/profile_scre
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'support/settle_preview_images.dart';
 import 'package:aesthetic_way/core/widgets/async_action_button.dart';
-// Synthetic public data only. Photographic previews reuse the existing onboarding
-// clinic image; this file never supplies media or invented records to production.
+// Synthetic test-only records. Photographs have provenance in fixtures/media/README.md;
+// neither these records nor fixture photographs are supplied to production.
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -34,6 +34,7 @@ final previewClinic = <String, dynamic>{
   'address_ar': 'جميرا، دبي',
   'logo': 'assets/images/aesthetic_way_logo.png',
   'cover_image': _photo,
+  'gallery_images': [_photo, 'assets/images/onboarding/onboarding_2.webp'],
   'google_rating': 4.7,
   'google_reviews_count': 125,
   'google_maps_url': 'https://www.google.com/maps/search/?api=1&query=Dubai',
@@ -52,14 +53,16 @@ final _offer = <String, dynamic>{
   'title_ar': 'استشارة للبشرة',
   'description_en': 'Discuss your skin concerns with the clinic.',
   'description_ar': 'ناقش احتياجات بشرتك مع العيادة.',
-  'image_url': _photo,
+  'image_url': File(
+    'test/fixtures/media/portrait_photo.png',
+  ).absolute.uri.toString(),
   'original_price': '600',
   'offer_price': '450',
 };
 final _product = <String, dynamic>{
   'id': '55555555-5555-4555-8555-555555555555',
-  'name_en': 'Daily hydration serum',
-  'name_ar': 'سيروم الترطيب اليومي',
+  'name_en': 'Fragrance showcase',
+  'name_ar': 'عرض عطر تجميلي',
   'brand_name_en': 'Sample Skincare',
   'brand_name_ar': 'علامة نموذجية للعناية',
   'sponsor_company': 'Sample Cosmetics',
@@ -82,6 +85,7 @@ Object _response(String path) {
     ...previewClinic,
     if (!populated) ...{
       'cover_image': '',
+      'gallery_images': <String>[],
       'google_rating': null,
       'google_reviews_count': 0,
     },
@@ -91,7 +95,7 @@ Object _response(String path) {
     ..._product,
     if (populated)
       'image_url': File(
-        'test/fixtures/media/packaging_fixture.png',
+        'test/fixtures/media/fragrance_photo.jpg',
       ).absolute.uri.toString(),
   };
   final practitioner = {
@@ -99,25 +103,49 @@ Object _response(String path) {
     'clinic': clinic,
     if (populated)
       'avatar_url': File(
-        'test/fixtures/media/portrait_frame_fixture.png',
+        'test/fixtures/media/portrait_photo.png',
       ).absolute.uri.toString(),
   };
   if (path == 'home/feed/') {
     return {
       'featured_ads': [
-        {
-          'id': 'ad-1',
-          'subscription_tier': 'VIP',
-          'clinic': clinic,
-          'image_url': populated ? _photo : '',
-        },
+        {'id': 'ad-1', 'subscription_tier': 'VIP', 'clinic': clinic},
       ],
       'nearby_clinics': [clinic],
       'active_offers': [offer],
       'categories': [],
     };
   }
-  if (path == 'clinics/$previewClinicId/') return clinic;
+  if (path == 'clinics/$previewClinicId/') {
+    return {
+      ...clinic,
+      'practitioners': [
+        {
+          for (final field in [
+            'id',
+            'name_en',
+            'name_ar',
+            'type',
+            'speciality_en',
+            'speciality_ar',
+            'avatar_url',
+          ])
+            if (practitioner.containsKey(field)) field: practitioner[field],
+        },
+      ],
+      'treatments': [
+        {
+          'id': '77777777-7777-4777-8777-777777777777',
+          'name_en': 'Skin consultation',
+          'name_ar': 'استشارة للبشرة',
+          'description_en': 'Discuss care options with the clinic.',
+          'description_ar': 'ناقش خيارات العناية مع العيادة.',
+          'category': null,
+          'price': null,
+        },
+      ],
+    };
+  }
   if (path == 'auth/me/') {
     return {
       'id': 'fixture-patient',
@@ -143,9 +171,11 @@ Object _response(String path) {
               'An editorial preview using synthetic test data. Learn what to discuss with a medical professional.',
           'content_ar':
               'معاينة تحريرية ببيانات اختبار اصطناعية. تعرّف على ما يمكنك مناقشته مع المختص الطبي.',
-          'cover_image_url': populated ? _photo : '',
-          'category_en': 'Skin care',
-          'category_ar': 'العناية بالبشرة',
+          'cover_image_url': populated
+              ? File(
+                  'test/fixtures/media/portrait_photo.png',
+                ).absolute.uri.toString()
+              : '',
           'clinic': clinic,
         },
       ],
@@ -156,7 +186,6 @@ Object _response(String path) {
           'name_ar': 'استشارة للبشرة',
           'description_en': 'Discuss care options with the clinic.',
           'description_ar': 'ناقش خيارات العناية مع العيادة.',
-          'image_url': populated ? _photo : '',
         },
       ],
       _ => [],
@@ -232,7 +261,10 @@ void main() {
               'clinic' => ClinicProfileScreen(
                 clinic: ClinicModel.fromJson({
                   ...previewClinic,
-                  if (!media) 'cover_image': '',
+                  if (!media) ...{
+                    'cover_image': '',
+                    'gallery_images': <String>[],
+                  },
                 }),
               ),
               'products' => const MainNavScreen(initialIndex: 2),
@@ -243,7 +275,10 @@ void main() {
               'consultation' => AppointmentRequestScreen(
                 clinic: ClinicModel.fromJson({
                   ...previewClinic,
-                  if (!media) 'cover_image': '',
+                  if (!media) ...{
+                    'cover_image': '',
+                    'gallery_images': <String>[],
+                  },
                 }),
               ),
               'clinic_staff' ||
@@ -251,7 +286,10 @@ void main() {
               'clinic_offers' => ClinicProfileScreen(
                 clinic: ClinicModel.fromJson({
                   ...previewClinic,
-                  if (!media) 'cover_image': '',
+                  if (!media) ...{
+                    'cover_image': '',
+                    'gallery_images': <String>[],
+                  },
                 }),
               ),
               _ => _ConsultationBusyPreview(),
@@ -338,8 +376,8 @@ void main() {
             }
             if (media && (screen == 'products' || screen == 'practitioners')) {
               final fixture = screen == 'products'
-                  ? 'packaging_fixture.png'
-                  : 'portrait_frame_fixture.png';
+                  ? 'fragrance_photo.jpg'
+                  : 'portrait_photo.png';
               final expected = File.fromUri(
                 File('test/fixtures/media/$fixture').absolute.uri,
               );
@@ -400,7 +438,8 @@ void main() {
             if (output.isNotEmpty &&
                 (screen == 'home' ||
                     screen == 'consultation' ||
-                    screen == 'profile')) {
+                    screen == 'profile' ||
+                    screen == 'clinic')) {
               final scrollable = find.byType(Scrollable).first;
               await tester.drag(scrollable, const Offset(0, -540));
               await tester.pumpAndSettle();

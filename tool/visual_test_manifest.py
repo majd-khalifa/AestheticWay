@@ -10,6 +10,8 @@ files = [
     "assets/fonts/patient/NotoSansArabic.ttf",
     "test/fixtures/fonts/DejaVuSans.ttf",
     "test/fixtures/fonts/DejaVuSans-Bold.ttf",
+    "test/fixtures/media/fragrance_photo.jpg",
+    "test/fixtures/media/portrait_photo.png",
     "test/fixtures/media/packaging_fixture.png",
     "test/fixtures/media/portrait_frame_fixture.png",
 ]

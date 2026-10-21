@@ -12,6 +12,8 @@ import '../../../../core/widgets/async_action_button.dart';
 import '../../models/clinic_model.dart';
 import 'google_clinic_rating.dart';
 
+/// Photo, identity and actions form one composition. Compact placements retain
+/// photography and identity without repeating every directory action.
 class PatientClinicCard extends StatelessWidget {
   const PatientClinicCard({
     super.key,
@@ -41,85 +43,90 @@ class PatientClinicCard extends StatelessWidget {
     final description = loc.isArabic
         ? clinic.descriptionAr
         : clinic.descriptionEn;
+    final hasPhoto =
+        showCover &&
+        (media != null || resolveImageProvider(clinic.primaryPhotoUrl) != null);
+    Widget identity() => Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: AppColors.surface(context),
+            border: Border.all(color: AppColors.border(context)),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: LuxuryImage(
+            imageUrl: clinic.logoUrl,
+            width: compact ? 38 : 48,
+            height: compact ? 38 : 48,
+            fit: BoxFit.contain,
+            borderRadius: BorderRadius.circular(7),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                loc.isArabic ? clinic.nameAr : clinic.nameEn,
+                style: PatientDesign.heading(context, size: compact ? 17 : 21),
+              ),
+              if (location.trim().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    location,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.4,
+                      color: AppColors.subtext(context),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (compact)
+          IconButton(
+            onPressed: onTap,
+            tooltip: loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
+            icon: Icon(
+              Icons.arrow_forward_rounded,
+              size: 20,
+              color: AppColors.goldText(context),
+            ),
+          ),
+      ],
+    );
     return LuxuryCard(
       padding: EdgeInsets.zero,
       onTap: onTap,
-      borderRadius: 16,
+      borderRadius: 18,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (showCover)
+            if (hasPhoto)
               media ??
                   PatientMediaBanner(
                     source: clinic.primaryPhotoUrl,
                     aspectRatio: 3 / 2,
                   ),
+            if (showCover && !hasPhoto) const PatientMediaBanner(source: null),
+            // The fine champagne rule joins a photograph to its identity panel.
+            Container(
+              height: 2,
+              color: AppColors.goldText(context).withValues(alpha: .35),
+            ),
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(compact ? 12 : 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceSubtle(context),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: LuxuryImage(
-                          imageUrl: clinic.logoUrl,
-                          width: 46,
-                          height: 46,
-                          fit: BoxFit.contain,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              loc.isArabic ? clinic.nameAr : clinic.nameEn,
-                              style: PatientDesign.heading(
-                                context,
-                                size: compact ? 18 : 21,
-                              ),
-                            ),
-                            if (location.trim().isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.location_on_outlined,
-                                      size: 14,
-                                      color: AppColors.subtext(context),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        location,
-                                        style: TextStyle(
-                                          color: AppColors.subtext(context),
-                                          fontSize: 12,
-                                          height: 1.4,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  identity(),
                   GoogleClinicRating(clinic: clinic),
                   if (!compact && description.trim().isNotEmpty)
                     Padding(
@@ -129,40 +136,41 @@ class PatientClinicCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
                           height: 1.5,
                           color: AppColors.subtext(context),
                         ),
                       ),
                     ),
-                  const SizedBox(height: 12),
-                  SilverButton(
-                    label: loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
-                    onPressed: onTap,
-                    icon: Icons.arrow_forward_rounded,
-                    isFullWidth: true,
-                  ),
-                  if (!compact &&
-                      (onRequestAction != null ||
-                          onRequest != null ||
-                          onContact != null))
+                  if (!compact) ...[
+                    const SizedBox(height: 12),
+                    if (onRequestAction != null || onRequest != null)
+                      onRequestAction != null
+                          ? AsyncActionButton(
+                              label: loc.tr('request_consultation'),
+                              onPressed: isEntityUuid(clinic.id)
+                                  ? onRequestAction
+                                  : null,
+                              icon: Icons.chat_bubble_outline,
+                            )
+                          : SilverButton(
+                              label: loc.tr('request_consultation'),
+                              onPressed: onRequest,
+                            ),
                     Row(
                       children: [
-                        if (onRequestAction != null || onRequest != null)
-                          Expanded(
-                            child: onRequestAction != null
-                                ? AsyncActionButton(
-                                    label: loc.tr('request_consultation'),
-                                    onPressed: isEntityUuid(clinic.id)
-                                        ? onRequestAction
-                                        : null,
-                                    variant: SilverButtonVariant.textOnly,
-                                  )
-                                : TextButton(
-                                    onPressed: onRequest,
-                                    child: Text(loc.tr('request_consultation')),
-                                  ),
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: onTap,
+                            icon: const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 17,
+                            ),
+                            label: Text(
+                              loc.isArabic ? 'اكتشف العيادة' : 'Explore clinic',
+                            ),
                           ),
+                        ),
                         if (onContact != null)
                           IconButton(
                             onPressed: onContact,
@@ -171,6 +179,7 @@ class PatientClinicCard extends StatelessWidget {
                           ),
                       ],
                     ),
+                  ],
                 ],
               ),
             ),

@@ -1,3 +1,8 @@
+import '../../../../core/auth/guest_auth_guard.dart';
+import '../../../../core/utils/entity_id.dart';
+import '../../../../core/widgets/async_action_button.dart';
+import '../../../clinics/data/clinics_repository.dart';
+import '../../../appointment_lead/presentation/screens/appointment_request_screen.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/patient_practitioner_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
@@ -15,11 +20,13 @@ import 'package:aesthetic_way/features/practitioners/presentation/screens/practi
 class PractitionersScreen extends StatefulWidget {
   final String? initialRoleFilter; // 'all', 'doctors', 'skin_experts'
   final PractitionersRepository? repository;
+  final ClinicsRepository? clinicsRepository;
 
   const PractitionersScreen({
     super.key,
     this.initialRoleFilter,
     this.repository,
+    this.clinicsRepository,
   });
 
   @override
@@ -84,6 +91,41 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
     'licensed_professional' => 'licensed_professional',
     _ => null,
   };
+
+  Future<void> _requestConsultation(
+    PractitionerModel practitioner,
+    AsyncActionScope action,
+  ) async {
+    if (!isEntityUuid(practitioner.id) ||
+        !isEntityUuid(practitioner.clinicId)) {
+      throw StateError('Professional clinic unavailable');
+    }
+    final allowed = await action.wait(
+      GuestAuthGuard.requireAuth(
+        context,
+        reasonTitle: LocaleService().tr('request_consultation'),
+        reasonSubtitle: LocaleService().tr('request_consultation'),
+      ),
+    );
+    if (!allowed || !mounted) return;
+    final clinic = await action.wait(
+      (widget.clinicsRepository ?? ClinicsRepository()).getClinicDetail(
+        practitioner.clinicId,
+      ),
+    );
+    if (!mounted || clinic.id != practitioner.clinicId) {
+      throw StateError('Professional clinic unavailable');
+    }
+    Navigator.push(
+      context,
+      LuxuryPageRoute(
+        page: AppointmentRequestScreen(
+          clinic: clinic,
+          preselectedPractitioner: practitioner,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
@@ -340,6 +382,8 @@ class _PractitionersScreenState extends State<PractitionersScreen> {
                                 padding: const EdgeInsets.only(bottom: 18),
                                 child: PatientPractitionerCard(
                                   practitioner: p,
+                                  onInquiryAction: (action) =>
+                                      _requestConsultation(p, action),
                                   onTap: () => Navigator.push(
                                     context,
                                     LuxuryPageRoute(

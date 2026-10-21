@@ -534,18 +534,20 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
 
               // Clinic Summary Card
               LuxuryCard(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child:
-                          (resolveImageProvider(widget.clinic.coverImageUrl) !=
+                          (resolveImageProvider(
+                                widget.clinic.primaryPhotoUrl,
+                              ) !=
                               null)
                           ? LuxuryImage(
-                              imageUrl: widget.clinic.coverImageUrl,
-                              width: 82,
-                              height: 78,
+                              imageUrl: widget.clinic.primaryPhotoUrl,
+                              width: 106,
+                              height: 100,
                               fit: BoxFit.cover,
                               customPlaceholder: Container(
                                 width: 82,
@@ -562,8 +564,8 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                               ),
                             )
                           : Container(
-                              width: 82,
-                              height: 78,
+                              width: 106,
+                              height: 100,
                               color: isDark
                                   ? AppColors.cardSurfaceHover
                                   : AppColors.lightCardSurfaceHover,
@@ -582,11 +584,25 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                         children: [
                           Text(
                             loc.isArabic
+                                ? 'العيادة المختارة'
+                                : 'SELECTED CLINIC',
+                            style: TextStyle(
+                              fontSize: 10,
+                              letterSpacing: loc.isArabic ? 0 : 1,
+                              color: AppColors.goldText(context),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            loc.isArabic
                                 ? widget.clinic.nameAr
                                 : widget.clinic.nameEn,
                             style: AppTypography.cardTitle.copyWith(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              fontFamily: loc.isArabic
+                                  ? 'PatientArabic'
+                                  : 'PatientDisplay',
+                              fontWeight: FontWeight.w600,
                               color: isDark
                                   ? AppColors.silverPrimary
                                   : AppColors.lightTextPrimary,
@@ -904,7 +920,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                           style: AppTypography.caption.copyWith(
                             color: AppColors.mutedText(context),
                             height: 1.45,
-                            fontSize: 11.5,
+                            fontSize: 13,
                           ),
                         ),
                       ),

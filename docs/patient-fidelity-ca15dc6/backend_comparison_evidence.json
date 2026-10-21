@@ -1,0 +1,48 @@
+{
+  "new_archive_sha256": "8c649026a3acdc0835ab8533312e210636153fb2632c41ed1a6b574400124826",
+  "comparison_before_integration_edits": true,
+  "new_files": 390,
+  "old_files_including_generated_bytecode": 641,
+  "new_snapshot_digest": "e7f823222e094652e751094e6d9ba414c33f41d364e449f8c37dca5ddea7f51c",
+  "old_snapshot_digest": "e65ed63c532e73bdf1a5b8fff923fe8942b33f34e23a165cee52380dc2657d7d",
+  "new_snapshot_unchanged": true,
+  "old_snapshot_unchanged": true,
+  "delta_excluding_generated_bytecode": {
+    "added": [
+      "AESTHETIC_WAY_Backend_Spec_v1.md",
+      "README.md",
+      "conftest.py",
+      "docker-compose.yml",
+      ".dockerignore",
+      "openapi.json",
+      "CLINIC_ONBOARDING_AND_CRUD_GAPS_SPEC.md",
+      "pytest.ini",
+      ".gitignore",
+      "ruff.toml",
+      "docker/Dockerfile",
+      "docker/entrypoint.sh",
+      "apps/media/tests/test_media_hardening_b02_b07.py",
+      "apps/media/tests/test_media_first_handoff.py"
+    ],
+    "removed": [
+      ".env.example"
+    ],
+    "changed": [
+      "core/pagination/standard.py",
+      "apps/clinics/portal_views.py",
+      "apps/clinics/views.py",
+      "apps/clinics/serializers.py",
+      "apps/clinics/portal_serializers.py",
+      "apps/home/serializers.py",
+      "apps/media/serializers.py",
+      "apps/media/permissions.py",
+      "apps/media/models.py",
+      "apps/media/validators.py",
+      "apps/clinics/tests/test_mobile_sync_and_storage.py",
+      "apps/media/tests/test_media_security.py"
+    ]
+  },
+  "live_api_verified": false,
+  "django_tests_executed": false,
+  "django_files_modified": false
+}

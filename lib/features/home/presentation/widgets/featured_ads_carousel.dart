@@ -39,7 +39,7 @@ class FeaturedAdsCarousel extends StatefulWidget {
 
 class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
     with WidgetsBindingObserver {
-  final PageController _pageController = PageController(viewportFraction: 0.92);
+  late PageController _pageController;
   int _currentIndex = 0;
   Timer? _autoScrollTimer;
   Timer? _resumeTimer;
@@ -54,10 +54,35 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(
+      viewportFraction: widget.ads.length == 1 ? 1 : .72,
+    );
     WidgetsBinding.instance.addObserver(this);
     _foreground =
         WidgetsBinding.instance.lifecycleState == null ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    _startAutoScroll();
+  }
+
+  @override
+  void didUpdateWidget(covariant FeaturedAdsCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if ((oldWidget.ads.length == 1) != (widget.ads.length == 1)) {
+      final previous = _pageController;
+      _pageController = PageController(
+        viewportFraction: widget.ads.length == 1 ? 1 : .72,
+      );
+      _currentIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
+    if (widget.ads.isNotEmpty && _currentIndex >= widget.ads.length) {
+      _currentIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(0);
+        }
+      });
+    }
     _startAutoScroll();
   }
 
@@ -157,13 +182,14 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      '${_currentIndex + 1} / ${widget.ads.length}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.subtext(context),
+                    if (widget.ads.length > 1)
+                      Text(
+                        '${_currentIndex + 1} / ${widget.ads.length}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.subtext(context),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -180,11 +206,13 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
                 },
                 child: ContentSizedPageView(
                   controller: _pageController,
+                  padEnds: false,
                   itemCount: widget.ads.length,
                   onPageChanged: (index) =>
                       setState(() => _currentIndex = index),
                   itemBuilder: (context, index) => _FeaturedAdCard(
                     clinic: widget.ads[index],
+                    mediaAspectRatio: widget.ads.length == 1 ? 2.5 : 16 / 9,
                     placement: widget.placements?[index],
                     loc: loc,
                     sheenAnimation: _sheenController,
@@ -205,7 +233,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              if (widget.ads.length > 1) const SizedBox(height: 10),
 
               if (widget.ads.length > 1)
                 SingleChildScrollView(
@@ -253,6 +281,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
 
 class _FeaturedAdCard extends StatefulWidget {
   final ClinicModel clinic;
+  final double mediaAspectRatio;
   final FeaturedAdApiModel? placement;
   final LocaleService loc;
   final Animation<double> sheenAnimation;
@@ -264,6 +293,7 @@ class _FeaturedAdCard extends StatefulWidget {
 
   const _FeaturedAdCard({
     required this.clinic,
+    required this.mediaAspectRatio,
     this.placement,
     required this.loc,
     required this.sheenAnimation,
@@ -290,7 +320,7 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 8),
+      padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 4),
       child: PatientClinicCard(
         clinic: widget.clinic,
         compact: true,
@@ -302,6 +332,7 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
           children: [
             FeaturedAdSlideMedia(
               imageUrl: _image,
+              aspectRatio: widget.mediaAspectRatio,
               videoUrl: _video,
               fallbackLogoUrl: widget.clinic.logoUrl,
               isActive: widget.isActive,
@@ -336,6 +367,7 @@ class FeaturedAdSlideMedia extends StatefulWidget {
   static const Duration maxVideoDuration = Duration(seconds: 15);
 
   final String? imageUrl;
+  final double aspectRatio;
   final String? fallbackLogoUrl;
   final String? videoUrl;
   final bool isActive;
@@ -343,6 +375,7 @@ class FeaturedAdSlideMedia extends StatefulWidget {
   const FeaturedAdSlideMedia({
     super.key,
     required this.imageUrl,
+    this.aspectRatio = 16 / 9,
     this.fallbackLogoUrl,
     this.videoUrl,
     this.isActive = true,
@@ -498,13 +531,13 @@ class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
     final hasVideo = resolveNetworkImageUrl(widget.videoUrl) != null;
     Widget media = PatientMediaBanner(
       source: widget.imageUrl,
-      aspectRatio: 16 / 9,
+      aspectRatio: widget.aspectRatio,
     );
     // A video without a poster still needs measurable bounds: otherwise the
     // visibility observer sees zero height and can never initialize playback.
     if (hasVideo) {
       media = AspectRatio(
-        aspectRatio: 16 / 9,
+        aspectRatio: widget.aspectRatio,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -538,7 +571,7 @@ class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
     if (_isVideoInitialized && !_hasVideoError && _controller != null) {
       final size = _controller!.value.size;
       media = AspectRatio(
-        aspectRatio: 16 / 9,
+        aspectRatio: widget.aspectRatio,
         child: ClipRect(
           child: FittedBox(
             fit: BoxFit.cover,

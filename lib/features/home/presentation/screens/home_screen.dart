@@ -337,29 +337,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 18),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   loc.isArabic
-                      ? 'عناية جمالية\nتليق بك'
-                      : 'Aesthetic Care\nfor a More You',
-                  style: PatientDesign.heading(context, size: 34),
-                ),
-                const SizedBox(height: 10),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 320),
-                  child: Text(
-                    loc.isArabic
-                        ? 'اكتشف العيادات والمختصين والإجراءات المناسبة لاحتياجاتك.'
-                        : 'Discover clinics, medical professionals and treatments for your skin and wellbeing.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.6,
-                      color: AppColors.subtext(context),
-                    ),
-                  ),
+                      ? 'عناية جمالية تليق بك'
+                      : 'Aesthetic Care, for You',
+                  style: PatientDesign.heading(context, size: 27),
                 ),
               ],
             ),
@@ -398,14 +384,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 4. Categories Quick Access Grid (8 Official Categories)
         SliverToBoxAdapter(
           child: CategoryGrid(onCategorySelected: _handleCategoryTap),
         ),
 
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 5. Active Medical Offers Section
         if (offersList.isNotEmpty)
@@ -417,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
         if (offersList.isNotEmpty)
-          const SliverToBoxAdapter(child: SizedBox(height: 18)),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 6. Nearby Verified Clinics Section
         if (nearbyList.isNotEmpty)

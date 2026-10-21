@@ -1,3 +1,5 @@
+> **Updated recovery:** this report records the earlier PR10 milestone. See [final reference-fidelity report](PATIENT_REFERENCE_FIDELITY_RECOVERY_REPORT.md) and [ca15dc6 contract review](PATIENT_CA15DC6_CONTRACT_REVIEW_FOR_ALI.md) for the current implementation and source findings. In particular, the newly supplied backend supports real gallery assets and distinct video posters.
+
 # Patient Portal — approved design reference lock
 
 Branch: `codex/patient-luxury-design-reference-lock`. Base: `b33a287a5fd4d8473044f93ca03f044bf083fd42` (`origin/main`, merged PRs #6–#9). Approved design archive SHA-256: `bd6d22fc988f3ca140c7dbd59198c60c13ed71341b853271800f612bf687de99`. The user approved the screen mapping and deviations before production edits.

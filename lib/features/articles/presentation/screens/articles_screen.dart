@@ -299,8 +299,8 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             : (loc.isArabic
                   ? (article.clinicNameAr.isNotEmpty
                         ? article.clinicNameAr
-                        : 'أستيتك واي')
-                  : (article.clinicNameEn ?? 'Aesthetic Way'));
+                        : '')
+                  : (article.clinicNameEn ?? ''));
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 14),
@@ -315,53 +315,45 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PatientMediaBanner(
-                  source: article.coverImageUrl,
-                  aspectRatio: 16 / 10,
-                  borderRadius: BorderRadius.circular(18),
+                Stack(
+                  children: [
+                    PatientMediaBanner(
+                      source: article.coverImageUrl,
+                      aspectRatio: 16 / 9,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(18),
+                      ),
+                    ),
+                    if (categoryLabel.isNotEmpty)
+                      PositionedDirectional(
+                        start: 14,
+                        bottom: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            categoryLabel,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.goldText(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          if (categoryLabel.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.accentChampagne.withValues(
-                                  alpha: isDark ? 0.15 : 0.2,
-                                ),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                categoryLabel,
-                                style: TextStyle(
-                                  color: AppColors.goldText(context),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10.5,
-                                ),
-                              ),
-                            ),
-                          const Spacer(),
-                          if (article.hasPublicationDate)
-                            Text(
-                              DateFormat(
-                                'yyyy/MM/dd',
-                              ).format(article.publishedAt),
-                              style: TextStyle(
-                                color: AppColors.mutedText(context),
-                                fontSize: 10.5,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
                       Text(
                         loc.isArabic ? article.titleAr : article.titleEn,
                         style: PatientDesign.heading(context, size: 23),
@@ -380,43 +372,61 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 12),
-                      Row(
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          if (article.authorDoctorAvatar.isNotEmpty)
-                            LuxuryAvatar(
-                              imageUrl: article.authorDoctorAvatar,
-                              radius: 12,
-                              fallbackLogoUrl: article.clinicLogoUrl,
-                            )
-                          else
-                            const CircleAvatar(
-                              radius: 12,
-                              backgroundColor: AppColors.cardSurfaceHover,
-                              child: Icon(
-                                Icons.person_rounded,
-                                size: 14,
-                                color: AppColors.accentChampagne,
-                              ),
+                          if (displayAuthor.trim().isNotEmpty)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (article.authorDoctorAvatar.isNotEmpty) ...[
+                                  LuxuryAvatar(
+                                    imageUrl: article.authorDoctorAvatar,
+                                    radius: 12,
+                                    fallbackLogoUrl: article.clinicLogoUrl,
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                Flexible(
+                                  child: Text(
+                                    displayAuthor,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.subtext(context),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              displayAuthor,
+                          if (article.hasPublicationDate)
+                            Text(
+                              DateFormat(
+                                'yyyy/MM/dd',
+                              ).format(article.publishedAt),
                               style: TextStyle(
-                                color: isDark
-                                    ? AppColors.silverPrimary
-                                    : AppColors.lightTextPrimary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11.5,
+                                fontSize: 11,
+                                color: AppColors.subtext(context),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 12,
-                            color: AppColors.accentChampagne,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                loc.isArabic ? 'اقرأ المقال' : 'Read article',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.goldText(context),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 18,
+                                color: AppColors.goldText(context),
+                              ),
+                            ],
                           ),
                         ],
                       ),

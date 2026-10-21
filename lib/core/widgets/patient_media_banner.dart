@@ -62,7 +62,7 @@ class PatientMediaFallback extends StatelessWidget {
     child: Row(
       children: [
         Icon(
-          Icons.photo_outlined,
+          Icons.auto_awesome_outlined,
           size: 22,
           color: AppColors.goldText(context),
         ),
@@ -70,8 +70,8 @@ class PatientMediaFallback extends StatelessWidget {
         Expanded(
           child: Text(
             LocaleService().isArabic
-                ? 'الصور غير متاحة'
-                : 'Photography unavailable',
+                ? 'اكتشف التفاصيل'
+                : 'Discover the details',
             style: TextStyle(fontSize: 12, color: AppColors.subtext(context)),
           ),
         ),

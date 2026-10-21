@@ -1,0 +1,538 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "text": [
+    {
+      "text": "Discover the details",
+      "rect": [
+        68.0,
+        82.5,
+        286.0,
+        17.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 12.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "Fixture Medical Aesthetics & Dermatology Clinic",
+      "rect": [
+        94.0,
+        136.0,
+        276.0,
+        93.0
+      ],
+      "family": "PatientDisplay",
+      "weight": 600,
+      "size": 24.0,
+      "height": 1.3,
+      "spacing": 0.25,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Dubai",
+      "rect": [
+        94.0,
+        235.0,
+        40.1875,
+        20.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "4.7",
+      "rect": [
+        118.625,
+        270.5,
+        17.1875,
+        17.0
+      ],
+      "family": "PatientArabic",
+      "weight": 700,
+      "size": 11.5,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4294507260,
+      "direction": "ltr"
+    },
+    {
+      "text": "Google",
+      "rect": [
+        140.8125,
+        271.5,
+        35.5625,
+        15.0
+      ],
+      "family": "PatientArabic",
+      "weight": 500,
+      "size": 10.0,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "(125)",
+      "rect": [
+        179.375,
+        271.5,
+        24.625,
+        15.0
+      ],
+      "family": "PatientArabic",
+      "weight": 500,
+      "size": 10.0,
+      "height": 1.5,
+      "spacing": 0.25,
+      "color": 4288326077,
+      "direction": "ltr"
+    },
+    {
+      "text": "Request Consultation",
+      "rect": [
+        132.125,
+        334.0,
+        150.8125,
+        18.0
+      ],
+      "family": "PatientArabic",
+      "weight": 600,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4279704614,
+      "direction": "ltr"
+    },
+    {
+      "text": "Please wait",
+      "rect": [
+        168.1875,
+        334.0,
+        81.625,
+        18.0
+      ],
+      "family": "PatientArabic",
+      "weight": 700,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4279704614,
+      "direction": "ltr"
+    },
+    {
+      "text": "Google Maps",
+      "rect": [
+        162.0,
+        392.0,
+        91.0,
+        18.0
+      ],
+      "family": "PatientArabic",
+      "weight": 600,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Opening Maps",
+      "rect": [
+        157.3125,
+        392.0,
+        103.3125,
+        18.0
+      ],
+      "family": "PatientArabic",
+      "weight": 700,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "About & Map",
+      "rect": [
+        24.1875,
+        494.0,
+        79.125,
+        17.0
+      ],
+      "family": "PatientArabic",
+      "weight": 600,
+      "size": 12.0,
+      "height": 1.4,
+      "spacing": 0.25,
+      "color": 4293312125,
+      "direction": "ltr"
+    },
+    {
+      "text": "Medical Staff",
+      "rect": [
+        113.25,
+        494.0,
+        76.0,
+        17.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 12.0,
+      "height": 1.4,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "Treatments",
+      "rect": [
+        205.4375,
+        494.0,
+        66.625,
+        17.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 12.0,
+      "height": 1.4,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "Offers",
+      "rect": [
+        307.9375,
+        494.0,
+        36.625,
+        17.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 12.0,
+      "height": 1.4,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "About the clinic",
+      "rect": [
+        40.6875,
+        561.6875,
+        308.625,
+        33.0
+      ],
+      "family": "PatientDisplay",
+      "weight": 400,
+      "size": 23.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Medical information supplied by this fixture clinic.",
+      "rect": [
+        40.6875,
+        604.6875,
+        308.625,
+        52.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 15.0,
+      "height": 1.7,
+      "spacing": 0.25,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Clinic location",
+      "rect": [
+        93.6875,
+        687.6875,
+        123.0,
+        23.0
+      ],
+      "family": "PatientDisplay",
+      "weight": 600,
+      "size": 18.0,
+      "height": 1.3,
+      "spacing": 0.25,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Google Maps",
+      "rect": [
+        162.0,
+        742.6875,
+        91.0,
+        18.0
+      ],
+      "family": "PatientArabic",
+      "weight": 600,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Opening Maps",
+      "rect": [
+        157.3125,
+        742.6875,
+        103.3125,
+        18.0
+      ],
+      "family": "PatientArabic",
+      "weight": 700,
+      "size": 14.0,
+      "height": 1.3,
+      "spacing": 0.2,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "Fixture branch 1",
+      "rect": [
+        80.6875,
+        805.625,
+        268.625,
+        24.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 16.0,
+      "height": 1.5,
+      "spacing": 0.5,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "",
+      "rect": [
+        80.6875,
+        829.875,
+        268.625,
+        20.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "Fixture branch 2",
+      "rect": [
+        80.6875,
+        877.625,
+        268.625,
+        24.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 16.0,
+      "height": 1.5,
+      "spacing": 0.5,
+      "color": 4294506226,
+      "direction": "ltr"
+    },
+    {
+      "text": "",
+      "rect": [
+        80.6875,
+        901.875,
+        268.625,
+        20.0
+      ],
+      "family": "PatientArabic",
+      "weight": 400,
+      "size": 14.0,
+      "height": 1.43,
+      "spacing": 0.25,
+      "color": 4290100683,
+      "direction": "ltr"
+    },
+    {
+      "text": "Clinic profile",
+      "rect": [
+        132.0,
+        14.5,
+        126.0,
+        27.0
+      ],
+      "family": "PatientDisplay",
+      "weight": 600,
+      "size": 21.0,
+      "height": 1.3,
+      "spacing": null,
+      "color": 4294506226,
+      "direction": "ltr"
+    }
+  ],
+  "icons": [
+    {
+      "glyph": 61097,
+      "family": "MaterialIcons",
+      "rect": [
+        36.0,
+        80.0,
+        22.0,
+        22.0
+      ],
+      "size": 22.0,
+      "color": 4293312125
+    },
+    {
+      "glyph": 983508,
+      "family": "MaterialIcons",
+      "rect": [
+        102.625,
+        272.5,
+        13.0,
+        13.0
+      ],
+      "size": 13.0,
+      "color": 4294286859
+    },
+    {
+      "glyph": 57685,
+      "family": "MaterialIcons",
+      "rect": [
+        107.125,
+        334.5,
+        17.0,
+        17.0
+      ],
+      "size": 17.0,
+      "color": 4279704614
+    },
+    {
+      "glyph": 61870,
+      "family": "MaterialIcons",
+      "rect": [
+        137.0,
+        392.5,
+        17.0,
+        17.0
+      ],
+      "size": 17.0,
+      "color": 4294506226
+    },
+    {
+      "glyph": 61075,
+      "family": "MaterialIcons",
+      "rect": [
+        53.25,
+        467.0,
+        21.0,
+        21.0
+      ],
+      "size": 21.0,
+      "color": 4293312125
+    },
+    {
+      "glyph": 58504,
+      "family": "MaterialIcons",
+      "rect": [
+        140.75,
+        467.0,
+        21.0,
+        21.0
+      ],
+      "size": 21.0,
+      "color": 4290100683
+    },
+    {
+      "glyph": 61097,
+      "family": "MaterialIcons",
+      "rect": [
+        228.25,
+        467.0,
+        21.0,
+        21.0
+      ],
+      "size": 21.0,
+      "color": 4290100683
+    },
+    {
+      "glyph": 61828,
+      "family": "MaterialIcons",
+      "rect": [
+        315.75,
+        467.0,
+        21.0,
+        21.0
+      ],
+      "size": 21.0,
+      "color": 4290100683
+    },
+    {
+      "glyph": 61843,
+      "family": "MaterialIcons",
+      "rect": [
+        55.6875,
+        687.6875,
+        28.0,
+        28.0
+      ],
+      "size": 28.0,
+      "color": 4293312125
+    },
+    {
+      "glyph": 58460,
+      "family": "MaterialIcons",
+      "rect": [
+        137.0,
+        743.1875,
+        17.0,
+        17.0
+      ],
+      "size": 17.0,
+      "color": 4294506226
+    },
+    {
+      "glyph": 61411,
+      "family": "MaterialIcons",
+      "rect": [
+        40.6875,
+        814.6875,
+        24.0,
+        24.0
+      ],
+      "size": 24.0,
+      "color": 4290100683
+    },
+    {
+      "glyph": 61411,
+      "family": "MaterialIcons",
+      "rect": [
+        40.6875,
+        886.6875,
+        24.0,
+        24.0
+      ],
+      "size": 24.0,
+      "color": 4290100683
+    }
+  ]
+}

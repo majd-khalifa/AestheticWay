@@ -35,21 +35,29 @@ class NearbyClinicsSection extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          for (final clinic in clinics)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: PatientClinicCard(
-                clinic: clinic,
-                onTap: () => onClinicTap(clinic),
-                onRequest: onRequestTap == null
-                    ? null
-                    : () => onRequestTap!(clinic),
-                onRequestAction: onRequestAction == null
-                    ? null
-                    : (action) => onRequestAction!(clinic, action),
-                onContact: () => onContactTap(clinic),
-              ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final clinic in clinics)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 12),
+                    child: SizedBox(
+                      width: (MediaQuery.sizeOf(context).width * .72).clamp(
+                        230,
+                        330,
+                      ),
+                      child: PatientClinicCard(
+                        clinic: clinic,
+                        compact: true,
+                        onTap: () => onClinicTap(clinic),
+                      ),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );

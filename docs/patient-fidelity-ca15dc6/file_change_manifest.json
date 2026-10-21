@@ -1,0 +1,3829 @@
+{
+  "cumulative_base": "b33a287a5fd4d8473044f93ca03f044bf083fd42",
+  "recovery_base": "514f03a3939ed346e5b43b05533d708831b9bdcb",
+  "cumulative_pr10": [
+    {
+      "status": "M",
+      "path": ".github/workflows/flutter-visual-regressions.yml",
+      "sha256": "b943e0d62479bd428f772c53a0e54c5c4151148df6015c4eed6187bcbea7f3a3"
+    },
+    {
+      "status": "A",
+      "path": "assets/fonts/patient/NotoSansArabic.ttf",
+      "sha256": "63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e"
+    },
+    {
+      "status": "A",
+      "path": "assets/fonts/patient/OFL-NotoSansArabic.txt",
+      "sha256": "07fc70bfeb985cc1a87a8587d0a0c80bab11c86c9dc3fd95b6f0cb332f983e96"
+    },
+    {
+      "status": "A",
+      "path": "assets/fonts/patient/OFL-PlayfairDisplay.txt",
+      "sha256": "566be814f8e96e93dfa16101331557eb6b5467e9e03f627c0910fe93ca12300e"
+    },
+    {
+      "status": "A",
+      "path": "assets/fonts/patient/PlayfairDisplay.ttf",
+      "sha256": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6"
+    },
+    {
+      "status": "A",
+      "path": "assets/fonts/patient/README.md",
+      "sha256": "bd4875a8f9b57b8d86fa8bd3d6bdfa915fa6f1a6968ccbcd504f485086cf41a0"
+    },
+    {
+      "status": "A",
+      "path": "docs/PATIENT_CA15DC6_CONTRACT_REVIEW_FOR_ALI.md",
+      "sha256": "3d60b24d0efa2370e7eb0d977f1e2c769bb165a46fe8af92766b2154ea47ba55"
+    },
+    {
+      "status": "A",
+      "path": "docs/PATIENT_DESIGN_LOCK_BACKEND_HANDOFF_FOR_ALI.md",
+      "sha256": "4054b5c785459154c0ed95b8975644c7d3ba3e91a2c86c9ab8098a0c43ff6a41"
+    },
+    {
+      "status": "A",
+      "path": "docs/PATIENT_DESIGN_LOCK_CHANGE_REPORT.md",
+      "sha256": "2dcc546e0490b36d854d1acf723915da7fda4fbc2951f52810917fc7210fd4fa"
+    },
+    {
+      "status": "A",
+      "path": "docs/PATIENT_REFERENCE_FIDELITY_RECOVERY_REPORT.md",
+      "sha256": "1214b0b77e6eb51c1990c50d2e9c57f04f1294fae95ab382a8fdeae797d3492d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/README.md",
+      "sha256": "56366175dd515a278b98a92f2afd6e239ceafe076634c271d27355ff6f8b61e5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/capture_manifest.json",
+      "sha256": "dddf85a97961c710d59e9bf5238de060feda5873c729a1aa39c60e546e446922"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_articles.jpg",
+      "sha256": "380cac0e6f1b9e9eab0b6fc42110843876869249f85f9d159d13b4a9382a249e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_clinic.jpg",
+      "sha256": "63c1af63ac28c102d79f1e5882170cb79bdefa78cbb52234be298144f4abe340"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_consultation.jpg",
+      "sha256": "6d3a6d38125727d4bd2543d30dd0466e71ff663a050c6d2c39d02213969426d0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_directory.jpg",
+      "sha256": "11566c55cc798807a50c0d412bb7d70bfa967d1c229b8e4431cee9d91bb9814d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_home.jpg",
+      "sha256": "819d4ebbaea3e790626c3fe7460502ec8e1586b6406750ae94cdeaa5a7dd6d5b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_offers.jpg",
+      "sha256": "6d9f468017a68c7a312a25d80debc25f77ea019a4ddf1375b7d79816d2ff2318"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_practitioners.jpg",
+      "sha256": "6b5bca0e9c51fa431727668c8a3d8498e8e7b9f99214f9cd16202b3ee8bb4052"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/compare_products.jpg",
+      "sha256": "153641321242ea197bc42edc19cf2187afd17340edd2071aec794d3611b75872"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/matrix_home_to_products.jpg",
+      "sha256": "8aad9fe5a7a16e3720af45e6e3fe15ad53047e97b1eb9df7fc95f7625a400751"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/comparisons/matrix_offers_to_consultation.jpg",
+      "sha256": "5ed2d34dd4ab27f2aa3549e0f475b7d6c85728f63c2e61a865595bbb555705b5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/articles_absent_dark_ar.png",
+      "sha256": "2e7748b2790a1844378904a7f4241351f8e319f75962f3e71ffb7aee69558bb8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/articles_absent_dark_en.png",
+      "sha256": "01a26d25e7507a6a0cedcbfa230ccaefbe2b96f1bacfc4af21f406fa0e4bce14"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/articles_absent_light_en.png",
+      "sha256": "d5fc27302a2bc34e024c8305c8ef1062c49d0c4644d1a6a03069fed295a1d466"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/articles_media_dark_ar.png",
+      "sha256": "8ffc27ac797ba21e69227de68c8bce7b624ca4faabe553a23d454dbf22a81388"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/articles_media_dark_en.png",
+      "sha256": "1531517f8f1c71d1ab65c9dd198107642b7eeb02ec8ee4659c62ec7afcb7fad5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/articles_media_light_en.png",
+      "sha256": "9b973e452b621328f674739175b3a1aa195defb7b61693c3a17fd049faad75d0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/busy_absent_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/busy_absent_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/busy_absent_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/busy_media_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/busy_media_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/busy_media_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_absent_dark_ar.png",
+      "sha256": "d4429157126fba4f3b4db8b44a73bf79beedd6d7d7fb66c56fbb72498a69a440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_absent_dark_en.png",
+      "sha256": "d6d85cd9ca9bc9c6fcc4c4f94c2fa2d5f9d220b0ee1eaa967df872f16f3a5a1f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_absent_light_en.png",
+      "sha256": "8839618ad57d698ddd3cfb4121cff39295df4107cfb0c2c6728a9f1b2b712223"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_media_dark_ar.png",
+      "sha256": "ef48bd26ba4c13c589ade3a8ae8957ab040d0ec0b5f8916cdcbd0c0a7c6f6999"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_media_dark_en.png",
+      "sha256": "ce5fddb01f13aeb9e364a951249bfcb39d6b3928c217c6f92ebdb6007d5da754"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_media_light_en.png",
+      "sha256": "25976f6e7d47545e2f4a8a4b9fcac22125784b4808a2d9b78b4441096334d932"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_offers_absent_dark_ar.png",
+      "sha256": "301cde0353a0d3390b94ac128db6822000d9f5d9baf32bb556ed7d46fbfea87e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_offers_absent_dark_en.png",
+      "sha256": "53f47fce26c4d77c84b88725a14f63d8665dd40a408fd7484800217c76d99740"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_offers_absent_light_en.png",
+      "sha256": "376271de739833733bf8a72070a12aa77b8864663d76ef8fb58a665992a1c4e4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_offers_media_dark_ar.png",
+      "sha256": "86e8142ceff439621b7f7ada6add894d18057deded70bdca94dd349832813d2b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_offers_media_dark_en.png",
+      "sha256": "b4801e1ec7948ee7c7d4f24e8db55e1952d4ecf333bdae71bc06c7c9be1c5559"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_offers_media_light_en.png",
+      "sha256": "051dcf159d96da32c711d7cdaa1884985365eb7d672341dfbe97341709fdb41d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_staff_absent_dark_ar.png",
+      "sha256": "10c45d561ca9e2596de36e654e46f11dae402e853a177e71c9c514cd9b594fe4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_staff_absent_dark_en.png",
+      "sha256": "d4933f8f7e91049e4aaf25cd620e81211c86ec57bebfbe3c9dac37482bf0666c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_staff_absent_light_en.png",
+      "sha256": "28e03ddfd837716b1b5c7cef447e31a6e3cec5dc9d25aef79b50dce65570714d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_staff_media_dark_ar.png",
+      "sha256": "c698013e45f588be64153e7e9e0817befef4024a45b1c71aea280f751ef85de5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_staff_media_dark_en.png",
+      "sha256": "f02f20486b3a74459e85b5de1a3bf655a927214a9b0667eba93f591c707e8f93"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_staff_media_light_en.png",
+      "sha256": "02e2fab91454f53c5c1b08e8f7ab1d4bb8a7e0b5fcf646bd92a2178502a7c959"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_treatments_absent_dark_ar.png",
+      "sha256": "4a0ab64df8b9bb1fbfa2b2746439685c0719c7dd85afc51e1bf1616fbb750080"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_treatments_absent_dark_en.png",
+      "sha256": "92fc0ee60f105be846de20d8827cd2681e08edc214aa298fab158b6ae9a94d29"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_treatments_absent_light_en.png",
+      "sha256": "d796118534c5c3dfebc39e48077caa276bd9b962a4bdcd0d317a047b100a9457"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_treatments_media_dark_ar.png",
+      "sha256": "235a8c34c6c7138c74102a0cbdb2e2a6d270db4dc31f3586dc9b7d44c6ceb533"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_treatments_media_dark_en.png",
+      "sha256": "625c73f88380de6e1260c346fe7ea4f836bd28ea95cf3a9ee64cb9b9848479a9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/clinic_treatments_media_light_en.png",
+      "sha256": "e849ec946da3b0658354ed00025efa1b73bc423fa39d73f2b8ca0cfcc48b982b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_absent_dark_ar.png",
+      "sha256": "4025b9d72bd8be0f7b21e656f2168d1a87694a8e56b211366ad54612d07b64ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_absent_dark_ar_scrolled.png",
+      "sha256": "4025b9d72bd8be0f7b21e656f2168d1a87694a8e56b211366ad54612d07b64ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_absent_dark_en.png",
+      "sha256": "7717680d65b5fe07cf672f374dfafd653bb592f01266c4d730717207b6b1bc89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_absent_dark_en_scrolled.png",
+      "sha256": "7717680d65b5fe07cf672f374dfafd653bb592f01266c4d730717207b6b1bc89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_absent_light_en.png",
+      "sha256": "ca0b0be058e63ed85b8b33516bb32ee49a6d47e8f50bbf8208493acd38d0de30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_absent_light_en_scrolled.png",
+      "sha256": "ca0b0be058e63ed85b8b33516bb32ee49a6d47e8f50bbf8208493acd38d0de30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_media_dark_ar.png",
+      "sha256": "0c98243b05f6a27b65efd5d62a84448250cdc636d3e19bcddf21c04bc372b0e1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_media_dark_ar_scrolled.png",
+      "sha256": "0c98243b05f6a27b65efd5d62a84448250cdc636d3e19bcddf21c04bc372b0e1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_media_dark_en.png",
+      "sha256": "2c5b294a4d8d61625cb3c089c6f94bf897db199f17946734f9a4c638218886ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_media_dark_en_scrolled.png",
+      "sha256": "2c5b294a4d8d61625cb3c089c6f94bf897db199f17946734f9a4c638218886ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_media_light_en.png",
+      "sha256": "3ebb234f867a34aee2c8410e65110ed22be07594cbd813fb68c62ff71240d17c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/consultation_media_light_en_scrolled.png",
+      "sha256": "3ebb234f867a34aee2c8410e65110ed22be07594cbd813fb68c62ff71240d17c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/directory_absent_dark_ar.png",
+      "sha256": "36f38fe6de40ef3ffc3e02e2f6b082fc04aac356c38702c4b1126d00bf414dda"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/directory_absent_dark_en.png",
+      "sha256": "70da74bc690e913f5a20277ff8742a7afe67cb1594b3295e2207c8ff2ab371f6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/directory_absent_light_en.png",
+      "sha256": "d8c88166e3922456c8257ede9fe2121150133f6a57c3d7181ea4e9f27d5dba7b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/directory_media_dark_ar.png",
+      "sha256": "2437fbeaa1d6f9d730f57c9cc0290600258b21525b0c4ac81f5d7b5b531500ee"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/directory_media_dark_en.png",
+      "sha256": "9929e6b44749edeabc26b51c164b100d4f0ca4e26bea4cd6cc9ca33232926a76"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/directory_media_light_en.png",
+      "sha256": "ea1559f93bd2807f0f24467b552d7a4328da14ebff34e62181aa587be8d05a1e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_absent_dark_ar.png",
+      "sha256": "87c68f47f5d9f1348086b8f979a51654a449a0e48954290c5e0dcd3ee6877eb7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_absent_dark_ar_scrolled.png",
+      "sha256": "f2b5774b82b9936599332b99b3369b94167c014ad17dfe22c2752d8982ac0612"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_absent_dark_en.png",
+      "sha256": "b926611303523ddc60e88b6587fb77ca1435c8e20b20720acd91559bade540ea"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_absent_dark_en_scrolled.png",
+      "sha256": "b5558269337b3f3a315c4f9a8b9f6e173ec901eeea9769886d5cba5a06488027"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_absent_light_en.png",
+      "sha256": "d1c1f6439befdf3a2d1e68a60caf86458d9bcbe70bc2ad36206c643befbbcada"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_absent_light_en_scrolled.png",
+      "sha256": "598e1ea9c9b07974d3a6fcf1cfef956d521ca2496988c08072b262c3e301c6f9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_media_dark_ar.png",
+      "sha256": "f67a2b24994dadf62baf34b5532e624be10b6fee4848a72423444580f8ec14fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_media_dark_ar_scrolled.png",
+      "sha256": "4ac637b7978a4e59e69a6f62b32cfce131d14982c749bb77822b2a64db2fea0b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_media_dark_en.png",
+      "sha256": "026d64276910201cd698e00894e452062c1cb7dd2639eb6e8ba8ebb64ef8c7db"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_media_dark_en_scrolled.png",
+      "sha256": "6caf115cbc8c4ab2d21b40d482b558c9e327d1c5ed5f5f908ebc2ed52c77fda2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_media_light_en.png",
+      "sha256": "ac81f03ad079acb8ecfd84ef85262d05077650d5c5a01caab97bf0d49b5f8766"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/home_media_light_en_scrolled.png",
+      "sha256": "37285c15c7a332c5de6c3022cd72eebeec16e68bd9f121a5724c8145364bfabe"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/offers_absent_dark_ar.png",
+      "sha256": "372cc838bb4a53082b8a2dc8cfaceb7dfd0c0ceb0508dbbf78531c05e58d255e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/offers_absent_dark_en.png",
+      "sha256": "d78b9f822d90f5a357ac753868650c24a00bf3d2a640977b5a55f07c3fc027fb"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/offers_absent_light_en.png",
+      "sha256": "6ea5d8d9976e83189e2dd8f1c1cbf87d668846d6e9c62da416dac2179dc5645e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/offers_media_dark_ar.png",
+      "sha256": "ce5bd617de5f2f1ddaf4c1e91b2a82a28c35191b6e271c53faf95d30f07c58c4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/offers_media_dark_en.png",
+      "sha256": "1f06276fecf56a48f205bb3c1527b2f96c145b76b0988e44520cb54c8845886b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/offers_media_light_en.png",
+      "sha256": "bebacbc8bf537dd20084429bbd7c82a701c9a0435838a097073257320e1c4555"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/practitioners_absent_dark_ar.png",
+      "sha256": "51ba35611dc4f6a37669ab2a48b6b8adc0a48d42b8fa03af7b7b19fe0a1ff5a9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/practitioners_absent_dark_en.png",
+      "sha256": "fa261ac5852c8619f9ec46a4ea0ab451d7f0891b4e9cfcb29f9e5577b89f3186"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/practitioners_absent_light_en.png",
+      "sha256": "db09d239bcd5a2cf31608a90c736e326cc5b900c4e9e87dabbff25fc5c71ec30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/practitioners_media_dark_ar.png",
+      "sha256": "baf8926539f9aa181ff76fdee056a2435d5bdd50502e53eee9a00387de4ee8f6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/practitioners_media_dark_en.png",
+      "sha256": "468724e968a293254ca29c7002c5ab0f7261bc5268f1ed9a464e01625f154169"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/practitioners_media_light_en.png",
+      "sha256": "c07418fa9295bcc13c7a47df4730e764a48ddc2ffa6ebd61faa4fc2870442615"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/products_absent_dark_ar.png",
+      "sha256": "7f31917dcfd90b1127b8a6333ea8c477ba95a589cab14d755ca38de9d9fdc5b0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/products_absent_dark_en.png",
+      "sha256": "bc61aa0e395e42177d9d8082b16b23727db9e928bea88bdab4980e69dbc2677e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/products_absent_light_en.png",
+      "sha256": "7386b2ba5add080d60eef97369059c8e95cfcb9399f82db9fd6197cd31a8c209"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/products_media_dark_ar.png",
+      "sha256": "b8032f74ef2bab45cedcaf9d64ceb0f8b6147dbfa71da8bf021f40a5e3ecd543"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/products_media_dark_en.png",
+      "sha256": "12ec73fb3910b796a980ab769205d028e2287036210a86845632166199930f95"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/products_media_light_en.png",
+      "sha256": "f0b900c2037b048862d3ae4da3fcd824087d2ae8377eed668a9bb481d56d99d3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_absent_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_absent_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_absent_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_absent_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_absent_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_absent_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_media_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_media_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_media_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_media_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_media_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/after/profile_media_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/articles_absent_dark_ar.png",
+      "sha256": "72d70d5010eeb2e2b17aaf738d50e4d654b615650feae4d07e9b31af723fab4d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/articles_absent_dark_en.png",
+      "sha256": "68f75d87c8144617ce235951ccc99f8c53011ae287db6f13022f53f6399b423e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/articles_absent_light_en.png",
+      "sha256": "8c121286e8fff1d762bfa7159462cc2ab8135a823c11b175cc2c53f5016a5705"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/articles_media_dark_ar.png",
+      "sha256": "0631a35b434875d9d93deaf399d1578eb502adfda5b0c13fc6ed08fabb481df8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/articles_media_dark_en.png",
+      "sha256": "f1974ecd272861fdd5920cf66bf204a7d6ee85e74a5703dfbb6b4c8aa010b081"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/articles_media_light_en.png",
+      "sha256": "14dc32410e3f82ef876268228b468e0f060ca671ef8a50431fd8d2aa74070c64"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/busy_absent_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/busy_absent_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/busy_absent_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/busy_media_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/busy_media_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/busy_media_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_absent_dark_ar.png",
+      "sha256": "b5eb45707e804bfa9c7658355109957c9017c79e7a50b117b7b30596a00faa4c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_absent_dark_en.png",
+      "sha256": "2669130cd67e202f460a66c4f291009265b2d5950c83ceed28900dfdbf385903"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_absent_light_en.png",
+      "sha256": "b79caa09798122809ac826886e412fe506e0521f81eb1db05d8756302ae4b429"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_media_dark_ar.png",
+      "sha256": "138cc777efaa77e616511d1562482464e55412ce12c0ef1deb5a7fef45fc9b3a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_media_dark_en.png",
+      "sha256": "606089fca6d7b1ef635e6f3fb279fdb66a602186071afd6c03ef99d55e0b28c0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_media_light_en.png",
+      "sha256": "b203069cdd46733cbc3c9dc6b9d1b3c158298e6d02d1eb0d887a96eb6f6027e5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_offers_absent_dark_ar.png",
+      "sha256": "a95d6fa7de76b61033523a3c1e441e7767531ef289970b95715c9e66a3259107"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_offers_absent_dark_en.png",
+      "sha256": "5cd74a0e3d3aa7cb4d8423a0aac1db94ceaed7788ec0c26730faa7d3da519df7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_offers_absent_light_en.png",
+      "sha256": "70830ac6fd1894b1e7208668f155f6b9240f0588e94b34f898f76e99c428632b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_offers_media_dark_ar.png",
+      "sha256": "7570e334b8983f9e8388b3d5c24ec21967dbdf9eabce275c42923f313daa1484"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_offers_media_dark_en.png",
+      "sha256": "b1dfe6d68f4957334ddf5b29626f7f0e645f44afa75f38251b5d0d8f3cc1e8f2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_offers_media_light_en.png",
+      "sha256": "6b0d815922634b99f6c71766dc5cbf80c55783a44ae7f9fd4e9e8b4533449c19"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_staff_absent_dark_ar.png",
+      "sha256": "9c48e85f6425171e67c449e54176a40bd8d14c80345140948cd8b6f1be180d3a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_staff_absent_dark_en.png",
+      "sha256": "8bb360bc7845637ba6f92a91502d6b2c352d8bf1d24b1159f93b4b055ed705f7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_staff_absent_light_en.png",
+      "sha256": "dc63f772812e3f196f6ff9444f58ca011d6448c96e0d24a89fa431f405e077c3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_staff_media_dark_ar.png",
+      "sha256": "fb8a36df29421885328a30631dfd486d9e65e66374e054f76f59a6bca7818ffc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_staff_media_dark_en.png",
+      "sha256": "5f943fa933f99b3a9f00a7df4e5f82d4ec7883475656990f2a6cbad3b3241f2c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_staff_media_light_en.png",
+      "sha256": "b7df262c03e8a0257efb6e0afda983ed4292a936084a5603589a674a243c24e5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_treatments_absent_dark_ar.png",
+      "sha256": "8dcf0ee71c9e8240a3b50690df1f5b86d82e4773066f428aa4ac1e5450e13361"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_treatments_absent_dark_en.png",
+      "sha256": "9fa66d80b542c27af06ae3bb545e24a3458aef5ca05f4440aa83b3487c513592"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_treatments_absent_light_en.png",
+      "sha256": "00f0c114786ccab48d4acb97b40e42559d03f5b8d7f608ec2cba2fe45bfe5c89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_treatments_media_dark_ar.png",
+      "sha256": "888713e9ac9ce8abd7e88a57c6cfababeac7e90eb44eed2b9358d41b16667258"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_treatments_media_dark_en.png",
+      "sha256": "39cf9c0754dd594e4b1c0ba3eb826ce1dd5a5a1dd1c72ba741b0af354ab4f8d3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/clinic_treatments_media_light_en.png",
+      "sha256": "02fc34824ab7b1aa11301e120b9d0937083b83b1c31641b6a093809a3d7f6cd8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_absent_dark_ar.png",
+      "sha256": "f319f391a1a284a0e4db4d339ad9cb8985244f96130c7a6643bba8ebed6d366b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_absent_dark_ar_scrolled.png",
+      "sha256": "f319f391a1a284a0e4db4d339ad9cb8985244f96130c7a6643bba8ebed6d366b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_absent_dark_en.png",
+      "sha256": "4313ad876a9305a0b7f0b6e7c243864d7eb8fcdedc97c09ffa8dc35c5492329d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_absent_dark_en_scrolled.png",
+      "sha256": "4313ad876a9305a0b7f0b6e7c243864d7eb8fcdedc97c09ffa8dc35c5492329d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_absent_light_en.png",
+      "sha256": "29d829cf1d58c3f186bb474562f0604cd0d4e683354b0205c74e7185cefd11d6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_absent_light_en_scrolled.png",
+      "sha256": "29d829cf1d58c3f186bb474562f0604cd0d4e683354b0205c74e7185cefd11d6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_media_dark_ar.png",
+      "sha256": "7bbf10f5f0c8a07b84206b24b972b6061138e2acf96f8a3e69a85df1d34a4cae"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_media_dark_ar_scrolled.png",
+      "sha256": "7bbf10f5f0c8a07b84206b24b972b6061138e2acf96f8a3e69a85df1d34a4cae"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_media_dark_en.png",
+      "sha256": "9e93629f7e9a117cc5f05dfb733680e02b7fc16e76f59e5a9e9f4bb136126c75"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_media_dark_en_scrolled.png",
+      "sha256": "9e93629f7e9a117cc5f05dfb733680e02b7fc16e76f59e5a9e9f4bb136126c75"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_media_light_en.png",
+      "sha256": "1812cf49410d91944d6b94e580d7ceb5ea83053000e9653adad37fc72ecf2f3f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/consultation_media_light_en_scrolled.png",
+      "sha256": "1812cf49410d91944d6b94e580d7ceb5ea83053000e9653adad37fc72ecf2f3f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/directory_absent_dark_ar.png",
+      "sha256": "ac99642f265bbfba82c6e9567b80cffaa3a2d7d2fd6c8f96cc2dfb3cd025ba0d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/directory_absent_dark_en.png",
+      "sha256": "17a9c5e6d4e2e8e4599b5e0cf9ca14e5db0b14501f822ce54c98fe082a656ad5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/directory_absent_light_en.png",
+      "sha256": "e93eb50e959c796109cfed781294942e7573ce6a6d274f229041f55d76237cbc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/directory_media_dark_ar.png",
+      "sha256": "543b8649b40ebfb3de16bb154c47346e6e39202418a6f22402040f7e9d60800a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/directory_media_dark_en.png",
+      "sha256": "c9f548f36bc4a1e4c35564e5b2318b3de2fb247c5a63c62f8da8a0d4c6405735"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/directory_media_light_en.png",
+      "sha256": "d3a741e19c88d3c063cf695c0cf262645d6c73c3ce5b664f3c584d96c393a4dd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_absent_dark_ar.png",
+      "sha256": "38ddcf0a32a0114de0c46995db46ae8dfe4d8a20379e651e4a4e8e5beff59156"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_absent_dark_ar_scrolled.png",
+      "sha256": "b7984d77fd3d6a6cf8241115cab8a0e6791781007ce91e10e30cab05e569c5b4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_absent_dark_en.png",
+      "sha256": "71356d314b8512ed049c9bd86db17dcc3089a136e47fe10bde0464ddcd904fcd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_absent_dark_en_scrolled.png",
+      "sha256": "946bf6c82432356b100ca4b46fb60bc3ae64828a8f8d3a657645aa674629302d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_absent_light_en.png",
+      "sha256": "dff1992c50297b4bb86858c866d36afb83294045a671e0cdc19c321ca9efdfca"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_absent_light_en_scrolled.png",
+      "sha256": "5beb253dbd0676e1f46727fab5988e65660661faabf27fb240bba27f7106e28f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_media_dark_ar.png",
+      "sha256": "a4c6db88291f6aa2372785cd29c1b1319158f32fb75df08dc45f592a9b61fdde"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_media_dark_ar_scrolled.png",
+      "sha256": "72515af0b2892978d593b6d3754408314a714b190dc01630fb572d435dc69853"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_media_dark_en.png",
+      "sha256": "55bbe5adf3bf1e349215c38a547480dbadcd03c29629fdeed3ae413c73fe6058"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_media_dark_en_scrolled.png",
+      "sha256": "8148fc113e67044af5ab55302b28fd37570f4d49d5f05291f55395fb526445e5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_media_light_en.png",
+      "sha256": "61a56f107f9419665fdc10affc39540a25b12e3ea49749b2daa04b8f961fc860"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/home_media_light_en_scrolled.png",
+      "sha256": "00fc8e53f0a777549d963513a875a151aaeec1061351b0913d988c2069d22959"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/offers_absent_dark_ar.png",
+      "sha256": "4bbff9bb3cabee7f11f25cc67d072c0b315ba203502a0b72a6c2656d6b3d92f0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/offers_absent_dark_en.png",
+      "sha256": "0ce1c2d6b6f9efa09abfd9fec757f3d42806374cc84a39d5a14ea4f4a2216cf2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/offers_absent_light_en.png",
+      "sha256": "35542b566cff0541b6b0aba42fe5834c2828fd5d3fa61dd8452e7711b9c10036"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/offers_media_dark_ar.png",
+      "sha256": "0c2db14e7e51c9c218cc0bf739fb19d2f2504a363f0fdb496a54ed21e0ab4e6c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/offers_media_dark_en.png",
+      "sha256": "045b54b05b2581c69978517be3f91eeb87c5eeb6723516fa55db009c6eafaa93"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/offers_media_light_en.png",
+      "sha256": "146a5e94d6b983109d455288047078e08fc4e968a44c4f8d646d86d1e6acc20b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/practitioners_absent_dark_ar.png",
+      "sha256": "06e6ac30c304421a6928143400af6b9036392a65bd404767a0453de65e95a3bb"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/practitioners_absent_dark_en.png",
+      "sha256": "3afca44222f38c0453e95e731f96dc306066286f46b752b44f47cb722fa65d4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/practitioners_absent_light_en.png",
+      "sha256": "d1de828563affb7c755d37fcd687f1c5efa08dcdef0328b8f6d945a6b9e859c4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/practitioners_media_dark_ar.png",
+      "sha256": "a66b5524dc4ab28aa8ea1ac1a719f3911be350482e4ff21853cd73a299d52490"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/practitioners_media_dark_en.png",
+      "sha256": "afed0a28642d63e6591fe4500432ba669b0eb8e9ebebc3bc4139b78de1c9e457"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/practitioners_media_light_en.png",
+      "sha256": "0300a0468ec9b55060d3fcbc4c2b734128dc5f8a9c0ef12d592b6e9b785c02f5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/products_absent_dark_ar.png",
+      "sha256": "abbd7752d2723d00c4f359ca74ff19e45edbf9d96280df1023f3372baca57607"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/products_absent_dark_en.png",
+      "sha256": "db2913014a90ea0182c7ac58f5169362e0251d04620ef1ca7263b4bf45270017"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/products_absent_light_en.png",
+      "sha256": "1a413af4191f8e9bcaf3327428815950f3efd04b5f0ca466eb69d13315bb5b12"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/products_media_dark_ar.png",
+      "sha256": "dd46ac0fc87e141e5577d406030c29cd1862f0bdaa0cd4e175eae88e7d8ddd88"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/products_media_dark_en.png",
+      "sha256": "9f61bd09e66612c6b22d104cba007adb87a472f8bf11c439f3dd4dc70fbf6cb5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/products_media_light_en.png",
+      "sha256": "5d931de008f32f7893170442fb96a93ce1aff1e091873d12d8acdb94c2c447ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_absent_dark_ar.png",
+      "sha256": "18ff17a1d6ba4b2df9e4fda803ac802ea9360d60fee8d043170a2837ac55072d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_absent_dark_ar_scrolled.png",
+      "sha256": "18ff17a1d6ba4b2df9e4fda803ac802ea9360d60fee8d043170a2837ac55072d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_absent_dark_en.png",
+      "sha256": "242c4cc4c710a6edc25969e52a7df61c265db5c378b65cf41b7943bfd4212814"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_absent_dark_en_scrolled.png",
+      "sha256": "242c4cc4c710a6edc25969e52a7df61c265db5c378b65cf41b7943bfd4212814"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_absent_light_en.png",
+      "sha256": "6848d4bee517b23c5b92ee1e63a8fb81485fa96106f50115007ef33ea314b2fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_absent_light_en_scrolled.png",
+      "sha256": "6848d4bee517b23c5b92ee1e63a8fb81485fa96106f50115007ef33ea314b2fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_media_dark_ar.png",
+      "sha256": "18ff17a1d6ba4b2df9e4fda803ac802ea9360d60fee8d043170a2837ac55072d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_media_dark_ar_scrolled.png",
+      "sha256": "18ff17a1d6ba4b2df9e4fda803ac802ea9360d60fee8d043170a2837ac55072d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_media_dark_en.png",
+      "sha256": "242c4cc4c710a6edc25969e52a7df61c265db5c378b65cf41b7943bfd4212814"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_media_dark_en_scrolled.png",
+      "sha256": "242c4cc4c710a6edc25969e52a7df61c265db5c378b65cf41b7943bfd4212814"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_media_light_en.png",
+      "sha256": "6848d4bee517b23c5b92ee1e63a8fb81485fa96106f50115007ef33ea314b2fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-design-lock/previews/before/profile_media_light_en_scrolled.png",
+      "sha256": "6848d4bee517b23c5b92ee1e63a8fb81485fa96106f50115007ef33ea314b2fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/README.md",
+      "sha256": "28836dde7bb09c1d31e2fe7d992659f41a46fcb8d89e9d9fe3559bdb8a9273a7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/backend_comparison_evidence.json",
+      "sha256": "e71e55e596242c2261dd7f35e88cc3de860a30f589b1955b42dffe88c0db20b9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/capture_manifest.json",
+      "sha256": "456a9adf2bc6586b8681d1de713b8d94e35ce1f609ca0a96a1a101c2b7d4c03a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_articles.jpg",
+      "sha256": "27e203dec4980b9ba33a8bfabbeeb776ba20ce87c52743fb0c11c2d117a58255"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_clinic.jpg",
+      "sha256": "ee16918060821a3ff9bad5fdb5ca94247d7669adc5baf66c60f4574cb87e266e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_consultation.jpg",
+      "sha256": "461f0f7510799a7e0a5c01f8ee2e398aeb05c8bd526d0421a2028b9c3a8eacb7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_directory.jpg",
+      "sha256": "1612972e5fce15b0238fb1904541bf79ed3d0e7c75f5e1dc38c6eec62581a291"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_home.jpg",
+      "sha256": "63577f371a438484e515b636308e4a4053ac894ee9e359e4bd8300328bdee6b5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_offers.jpg",
+      "sha256": "af7847d0852afaf1e43cd4c0201a62ef9358265d640ab93bc5130916c18c6002"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_practitioners.jpg",
+      "sha256": "7198ebb3fd21cd86217d91e24ddd0964245580b8e2246580a3035daf02973a4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_products.jpg",
+      "sha256": "8c4ee1dfd8e0b7c7e5b2c2682b777253972e4b03d1ae5a7662c1b5ea25447497"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/matrix_home_to_products.jpg",
+      "sha256": "c9ab64b43caafd8806522ab1d563d99cef4311586fd6a61a075dffb552e1f4f5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/matrix_offers_to_consultation.jpg",
+      "sha256": "0f3378bc76fd1817edfefc3deec65b63378911adbab72b26682d13ce73696f59"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_absent_dark_ar.png",
+      "sha256": "584012dff01d6f9e8c8763fdc07041a5c13c4bee00907d4f31bf7e10747eefab"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_absent_dark_en.png",
+      "sha256": "c4c1f21f5417df20e3dd6240dba77a3641a076e3adc863863ed9a09b4056ca12"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_absent_light_en.png",
+      "sha256": "9c47c3d20c813eb823b1dfb74b434cb194403434e9beeeaedd4ccfc6340c7cd0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_media_dark_ar.png",
+      "sha256": "705171d8466e1f6334743b3d339fae11fd22de9a8c5278b49db24e38ffd2dae1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_media_dark_en.png",
+      "sha256": "1d7ffd9332fa62659bfc794fc2e51ef12450938f2895a37ef92e31f92b3ff20a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_media_light_en.png",
+      "sha256": "f8539da86f43ca72d645a16e14b0769bf419f462ee05a4c998a0dce53972cc6e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_absent_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_absent_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_absent_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_media_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_media_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_media_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_ar.png",
+      "sha256": "5d5adf833f843fee61414bd72322290d5f8c2e44307a46ebdda28e7047749714"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_ar_scrolled.png",
+      "sha256": "d0feb5ac29180487a4eb20caa24565d7086cc7c8ccf944b9f298768ba9655482"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_en.png",
+      "sha256": "727d043938aff8e15ff834aac473d00cec2a1188b6f759556ca77b1203ed34c3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_en_scrolled.png",
+      "sha256": "c77ea46aa809e65803653ceca3299ae7b5cb921adcdd839800d523e3b999d4c1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_light_en.png",
+      "sha256": "c0ed5a9144a2a09b74e4f62905ef7f3acc4a7542c926e43f21367b9a28d5c17b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_light_en_scrolled.png",
+      "sha256": "9f142063dc0c19a0fd51457d30c81ade94300fb9a10c1d8c68837d3929d0d965"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_ar.png",
+      "sha256": "da80187f35b40d95c487b14401313e34483b810a35605775ce90e74c8747ae18"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_ar_scrolled.png",
+      "sha256": "0a730674be5a85042a112d5e424a5cda62f735d96c3d49407455b063cbe7a6d1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_en.png",
+      "sha256": "f6faf6ada0e4cf58961abf1fa7a387e0f5be3eeb2d0a44641b1ebb8fbee95ae7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_en_scrolled.png",
+      "sha256": "f1d5229c0976e430f581e60aac88195e69a641a6bcc24f0061116c5c05f9e756"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_light_en.png",
+      "sha256": "a1b0434561caec2acf193e42c50349f001a85604046dccdd35c829f11ef9a41f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_light_en_scrolled.png",
+      "sha256": "5e443f6699e8c6d500edf1cbe8656ce8e6ec975f4d2ef9726f161903d6a64456"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_absent_dark_ar.png",
+      "sha256": "e9e938faca8b0c8c9b43f1016d9b33d94e83d962409ffaf4e3820050e01d9e6b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_absent_dark_en.png",
+      "sha256": "bdcf63e731016febe41e24de73e99a5566e555ebc5100cd97c269875bd96efd7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_absent_light_en.png",
+      "sha256": "692062cf52dfaf0807e4a5094ba00cc87543e5c93d09cf2415c044d722e6220d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_media_dark_ar.png",
+      "sha256": "479544f5d44914861dbd5dc1989035d99e24680a29db25dd60f59c35f2e28d32"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_media_dark_en.png",
+      "sha256": "931babab3ae910d8efc2d7c8e97419068391bdd9cab93a62365c7560c188075e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_media_light_en.png",
+      "sha256": "d31e88c086a026b37cdbac1c878bc538f83c2ef2d930a733569d92676f1e7ad7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_absent_dark_ar.png",
+      "sha256": "459b90041646572b383d4a0e52c71b183268c40e9feba0ad53da185cdad1cd0b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_absent_dark_en.png",
+      "sha256": "601a66aed60bbd50b8f46fdf05ee0902e89467111be35f45ceed2e78e89fb6de"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_absent_light_en.png",
+      "sha256": "0bcb8e5ae8abd4f594d6c0bd133d9e2d6c82ec0ad044cac70505a1d15213ed02"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_media_dark_ar.png",
+      "sha256": "99cd2aa853c421ef15e3c23a8d1fca077fc5e50f925f7815801bb94b0312128c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_media_dark_en.png",
+      "sha256": "fb4e4928a9cf92b81e7002d31119d9ece9658299c8ad758a4d68e7a7836b6b35"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_media_light_en.png",
+      "sha256": "f5a1ec4717acb2038b9800a933ffacf3b10704cfd834aa4dc90feec502556c67"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_absent_dark_ar.png",
+      "sha256": "50a7b638746447df7f352b50f56a17b9bdb1f351a12b33923f5e8994fd5b6db2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_absent_dark_en.png",
+      "sha256": "c45bf3ba221d5a33e31a795828e3979125be1a793d0d57c7c502e4c44e4f1684"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_absent_light_en.png",
+      "sha256": "18bb6bf0736d329442be18d7a04504ed237ba6cfb272cd104e661276e96ef3a2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_media_dark_ar.png",
+      "sha256": "a85ed836cf751ead3d3d0d05ce114c9eebc6244d55fda0bd0f37240445b53a1a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_media_dark_en.png",
+      "sha256": "5a9164f2a74c961cd11aa5ef2a7c95b3dcfe48f3994c50240a444d2d86561303"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_media_light_en.png",
+      "sha256": "78aeedd0b6799a1c75c954e0e4102adb753d17331cb4663a6c540ca60c8d1876"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_ar.png",
+      "sha256": "aa0f78402fa61629678b6bdf59a5e89ec4e11a2210ce4865db96b718252f3261"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_ar_scrolled.png",
+      "sha256": "aa0f78402fa61629678b6bdf59a5e89ec4e11a2210ce4865db96b718252f3261"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_en.png",
+      "sha256": "3129a505603ad49ac16eb0f71ed95a65d15d77ba3828d0fc1c88c0d40394243b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_en_scrolled.png",
+      "sha256": "3129a505603ad49ac16eb0f71ed95a65d15d77ba3828d0fc1c88c0d40394243b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_light_en.png",
+      "sha256": "3c87d1ba14f26ff67d10c7bca5a1275508ee5bde2e7693914280d36b53f59833"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_light_en_scrolled.png",
+      "sha256": "3c87d1ba14f26ff67d10c7bca5a1275508ee5bde2e7693914280d36b53f59833"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_ar.png",
+      "sha256": "d4bce01afae57890d0c61966f6d5b98b03072d47b3d6a5c81bf8335e36992dd6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_ar_scrolled.png",
+      "sha256": "d4bce01afae57890d0c61966f6d5b98b03072d47b3d6a5c81bf8335e36992dd6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_en.png",
+      "sha256": "c693bea3130a662b53126373f66f53a6043896ccf30cfd685b872e109f94cb9f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_en_scrolled.png",
+      "sha256": "c693bea3130a662b53126373f66f53a6043896ccf30cfd685b872e109f94cb9f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_light_en.png",
+      "sha256": "87c0341e85e1e331e9783654e54719a5a3214b0d0ab5469477d8d8c0514b68a0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_light_en_scrolled.png",
+      "sha256": "87c0341e85e1e331e9783654e54719a5a3214b0d0ab5469477d8d8c0514b68a0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_absent_dark_ar.png",
+      "sha256": "604d7e2b2c93034fc395b56f2629366ff18cff817efb87607c583c88040d0dd4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_absent_dark_en.png",
+      "sha256": "8edb931e8fb1589430da6f095825cdc7a8744563737f5d7b6587202859a076d3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_absent_light_en.png",
+      "sha256": "72b5bd2ae5f088a637488bd84e8c39cc45c6a211866bab7bcaaaf9b7bfdd6dce"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_media_dark_ar.png",
+      "sha256": "8f9ea76f2ce905577567bf5022ec917cdfc95d42bac6376b24dee627cb3daecc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_media_dark_en.png",
+      "sha256": "6437ca3b82f9f2685fc33c22aa6ed16154eb773fcf6090cb063ae8421f451a18"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_media_light_en.png",
+      "sha256": "b7efa24e87987dafee0f597771c5eee4dff33ac457e896924bb6f32ec5978865"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_ar.png",
+      "sha256": "78d5bedadd80569d35ab4d7eae140784c7c6f41b1241f604442b2e1d843fa862"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_ar_scrolled.png",
+      "sha256": "c63f4c0ce986c36554f0329febd768e622d35214da48cc5fc184974a40e81a01"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_en.png",
+      "sha256": "956ebadf4eb8ba13f6a735cade18872de03a178f4bf9fc0af16c776c857da382"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_en_scrolled.png",
+      "sha256": "d2f6773c71b27ec4245fa0ff20ada4649f654cbd19f17ba2cd20811214990a5d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_light_en.png",
+      "sha256": "cc561e84b1d60db53d7940ccae147f1c21a7a54418e801b2d9f67ef53096a469"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_light_en_scrolled.png",
+      "sha256": "f391de2f7441244f5510a0e39c5e056fc4d5322878342b8ab2d18b04e61468b9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_ar.png",
+      "sha256": "8b78369b1607f856004bc18388dcb427bd7807b48efe43f8b348d05e2a7dc985"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_ar_scrolled.png",
+      "sha256": "4cf1dcd2d58bd183494c6f4687f57b2ee21d7b9077cf52936fd2f30d96876fd2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_en.png",
+      "sha256": "7978096b55cb9a03eeef166cf32e291f1c3b5cac61b302a37489a3473a532ad9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_en_scrolled.png",
+      "sha256": "05ecaa405963121af7440c6dfd5cf2a8ac965c3e80fb57bbd1775395bb039ebb"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_light_en.png",
+      "sha256": "ff1df3f4be60853f31ac6193d6bf59e75246344af432a086dd861aaa31170544"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_light_en_scrolled.png",
+      "sha256": "43ff54ddcc5d3db692096c42509863a08fa8d3ebb7045e51c2598f7eba8d3573"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_absent_dark_ar.png",
+      "sha256": "e85ac275f9cd3fc01e87ddd3b358d3abca07b97b9a178de7175d7e79eacf4f34"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_absent_dark_en.png",
+      "sha256": "81e15c7b3e23ddd2528bd818f517ce72b09f13007703f36005bd5bb2381e38c8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_absent_light_en.png",
+      "sha256": "f97029b71b51f435709fa7edf0295419ec1f70cb9734c83c3c6723ea47bfa3bf"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_media_dark_ar.png",
+      "sha256": "237b5ef08cf76a070867bae7ed99bee80223260f0c0272dc2d7fd1bdb04ff50f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_media_dark_en.png",
+      "sha256": "bb5863c69650169d7a55ea1eb347e93c9f1b5b6355cf9c2e96e322783760e6d1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_media_light_en.png",
+      "sha256": "5f793ebc33089a3fad26eea697758a59d0ac284d25e48731ec85b8610545aa72"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_absent_dark_ar.png",
+      "sha256": "dbe8d9e9994f491b6f4565944f45afecf784af4958915f34274bd3f545cabbee"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_absent_dark_en.png",
+      "sha256": "5074dec4c8095c447507a0863e35d2379c534778a726202bf8c98c5481374880"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_absent_light_en.png",
+      "sha256": "ef824f8f95f09d588394e3adb4b0180637229b44c1209528c79480ac63bd5ee6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_media_dark_ar.png",
+      "sha256": "a163647f7cce671fb9256a67db65f1b5b1c209a8473f8aa2e0b510c4f635c4c9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_media_dark_en.png",
+      "sha256": "2e9beb221476510f26e52665bb763ac62e7f7c18af7137d20c76834bd35a5a80"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_media_light_en.png",
+      "sha256": "2b339fee052db656c2d85371ac1e57479f64bfac11faf51668e45228ed18defe"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_absent_dark_ar.png",
+      "sha256": "17e1a3223f0422422c501faf2d9ace4c25d0b3439e0926d3e85e3f7e509f0ad0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_absent_dark_en.png",
+      "sha256": "c6f412c55699f1892919206c56c1256c76cbdfd0cff94effba810acb01457204"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_absent_light_en.png",
+      "sha256": "773e2d771e56ecad9943e4b6565e9dd6e062c0ed5aef50f18fd1e2c478c2b402"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_media_dark_ar.png",
+      "sha256": "b2e87fc2c5a68b55b67878912352aeda8ad4fb592c3cc019ac6377312d036dab"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_media_dark_en.png",
+      "sha256": "5910cd05775585baaf102107ef23345a45141e36a7ea547e2016a92cd480de36"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_media_light_en.png",
+      "sha256": "7e75a2cd955ebec917b0cc0317e3b2ee0a172a99a455b764dce86281718246e7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_absent_dark_ar.png",
+      "sha256": "daa2307ab6acae89d800e097cac6f5efbd958090488cf0abb58d00df73001c81"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_absent_dark_en.png",
+      "sha256": "cdf4c53c6f4c85f080947ce402b4ed2e509069c6b01740fe7288a5d0d66b4b7a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_absent_light_en.png",
+      "sha256": "7378a2b9e2cbc81a92519a249b4fae466f00585f4281bf207600a8147e6da35a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_media_dark_ar.png",
+      "sha256": "6c37670bc7b8ed7d206204d49c0e3915b5bca9dfc41260333680389c021cd3c8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_media_dark_en.png",
+      "sha256": "a83d4e6482d0448630607d4f75c0eae300e03c11395f5ae0efeecc0759e91a91"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_media_light_en.png",
+      "sha256": "3e0b7dfc9bf3fe9f1abb740b8169573a8b3f41d46c739ae4c9c7506694392643"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_absent_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_absent_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_absent_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_media_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_media_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_media_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_ar.png",
+      "sha256": "d4429157126fba4f3b4db8b44a73bf79beedd6d7d7fb66c56fbb72498a69a440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_ar_scrolled.png",
+      "sha256": "d4429157126fba4f3b4db8b44a73bf79beedd6d7d7fb66c56fbb72498a69a440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_en.png",
+      "sha256": "d6d85cd9ca9bc9c6fcc4c4f94c2fa2d5f9d220b0ee1eaa967df872f16f3a5a1f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_en_scrolled.png",
+      "sha256": "d6d85cd9ca9bc9c6fcc4c4f94c2fa2d5f9d220b0ee1eaa967df872f16f3a5a1f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_light_en.png",
+      "sha256": "8839618ad57d698ddd3cfb4121cff39295df4107cfb0c2c6728a9f1b2b712223"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_light_en_scrolled.png",
+      "sha256": "8839618ad57d698ddd3cfb4121cff39295df4107cfb0c2c6728a9f1b2b712223"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_ar.png",
+      "sha256": "8d008b5f0a6c3d5a273f97d1a57d244885a23f4a683ac955e1f8fdff57b568b7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_ar_scrolled.png",
+      "sha256": "da05dc64118d45ea1b4d733b853f8e559099b107be9a2fa4316d4cecaa7ec593"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_en.png",
+      "sha256": "1d15fdfe4408e043b5d8a597c514759780eb25fed3acf35c288640f99ae2c916"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_en_scrolled.png",
+      "sha256": "7e4eef99eec713b496566884a24e3279e4a33fdde292a22277ed5262425303d7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_light_en.png",
+      "sha256": "cc0857564b44fb0e2240d3883bf6fb8901042c6f3e18da1702728302ba5628e9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_light_en_scrolled.png",
+      "sha256": "68b9dbe73f3a0ce8f28516895ad118da9b5c42a7026abc032c06ecaab2a448e2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_absent_dark_ar.png",
+      "sha256": "301cde0353a0d3390b94ac128db6822000d9f5d9baf32bb556ed7d46fbfea87e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_absent_dark_en.png",
+      "sha256": "53f47fce26c4d77c84b88725a14f63d8665dd40a408fd7484800217c76d99740"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_absent_light_en.png",
+      "sha256": "376271de739833733bf8a72070a12aa77b8864663d76ef8fb58a665992a1c4e4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_media_dark_ar.png",
+      "sha256": "8b28eabd4d459b2f7d555fccf4790c1cdc87b796006e0992c56dbce1a0b13c56"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_media_dark_en.png",
+      "sha256": "f340b836ca038b1d6440d562acf7caf3c293eb62f20ef421719fee61890e9b5f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_media_light_en.png",
+      "sha256": "7a47691e6ddc0200cc1d7571f139c1bd365f9c6a0a3a3a73d4ca57c380e9fb1e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_absent_dark_ar.png",
+      "sha256": "10c45d561ca9e2596de36e654e46f11dae402e853a177e71c9c514cd9b594fe4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_absent_dark_en.png",
+      "sha256": "d4933f8f7e91049e4aaf25cd620e81211c86ec57bebfbe3c9dac37482bf0666c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_absent_light_en.png",
+      "sha256": "28e03ddfd837716b1b5c7cef447e31a6e3cec5dc9d25aef79b50dce65570714d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_media_dark_ar.png",
+      "sha256": "2e60f1f132c40e97570e50fec99102379522876ce49778b5b66109c1a6eb2fac"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_media_dark_en.png",
+      "sha256": "b5d1127e60ca932c7c773bdeb043d33664af4b21d746a317bc008295ec9250c3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_media_light_en.png",
+      "sha256": "2a0f442d5d2d0fd1997b2e9a8e2b86d1d01cbfbd918bbbf82e880ac32a1191f3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_absent_dark_ar.png",
+      "sha256": "4a0ab64df8b9bb1fbfa2b2746439685c0719c7dd85afc51e1bf1616fbb750080"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_absent_dark_en.png",
+      "sha256": "92fc0ee60f105be846de20d8827cd2681e08edc214aa298fab158b6ae9a94d29"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_absent_light_en.png",
+      "sha256": "d796118534c5c3dfebc39e48077caa276bd9b962a4bdcd0d317a047b100a9457"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_media_dark_ar.png",
+      "sha256": "8d3df42054db3eac3529462a1f025d766ae3a14d36f7e090b6e380ace0263ac5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_media_dark_en.png",
+      "sha256": "c383ccacf152c3e36f6d66ed4178cf4f823d8fd7be7a5dbe01eeb5f344cd8f3b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_media_light_en.png",
+      "sha256": "b96152735b49fee1ce22a3269a1da51968c4768bb3046493aa4e36c2a282020e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_ar.png",
+      "sha256": "4025b9d72bd8be0f7b21e656f2168d1a87694a8e56b211366ad54612d07b64ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_ar_scrolled.png",
+      "sha256": "4025b9d72bd8be0f7b21e656f2168d1a87694a8e56b211366ad54612d07b64ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_en.png",
+      "sha256": "7717680d65b5fe07cf672f374dfafd653bb592f01266c4d730717207b6b1bc89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_en_scrolled.png",
+      "sha256": "7717680d65b5fe07cf672f374dfafd653bb592f01266c4d730717207b6b1bc89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_light_en.png",
+      "sha256": "ca0b0be058e63ed85b8b33516bb32ee49a6d47e8f50bbf8208493acd38d0de30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_light_en_scrolled.png",
+      "sha256": "ca0b0be058e63ed85b8b33516bb32ee49a6d47e8f50bbf8208493acd38d0de30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_ar.png",
+      "sha256": "0c98243b05f6a27b65efd5d62a84448250cdc636d3e19bcddf21c04bc372b0e1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_ar_scrolled.png",
+      "sha256": "0c98243b05f6a27b65efd5d62a84448250cdc636d3e19bcddf21c04bc372b0e1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_en.png",
+      "sha256": "2c5b294a4d8d61625cb3c089c6f94bf897db199f17946734f9a4c638218886ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_en_scrolled.png",
+      "sha256": "2c5b294a4d8d61625cb3c089c6f94bf897db199f17946734f9a4c638218886ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_light_en.png",
+      "sha256": "3ebb234f867a34aee2c8410e65110ed22be07594cbd813fb68c62ff71240d17c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_light_en_scrolled.png",
+      "sha256": "3ebb234f867a34aee2c8410e65110ed22be07594cbd813fb68c62ff71240d17c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_absent_dark_ar.png",
+      "sha256": "36f38fe6de40ef3ffc3e02e2f6b082fc04aac356c38702c4b1126d00bf414dda"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_absent_dark_en.png",
+      "sha256": "70da74bc690e913f5a20277ff8742a7afe67cb1594b3295e2207c8ff2ab371f6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_absent_light_en.png",
+      "sha256": "d8c88166e3922456c8257ede9fe2121150133f6a57c3d7181ea4e9f27d5dba7b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_media_dark_ar.png",
+      "sha256": "2437fbeaa1d6f9d730f57c9cc0290600258b21525b0c4ac81f5d7b5b531500ee"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_media_dark_en.png",
+      "sha256": "9929e6b44749edeabc26b51c164b100d4f0ca4e26bea4cd6cc9ca33232926a76"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_media_light_en.png",
+      "sha256": "ea1559f93bd2807f0f24467b552d7a4328da14ebff34e62181aa587be8d05a1e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_ar.png",
+      "sha256": "87c68f47f5d9f1348086b8f979a51654a449a0e48954290c5e0dcd3ee6877eb7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_ar_scrolled.png",
+      "sha256": "f2b5774b82b9936599332b99b3369b94167c014ad17dfe22c2752d8982ac0612"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_en.png",
+      "sha256": "b926611303523ddc60e88b6587fb77ca1435c8e20b20720acd91559bade540ea"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_en_scrolled.png",
+      "sha256": "b5558269337b3f3a315c4f9a8b9f6e173ec901eeea9769886d5cba5a06488027"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_light_en.png",
+      "sha256": "d1c1f6439befdf3a2d1e68a60caf86458d9bcbe70bc2ad36206c643befbbcada"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_light_en_scrolled.png",
+      "sha256": "598e1ea9c9b07974d3a6fcf1cfef956d521ca2496988c08072b262c3e301c6f9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_ar.png",
+      "sha256": "f67a2b24994dadf62baf34b5532e624be10b6fee4848a72423444580f8ec14fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_ar_scrolled.png",
+      "sha256": "87fc0f956dcc3eee2e8fccb2916d3310e6856d49e411417c91027fba8cbbf981"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_en.png",
+      "sha256": "026d64276910201cd698e00894e452062c1cb7dd2639eb6e8ba8ebb64ef8c7db"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_en_scrolled.png",
+      "sha256": "7cbd3eea39272c218a670e243242b1e996d8df178e0a91afdb127c68d9afea14"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_light_en.png",
+      "sha256": "ac81f03ad079acb8ecfd84ef85262d05077650d5c5a01caab97bf0d49b5f8766"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_light_en_scrolled.png",
+      "sha256": "0a2627b53a7c3c9ee00391c0e18458e2e7b3bfb4386ba4066ce7a7ccf7458d6b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_absent_dark_ar.png",
+      "sha256": "372cc838bb4a53082b8a2dc8cfaceb7dfd0c0ceb0508dbbf78531c05e58d255e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_absent_dark_en.png",
+      "sha256": "d78b9f822d90f5a357ac753868650c24a00bf3d2a640977b5a55f07c3fc027fb"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_absent_light_en.png",
+      "sha256": "6ea5d8d9976e83189e2dd8f1c1cbf87d668846d6e9c62da416dac2179dc5645e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_media_dark_ar.png",
+      "sha256": "8c8e9159b89bfc35d16e31d76078a2381458d19597e3035404ccdd05c5e7bae7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_media_dark_en.png",
+      "sha256": "f348ee9f93949a98cce1603712ffdd4fd127293ab847992d3b6b54fdd512868d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_media_light_en.png",
+      "sha256": "ce788becc99835b1223f73660681ea2d087cf149ddc5e93ea83fe0744e94e451"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_absent_dark_ar.png",
+      "sha256": "51ba35611dc4f6a37669ab2a48b6b8adc0a48d42b8fa03af7b7b19fe0a1ff5a9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_absent_dark_en.png",
+      "sha256": "fa261ac5852c8619f9ec46a4ea0ab451d7f0891b4e9cfcb29f9e5577b89f3186"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_absent_light_en.png",
+      "sha256": "db09d239bcd5a2cf31608a90c736e326cc5b900c4e9e87dabbff25fc5c71ec30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_media_dark_ar.png",
+      "sha256": "3e5fa5ed5d9dc4dcb3db81d2b98ef8c3069b0f850c09d6f2a3a74854fd163164"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_media_dark_en.png",
+      "sha256": "36abd66d9c0c8e1f6f5f6be450a048efaead0365ed24cfb46cf371a535ad2be1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_media_light_en.png",
+      "sha256": "098e117ca4f85df0f8b7ebffcd6f72e7f8e68151f787fe2bc8ae06593627e03c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_absent_dark_ar.png",
+      "sha256": "5a5ef4839f94c0c2dd36314a60a19e21c6c77c1181ecfb9a5fe64d7698a508ef"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_absent_dark_en.png",
+      "sha256": "1d9987bf0a69336d270ebe2510bb2ab30e36d7d0b93f5bf21ce7798f1275106d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_absent_light_en.png",
+      "sha256": "2e4d3e88c0c32684d1cd5b13153705e6dfe6133c06a60db534f5e6b6af218daf"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_media_dark_ar.png",
+      "sha256": "e0e883acf764390cc60fa701aba24f561ebf932a908fc802d13ab3d8be184264"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_media_dark_en.png",
+      "sha256": "49e9fd87ad7ea4d7c543fc00f36ccf436b56d63b4e2be94124653997ecfc79fa"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_media_light_en.png",
+      "sha256": "0b03b18ccbf4d7bf7a811ec0618ada4f88e16c1724f459d28240a7cd48f343a7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/localization/app_locale.dart",
+      "sha256": "d47fc1fbe6f6680beb79faa3c88fa56b114cd4c2a88e8fe87d4fadb7deb34eea"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/theme/app_colors.dart",
+      "sha256": "1578a8efb7b4e01802869c36fe47a0eec05f45e9db6a7427329a6a036f0fc5d9"
+    },
+    {
+      "status": "A",
+      "path": "lib/core/theme/patient_design.dart",
+      "sha256": "f17c1ff8e70efc99453eb0c8f7d1f521308fa5d52316e504e4ad1b19e6e8b294"
+    },
+    {
+      "status": "A",
+      "path": "lib/core/theme/patient_theme_tokens.dart",
+      "sha256": "3ed419ed133ce039059cc1b387049cbd0da8ee716b9b06be7512a11a1050b846"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/widgets/content_sized_page_view.dart",
+      "sha256": "8ad8dc84f2bb54bccb4709845b284c70f850df98e5d64f02993da2b4f52c1e91"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/widgets/editorial_heading.dart",
+      "sha256": "40225ddced535387a8e3cd5afff86478b6ae199037f9c04f9500b04177cb8885"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/widgets/patient_media_banner.dart",
+      "sha256": "1167b743c5498f31e5bd20f8b89751dadd7d24f47f0fc87956bc889882842c1b"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/widgets/silver_button.dart",
+      "sha256": "135147b0ddccda76403390fefb6b2346032e8c7eef853de0313c99f0275533d8"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/appointment_lead/presentation/screens/appointment_request_screen.dart",
+      "sha256": "8dd225bd6cb8bfad4f09d072965bf91709f284b42d716551f63e3e2830de4110"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/appointment_lead/presentation/screens/appointment_success_screen.dart",
+      "sha256": "0cba7a48a9f4138d3224347608d50d7918927e944f01e4828bde1720723a4fda"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/appointment_lead/presentation/screens/my_requests_screen.dart",
+      "sha256": "4a1744b8b74ed64206ff8c7476f62260ce4866b296a0454a3220e433a7127d90"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/articles/presentation/screens/article_detail_screen.dart",
+      "sha256": "0c9dfbb0d7dd48e38b129b3c712f0f3e3f40e7199522f34e611f6626d5f009eb"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/articles/presentation/screens/articles_screen.dart",
+      "sha256": "3294cc34fa5c11c6a1501edb8a86679747cd90dbe60bfe2910f5ece38a4356e8"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/screens/clinic_profile_screen.dart",
+      "sha256": "61292b20bbfb86fd95c7529edbb5f9fe0ccd8f3c6d784f1251888e2bac456f2a"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/screens/clinics_list_screen.dart",
+      "sha256": "7d7e28a85c8d0b0840f7cf09f3aab9536f6d5bd002f48a767377f29b8e22c893"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/widgets/google_clinic_rating.dart",
+      "sha256": "ca0c0717818ae7b78ae6290d36485eb1c9d23e23218496e0da4a7f0ece8928be"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/widgets/patient_clinic_card.dart",
+      "sha256": "a3ccc5f60cfb05a388a82e3d36278cb43a0f8c356304dfd284e72a6ee96e7975"
+    },
+    {
+      "status": "A",
+      "path": "lib/features/clinics/presentation/widgets/patient_clinic_gallery.dart",
+      "sha256": "ba5faf8759acd6c8a66554b918a29ba5b8692cb29df5f2a623d72d73aaf00628"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/data/home_repository.dart",
+      "sha256": "f51de04f405b22344c407edb8e013f42f497b2297a42ca277046461727e0d39c"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/screens/home_screen.dart",
+      "sha256": "1e23eb50fe432832bd88ab8143c16308d185f36b74a7482fa757dc0b2b7dbdd5"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/active_offers_section.dart",
+      "sha256": "a311ce53abdf4da5eb9dc91c3b521cf599725ef3b2940485442dc6521197a0d0"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/category_grid.dart",
+      "sha256": "463c6d4678ffd1a842b08d6ae599d217e8fc31ee273343a9e5933da298f141b9"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/featured_ads_carousel.dart",
+      "sha256": "fe2c5b000df3339238accef6bce715e2d60661b8bb261c47a8af2796274efad3"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/home_header.dart",
+      "sha256": "53394e0f126dc226701c16e8c408065a0132295be389a5dca070ce29a69689f5"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/nearby_clinics_section.dart",
+      "sha256": "0d65bb780b07787e716241b3b0313876aad7953bb98e551cf6bfdd2b2c706895"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/navigation/main_nav_screen.dart",
+      "sha256": "8d71659df09f1175b23fac387485447c76ffca7c7868b73cc1b1c5f6c6a09b81"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/offers/presentation/screens/offers_screen.dart",
+      "sha256": "3e598b25efc984c0a2143dc982a8bd810b70eb55267a94591d957834c94b86d4"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/offers/presentation/widgets/patient_offer_card.dart",
+      "sha256": "cb63a0af5e7e22d69ec9d1630f6d5eecf23793ad80352179e5de24f18f179040"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/practitioners/presentation/screens/practitioner_profile_screen.dart",
+      "sha256": "2d19fdc7d131ae8c7d53cecd52b8fb5887b06731814a45b7b56e54435421f141"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/practitioners/presentation/screens/practitioners_screen.dart",
+      "sha256": "d763e150447957bc34e5c1a5965923210770a973cf8f15e4ceed060197bf8edf"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/practitioners/presentation/widgets/patient_practitioner_card.dart",
+      "sha256": "cd87739a9439b10c7f73c273217fcfc91cf384339ea6d7d0dfe23aae28e6d184"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/products/presentation/screens/product_detail_screen.dart",
+      "sha256": "6f24891f30dcd11194ce5b655bee1c906eae0a2066fae60df23a4fdb31e029df"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/products/presentation/screens/products_screen.dart",
+      "sha256": "fb791f0df9732ab5d312feec43a89ec0b8638a83a7ff763c935361381d65b6ca"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/products/presentation/widgets/brand_product_media.dart",
+      "sha256": "a279cc3b4328a98a1bdc27982826cc37fe60140eb36814adae24c8a5d8b56211"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/profile/presentation/screens/profile_screen.dart",
+      "sha256": "0bca65e5d60d8cf86e2f5c58471c1a6ec7ee3d9ee3e023396ec381cc9494c840"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/treatments/presentation/screens/treatment_detail_screen.dart",
+      "sha256": "5049ef1f65dbeb886641f25bafae5a3214db6e80e3d64caa33cf7b387429affd"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/treatments/presentation/screens/treatments_screen.dart",
+      "sha256": "4a18266532182298ecdfd6b17ec32fce398304647485bb138748e316ea83e041"
+    },
+    {
+      "status": "A",
+      "path": "lib/features/treatments/presentation/widgets/patient_treatment_card.dart",
+      "sha256": "273a58bc9b44635690d4745aac96c755c0432a7d9e640e95a6d60746c8ecb37d"
+    },
+    {
+      "status": "M",
+      "path": "pubspec.yaml",
+      "sha256": "d37ad5dc1eeed9c9f6ff01d086f2ee653251e1c0b839265545a75ce2650b1964"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/LICENSE-flutter-gallery-assets.txt",
+      "sha256": "7bbee97ff6d9a19cf7c1ee7b0bd25b5d1d5735fc9a2202d7d903fdbb29c199b3"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/README.md",
+      "sha256": "dea8b6044b25e997572d59902f802af1a52a87f169ae492f3414ecaf2520b9d1"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/fragrance_photo.jpg",
+      "sha256": "462925474f485d1e16f3912984422bcb399e102ce5e0404d72bf0a6ce1590896"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/portrait_photo.png",
+      "sha256": "de0f9c8ce3f8295fbb02f783d266bd28735d43453fec5cbf189b930010661e49"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/README.md",
+      "sha256": "e9c9ab9e539147cfa6479d3e7a6247b942fd8181cab894b8730fb6e344b803d7"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/geometry/patient_clinic_dark_ar.json",
+      "sha256": "d655399f501f69e900e2d149c822a0a4c7fd0f88207c6243ea3878bdee515457"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/geometry/patient_clinic_dark_en.json",
+      "sha256": "0185bcce0b3ddaa48b1c3d1fa2740f82d90a0206a292d3da1c3acc12440c56c5"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/geometry/patient_clinic_light_ar.json",
+      "sha256": "21660ef5c6e7a60c79ee6ea1ac07308a0a87ad19fe5e7fa3b6c495da9cd90561"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/geometry/patient_clinic_light_en.json",
+      "sha256": "52f6ba8e3d16958acd1d45d35aba48d13aee060f290abf8d879115393540c583"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/linux/patient_clinic_dark_ar.png",
+      "sha256": "29b95e751e5f8c62e95e71c05433f1a050822eeac44d5f9e3ef613af9a5efc3c"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/linux/patient_clinic_dark_en.png",
+      "sha256": "e8f036eee1b16eecb20cb11a91ebb8685cb89d1a232d2158b79d2fbbc0a8e5f4"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/linux/patient_clinic_light_ar.png",
+      "sha256": "8863e5f1e9fede4cc68197bbd571295ba3b3cfc271acbe8a7d92db9a8096192c"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/linux/patient_clinic_light_en.png",
+      "sha256": "9ae545033fb2a2fcea7154e77c648fb815aea847bc52fc947d0edbf3afd0d9e7"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/provenance.json",
+      "sha256": "647b27d26c654eb68d05876105f61a6af142bcdb366e42d4f5d6323ee1f018f8"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/windows/patient_clinic_dark_ar.png",
+      "sha256": "00a6ffbd1bdbacb430107eb18c627b709b630f4805d8d11a4cbcd43ae74f120a"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/windows/patient_clinic_dark_en.png",
+      "sha256": "842b72f9bac43810edd554ce109eefbf73d0ebaac6f3f8949cfb8812b4a9c499"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/windows/patient_clinic_light_ar.png",
+      "sha256": "0f6b944bd9596e5428f41c55c964e5f962caf3ce07ff8e5790ab106d539d21c5"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_design_lock_v1/windows/patient_clinic_light_en.png",
+      "sha256": "f98f67bb483d854d391545c5df385fafcffcbfb0b8d6a13f1096685f325086ce"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/README.md",
+      "sha256": "8e108bb27927d94a8b9417c3864a80f416f130eda720b4fa69b15f232b5536bc"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_dark_ar.json",
+      "sha256": "cf3aec2eed2744f5e01d6198efa62222531c5a7f10c37bd88f41f598c92e9417"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_dark_en.json",
+      "sha256": "2f1de342dbed31e34cb72b53e9ae122549f632177665202638358486c889252f"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_light_ar.json",
+      "sha256": "544e1eb5392a80ea2203b8cce6f1f3a65455d6d0c7e0a87935b6ad50a7c955d1"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_light_en.json",
+      "sha256": "6eadf57b350a465ae201862d2f3399a57bf86dd40edfd71301e3638190090b7b"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_dark_ar.png",
+      "sha256": "373e7ba933b5e509337748285bd45905fcaf5b8b46c74ea977cca102c4d22b83"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_dark_en.png",
+      "sha256": "5c3261071d8f01d352427f8afa76830a8e8817181e319436b1f43667772b18c6"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_light_ar.png",
+      "sha256": "0543f048572765a05731f6502cc4da3ea8a426731cc5a03618882382c498c166"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_light_en.png",
+      "sha256": "b15b74e915dc86a19d607b8670ee2e38c5ef1ec2edaeb947767a218a838fb744"
+    },
+    {
+      "status": "M",
+      "path": "test/media_first_previews_test.dart",
+      "sha256": "8f327ed3d70093d87a9feff38b15efa499de3fdb66e6ce2767fbb079c936d564"
+    },
+    {
+      "status": "M",
+      "path": "test/media_interaction_polish_test.dart",
+      "sha256": "e8c74adbf252d853cf581c482b8c22f33d4db6157e7cf39038ae31c97a1c42e5"
+    },
+    {
+      "status": "A",
+      "path": "test/patient_ca15dc6_contract_test.dart",
+      "sha256": "7c4b42186ee48f0b5d8f5a435c0c2db3ee7312fdc1b4197beeaf5ad9373c2a93"
+    },
+    {
+      "status": "A",
+      "path": "test/patient_design_lock_test.dart",
+      "sha256": "369739114027b53aa3e7900a69f97c89940fa79abf6c79cf9eee332ca3418691"
+    },
+    {
+      "status": "M",
+      "path": "test/patient_portal_visual_test.dart",
+      "sha256": "de26d3272c7534ef5e870d695db411c29a899abc69e8a0fc52ec17e5b76aa121"
+    },
+    {
+      "status": "M",
+      "path": "test/patient_visual_recovery_test.dart",
+      "sha256": "26caf9ce5cff14ae050b41050efdec70f98d47d453536278f0d092d6ad120f70"
+    },
+    {
+      "status": "M",
+      "path": "test/support/clinic_golden_geometry.dart",
+      "sha256": "629217db672ce57c2987bf0b94ee48b85ab3cdd208519bae19125b36aca07b5f"
+    },
+    {
+      "status": "M",
+      "path": "test/support/patient_visual_harness.dart",
+      "sha256": "0c9d2fff896fed4de11a9977310740f02df992476045bbf150a841b1c2f5887e"
+    },
+    {
+      "status": "A",
+      "path": "tool/capture_public_clinic_contract.ps1",
+      "sha256": "904b0e2bd3dfe47aaf5703d979dae55761a0a18cae895d88992743bc1d6aa856"
+    },
+    {
+      "status": "A",
+      "path": "tool/test_public_clinic_capture.ps1",
+      "sha256": "8f91ea31099e1582411e5c367eee4401b482b6312bbc45ea892753ac065e258b"
+    },
+    {
+      "status": "M",
+      "path": "tool/visual_test_manifest.py",
+      "sha256": "f8b4cb43171df51d1f04788379f81f72fba80f0a46ae94665114fe253cd598b7"
+    }
+  ],
+  "this_recovery": [
+    {
+      "status": "M",
+      "path": ".github/workflows/flutter-visual-regressions.yml",
+      "sha256": "b943e0d62479bd428f772c53a0e54c5c4151148df6015c4eed6187bcbea7f3a3"
+    },
+    {
+      "status": "A",
+      "path": "docs/PATIENT_CA15DC6_CONTRACT_REVIEW_FOR_ALI.md",
+      "sha256": "3d60b24d0efa2370e7eb0d977f1e2c769bb165a46fe8af92766b2154ea47ba55"
+    },
+    {
+      "status": "M",
+      "path": "docs/PATIENT_DESIGN_LOCK_BACKEND_HANDOFF_FOR_ALI.md",
+      "sha256": "4054b5c785459154c0ed95b8975644c7d3ba3e91a2c86c9ab8098a0c43ff6a41"
+    },
+    {
+      "status": "M",
+      "path": "docs/PATIENT_DESIGN_LOCK_CHANGE_REPORT.md",
+      "sha256": "2dcc546e0490b36d854d1acf723915da7fda4fbc2951f52810917fc7210fd4fa"
+    },
+    {
+      "status": "A",
+      "path": "docs/PATIENT_REFERENCE_FIDELITY_RECOVERY_REPORT.md",
+      "sha256": "1214b0b77e6eb51c1990c50d2e9c57f04f1294fae95ab382a8fdeae797d3492d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/README.md",
+      "sha256": "28836dde7bb09c1d31e2fe7d992659f41a46fcb8d89e9d9fe3559bdb8a9273a7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/backend_comparison_evidence.json",
+      "sha256": "e71e55e596242c2261dd7f35e88cc3de860a30f589b1955b42dffe88c0db20b9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/capture_manifest.json",
+      "sha256": "456a9adf2bc6586b8681d1de713b8d94e35ce1f609ca0a96a1a101c2b7d4c03a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_articles.jpg",
+      "sha256": "27e203dec4980b9ba33a8bfabbeeb776ba20ce87c52743fb0c11c2d117a58255"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_clinic.jpg",
+      "sha256": "ee16918060821a3ff9bad5fdb5ca94247d7669adc5baf66c60f4574cb87e266e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_consultation.jpg",
+      "sha256": "461f0f7510799a7e0a5c01f8ee2e398aeb05c8bd526d0421a2028b9c3a8eacb7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_directory.jpg",
+      "sha256": "1612972e5fce15b0238fb1904541bf79ed3d0e7c75f5e1dc38c6eec62581a291"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_home.jpg",
+      "sha256": "63577f371a438484e515b636308e4a4053ac894ee9e359e4bd8300328bdee6b5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_offers.jpg",
+      "sha256": "af7847d0852afaf1e43cd4c0201a62ef9358265d640ab93bc5130916c18c6002"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_practitioners.jpg",
+      "sha256": "7198ebb3fd21cd86217d91e24ddd0964245580b8e2246580a3035daf02973a4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/compare_products.jpg",
+      "sha256": "8c4ee1dfd8e0b7c7e5b2c2682b777253972e4b03d1ae5a7662c1b5ea25447497"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/matrix_home_to_products.jpg",
+      "sha256": "c9ab64b43caafd8806522ab1d563d99cef4311586fd6a61a075dffb552e1f4f5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/comparisons/matrix_offers_to_consultation.jpg",
+      "sha256": "0f3378bc76fd1817edfefc3deec65b63378911adbab72b26682d13ce73696f59"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_absent_dark_ar.png",
+      "sha256": "584012dff01d6f9e8c8763fdc07041a5c13c4bee00907d4f31bf7e10747eefab"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_absent_dark_en.png",
+      "sha256": "c4c1f21f5417df20e3dd6240dba77a3641a076e3adc863863ed9a09b4056ca12"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_absent_light_en.png",
+      "sha256": "9c47c3d20c813eb823b1dfb74b434cb194403434e9beeeaedd4ccfc6340c7cd0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_media_dark_ar.png",
+      "sha256": "705171d8466e1f6334743b3d339fae11fd22de9a8c5278b49db24e38ffd2dae1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_media_dark_en.png",
+      "sha256": "1d7ffd9332fa62659bfc794fc2e51ef12450938f2895a37ef92e31f92b3ff20a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/articles_media_light_en.png",
+      "sha256": "f8539da86f43ca72d645a16e14b0769bf419f462ee05a4c998a0dce53972cc6e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_absent_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_absent_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_absent_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_media_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_media_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/busy_media_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_ar.png",
+      "sha256": "5d5adf833f843fee61414bd72322290d5f8c2e44307a46ebdda28e7047749714"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_ar_scrolled.png",
+      "sha256": "d0feb5ac29180487a4eb20caa24565d7086cc7c8ccf944b9f298768ba9655482"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_en.png",
+      "sha256": "727d043938aff8e15ff834aac473d00cec2a1188b6f759556ca77b1203ed34c3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_dark_en_scrolled.png",
+      "sha256": "c77ea46aa809e65803653ceca3299ae7b5cb921adcdd839800d523e3b999d4c1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_light_en.png",
+      "sha256": "c0ed5a9144a2a09b74e4f62905ef7f3acc4a7542c926e43f21367b9a28d5c17b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_absent_light_en_scrolled.png",
+      "sha256": "9f142063dc0c19a0fd51457d30c81ade94300fb9a10c1d8c68837d3929d0d965"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_ar.png",
+      "sha256": "da80187f35b40d95c487b14401313e34483b810a35605775ce90e74c8747ae18"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_ar_scrolled.png",
+      "sha256": "0a730674be5a85042a112d5e424a5cda62f735d96c3d49407455b063cbe7a6d1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_en.png",
+      "sha256": "f6faf6ada0e4cf58961abf1fa7a387e0f5be3eeb2d0a44641b1ebb8fbee95ae7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_dark_en_scrolled.png",
+      "sha256": "f1d5229c0976e430f581e60aac88195e69a641a6bcc24f0061116c5c05f9e756"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_light_en.png",
+      "sha256": "a1b0434561caec2acf193e42c50349f001a85604046dccdd35c829f11ef9a41f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_media_light_en_scrolled.png",
+      "sha256": "5e443f6699e8c6d500edf1cbe8656ce8e6ec975f4d2ef9726f161903d6a64456"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_absent_dark_ar.png",
+      "sha256": "e9e938faca8b0c8c9b43f1016d9b33d94e83d962409ffaf4e3820050e01d9e6b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_absent_dark_en.png",
+      "sha256": "bdcf63e731016febe41e24de73e99a5566e555ebc5100cd97c269875bd96efd7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_absent_light_en.png",
+      "sha256": "692062cf52dfaf0807e4a5094ba00cc87543e5c93d09cf2415c044d722e6220d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_media_dark_ar.png",
+      "sha256": "479544f5d44914861dbd5dc1989035d99e24680a29db25dd60f59c35f2e28d32"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_media_dark_en.png",
+      "sha256": "931babab3ae910d8efc2d7c8e97419068391bdd9cab93a62365c7560c188075e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_offers_media_light_en.png",
+      "sha256": "d31e88c086a026b37cdbac1c878bc538f83c2ef2d930a733569d92676f1e7ad7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_absent_dark_ar.png",
+      "sha256": "459b90041646572b383d4a0e52c71b183268c40e9feba0ad53da185cdad1cd0b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_absent_dark_en.png",
+      "sha256": "601a66aed60bbd50b8f46fdf05ee0902e89467111be35f45ceed2e78e89fb6de"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_absent_light_en.png",
+      "sha256": "0bcb8e5ae8abd4f594d6c0bd133d9e2d6c82ec0ad044cac70505a1d15213ed02"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_media_dark_ar.png",
+      "sha256": "99cd2aa853c421ef15e3c23a8d1fca077fc5e50f925f7815801bb94b0312128c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_media_dark_en.png",
+      "sha256": "fb4e4928a9cf92b81e7002d31119d9ece9658299c8ad758a4d68e7a7836b6b35"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_staff_media_light_en.png",
+      "sha256": "f5a1ec4717acb2038b9800a933ffacf3b10704cfd834aa4dc90feec502556c67"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_absent_dark_ar.png",
+      "sha256": "50a7b638746447df7f352b50f56a17b9bdb1f351a12b33923f5e8994fd5b6db2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_absent_dark_en.png",
+      "sha256": "c45bf3ba221d5a33e31a795828e3979125be1a793d0d57c7c502e4c44e4f1684"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_absent_light_en.png",
+      "sha256": "18bb6bf0736d329442be18d7a04504ed237ba6cfb272cd104e661276e96ef3a2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_media_dark_ar.png",
+      "sha256": "a85ed836cf751ead3d3d0d05ce114c9eebc6244d55fda0bd0f37240445b53a1a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_media_dark_en.png",
+      "sha256": "5a9164f2a74c961cd11aa5ef2a7c95b3dcfe48f3994c50240a444d2d86561303"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/clinic_treatments_media_light_en.png",
+      "sha256": "78aeedd0b6799a1c75c954e0e4102adb753d17331cb4663a6c540ca60c8d1876"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_ar.png",
+      "sha256": "aa0f78402fa61629678b6bdf59a5e89ec4e11a2210ce4865db96b718252f3261"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_ar_scrolled.png",
+      "sha256": "aa0f78402fa61629678b6bdf59a5e89ec4e11a2210ce4865db96b718252f3261"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_en.png",
+      "sha256": "3129a505603ad49ac16eb0f71ed95a65d15d77ba3828d0fc1c88c0d40394243b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_dark_en_scrolled.png",
+      "sha256": "3129a505603ad49ac16eb0f71ed95a65d15d77ba3828d0fc1c88c0d40394243b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_light_en.png",
+      "sha256": "3c87d1ba14f26ff67d10c7bca5a1275508ee5bde2e7693914280d36b53f59833"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_absent_light_en_scrolled.png",
+      "sha256": "3c87d1ba14f26ff67d10c7bca5a1275508ee5bde2e7693914280d36b53f59833"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_ar.png",
+      "sha256": "d4bce01afae57890d0c61966f6d5b98b03072d47b3d6a5c81bf8335e36992dd6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_ar_scrolled.png",
+      "sha256": "d4bce01afae57890d0c61966f6d5b98b03072d47b3d6a5c81bf8335e36992dd6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_en.png",
+      "sha256": "c693bea3130a662b53126373f66f53a6043896ccf30cfd685b872e109f94cb9f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_dark_en_scrolled.png",
+      "sha256": "c693bea3130a662b53126373f66f53a6043896ccf30cfd685b872e109f94cb9f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_light_en.png",
+      "sha256": "87c0341e85e1e331e9783654e54719a5a3214b0d0ab5469477d8d8c0514b68a0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/consultation_media_light_en_scrolled.png",
+      "sha256": "87c0341e85e1e331e9783654e54719a5a3214b0d0ab5469477d8d8c0514b68a0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_absent_dark_ar.png",
+      "sha256": "604d7e2b2c93034fc395b56f2629366ff18cff817efb87607c583c88040d0dd4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_absent_dark_en.png",
+      "sha256": "8edb931e8fb1589430da6f095825cdc7a8744563737f5d7b6587202859a076d3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_absent_light_en.png",
+      "sha256": "72b5bd2ae5f088a637488bd84e8c39cc45c6a211866bab7bcaaaf9b7bfdd6dce"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_media_dark_ar.png",
+      "sha256": "8f9ea76f2ce905577567bf5022ec917cdfc95d42bac6376b24dee627cb3daecc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_media_dark_en.png",
+      "sha256": "6437ca3b82f9f2685fc33c22aa6ed16154eb773fcf6090cb063ae8421f451a18"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/directory_media_light_en.png",
+      "sha256": "b7efa24e87987dafee0f597771c5eee4dff33ac457e896924bb6f32ec5978865"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_ar.png",
+      "sha256": "78d5bedadd80569d35ab4d7eae140784c7c6f41b1241f604442b2e1d843fa862"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_ar_scrolled.png",
+      "sha256": "c63f4c0ce986c36554f0329febd768e622d35214da48cc5fc184974a40e81a01"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_en.png",
+      "sha256": "956ebadf4eb8ba13f6a735cade18872de03a178f4bf9fc0af16c776c857da382"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_dark_en_scrolled.png",
+      "sha256": "d2f6773c71b27ec4245fa0ff20ada4649f654cbd19f17ba2cd20811214990a5d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_light_en.png",
+      "sha256": "cc561e84b1d60db53d7940ccae147f1c21a7a54418e801b2d9f67ef53096a469"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_absent_light_en_scrolled.png",
+      "sha256": "f391de2f7441244f5510a0e39c5e056fc4d5322878342b8ab2d18b04e61468b9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_ar.png",
+      "sha256": "8b78369b1607f856004bc18388dcb427bd7807b48efe43f8b348d05e2a7dc985"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_ar_scrolled.png",
+      "sha256": "4cf1dcd2d58bd183494c6f4687f57b2ee21d7b9077cf52936fd2f30d96876fd2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_en.png",
+      "sha256": "7978096b55cb9a03eeef166cf32e291f1c3b5cac61b302a37489a3473a532ad9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_dark_en_scrolled.png",
+      "sha256": "05ecaa405963121af7440c6dfd5cf2a8ac965c3e80fb57bbd1775395bb039ebb"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_light_en.png",
+      "sha256": "ff1df3f4be60853f31ac6193d6bf59e75246344af432a086dd861aaa31170544"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/home_media_light_en_scrolled.png",
+      "sha256": "43ff54ddcc5d3db692096c42509863a08fa8d3ebb7045e51c2598f7eba8d3573"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_absent_dark_ar.png",
+      "sha256": "e85ac275f9cd3fc01e87ddd3b358d3abca07b97b9a178de7175d7e79eacf4f34"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_absent_dark_en.png",
+      "sha256": "81e15c7b3e23ddd2528bd818f517ce72b09f13007703f36005bd5bb2381e38c8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_absent_light_en.png",
+      "sha256": "f97029b71b51f435709fa7edf0295419ec1f70cb9734c83c3c6723ea47bfa3bf"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_media_dark_ar.png",
+      "sha256": "237b5ef08cf76a070867bae7ed99bee80223260f0c0272dc2d7fd1bdb04ff50f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_media_dark_en.png",
+      "sha256": "bb5863c69650169d7a55ea1eb347e93c9f1b5b6355cf9c2e96e322783760e6d1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/offers_media_light_en.png",
+      "sha256": "5f793ebc33089a3fad26eea697758a59d0ac284d25e48731ec85b8610545aa72"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_absent_dark_ar.png",
+      "sha256": "dbe8d9e9994f491b6f4565944f45afecf784af4958915f34274bd3f545cabbee"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_absent_dark_en.png",
+      "sha256": "5074dec4c8095c447507a0863e35d2379c534778a726202bf8c98c5481374880"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_absent_light_en.png",
+      "sha256": "ef824f8f95f09d588394e3adb4b0180637229b44c1209528c79480ac63bd5ee6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_media_dark_ar.png",
+      "sha256": "a163647f7cce671fb9256a67db65f1b5b1c209a8473f8aa2e0b510c4f635c4c9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_media_dark_en.png",
+      "sha256": "2e9beb221476510f26e52665bb763ac62e7f7c18af7137d20c76834bd35a5a80"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/practitioners_media_light_en.png",
+      "sha256": "2b339fee052db656c2d85371ac1e57479f64bfac11faf51668e45228ed18defe"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_absent_dark_ar.png",
+      "sha256": "17e1a3223f0422422c501faf2d9ace4c25d0b3439e0926d3e85e3f7e509f0ad0"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_absent_dark_en.png",
+      "sha256": "c6f412c55699f1892919206c56c1256c76cbdfd0cff94effba810acb01457204"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_absent_light_en.png",
+      "sha256": "773e2d771e56ecad9943e4b6565e9dd6e062c0ed5aef50f18fd1e2c478c2b402"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_media_dark_ar.png",
+      "sha256": "b2e87fc2c5a68b55b67878912352aeda8ad4fb592c3cc019ac6377312d036dab"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_media_dark_en.png",
+      "sha256": "5910cd05775585baaf102107ef23345a45141e36a7ea547e2016a92cd480de36"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/products_media_light_en.png",
+      "sha256": "7e75a2cd955ebec917b0cc0317e3b2ee0a172a99a455b764dce86281718246e7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_absent_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/after/profile_media_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_absent_dark_ar.png",
+      "sha256": "daa2307ab6acae89d800e097cac6f5efbd958090488cf0abb58d00df73001c81"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_absent_dark_en.png",
+      "sha256": "cdf4c53c6f4c85f080947ce402b4ed2e509069c6b01740fe7288a5d0d66b4b7a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_absent_light_en.png",
+      "sha256": "7378a2b9e2cbc81a92519a249b4fae466f00585f4281bf207600a8147e6da35a"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_media_dark_ar.png",
+      "sha256": "6c37670bc7b8ed7d206204d49c0e3915b5bca9dfc41260333680389c021cd3c8"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_media_dark_en.png",
+      "sha256": "a83d4e6482d0448630607d4f75c0eae300e03c11395f5ae0efeecc0759e91a91"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/articles_media_light_en.png",
+      "sha256": "3e0b7dfc9bf3fe9f1abb740b8169573a8b3f41d46c739ae4c9c7506694392643"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_absent_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_absent_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_absent_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_media_dark_ar.png",
+      "sha256": "d2ec21e7f539f0f29fc77717ec2a1a97f9a73dcb8c8dce7749431a0d5bb3bd4b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_media_dark_en.png",
+      "sha256": "d9c55a94e089f95b1300d0ec5743033f90cd7700c79299aabfd52d5f6a206c92"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/busy_media_light_en.png",
+      "sha256": "8eedf2bd76157ac205763f70460ecf7d0dd55bcb73cb82f057320471126ed498"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_ar.png",
+      "sha256": "d4429157126fba4f3b4db8b44a73bf79beedd6d7d7fb66c56fbb72498a69a440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_ar_scrolled.png",
+      "sha256": "d4429157126fba4f3b4db8b44a73bf79beedd6d7d7fb66c56fbb72498a69a440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_en.png",
+      "sha256": "d6d85cd9ca9bc9c6fcc4c4f94c2fa2d5f9d220b0ee1eaa967df872f16f3a5a1f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_dark_en_scrolled.png",
+      "sha256": "d6d85cd9ca9bc9c6fcc4c4f94c2fa2d5f9d220b0ee1eaa967df872f16f3a5a1f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_light_en.png",
+      "sha256": "8839618ad57d698ddd3cfb4121cff39295df4107cfb0c2c6728a9f1b2b712223"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_absent_light_en_scrolled.png",
+      "sha256": "8839618ad57d698ddd3cfb4121cff39295df4107cfb0c2c6728a9f1b2b712223"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_ar.png",
+      "sha256": "8d008b5f0a6c3d5a273f97d1a57d244885a23f4a683ac955e1f8fdff57b568b7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_ar_scrolled.png",
+      "sha256": "da05dc64118d45ea1b4d733b853f8e559099b107be9a2fa4316d4cecaa7ec593"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_en.png",
+      "sha256": "1d15fdfe4408e043b5d8a597c514759780eb25fed3acf35c288640f99ae2c916"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_dark_en_scrolled.png",
+      "sha256": "7e4eef99eec713b496566884a24e3279e4a33fdde292a22277ed5262425303d7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_light_en.png",
+      "sha256": "cc0857564b44fb0e2240d3883bf6fb8901042c6f3e18da1702728302ba5628e9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_media_light_en_scrolled.png",
+      "sha256": "68b9dbe73f3a0ce8f28516895ad118da9b5c42a7026abc032c06ecaab2a448e2"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_absent_dark_ar.png",
+      "sha256": "301cde0353a0d3390b94ac128db6822000d9f5d9baf32bb556ed7d46fbfea87e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_absent_dark_en.png",
+      "sha256": "53f47fce26c4d77c84b88725a14f63d8665dd40a408fd7484800217c76d99740"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_absent_light_en.png",
+      "sha256": "376271de739833733bf8a72070a12aa77b8864663d76ef8fb58a665992a1c4e4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_media_dark_ar.png",
+      "sha256": "8b28eabd4d459b2f7d555fccf4790c1cdc87b796006e0992c56dbce1a0b13c56"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_media_dark_en.png",
+      "sha256": "f340b836ca038b1d6440d562acf7caf3c293eb62f20ef421719fee61890e9b5f"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_offers_media_light_en.png",
+      "sha256": "7a47691e6ddc0200cc1d7571f139c1bd365f9c6a0a3a3a73d4ca57c380e9fb1e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_absent_dark_ar.png",
+      "sha256": "10c45d561ca9e2596de36e654e46f11dae402e853a177e71c9c514cd9b594fe4"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_absent_dark_en.png",
+      "sha256": "d4933f8f7e91049e4aaf25cd620e81211c86ec57bebfbe3c9dac37482bf0666c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_absent_light_en.png",
+      "sha256": "28e03ddfd837716b1b5c7cef447e31a6e3cec5dc9d25aef79b50dce65570714d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_media_dark_ar.png",
+      "sha256": "2e60f1f132c40e97570e50fec99102379522876ce49778b5b66109c1a6eb2fac"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_media_dark_en.png",
+      "sha256": "b5d1127e60ca932c7c773bdeb043d33664af4b21d746a317bc008295ec9250c3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_staff_media_light_en.png",
+      "sha256": "2a0f442d5d2d0fd1997b2e9a8e2b86d1d01cbfbd918bbbf82e880ac32a1191f3"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_absent_dark_ar.png",
+      "sha256": "4a0ab64df8b9bb1fbfa2b2746439685c0719c7dd85afc51e1bf1616fbb750080"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_absent_dark_en.png",
+      "sha256": "92fc0ee60f105be846de20d8827cd2681e08edc214aa298fab158b6ae9a94d29"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_absent_light_en.png",
+      "sha256": "d796118534c5c3dfebc39e48077caa276bd9b962a4bdcd0d317a047b100a9457"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_media_dark_ar.png",
+      "sha256": "8d3df42054db3eac3529462a1f025d766ae3a14d36f7e090b6e380ace0263ac5"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_media_dark_en.png",
+      "sha256": "c383ccacf152c3e36f6d66ed4178cf4f823d8fd7be7a5dbe01eeb5f344cd8f3b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/clinic_treatments_media_light_en.png",
+      "sha256": "b96152735b49fee1ce22a3269a1da51968c4768bb3046493aa4e36c2a282020e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_ar.png",
+      "sha256": "4025b9d72bd8be0f7b21e656f2168d1a87694a8e56b211366ad54612d07b64ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_ar_scrolled.png",
+      "sha256": "4025b9d72bd8be0f7b21e656f2168d1a87694a8e56b211366ad54612d07b64ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_en.png",
+      "sha256": "7717680d65b5fe07cf672f374dfafd653bb592f01266c4d730717207b6b1bc89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_dark_en_scrolled.png",
+      "sha256": "7717680d65b5fe07cf672f374dfafd653bb592f01266c4d730717207b6b1bc89"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_light_en.png",
+      "sha256": "ca0b0be058e63ed85b8b33516bb32ee49a6d47e8f50bbf8208493acd38d0de30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_absent_light_en_scrolled.png",
+      "sha256": "ca0b0be058e63ed85b8b33516bb32ee49a6d47e8f50bbf8208493acd38d0de30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_ar.png",
+      "sha256": "0c98243b05f6a27b65efd5d62a84448250cdc636d3e19bcddf21c04bc372b0e1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_ar_scrolled.png",
+      "sha256": "0c98243b05f6a27b65efd5d62a84448250cdc636d3e19bcddf21c04bc372b0e1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_en.png",
+      "sha256": "2c5b294a4d8d61625cb3c089c6f94bf897db199f17946734f9a4c638218886ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_dark_en_scrolled.png",
+      "sha256": "2c5b294a4d8d61625cb3c089c6f94bf897db199f17946734f9a4c638218886ba"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_light_en.png",
+      "sha256": "3ebb234f867a34aee2c8410e65110ed22be07594cbd813fb68c62ff71240d17c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/consultation_media_light_en_scrolled.png",
+      "sha256": "3ebb234f867a34aee2c8410e65110ed22be07594cbd813fb68c62ff71240d17c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_absent_dark_ar.png",
+      "sha256": "36f38fe6de40ef3ffc3e02e2f6b082fc04aac356c38702c4b1126d00bf414dda"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_absent_dark_en.png",
+      "sha256": "70da74bc690e913f5a20277ff8742a7afe67cb1594b3295e2207c8ff2ab371f6"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_absent_light_en.png",
+      "sha256": "d8c88166e3922456c8257ede9fe2121150133f6a57c3d7181ea4e9f27d5dba7b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_media_dark_ar.png",
+      "sha256": "2437fbeaa1d6f9d730f57c9cc0290600258b21525b0c4ac81f5d7b5b531500ee"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_media_dark_en.png",
+      "sha256": "9929e6b44749edeabc26b51c164b100d4f0ca4e26bea4cd6cc9ca33232926a76"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/directory_media_light_en.png",
+      "sha256": "ea1559f93bd2807f0f24467b552d7a4328da14ebff34e62181aa587be8d05a1e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_ar.png",
+      "sha256": "87c68f47f5d9f1348086b8f979a51654a449a0e48954290c5e0dcd3ee6877eb7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_ar_scrolled.png",
+      "sha256": "f2b5774b82b9936599332b99b3369b94167c014ad17dfe22c2752d8982ac0612"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_en.png",
+      "sha256": "b926611303523ddc60e88b6587fb77ca1435c8e20b20720acd91559bade540ea"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_dark_en_scrolled.png",
+      "sha256": "b5558269337b3f3a315c4f9a8b9f6e173ec901eeea9769886d5cba5a06488027"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_light_en.png",
+      "sha256": "d1c1f6439befdf3a2d1e68a60caf86458d9bcbe70bc2ad36206c643befbbcada"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_absent_light_en_scrolled.png",
+      "sha256": "598e1ea9c9b07974d3a6fcf1cfef956d521ca2496988c08072b262c3e301c6f9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_ar.png",
+      "sha256": "f67a2b24994dadf62baf34b5532e624be10b6fee4848a72423444580f8ec14fd"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_ar_scrolled.png",
+      "sha256": "87fc0f956dcc3eee2e8fccb2916d3310e6856d49e411417c91027fba8cbbf981"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_en.png",
+      "sha256": "026d64276910201cd698e00894e452062c1cb7dd2639eb6e8ba8ebb64ef8c7db"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_dark_en_scrolled.png",
+      "sha256": "7cbd3eea39272c218a670e243242b1e996d8df178e0a91afdb127c68d9afea14"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_light_en.png",
+      "sha256": "ac81f03ad079acb8ecfd84ef85262d05077650d5c5a01caab97bf0d49b5f8766"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/home_media_light_en_scrolled.png",
+      "sha256": "0a2627b53a7c3c9ee00391c0e18458e2e7b3bfb4386ba4066ce7a7ccf7458d6b"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_absent_dark_ar.png",
+      "sha256": "372cc838bb4a53082b8a2dc8cfaceb7dfd0c0ceb0508dbbf78531c05e58d255e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_absent_dark_en.png",
+      "sha256": "d78b9f822d90f5a357ac753868650c24a00bf3d2a640977b5a55f07c3fc027fb"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_absent_light_en.png",
+      "sha256": "6ea5d8d9976e83189e2dd8f1c1cbf87d668846d6e9c62da416dac2179dc5645e"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_media_dark_ar.png",
+      "sha256": "8c8e9159b89bfc35d16e31d76078a2381458d19597e3035404ccdd05c5e7bae7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_media_dark_en.png",
+      "sha256": "f348ee9f93949a98cce1603712ffdd4fd127293ab847992d3b6b54fdd512868d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/offers_media_light_en.png",
+      "sha256": "ce788becc99835b1223f73660681ea2d087cf149ddc5e93ea83fe0744e94e451"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_absent_dark_ar.png",
+      "sha256": "51ba35611dc4f6a37669ab2a48b6b8adc0a48d42b8fa03af7b7b19fe0a1ff5a9"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_absent_dark_en.png",
+      "sha256": "fa261ac5852c8619f9ec46a4ea0ab451d7f0891b4e9cfcb29f9e5577b89f3186"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_absent_light_en.png",
+      "sha256": "db09d239bcd5a2cf31608a90c736e326cc5b900c4e9e87dabbff25fc5c71ec30"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_media_dark_ar.png",
+      "sha256": "3e5fa5ed5d9dc4dcb3db81d2b98ef8c3069b0f850c09d6f2a3a74854fd163164"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_media_dark_en.png",
+      "sha256": "36abd66d9c0c8e1f6f5f6be450a048efaead0365ed24cfb46cf371a535ad2be1"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/practitioners_media_light_en.png",
+      "sha256": "098e117ca4f85df0f8b7ebffcd6f72e7f8e68151f787fe2bc8ae06593627e03c"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_absent_dark_ar.png",
+      "sha256": "5a5ef4839f94c0c2dd36314a60a19e21c6c77c1181ecfb9a5fe64d7698a508ef"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_absent_dark_en.png",
+      "sha256": "1d9987bf0a69336d270ebe2510bb2ab30e36d7d0b93f5bf21ce7798f1275106d"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_absent_light_en.png",
+      "sha256": "2e4d3e88c0c32684d1cd5b13153705e6dfe6133c06a60db534f5e6b6af218daf"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_media_dark_ar.png",
+      "sha256": "e0e883acf764390cc60fa701aba24f561ebf932a908fc802d13ab3d8be184264"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_media_dark_en.png",
+      "sha256": "49e9fd87ad7ea4d7c543fc00f36ccf436b56d63b4e2be94124653997ecfc79fa"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/products_media_light_en.png",
+      "sha256": "0b03b18ccbf4d7bf7a811ec0618ada4f88e16c1724f459d28240a7cd48f343a7"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_absent_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_ar.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_ar_scrolled.png",
+      "sha256": "27c14d45baefb14b3cd136ab0984c4a912b44377cab61a0ced9e6c4e9e553fdc"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_en.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_dark_en_scrolled.png",
+      "sha256": "4bf974f6d478b1cb0777596e3521cec509bbaf1a08fb0c4726d7bb978f2ee929"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_light_en.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "A",
+      "path": "docs/patient-fidelity-ca15dc6/previews/before/profile_media_light_en_scrolled.png",
+      "sha256": "23c3506b67c9933aba5b6d0adeda480f030e15f526d759720d861b2ea69b9440"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/widgets/content_sized_page_view.dart",
+      "sha256": "8ad8dc84f2bb54bccb4709845b284c70f850df98e5d64f02993da2b4f52c1e91"
+    },
+    {
+      "status": "M",
+      "path": "lib/core/widgets/patient_media_banner.dart",
+      "sha256": "1167b743c5498f31e5bd20f8b89751dadd7d24f47f0fc87956bc889882842c1b"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/appointment_lead/presentation/screens/appointment_request_screen.dart",
+      "sha256": "8dd225bd6cb8bfad4f09d072965bf91709f284b42d716551f63e3e2830de4110"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/articles/presentation/screens/articles_screen.dart",
+      "sha256": "3294cc34fa5c11c6a1501edb8a86679747cd90dbe60bfe2910f5ece38a4356e8"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/screens/clinic_profile_screen.dart",
+      "sha256": "61292b20bbfb86fd95c7529edbb5f9fe0ccd8f3c6d784f1251888e2bac456f2a"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/widgets/patient_clinic_card.dart",
+      "sha256": "a3ccc5f60cfb05a388a82e3d36278cb43a0f8c356304dfd284e72a6ee96e7975"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/clinics/presentation/widgets/patient_clinic_gallery.dart",
+      "sha256": "ba5faf8759acd6c8a66554b918a29ba5b8692cb29df5f2a623d72d73aaf00628"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/screens/home_screen.dart",
+      "sha256": "1e23eb50fe432832bd88ab8143c16308d185f36b74a7482fa757dc0b2b7dbdd5"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/category_grid.dart",
+      "sha256": "463c6d4678ffd1a842b08d6ae599d217e8fc31ee273343a9e5933da298f141b9"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/featured_ads_carousel.dart",
+      "sha256": "fe2c5b000df3339238accef6bce715e2d60661b8bb261c47a8af2796274efad3"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/home/presentation/widgets/nearby_clinics_section.dart",
+      "sha256": "0d65bb780b07787e716241b3b0313876aad7953bb98e551cf6bfdd2b2c706895"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/offers/presentation/widgets/patient_offer_card.dart",
+      "sha256": "cb63a0af5e7e22d69ec9d1630f6d5eecf23793ad80352179e5de24f18f179040"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/practitioners/presentation/screens/practitioners_screen.dart",
+      "sha256": "d763e150447957bc34e5c1a5965923210770a973cf8f15e4ceed060197bf8edf"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/practitioners/presentation/widgets/patient_practitioner_card.dart",
+      "sha256": "cd87739a9439b10c7f73c273217fcfc91cf384339ea6d7d0dfe23aae28e6d184"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/products/presentation/screens/products_screen.dart",
+      "sha256": "fb791f0df9732ab5d312feec43a89ec0b8638a83a7ff763c935361381d65b6ca"
+    },
+    {
+      "status": "M",
+      "path": "lib/features/products/presentation/widgets/brand_product_media.dart",
+      "sha256": "a279cc3b4328a98a1bdc27982826cc37fe60140eb36814adae24c8a5d8b56211"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/LICENSE-flutter-gallery-assets.txt",
+      "sha256": "7bbee97ff6d9a19cf7c1ee7b0bd25b5d1d5735fc9a2202d7d903fdbb29c199b3"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/README.md",
+      "sha256": "dea8b6044b25e997572d59902f802af1a52a87f169ae492f3414ecaf2520b9d1"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/fragrance_photo.jpg",
+      "sha256": "462925474f485d1e16f3912984422bcb399e102ce5e0404d72bf0a6ce1590896"
+    },
+    {
+      "status": "A",
+      "path": "test/fixtures/media/portrait_photo.png",
+      "sha256": "de0f9c8ce3f8295fbb02f783d266bd28735d43453fec5cbf189b930010661e49"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/README.md",
+      "sha256": "8e108bb27927d94a8b9417c3864a80f416f130eda720b4fa69b15f232b5536bc"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_dark_ar.json",
+      "sha256": "cf3aec2eed2744f5e01d6198efa62222531c5a7f10c37bd88f41f598c92e9417"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_dark_en.json",
+      "sha256": "2f1de342dbed31e34cb72b53e9ae122549f632177665202638358486c889252f"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_light_ar.json",
+      "sha256": "544e1eb5392a80ea2203b8cce6f1f3a65455d6d0c7e0a87935b6ad50a7c955d1"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/geometry/patient_clinic_light_en.json",
+      "sha256": "6eadf57b350a465ae201862d2f3399a57bf86dd40edfd71301e3638190090b7b"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_dark_ar.png",
+      "sha256": "373e7ba933b5e509337748285bd45905fcaf5b8b46c74ea977cca102c4d22b83"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_dark_en.png",
+      "sha256": "5c3261071d8f01d352427f8afa76830a8e8817181e319436b1f43667772b18c6"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_light_ar.png",
+      "sha256": "0543f048572765a05731f6502cc4da3ea8a426731cc5a03618882382c498c166"
+    },
+    {
+      "status": "A",
+      "path": "test/goldens/patient_reference_fidelity_v2/linux/patient_clinic_light_en.png",
+      "sha256": "b15b74e915dc86a19d607b8670ee2e38c5ef1ec2edaeb947767a218a838fb744"
+    },
+    {
+      "status": "M",
+      "path": "test/media_first_previews_test.dart",
+      "sha256": "8f327ed3d70093d87a9feff38b15efa499de3fdb66e6ce2767fbb079c936d564"
+    },
+    {
+      "status": "A",
+      "path": "test/patient_ca15dc6_contract_test.dart",
+      "sha256": "7c4b42186ee48f0b5d8f5a435c0c2db3ee7312fdc1b4197beeaf5ad9373c2a93"
+    },
+    {
+      "status": "M",
+      "path": "test/patient_portal_visual_test.dart",
+      "sha256": "de26d3272c7534ef5e870d695db411c29a899abc69e8a0fc52ec17e5b76aa121"
+    },
+    {
+      "status": "M",
+      "path": "test/support/clinic_golden_geometry.dart",
+      "sha256": "629217db672ce57c2987bf0b94ee48b85ab3cdd208519bae19125b36aca07b5f"
+    },
+    {
+      "status": "M",
+      "path": "tool/visual_test_manifest.py",
+      "sha256": "f8b4cb43171df51d1f04788379f81f72fba80f0a46ae94665114fe253cd598b7"
+    }
+  ],
+  "self_hash_excluded": true
+}

@@ -23,36 +23,35 @@ class BrandProductMedia extends StatelessWidget {
     super.key,
     required this.product,
     this.hero = false,
+    this.showIdentity = true,
   });
   final ProductModel product;
   final bool hero;
+  final bool showIdentity;
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final brand = productBrandLabel(product, loc);
     Widget identity() => Container(
-      padding: EdgeInsets.all(hero ? 24 : 16),
-      decoration: BoxDecoration(
-        gradient: AppColors.isDark(context)
-            ? AppColors.vipCardGradient
-            : AppColors.vipCardGradientLight,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      height: hero ? 64 : 52,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      color: AppColors.surfaceSubtle(context),
+      alignment: AlignmentDirectional.centerStart,
+      child: Row(
         children: [
-          Container(width: 28, height: 2, color: AppColors.goldText(context)),
-          const SizedBox(height: 16),
-          Text(
-            brand.isEmpty
-                ? (loc.isArabic ? 'عرض علامة تجميل' : 'Brand showcase')
-                : brand,
-            style: TextStyle(
-              fontFamily: loc.isArabic ? 'PatientArabic' : 'PatientDisplay',
-              fontSize: hero ? 26 : 21,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
-              color: AppColors.text(context),
+          Icon(
+            Icons.spa_outlined,
+            color: AppColors.goldText(context),
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              showIdentity && productBrandLabel(product, loc).isNotEmpty
+                  ? productBrandLabel(product, loc)
+                  : (loc.isArabic
+                        ? 'عناية من عالم التجميل'
+                        : 'Cosmetic brand showcase'),
+              style: TextStyle(color: AppColors.subtext(context), fontSize: 11),
             ),
           ),
         ],
@@ -69,7 +68,10 @@ class BrandProductMedia extends StatelessWidget {
           final width = constraints.hasBoundedWidth
               ? constraints.maxWidth
               : MediaQuery.sizeOf(context).width;
-          final height = (width * 5 / 4).clamp(0.0, hero ? 440.0 : 360.0);
+          final height = (width * (hero ? 1.5 : 5 / 4)).clamp(
+            0.0,
+            hero ? 440.0 : 360.0,
+          );
           return Image(
             key: ValueKey(provider),
             image: boundedImageDecode(

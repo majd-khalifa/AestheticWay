@@ -69,7 +69,7 @@ class CategoryGrid extends StatelessWidget {
     final loc = LocaleService();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -92,34 +92,28 @@ class CategoryGrid extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final minWidth = MediaQuery.textScalerOf(context).scale(1) > 1.3
-                  ? 120.0
-                  : 76.0;
-              final columns = (constraints.maxWidth / minWidth).floor().clamp(
-                2,
-                4,
-              );
-              final width =
-                  (constraints.maxWidth - (columns - 1) * 12) / columns;
-              return Wrap(
-                spacing: 12,
-                runSpacing: 18,
-                children: [
-                  for (final category in categories)
-                    SizedBox(
-                      width: width,
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final category in categories)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 10),
+                    child: SizedBox(
+                      width: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                          ? 108
+                          : 82,
                       child: _CategoryItemWidget(
                         category: category,
                         label: loc.tr(category.translationKey),
                         onTap: () => onCategorySelected(category),
                       ),
                     ),
-                ],
-              );
-            },
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -143,7 +137,7 @@ class _CategoryItemWidget extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.surface(context),
           borderRadius: BorderRadius.circular(14),
@@ -153,19 +147,19 @@ class _CategoryItemWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 46,
-              height: 46,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.surfaceSubtle(context),
               ),
               child: Icon(
                 category.icon,
-                size: 24,
+                size: 21,
                 color: AppColors.goldText(context),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(
               label,
               textAlign: TextAlign.center,
