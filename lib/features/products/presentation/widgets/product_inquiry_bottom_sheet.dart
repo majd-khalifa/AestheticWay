@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -6,7 +7,6 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
@@ -289,13 +289,12 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
-                        LuxuryImage(
+                        PatientImage(
                           imageUrl: widget.product.imageUrl,
-                          fallbackLogoUrl: widget.product.clinicLogoUrl,
+
                           width: 64,
                           height: 64,
                           borderRadius: BorderRadius.circular(12),
-                          placeholderIcon: Icons.auto_awesome_outlined,
                         ),
                         const SizedBox(width: 12),
                         Expanded(

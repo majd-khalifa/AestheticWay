@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/luxury_empty_state.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_picker.dart';
@@ -8,7 +9,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/features/treatments/data/treatments_repository.dart';
 import 'package:aesthetic_way/features/treatments/models/treatment_model.dart';
@@ -397,15 +397,11 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                                   padding: const EdgeInsets.all(12),
                                   child: Row(
                                     children: [
-                                      LuxuryImage(
+                                      PatientImage(
                                         imageUrl: treatment.imageUrl,
-                                        fallbackLogoUrl:
-                                            treatment.clinicLogoUrl,
                                         width: 80,
                                         height: 80,
                                         borderRadius: BorderRadius.circular(12),
-                                        placeholderIcon:
-                                            Icons.medical_services_rounded,
                                       ),
                                       const SizedBox(width: 14),
                                       Expanded(

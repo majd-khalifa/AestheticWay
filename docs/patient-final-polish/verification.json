@@ -1,0 +1,24 @@
+{
+  "baseline_commit": "a5ec85d3e189110800e9da1385f7f4df02aed59a",
+  "local_host": "Linux",
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "local_full_tests": 630,
+  "focused_request_qa_tests": 31,
+  "media_preview_tests": 78,
+  "new_tests": 22,
+  "analyze_issues": 0,
+  "format": "dart format .; no changes",
+  "diff_check": "git diff --check; clean",
+  "live_api_verified": false,
+  "physical_android_verified": false,
+  "native_windows_verification": "Pending current-branch CI and exact golden adoption review",
+  "backend_snapshot_unchanged_file_count": 390,
+  "log_sha256": {
+    "analyze.log": "e46975b8d57dd4665c35245cf0977e3aaced0c72606cb7849ec6f05c0405c05d",
+    "format.log": "6509adf29b2c091b5fed68ecf43dade24937a80dc29e771eb999a9c857ded457",
+    "final-renders.log": "3c22305bdcebc6c8d0ffd4db9be1d527fa6edd5b8a95d8f96c8b7f65772aa27d",
+    "final-qa-renders.log": "05f8d9750aa6772b095726a2a44e1ec7e3d340ee8fe4de35671ec661bb5f88ed",
+    "full-tests-final.log": "1811bbe218b1f252989bfd6fbcd3ed38cc181da9250515187b816896b9f6c600"
+  }
+}

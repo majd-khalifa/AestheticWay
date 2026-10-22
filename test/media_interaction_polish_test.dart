@@ -488,10 +488,11 @@ void main() {
         final media = find.byType(PatientMediaBanner);
         expect(
           media,
-          findsOneWidget,
-          reason: 'Only genuine clinic photography gets a media frame.',
+          findsNWidgets(2),
+          reason: 'Real and missing clinic media preserve identical frames.',
         );
-        final image = tester.getSize(media);
+        final image = tester.getSize(media.first);
+        expect(tester.getSize(media.last), image);
         expect(image.width / image.height, closeTo(3 / 2, .01));
         expect(find.text('Discover the details'), findsNothing);
         expect(find.text('اكتشف التفاصيل'), findsNothing);

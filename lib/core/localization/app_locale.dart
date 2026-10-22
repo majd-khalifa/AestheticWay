@@ -1,3 +1,4 @@
+import '../preferences/persistent_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -17,66 +18,53 @@ enum AppLanguage {
 class LocaleService extends ChangeNotifier {
   static final LocaleService _instance = LocaleService._internal();
   factory LocaleService() => _instance;
-  LocaleService._internal();
+  LocaleService._internal()
+    : this.withStorage(
+        const FlutterSecureStorage(
+          aOptions: AndroidOptions(encryptedSharedPreferences: true),
+          iOptions: IOSOptions(
+            accessibility: KeychainAccessibility.first_unlock,
+          ),
+        ),
+      );
 
+  /// A separate instance supports cold-start verification with a storage adapter.
+  LocaleService.withStorage(FlutterSecureStorage storage)
+    : _preference = PersistentPreference<AppLanguage>(
+        defaultValue: AppLanguage.english,
+        read: () => storage.read(key: storageKey),
+        write: (value) => storage.write(key: storageKey, value: value),
+        decode: (code) =>
+            code == 'ar' ? AppLanguage.arabic : AppLanguage.english,
+        encode: (value) => value.code,
+      ) {
+    _preference.addListener(notifyListeners);
+  }
   static const String storageKey = 'aw_pref_locale';
-
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
-  );
-
-  // Default on first launch (when no saved preference exists) is English (LTR)
-  AppLanguage _currentLanguage = AppLanguage.english;
-
-  AppLanguage get currentLanguage => _currentLanguage;
-  bool get isArabic => _currentLanguage == AppLanguage.arabic;
-  bool get isEnglish => _currentLanguage == AppLanguage.english;
-  Locale get locale => Locale(_currentLanguage.code);
-  TextDirection get textDirection => _currentLanguage.direction;
-
-  /// Restores persisted language choice; defaults to English (LTR) when unset.
-  Future<void> init() async {
-    try {
-      final savedCode = await _storage.read(key: storageKey);
-      if (savedCode == AppLanguage.arabic.code) {
-        _currentLanguage = AppLanguage.arabic;
-      } else if (savedCode == AppLanguage.english.code) {
-        _currentLanguage = AppLanguage.english;
-      } else {
-        _currentLanguage = AppLanguage.english;
-      }
-      notifyListeners();
-    } catch (_) {
-      _currentLanguage = AppLanguage.english;
-    }
-  }
-
-  Future<void> toggleLanguage() async {
-    _currentLanguage = _currentLanguage == AppLanguage.arabic
-        ? AppLanguage.english
-        : AppLanguage.arabic;
-    notifyListeners();
-    await _persistLanguage(_currentLanguage);
-  }
-
-  Future<void> setLanguage(AppLanguage language) async {
-    if (_currentLanguage != language) {
-      _currentLanguage = language;
-      notifyListeners();
-    }
-    await _persistLanguage(language);
-  }
-
-  Future<void> _persistLanguage(AppLanguage language) async {
-    try {
-      await _storage.write(key: storageKey, value: language.code);
-    } catch (_) {}
+  final PersistentPreference<AppLanguage> _preference;
+  AppLanguage get currentLanguage => _preference.value;
+  bool get isArabic => currentLanguage == AppLanguage.arabic;
+  bool get isEnglish => currentLanguage == AppLanguage.english;
+  Locale get locale => Locale(currentLanguage.code);
+  TextDirection get textDirection => currentLanguage.direction;
+  bool get isSaving => _preference.isSaving;
+  bool get saveFailed => _preference.saveFailed;
+  Future<void> init() => _preference.restore();
+  Future<void> setLanguage(AppLanguage language) =>
+      _preference.setValue(language);
+  Future<void> toggleLanguage() =>
+      setLanguage(isArabic ? AppLanguage.english : AppLanguage.arabic);
+  Future<void> retrySave() => _preference.retrySave();
+  @override
+  void dispose() {
+    _preference.removeListener(notifyListeners);
+    _preference.dispose();
+    super.dispose();
   }
 
   /// Translation Lookup Helper with Safe Fallback
   String tr(String key) {
-    return _translations[key]?[_currentLanguage.code] ?? key;
+    return _translations[key]?[currentLanguage.code] ?? key;
   }
 
   static const Map<String, Map<String, String>> _translations = {

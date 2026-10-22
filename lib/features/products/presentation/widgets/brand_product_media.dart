@@ -1,3 +1,4 @@
+import '../../../../core/widgets/patient_media_placeholder.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -16,49 +17,19 @@ String productBrandLabel(ProductModel product, LocaleService locale) {
       '';
 }
 
-/// Genuine product media is contained, never cropped. Without a photograph the
-/// supplied brand becomes the identity, rather than an empty grey photo panel.
+/// Genuine product media stays contained; absent media keeps the same frame.
 class BrandProductMedia extends StatelessWidget {
   const BrandProductMedia({
     super.key,
     required this.product,
     this.hero = false,
-    this.showIdentity = true,
   });
   final ProductModel product;
   final bool hero;
-  final bool showIdentity;
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    Widget identity() => Container(
-      height: hero ? 64 : 52,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      color: AppColors.surfaceSubtle(context),
-      alignment: AlignmentDirectional.centerStart,
-      child: Row(
-        children: [
-          Icon(
-            Icons.spa_outlined,
-            color: AppColors.goldText(context),
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              showIdentity && productBrandLabel(product, loc).isNotEmpty
-                  ? productBrandLabel(product, loc)
-                  : (loc.isArabic
-                        ? 'عناية من عالم التجميل'
-                        : 'Cosmetic brand showcase'),
-              style: TextStyle(color: AppColors.subtext(context), fontSize: 11),
-            ),
-          ),
-        ],
-      ),
-    );
     final provider = resolveImageProvider(product.imageUrl);
-    if (provider == null) return identity();
     return ColoredBox(
       color: AppColors.isDark(context)
           ? AppColors.cardSurfaceLight
@@ -72,6 +43,12 @@ class BrandProductMedia extends StatelessWidget {
             0.0,
             hero ? 440.0 : 360.0,
           );
+          if (provider == null) {
+            return PatientMediaPlaceholder(
+              height: height,
+              width: double.infinity,
+            );
+          }
           return Image(
             key: ValueKey(provider),
             image: boundedImageDecode(
@@ -85,7 +62,8 @@ class BrandProductMedia extends StatelessWidget {
             width: double.infinity,
             fit: BoxFit.contain,
             semanticLabel: loc.isArabic ? product.nameAr : product.nameEn,
-            errorBuilder: (_, _, _) => identity(),
+            errorBuilder: (_, _, _) =>
+                PatientMediaPlaceholder(height: height, width: double.infinity),
           );
         },
       ),

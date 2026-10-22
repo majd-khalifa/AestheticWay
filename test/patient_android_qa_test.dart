@@ -300,7 +300,9 @@ void main() {
       expect(find.textContaining('server requested'), findsNothing);
       expect(find.textContaining('seconds'), findsNothing);
       expect(
-        find.text('Too many attempts. Please wait before trying again.'),
+        find.text(
+          'This request could not be sent right now. Please wait before trying again; your form is unchanged.',
+        ),
         findsOneWidget,
       );
     },
@@ -485,6 +487,20 @@ void main() {
       await tester.tap(find.text(LocaleService().tr('status_contacted')));
       await tester.pumpAndSettle();
       expect(repo.reads.last, (1, 'contacted'));
+      final completedReads = repo.reads.length;
+      await tester.tap(
+        find.ancestor(
+          of: find.text(LocaleService().tr('status_contacted')),
+          matching: find.byType(ChoiceChip),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        repo.reads.length,
+        completedReads,
+        reason: 'Reselecting the active filter must not issue another GET.',
+      );
+
       expect(find.text('All'), findsOneWidget);
       expect(find.text('All (1)'), findsNothing);
       await tester.drag(find.byType(ListView).first, const Offset(0, 450));

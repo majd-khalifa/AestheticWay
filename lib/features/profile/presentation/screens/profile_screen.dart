@@ -1,3 +1,4 @@
+import '../../../../core/widgets/preference_save_status.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
@@ -819,8 +820,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 16),
                       _ThemeSwitchTile(loc: loc),
+                      PreferenceSaveStatus(
+                        listenable: ThemeService(),
+                        saving: () => ThemeService().isSaving,
+                        failed: () => ThemeService().saveFailed,
+                        onRetry: ThemeService().retrySave,
+                      ),
                       const SizedBox(height: 10),
                       _LanguageSwitchTile(loc: loc),
+                      PreferenceSaveStatus(
+                        listenable: loc,
+                        saving: () => loc.isSaving,
+                        failed: () => loc.saveFailed,
+                        onRetry: loc.retrySave,
+                      ),
                       const SizedBox(height: 10),
                       _ProfileMenuTile(
                         icon: Icons.security_outlined,
@@ -1059,10 +1072,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       // Theme Switcher Tile
                       _ThemeSwitchTile(loc: loc),
+                      PreferenceSaveStatus(
+                        listenable: ThemeService(),
+                        saving: () => ThemeService().isSaving,
+                        failed: () => ThemeService().saveFailed,
+                        onRetry: ThemeService().retrySave,
+                      ),
                       const SizedBox(height: 10),
 
                       // Language Switcher Tile
                       _LanguageSwitchTile(loc: loc),
+                      PreferenceSaveStatus(
+                        listenable: loc,
+                        saving: () => loc.isSaving,
+                        failed: () => loc.saveFailed,
+                        onRetry: loc.retrySave,
+                      ),
                       const SizedBox(height: 10),
 
                       _ProfileMenuTile(

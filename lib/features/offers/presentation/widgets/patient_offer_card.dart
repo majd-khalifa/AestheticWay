@@ -1,9 +1,9 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../../../../core/theme/patient_design.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../models/offer_model.dart';
@@ -30,7 +30,6 @@ class PatientOfferCard extends StatelessWidget {
         ? offer.clinicNameAr
         : (offer.clinicNameEn ?? offer.clinicNameAr);
     final description = loc.isArabic ? offer.termsAr : offer.termsEn;
-    final hasPhoto = resolveImageProvider(offer.imageUrl) != null;
     final copy = Padding(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -158,7 +157,6 @@ class PatientOfferCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final split =
-            hasPhoto &&
             constraints.maxWidth >= 290 &&
             MediaQuery.textScalerOf(context).scale(1) <= 1.3;
         return LuxuryCard(
@@ -173,8 +171,9 @@ class PatientOfferCard extends StatelessWidget {
                       children: [
                         SizedBox(
                           width: constraints.maxWidth * .38,
-                          child: LuxuryImage(
+                          child: PatientImage(
                             imageUrl: offer.imageUrl,
+                            height: compact ? 150 : 190,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -185,13 +184,12 @@ class PatientOfferCard extends StatelessWidget {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (hasPhoto)
-                        LuxuryImage(
-                          imageUrl: offer.imageUrl,
-                          height: compact ? 150 : 190,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
+                      PatientImage(
+                        imageUrl: offer.imageUrl,
+                        height: compact ? 150 : 190,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                       copy,
                     ],
                   ),

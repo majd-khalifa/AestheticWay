@@ -1,3 +1,5 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:aesthetic_way/core/widgets/patient_media_placeholder.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/clinics/presentation/widgets/google_clinic_rating.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -29,6 +31,7 @@ class _DelayedProfile implements AuthRepository {
 }
 
 void main() {
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   for (final dark in [false, true]) {
     testWidgets(
       'Patient visual tokens are scoped and preserve the global ${dark ? 'dark' : 'light'} portal theme',
@@ -114,9 +117,9 @@ void main() {
       expect(find.byType(Image), findsNothing);
       expect(
         tester.getSize(find.byType(PatientClinicGallery)).height,
-        inInclusiveRange(48, 76),
+        tester.getSize(find.byType(PatientClinicGallery)).width / (16 / 9),
       );
-      expect(find.byType(PatientMediaFallback), findsOneWidget);
+      expect(find.byType(PatientMediaPlaceholder), findsOneWidget);
     },
   );
   testWidgets(

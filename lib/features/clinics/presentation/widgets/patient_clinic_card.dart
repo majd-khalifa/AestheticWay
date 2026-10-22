@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../../../../core/theme/patient_design.dart';
 import '../../../../core/widgets/silver_button.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/clinic_location.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../models/clinic_model.dart';
@@ -43,9 +43,7 @@ class PatientClinicCard extends StatelessWidget {
     final description = loc.isArabic
         ? clinic.descriptionAr
         : clinic.descriptionEn;
-    final hasPhoto =
-        showCover &&
-        (media != null || resolveImageProvider(clinic.primaryPhotoUrl) != null);
+
     Widget identity() => Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -56,7 +54,7 @@ class PatientClinicCard extends StatelessWidget {
             border: Border.all(color: AppColors.border(context)),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: LuxuryImage(
+          child: PatientImage(
             imageUrl: clinic.logoUrl,
             width: compact ? 38 : 48,
             height: compact ? 38 : 48,
@@ -109,7 +107,7 @@ class PatientClinicCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (hasPhoto)
+            if (showCover)
               media ??
                   PatientMediaBanner(
                     source: clinic.primaryPhotoUrl,

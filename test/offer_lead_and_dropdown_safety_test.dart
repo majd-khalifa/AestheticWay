@@ -303,7 +303,9 @@ void main() {
 
         // Expect exact user-requested 429 duplicate message
         expect(
-          find.text('تعذر إرسال طلب متكرر. راجع طلباتك قبل إعادة المحاولة.'),
+          find.text(
+            'لم يُرسل هذا الطلب لأن النظام رصده كتكرار محتمل. يمكنك مراجعة طلباتك والمحاولة لاحقاً.',
+          ),
           findsOneWidget,
         );
       },

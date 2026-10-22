@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../widgets/lead_rejection_notice.dart';
 import 'my_requests_screen.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
@@ -9,7 +10,6 @@ import 'package:aesthetic_way/core/data/paged_collection.dart';
 import '../../../treatments/data/treatments_repository.dart';
 import '../../../treatments/models/treatment_model.dart';
 import '../../../practitioners/data/practitioners_repository.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -514,43 +514,11 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child:
-                          (resolveImageProvider(
-                                widget.clinic.primaryPhotoUrl,
-                              ) !=
-                              null)
-                          ? LuxuryImage(
-                              imageUrl: widget.clinic.primaryPhotoUrl,
-                              width: 106,
-                              height: 100,
-                              fit: BoxFit.cover,
-                              customPlaceholder: Container(
-                                width: 82,
-                                height: 78,
-                                color: isDark
-                                    ? AppColors.cardSurfaceHover
-                                    : AppColors.lightCardSurfaceHover,
-                                child: Icon(
-                                  Icons.local_hospital_outlined,
-                                  color: isDark
-                                      ? AppColors.silverMuted
-                                      : AppColors.lightTextMuted,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              width: 106,
-                              height: 100,
-                              color: isDark
-                                  ? AppColors.cardSurfaceHover
-                                  : AppColors.lightCardSurfaceHover,
-                              child: Icon(
-                                Icons.local_hospital_outlined,
-                                color: isDark
-                                    ? AppColors.silverMuted
-                                    : AppColors.lightTextMuted,
-                              ),
-                            ),
+                      child: PatientImage(
+                        imageUrl: widget.clinic.primaryPhotoUrl,
+                        width: 106,
+                        height: 100,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

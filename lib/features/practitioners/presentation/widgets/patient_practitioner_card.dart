@@ -1,9 +1,9 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../../../../core/theme/patient_design.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/practitioner_badge.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../models/practitioner_model.dart';
@@ -30,7 +30,6 @@ class PatientPractitionerCard extends StatelessWidget {
         ? p.clinicNameAr
         : (p.clinicNameEn ?? p.clinicNameAr);
     final specialty = loc.isArabic ? p.specialtyAr : p.specialtyEn;
-    final hasPortrait = resolveImageProvider(p.avatarUrl) != null;
     Widget action() => onInquiryAction != null
         ? AsyncActionButton(
             label: loc.tr('request_consultation'),
@@ -98,32 +97,15 @@ class PatientPractitionerCard extends StatelessWidget {
           onTap: onTap,
           padding: const EdgeInsets.all(10),
           borderRadius: 18,
-          child: !hasPortrait
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LuxuryImage(
-                      imageUrl: null,
-                      fallbackLogoUrl: p.clinicLogoUrl,
-                      width: 44,
-                      height: 44,
-                      borderRadius: BorderRadius.circular(12),
-                      placeholderIcon: Icons.person_outline,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(child: details()),
-                  ],
-                )
-              : narrow
+          child: narrow
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    LuxuryImage(
+                    PatientImage(
                       imageUrl: p.avatarUrl,
                       height: 200,
                       fit: BoxFit.cover,
                       borderRadius: BorderRadius.circular(12),
-                      placeholderIcon: Icons.person_outline,
                     ),
                     const SizedBox(height: 12),
                     details(),
@@ -137,11 +119,11 @@ class PatientPractitionerCard extends StatelessWidget {
                         width: (constraints.maxWidth - 32) * .39,
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(minHeight: 204),
-                          child: LuxuryImage(
+                          child: PatientImage(
                             imageUrl: p.avatarUrl,
+                            height: 204,
                             fit: BoxFit.cover,
                             borderRadius: BorderRadius.circular(12),
-                            placeholderIcon: Icons.person_outline,
                           ),
                         ),
                       ),

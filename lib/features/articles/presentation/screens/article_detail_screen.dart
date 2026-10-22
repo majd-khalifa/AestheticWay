@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/utils/entity_id.dart';
@@ -9,7 +10,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -233,22 +233,11 @@ class ArticleDetailScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: LuxuryImage(
+                  child: PatientImage(
                     imageUrl: article.authorDoctorAvatar,
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
-                    customPlaceholder: Container(
-                      width: 50,
-                      height: 50,
-                      color: isDark
-                          ? AppColors.cardSurfaceHover
-                          : AppColors.lightCardSurfaceHover,
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: AppColors.accentChampagne,
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

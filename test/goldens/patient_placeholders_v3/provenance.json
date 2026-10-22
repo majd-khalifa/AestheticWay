@@ -1,0 +1,13 @@
+{
+  "baseline_family": "patient_placeholders_v3",
+  "reason": "User-authorized same-geometry branded missing-media panels; prior families unchanged",
+  "flutter": "3.41.5",
+  "comparison": "Exact native rasters plus shared 1/16dp geometry/styles",
+  "native_windows_review": "Pending native candidate capture and visual/geometry review",
+  "linux_raster_sha256": {
+    "patient_clinic_dark_ar.png": "97582a43bbedb2d429d199a98779c0bcdb5fef4712a9a111a3713cb02a3f12a0",
+    "patient_clinic_dark_en.png": "471f33ee5eb4d01c639b723e4b98b7643055a66b4a4fa4439e7a0d2be34c2f03",
+    "patient_clinic_light_ar.png": "c655c639a5cc5a7e86d66fd0f3749c79402e19dd2c80d1a5a4b732dacb5d21fe",
+    "patient_clinic_light_en.png": "cc93dc7767b80b9e360eef8e30644625772c4c48a2d99a1a165436ed7897f4f3"
+  }
+}

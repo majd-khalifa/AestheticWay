@@ -24,11 +24,11 @@ class LeadRejectionNotice extends StatelessWidget {
         : null;
     final explanation = duplicate
         ? (ar
-              ? 'تعذر إرسال طلب متكرر. راجع طلباتك قبل إعادة المحاولة.'
-              : 'This request was blocked as a repeat. Review My Requests before trying again.')
+              ? 'لم يُرسل هذا الطلب لأن النظام رصده كتكرار محتمل. يمكنك مراجعة طلباتك والمحاولة لاحقاً.'
+              : 'This request was not sent because it may repeat a recent inquiry. You can review My Requests and try again later.')
         : (ar
-              ? 'محاولات كثيرة. يرجى الانتظار قبل إعادة المحاولة.'
-              : 'Too many attempts. Please wait before trying again.');
+              ? 'لم يُرسل هذا الطلب حالياً. يرجى الانتظار قبل المحاولة مجدداً؛ بياناتك محفوظة في النموذج.'
+              : 'This request could not be sent right now. Please wait before trying again; your form is unchanged.');
     return Semantics(
       liveRegion: true,
       child: Container(

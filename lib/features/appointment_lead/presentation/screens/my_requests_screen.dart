@@ -44,6 +44,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     },
   };
   void _setFilter(int index) {
+    if (index == _selectedFilterIndex) return;
     setState(() => _selectedFilterIndex = index);
     _paging.refresh(query: _query);
   }

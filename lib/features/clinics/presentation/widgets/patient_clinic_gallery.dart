@@ -23,7 +23,13 @@ class _PatientClinicGalleryState extends State<PatientClinicGallery> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.images.isEmpty) return const PatientMediaFallback();
+    if (widget.images.isEmpty) {
+      return const PatientMediaBanner(
+        source: null,
+        aspectRatio: 16 / 9,
+        borderRadius: BorderRadius.all(Radius.circular(18)),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

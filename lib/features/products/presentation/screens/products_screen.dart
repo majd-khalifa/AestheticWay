@@ -1,4 +1,3 @@
-import '../../../../core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/brand_product_media.dart';
 import '../../../../core/widgets/editorial_heading.dart';
@@ -421,8 +420,7 @@ class _ProductCard extends StatelessWidget {
         builder: (context, constraints) {
           final split =
               constraints.maxWidth >= 300 &&
-              MediaQuery.textScalerOf(context).scale(1) <= 1.3 &&
-              resolveImageProvider(product.imageUrl) != null;
+              MediaQuery.textScalerOf(context).scale(1) <= 1.3;
           return LuxuryCard(
             onTap: onTap,
             padding: EdgeInsets.zero,
@@ -438,7 +436,6 @@ class _ProductCard extends StatelessWidget {
                           child: BrandProductMedia(
                             product: product,
                             hero: true,
-                            showIdentity: false,
                           ),
                         ),
                         Expanded(child: copy),
@@ -447,11 +444,7 @@ class _ProductCard extends StatelessWidget {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (resolveImageProvider(product.imageUrl) != null)
-                          BrandProductMedia(
-                            product: product,
-                            showIdentity: false,
-                          ),
+                        BrandProductMedia(product: product),
                         copy,
                       ],
                     ),

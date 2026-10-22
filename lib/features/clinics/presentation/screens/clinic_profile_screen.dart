@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../../../../core/widgets/viewport_activity.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../../treatments/presentation/widgets/patient_treatment_card.dart';
@@ -16,7 +17,6 @@ import '../../../../core/utils/clinic_location.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/luxury_animations.dart';
 import '../../../../core/widgets/luxury_empty_state.dart';
-import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../appointment_lead/presentation/screens/appointment_request_screen.dart';
@@ -230,7 +230,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LuxuryImage(
+                      PatientImage(
                         imageUrl: clinic.logoUrl,
                         width: 62,
                         height: 62,
