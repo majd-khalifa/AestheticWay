@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/release-evidence/
+*.xcresult/
 
 # Symbolication related
 app.*.symbols
@@ -49,6 +51,12 @@ app.*.map.json
 *.keystore
 *.p12
 *.pfx
+*.mobileprovision
+*.provisionprofile
+AuthKey_*.p8
+ExportOptions.local.plist
+**/.bundle/
+**/vendor/bundle/
 key.properties
 .env
 .env.*

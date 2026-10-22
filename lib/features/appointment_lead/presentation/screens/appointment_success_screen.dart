@@ -202,32 +202,6 @@ class AppointmentSuccessScreen extends StatelessWidget {
                                       : AppColors.lightTextPrimary,
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2.5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.accentChampagne.withValues(
-                                    alpha: 0.15,
-                                  ),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: AppColors.accentChampagne.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                    width: 0.7,
-                                  ),
-                                ),
-                                child: Text(
-                                  request.referenceCode,
-                                  style: AppTypography.caption.copyWith(
-                                    color: AppColors.goldText(context),
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 10),

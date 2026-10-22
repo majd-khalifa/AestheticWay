@@ -55,8 +55,8 @@ Map<String, dynamic> historyRow(int index, {String status = 'new'}) => {
   },
   'service_name': 'Submitted service',
   'treatment_summary': {
-    'name_en': 'Source Treatment',
-    'name_ar': 'علاج المصدر',
+    'name_en': 'Source Treatment $index',
+    'name_ar': 'علاج المصدر $index',
   },
   'practitioner_summary': {
     'name_en': 'Source Practitioner',
@@ -335,7 +335,7 @@ void main() {
       expect(lead.clinicNameAr, 'Source only English');
       expect(lead.branchNameAr, isEmpty);
       expect(lead.branchNameEn, isEmpty);
-      expect(lead.serviceNameEn, 'Source Treatment');
+      expect(lead.serviceNameEn, 'Source Treatment 7');
       expect(lead.practitionerNameEn, 'Source Practitioner');
       expect(lead.referenceCode, '#REQ-7');
       expect(lead.createdAt, DateTime.utc(2026, 10, 22, 9, 10));
@@ -474,7 +474,7 @@ void main() {
       expect(find.text('All (20)'), findsNothing);
       await tester.tap(find.text('Source Clinic').first);
       await tester.pumpAndSettle();
-      expect(find.text('Source Treatment'), findsWidgets);
+      expect(find.text('Source Treatment 1'), findsWidgets);
       expect(find.text('Source Practitioner'), findsWidgets);
       expect(find.text('Main Branch'), findsNothing);
       expect(find.textContaining('2026/10/22'), findsWidgets);
@@ -653,7 +653,8 @@ void main() {
       expect(repo.reads.where((p) => p == (2, null)).length, 2);
       await tester.drag(find.byType(ListView).first, const Offset(0, -1000));
       await tester.pumpAndSettle();
-      expect(find.text('#REQ-21'), findsOneWidget);
+      expect(find.textContaining('Source Treatment 21'), findsOneWidget);
+      expect(find.textContaining('#REQ-'), findsNothing);
     },
   );
   testWidgets(
@@ -739,7 +740,8 @@ void main() {
       await tester.tap(view);
       await tester.pumpAndSettle();
       expect(find.byType(MyRequestsScreen), findsOneWidget);
-      expect(find.text('#REQ-1'), findsOneWidget);
+      expect(find.textContaining('Source Treatment 1'), findsOneWidget);
+      expect(find.textContaining('#REQ-'), findsNothing);
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.text('Underlying portal'), findsOneWidget);
@@ -772,10 +774,7 @@ void main() {
             scale: 1.6,
           );
           expect(tester.takeException(), isNull);
-          expect(
-            tester.widget<Text>(find.text('#REQ-1')).textDirection,
-            TextDirection.ltr,
-          );
+          expect(find.textContaining('#REQ-'), findsNothing);
           await capture(
             tester,
             'history_${dark ? 'dark' : 'light'}_${ar ? 'ar' : 'en'}_large_text',

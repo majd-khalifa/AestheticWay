@@ -16,7 +16,8 @@ val hasReleaseSigning = listOf(releaseStore, releaseStorePassword, releaseAlias,
 
 android {
     namespace = "com.aestheticway.aesthetic_way"
-    compileSdk = flutter.compileSdkVersion
+    // Keep the reviewed Play API contract stable across Flutter SDK upgrades.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -29,12 +30,11 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.aestheticway.aesthetic_way"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -67,5 +67,19 @@ gradle.taskGraph.whenReady {
     }
     if (buildingAppRelease && !hasReleaseSigning) {
         throw GradleException("Release signing is not configured. Supply the four AW_ANDROID signing variables through CI secrets.")
+    }
+    if (buildingAppRelease && !file(releaseStore!!).isFile) {
+        throw GradleException("The external release signing file does not exist.")
+    }
+}
+
+// Reports the resolved DSL, without exposing signing paths, aliases or passwords.
+tasks.register("printReleaseConfiguration") {
+    doLast {
+        println("AW_RELEASE_CONFIGURATION " +
+            "applicationId=${android.defaultConfig.applicationId} " +
+            "compileSdk=${android.compileSdk} targetSdk=${android.defaultConfig.targetSdk} " +
+            "minSdk=${android.defaultConfig.minSdk} ndk=${android.ndkVersion} " +
+            "signingConfigured=$hasReleaseSigning")
     }
 }

@@ -1,4 +1,5 @@
 import '../../../../core/widgets/preference_save_status.dart';
+import '../../../../core/widgets/account_privacy_actions.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/widgets/luxury_phone_input_field.dart';
 import 'package:flutter/material.dart';
@@ -163,6 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: isDark
           ? AppColors.cardSurface
           : AppColors.lightCardSurface,
@@ -171,65 +173,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       builder: (ctx) {
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.mutedText(
-                        context,
-                      ).withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.security_outlined,
-                      color: AppColors.accentChampagne,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        loc.tr('privacy_sheet_title'),
-                        style: AppTypography.cardTitle.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? AppColors.silverPrimary
-                              : AppColors.lightTextPrimary,
-                        ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.mutedText(
+                          context,
+                        ).withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  loc.tr('privacy_sheet_text'),
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: isDark
-                        ? AppColors.silverSecondary
-                        : AppColors.lightTextSecondary,
-                    height: 1.6,
-                    fontSize: 13,
                   ),
-                ),
-                const SizedBox(height: 20),
-                SilverButton(
-                  label: loc.isArabic ? 'حسناً، فهمت' : 'Understood',
-                  isFullWidth: true,
-                  height: 42,
-                  onPressed: () => Navigator.pop(ctx),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.security_outlined,
+                        color: AppColors.accentChampagne,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          loc.tr('privacy_sheet_title'),
+                          style: AppTypography.cardTitle.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? AppColors.silverPrimary
+                                : AppColors.lightTextPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    loc.tr('privacy_sheet_text'),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: isDark
+                          ? AppColors.silverSecondary
+                          : AppColors.lightTextSecondary,
+                      height: 1.6,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SilverButton(
+                    label: loc.isArabic ? 'حسناً، فهمت' : 'Understood',
+                    isFullWidth: true,
+                    height: 42,
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                  AccountPrivacyActions(
+                    includeDeletion: AuthState().isLoggedIn,
+                  ),
+                ],
+              ),
             ),
           ),
         );
