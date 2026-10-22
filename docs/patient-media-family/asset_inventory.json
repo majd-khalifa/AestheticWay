@@ -169,5 +169,12 @@
     "bytes": 657168,
     "sha256": "e448fa853142fef21394dea2fe34d347ee8554fa1d4b8ba877d9c249d3605ccb",
     "shipped_in_app": false
+  },
+  "test_only_invalid_fixture": {
+    "path": "test/fixtures/media/intentionally_corrupt_image.fixture",
+    "bytes": 73,
+    "format": "Original deliberately invalid UTF-8 text",
+    "shipped_in_app": false,
+    "purpose": "Genuine FileImage decoding failure without deleting a mapped native buffer"
   }
 }

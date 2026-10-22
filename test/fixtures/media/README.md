@@ -5,3 +5,5 @@
 - Earlier labelled `packaging_fixture.png` and `portrait_frame_fixture.png` remain available for the historical decode tests and baseline provenance.
 
 None of these photographs is in the Flutter asset manifest or used by `lib/`. All preview records, including ratings and prices, are explicitly test data. They prove rendering, never live delivery or provenance of production records. Approved reference photographs are not used as fixtures or application media.
+
+`intentionally_corrupt_image.fixture` is original plain text, deliberately not an image. FileImage/codec regression tests read it without modification. Keeping this source immutable for the process lifetime avoids unlinking a Windows-mapped corrupt buffer before the VM finalizer runs; genuine decoding failure and provider assertions remain required. This file is not a bundled application asset or photograph.

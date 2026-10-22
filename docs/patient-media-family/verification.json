@@ -12,14 +12,29 @@
   "live_api_verified": false,
   "physical_device_verified": false,
   "native_android_build_verified": false,
-  "native_windows_status": "Awaiting candidate review and final PR-head CI",
+  "native_windows_status": "Five native candidates reviewed/adopted; final corrected-fixture PR-head CI pending",
   "log_sha256": {
-    "full-tests-final.log": "dda211193c9c1b0a8d969feb7e6d528c4d434579093a3487bb4e238161ceaf1f",
-    "after-renders-final.log": "d3138d12285e4cbe5171e1f2e9307567cfeacd34bacfa1e75ffcd24600d52a8e",
-    "before-renders-verified.log": "22ce9e90d7eb526e164dc388f004ec71d875cc2b617efcb159a2192c4993ef94",
+    "full-tests-final.log": "0f202f0cefedab0c8c862f09c3e96c14ffbc6c489744549d90e3d72c67bd5f72",
+    "after-renders-final.log": "9a1dc384f66497a4d8992522606a04ece7f9d12f5f4a3175d89bc9a2e5bb4783",
+    "before-renders-verified.log": "f513427d739fa977548abd1ff1680156330339c8a743bd6fb1908affa5b00c39",
     "startup-final.log": "ff5537c3cc684ddb75c73dcee5075c097536180cf194f3c333114aad1ab93646",
     "capture-goldens-final.log": "06ca6db6745f12386137470e2122e743633779615aa26bd57a135bf99f564677",
-    "analyze-final.log": "e46975b8d57dd4665c35245cf0977e3aaced0c72606cb7849ec6f05c0405c05d",
-    "format-final.log": "c24cdeebbdf2d426829979e34576543e9076ad32b2e9257927239deb23446ae5"
+    "analyze-final.log": "a1ab4f4fe9650a605060d8b118687080f9cb00269f27dcd61d4f78fd66e9c2ac",
+    "format-final.log": "fff23e54c0caea1ccdba5c52e6984140f137b9196c69609a3732ed6ac86a270d"
+  },
+  "native_windows_candidate_capture": {
+    "run_id": 39754509562,
+    "source_commit": "69ba0bf31b6fd4f21b0f12634fdc6f1d72098d42",
+    "capture_cases_passed": 9,
+    "reviewed_rasters": 5,
+    "shared_clinic_geometry": "Four exact matches",
+    "full_suite": "Pending final corrected-fixture PR-head CI"
+  },
+  "native_ubuntu_probe": {
+    "run_id": 39754509562,
+    "source_commit": "69ba0bf31b6fd4f21b0f12634fdc6f1d72098d42",
+    "focused_passed": 291,
+    "full_passed": 737,
+    "analyze_issues": 0
   }
 }

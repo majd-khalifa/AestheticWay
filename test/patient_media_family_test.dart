@@ -14,14 +14,14 @@ void main() {
   late File broken;
   setUpAll(() async {
     await loadPatientVisualFonts();
-    final dir = Directory.systemTemp.createTempSync('aw-family-');
-    broken = File('${dir.path}/broken.png')..writeAsBytesSync([1, 2, 3]);
-    addTearDown(() => dir.deleteSync(recursive: true));
+    broken = File(
+      'test/fixtures/media/intentionally_corrupt_image.fixture',
+    ).absolute;
   });
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   bool corrupt(ImageProvider p) => p is ResizeImage
       ? corrupt(p.imageProvider)
-      : p is FileImage && p.file.path == broken.path;
+      : p is FileImage && p.file.absolute.uri == broken.absolute.uri;
   for (final category in PatientMediaCategory.values) {
     for (final dark in [false, true]) {
       for (final ar in [false, true]) {

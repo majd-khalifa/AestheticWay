@@ -14,8 +14,8 @@
   "production_api_verified": false,
   "physical_device_verified": false,
   "before_test_harness_sha256": {
-    "test/media_first_previews_test.dart": "03b5c1ea44398baf3e89e3c0b4235f1c77277aefd937e77bb6ebbbffc2af2718",
-    "test/support/settle_expected_media_errors.dart": "e1189cbb2bd1d4ae5dccc10ca77a0a38a29b1f5775ae49747bb5ffc125b87c5f"
+    "test/media_first_previews_test.dart": "ca36cb690957ed1be88a386a4cca7ff14d97086a9dcc46e427e19449a289f179",
+    "test/support/settle_expected_media_errors.dart": "1f8a49b21e60252b4052fed36388c7b5f7ea8ad0490d1045590da5c9e7b8eebd"
   },
   "current_source_sha256": {
     "lib/core/auth/guest_auth_guard.dart": "676b6dc447591bdaddbbb20aa576410aca36c374d5d72675a82b534da655ba3a",
@@ -193,8 +193,8 @@
     "lib/main.dart": "904f413daff96c270f1676c4ef4ecdcbcaac6a8fa05c93e9ff7638a6ef93e318"
   },
   "current_capture_test_sha256": {
-    "test/media_first_previews_test.dart": "03b5c1ea44398baf3e89e3c0b4235f1c77277aefd937e77bb6ebbbffc2af2718",
-    "test/patient_media_family_test.dart": "9cff336308abfc17c3cd4ce4047a39a4d15c9776de44c1d9ba5533bfdbf98b25",
+    "test/media_first_previews_test.dart": "dc80ef3a072b62e7464429f296f130a9a4dc2d40eba29c56ba849879a0b0355d",
+    "test/patient_media_family_test.dart": "d90f332ddfb05b025864f48fe0046dea1a26c0bcb3998ca8c57b71db56b40e61",
     "test/patient_startup_preferences_test.dart": "1fe449bf7e6232436b755a03ef603f7b6b87804c82f60426e5f49d92011226d1",
     "test/support/settle_expected_media_errors.dart": "1f8a49b21e60252b4052fed36388c7b5f7ea8ad0490d1045590da5c9e7b8eebd",
     "test/support/settle_preview_images.dart": "453bad2dfab34bebca0df35159c529c00cf8cc1e7fffa096a4a54e602943c97d"
@@ -656,6 +656,7 @@
     "before/treatments_absent_light_ar_w320.png": "1a40e110e55c8f4db3f6ae165df4511964492639dcf710c42f2829279649a8f1",
     "before/treatments_absent_light_en.png": "0982301e5c846373413656359657b6dead629625ebb740abdd841ba4d7cb8af6",
     "before/treatments_absent_light_en_w320.png": "00216c0d47169bc5eabea72c3cc83f8eb5566aa52cc2b49c9de62cc77b73eb90",
+    "native-windows-family.png": "487121af58558bb767953d69664e6328f9f14549787030e4a29332d909e6d0d1",
     "placeholder_family.png": "e448fa853142fef21394dea2fe34d347ee8554fa1d4b8ba877d9c249d3605ccb",
     "startup/splash_ar_dark.png": "4c26564a9e9b16470d074d7ecefe789799bf4f1aa496b4842fbb894ec9efe005",
     "startup/splash_ar_light.png": "6bf1d3a6b14ce7af5aeae2fe561edbfabae8de1c16fea7bd56252941a2f2b5b2",

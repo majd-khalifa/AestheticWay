@@ -60,7 +60,6 @@ The tests assert the first application frame **before** these animated splash ca
 
 [Engineering report, integration files and exact physical-device verification steps](../PATIENT_FINAL_PLACEHOLDERS_AND_PREFERENCES_REPORT.md). Native golden provenance is recorded separately; Linux-hosted Android-target renders do not establish native Windows, Android device or iOS acceptance.
 
-
 ## Reproduce review captures
 
 Use Flutter 3.41.5 and an empty review output directory. These commands write review candidates via the explicit output defines, rather than replacing approved host baselines:
@@ -71,4 +70,11 @@ flutter test test/patient_portal_visual_test.dart test/patient_media_family_test
 flutter test test/patient_startup_preferences_test.dart --update-goldens --dart-define=PATIENT_STARTUP_CAPTURE_DIR=/absolute/path/to/review/startup
 ```
 
-Before renders use the approved baseline commit with the same review harness, not an older design archive. The contact sheet shows 48 actual Flutter panels: eight categories × two themes × three frame classes. Native candidate adoption always requires visual and shared-geometry review.
+Before renders use the approved baseline commit with the same review matrix and fixture data, not an older design archive; before/after harness hashes are recorded separately. The contact sheet shows 48 actual Flutter panels: eight categories × two themes × three frame classes. Native candidate adoption always requires visual and shared-geometry review.
+
+## Native Windows review
+
+- [All-category native Windows family](native-windows-family.png)
+- [Four native Windows clinic variants](native-windows-clinic-review.jpg)
+
+All five rasters were visually reviewed before adoption. All four clinic geometry/style JSON files exactly match Linux. The initial Windows probe exposed fixture path/lifetime issues and missing new baselines; final PR-head CI validates the corrected fixtures and exact raster comparisons.

@@ -30,7 +30,8 @@ const premiumReview = bool.fromEnvironment('PREMIUM_PLACEHOLDER_REVIEW');
 late File corruptPreview;
 bool isCorrupt(ImageProvider provider) {
   if (provider is ResizeImage) return isCorrupt(provider.imageProvider);
-  return provider is FileImage && provider.file.path == corruptPreview.path;
+  return provider is FileImage &&
+      provider.file.absolute.uri == corruptPreview.absolute.uri;
 }
 
 Object? mediaState(Object? value, [String? field]) {
@@ -241,10 +242,11 @@ Object _response(String path) {
 void main() {
   setUpAll(() async {
     FlutterSecureStorage.setMockInitialValues({});
-    final dir = Directory.systemTemp.createTempSync('aw-preview-failure-');
-    corruptPreview = File('${dir.path}/corrupt.png')
-      ..writeAsBytesSync([1, 2, 3]);
-    addTearDown(() => dir.deleteSync(recursive: true));
+    // Keep the corrupt source immutable for the test process lifetime. Native
+    // Windows may retain a mapped buffer until GC after codec failure.
+    corruptPreview = File(
+      'test/fixtures/media/intentionally_corrupt_image.fixture',
+    ).absolute;
     final bytes = File('test/fixtures/fonts/DejaVuSans.ttf').readAsBytesSync();
     for (final family in ['PatientPreview', 'serif']) {
       await (FontLoader(

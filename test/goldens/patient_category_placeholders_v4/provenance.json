@@ -4,7 +4,19 @@
   "reason": "User-requested category-specific original artwork and portrait size classes; prior families preserved",
   "flutter": "3.41.5",
   "comparison": "Exact native host rasters and shared 1/16dp geometry/styles",
-  "native_windows_review": "Pending native candidate review/adoption; missing new-family Windows baselines are not a claimed Windows pass",
+  "native_windows_review": {
+    "status": "Five native rasters visually reviewed; all four clinic geometry/style JSON files exactly match shared Linux records",
+    "source_commit": "69ba0bf31b6fd4f21b0f12634fdc6f1d72098d42",
+    "workflow_run_id": 39754509562,
+    "windows_job_id": 119743018804,
+    "artifact_id": 12415311014,
+    "artifact_sha256": "853e4a12fe1401196030c9bf2c79d86dabe5f0270b8cf8388290bcb4e5d98018",
+    "candidate_capture_cases_passed": 9,
+    "native_host": "Windows Server 2022",
+    "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+    "review_date": "2026-10-22",
+    "initial_probe": "Not a Windows pass: nine absent new-family golden assertions, 96 corrupt-file fixture matcher failures and a mapped-temp-file cleanup failure. Fixture matching/lifetime corrected before final CI; production artwork unchanged."
+  },
   "linux_raster_sha256": {
     "patient_clinic_dark_ar.png": "2694369a513e598dd6a54592b7cffeb13203e69e9a74a75b50cf84473ab16170",
     "patient_clinic_dark_en.png": "9afcfa8bc4912cc0ad0dd92237abfa1f623e39cd1d98898d6df86e786ed35fe9",
@@ -17,5 +29,12 @@
     "patient_clinic_dark_en.json": "6201fcd1c33782cfd66ffb46f7f42446e61a97e95786468aa813a9486bd85863",
     "patient_clinic_light_ar.json": "6e3717de3510356240544d8a59bc3ba578264fa7ce35950d6cd46b681740b713",
     "patient_clinic_light_en.json": "9056102b5d235b1288823133a4a539b6d086661ebfa8d28baddbd69d3108c7a9"
+  },
+  "windows_raster_sha256": {
+    "patient_clinic_dark_ar.png": "34fe6263cfd0defb72806159264d33fa17ea38de6952dfeacf37f1fc7e16fbc3",
+    "patient_clinic_dark_en.png": "ab6f57e210245612ca3801906660adf45af09c56ad528b1e34226b78b7422942",
+    "patient_clinic_light_ar.png": "68756d9c1d9c2477204c3477789adbf42a6a23ed694f601f48d380b3ce8160df",
+    "patient_clinic_light_en.png": "2de8ae03ed6a0ec0e0d17d37ed18c067e7e2f1ee49f7a3496f81f855e759dce3",
+    "placeholder_family.png": "487121af58558bb767953d69664e6328f9f14549787030e4a29332d909e6d0d1"
   }
 }
