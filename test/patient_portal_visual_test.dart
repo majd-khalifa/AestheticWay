@@ -355,7 +355,7 @@ void main() {
                       'PATIENT_GOLDEN_CAPTURE_DIR',
                     ).isEmpty
                     ? Uri.parse(
-                        'goldens/patient_placeholders_v3/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                        'goldens/patient_category_placeholders_v4/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
                       )
                     : Directory(
                         const String.fromEnvironment(

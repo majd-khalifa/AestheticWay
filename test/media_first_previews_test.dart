@@ -5,6 +5,8 @@ import 'package:aesthetic_way/features/appointment_lead/presentation/screens/app
 import 'package:aesthetic_way/features/profile/presentation/screens/profile_screen.dart';
 import 'package:aesthetic_way/features/navigation/main_nav_screen.dart';
 import 'support/settle_preview_images.dart';
+import 'support/settle_expected_media_errors.dart';
+import 'package:aesthetic_way/features/treatments/presentation/screens/treatments_screen.dart';
 import 'package:aesthetic_way/core/widgets/async_action_button.dart';
 // Synthetic test-only records. Photographs have provenance in fixtures/media/README.md;
 // neither these records nor fixture photographs are supplied to production.
@@ -23,6 +25,46 @@ import 'package:aesthetic_way/features/practitioners/presentation/screens/practi
 
 const previewClinicId = '11111111-1111-4111-8111-111111111111';
 bool populated = true;
+bool failedMedia = false;
+const premiumReview = bool.fromEnvironment('PREMIUM_PLACEHOLDER_REVIEW');
+late File corruptPreview;
+bool isCorrupt(ImageProvider provider) {
+  if (provider is ResizeImage) return isCorrupt(provider.imageProvider);
+  return provider is FileImage && provider.file.path == corruptPreview.path;
+}
+
+Object? mediaState(Object? value, [String? field]) {
+  const scalar = {
+    'logo',
+    'cover_image',
+    'image_url',
+    'avatar_url',
+    'cover_image_url',
+  };
+  if (value is Map<String, dynamic>) {
+    return value.map((k, v) => MapEntry(k, mediaState(v, k)));
+  }
+  if (field == 'gallery_images' && value is List) {
+    return !populated
+        ? <String>[]
+        : value
+              .map((v) => failedMedia ? corruptPreview.uri.toString() : v)
+              .toList();
+  }
+  if (value is List) return value.map((v) => mediaState(v)).toList();
+  if (scalar.contains(field) && value is String && value.isNotEmpty) {
+    return !populated
+        ? ''
+        : failedMedia
+        ? corruptPreview.uri.toString()
+        : value;
+  }
+  return value;
+}
+
+Map<String, dynamic> clinicPreview() =>
+    mediaState(previewClinic) as Map<String, dynamic>;
+Object response(String path) => mediaState(_response(path))!;
 const _photo = 'assets/images/onboarding/onboarding_1.jpeg';
 final previewClinic = <String, dynamic>{
   'id': previewClinicId,
@@ -139,6 +181,7 @@ Object _response(String path) {
           'id': '77777777-7777-4777-8777-777777777777',
           'name_en': 'Skin consultation',
           'name_ar': 'استشارة للبشرة',
+          'image_url': populated ? _photo : '',
           'description_en': 'Discuss care options with the clinic.',
           'description_ar': 'ناقش خيارات العناية مع العيادة.',
           'category': null,
@@ -185,6 +228,7 @@ Object _response(String path) {
           'id': '77777777-7777-4777-8777-777777777777',
           'name_en': 'Skin consultation',
           'name_ar': 'استشارة للبشرة',
+          'image_url': populated ? _photo : '',
           'description_en': 'Discuss care options with the clinic.',
           'description_ar': 'ناقش خيارات العناية مع العيادة.',
         },
@@ -197,6 +241,10 @@ Object _response(String path) {
 void main() {
   setUpAll(() async {
     FlutterSecureStorage.setMockInitialValues({});
+    final dir = Directory.systemTemp.createTempSync('aw-preview-failure-');
+    corruptPreview = File('${dir.path}/corrupt.png')
+      ..writeAsBytesSync([1, 2, 3]);
+    addTearDown(() => dir.deleteSync(recursive: true));
     final bytes = File('test/fixtures/fonts/DejaVuSans.ttf').readAsBytesSync();
     for (final family in ['PatientPreview', 'serif']) {
       await (FontLoader(
@@ -223,237 +271,271 @@ void main() {
             Response(
               requestOptions: options,
               statusCode: 200,
-              data: _response(options.path),
+              data: response(options.path),
             ),
           );
         },
       ),
     );
   });
-  for (final media in [true, false]) {
-    for (final dark in [false, true]) {
-      for (final arabic in [false, true]) {
-        // Full English matrix, plus representative dark Arabic RTL for every screen.
-        if (arabic && !dark) continue;
-        for (final screen in [
-          'home',
-          'directory',
-          'clinic',
-          'products',
-          'offers',
-          'practitioners',
-          'articles',
-          'consultation',
-          'profile',
-          'clinic_staff',
-          'clinic_treatments',
-          'clinic_offers',
-          'busy',
-        ]) {
-          final name =
-              '${screen}_${media ? 'media' : 'absent'}_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}';
-          final entry = (
-            name,
-            dark,
-            arabic,
-            () => switch (screen) {
-              'home' => const MainNavScreen(),
-              'directory' => const MainNavScreen(initialIndex: 1),
-              'clinic' => ClinicProfileScreen(
-                clinic: ClinicModel.fromJson({
-                  ...previewClinic,
-                  if (!media) ...{
-                    'cover_image': '',
-                    'gallery_images': <String>[],
-                  },
-                }),
-              ),
-              'products' => const MainNavScreen(initialIndex: 2),
-              'offers' => const MainNavScreen(initialIndex: 3),
-              'practitioners' => const PractitionersScreen(),
-              'articles' => const ArticlesScreen(),
-              'profile' => ProfileScreen(onNavigateToRequests: () {}),
-              'consultation' => AppointmentRequestScreen(
-                clinic: ClinicModel.fromJson({
-                  ...previewClinic,
-                  if (!media) ...{
-                    'cover_image': '',
-                    'gallery_images': <String>[],
-                  },
-                }),
-              ),
-              'clinic_staff' ||
-              'clinic_treatments' ||
-              'clinic_offers' => ClinicProfileScreen(
-                clinic: ClinicModel.fromJson({
-                  ...previewClinic,
-                  if (!media) ...{
-                    'cover_image': '',
-                    'gallery_images': <String>[],
-                  },
-                }),
-              ),
-              _ => _ConsultationBusyPreview(),
-            },
-          );
-          testWidgets('Media-first preview ${entry.$1}', (tester) async {
-            populated = media;
-            AuthState().login(name: 'Preview Patient', phone: '+971501234567');
-            tester.view.devicePixelRatio = 3;
-            addTearDown(tester.view.resetDevicePixelRatio);
-            tester.view.physicalSize = const Size(1170, 2532);
-            addTearDown(tester.view.resetPhysicalSize);
-            await tester.binding.setSurfaceSize(const Size(390, 844));
-            addTearDown(() => tester.binding.setSurfaceSize(null));
-            unawaited(
-              LocaleService().setLanguage(
-                entry.$3 ? AppLanguage.arabic : AppLanguage.english,
-              ),
+  for (final state
+      in premiumReview ? ['media', 'absent', 'failed'] : ['media', 'absent']) {
+    final media = state == 'media';
+    for (final width in premiumReview ? [390.0, 320.0] : [390.0]) {
+      for (final dark in [false, true]) {
+        for (final arabic in [false, true]) {
+          // Full English matrix, plus representative dark Arabic RTL for every screen.
+          if (arabic && !dark && !premiumReview) continue;
+          for (final screen in [
+            'home',
+            'directory',
+            'clinic',
+            'products',
+            'offers',
+            'practitioners',
+            'articles',
+            'consultation',
+            'profile',
+            'clinic_staff',
+            'clinic_treatments',
+            'clinic_offers',
+            'busy',
+            if (premiumReview) 'treatments',
+          ]) {
+            final name =
+                '${screen}_${state}_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}${width == 320 ? '_w320' : ''}';
+            final entry = (
+              name,
+              dark,
+              arabic,
+              () => switch (screen) {
+                'home' => const MainNavScreen(),
+                'directory' => const MainNavScreen(initialIndex: 1),
+                'clinic' => ClinicProfileScreen(
+                  clinic: ClinicModel.fromJson({
+                    ...clinicPreview(),
+                    if (state == 'absent') ...{
+                      'cover_image': '',
+                      'gallery_images': <String>[],
+                    },
+                  }),
+                ),
+                'products' => const MainNavScreen(initialIndex: 2),
+                'offers' => const MainNavScreen(initialIndex: 3),
+                'practitioners' => const PractitionersScreen(),
+                'articles' => const ArticlesScreen(),
+                'treatments' => const TreatmentsScreen(),
+                'profile' => ProfileScreen(onNavigateToRequests: () {}),
+                'consultation' => AppointmentRequestScreen(
+                  clinic: ClinicModel.fromJson({
+                    ...clinicPreview(),
+                    if (state == 'absent') ...{
+                      'cover_image': '',
+                      'gallery_images': <String>[],
+                    },
+                  }),
+                ),
+                'clinic_staff' ||
+                'clinic_treatments' ||
+                'clinic_offers' => ClinicProfileScreen(
+                  clinic: ClinicModel.fromJson({
+                    ...clinicPreview(),
+                    if (state == 'absent') ...{
+                      'cover_image': '',
+                      'gallery_images': <String>[],
+                    },
+                  }),
+                ),
+                _ => _ConsultationBusyPreview(),
+              },
             );
-            final theme = entry.$2 ? AppTheme.darkTheme : AppTheme.lightTheme;
-            await tester.pumpWidget(
-              MaterialApp(
-                theme: theme.copyWith(
-                  platform: TargetPlatform.android,
-                  visualDensity: VisualDensity.standard,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  textTheme: theme.textTheme.apply(
-                    fontFamily: 'PatientPreview',
-                  ),
-                  elevatedButtonTheme: ElevatedButtonThemeData(
-                    style: theme.elevatedButtonTheme.style?.copyWith(
-                      textStyle: WidgetStatePropertyAll(
-                        theme.elevatedButtonTheme.style?.textStyle
-                            ?.resolve({})
-                            ?.copyWith(fontFamily: 'PatientPreview'),
-                      ),
-                    ),
-                  ),
-                  outlinedButtonTheme: OutlinedButtonThemeData(
-                    style: theme.outlinedButtonTheme.style?.copyWith(
-                      textStyle: WidgetStatePropertyAll(
-                        theme.outlinedButtonTheme.style?.textStyle
-                            ?.resolve({})
-                            ?.copyWith(fontFamily: 'PatientPreview'),
-                      ),
-                    ),
-                  ),
-                  appBarTheme: theme.appBarTheme.copyWith(
-                    titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(
+            testWidgets('Media-first preview ${entry.$1}', (tester) async {
+              populated = state != 'absent';
+              failedMedia = state == 'failed';
+              AuthState().login(
+                name: 'Preview Patient',
+                phone: '+971501234567',
+              );
+              tester.view.devicePixelRatio = 3;
+              addTearDown(tester.view.resetDevicePixelRatio);
+              tester.view.physicalSize = Size(width * 3, 2532);
+              addTearDown(tester.view.resetPhysicalSize);
+              await tester.binding.setSurfaceSize(Size(width, 844));
+              addTearDown(() => tester.binding.setSurfaceSize(null));
+              unawaited(
+                LocaleService().setLanguage(
+                  entry.$3 ? AppLanguage.arabic : AppLanguage.english,
+                ),
+              );
+              final theme = entry.$2 ? AppTheme.darkTheme : AppTheme.lightTheme;
+              await tester.pumpWidget(
+                MaterialApp(
+                  theme: theme.copyWith(
+                    platform: TargetPlatform.android,
+                    visualDensity: VisualDensity.standard,
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    textTheme: theme.textTheme.apply(
                       fontFamily: 'PatientPreview',
                     ),
-                  ),
-                ),
-                home: Directionality(
-                  textDirection: entry.$3
-                      ? TextDirection.rtl
-                      : TextDirection.ltr,
-                  child: RepaintBoundary(
-                    key: const ValueKey('capture'),
-                    child: entry.$4(),
-                  ),
-                ),
-              ),
-            );
-            await tester.pumpAndSettle();
-            await settlePreviewImages(tester);
-            if (screen.startsWith('clinic_')) {
-              final key = screen == 'clinic_staff'
-                  ? 'tab_staff'
-                  : screen == 'clinic_treatments'
-                  ? 'tab_treatments'
-                  : 'tab_offers';
-              await tester.ensureVisible(
-                find.text(LocaleService().tr(key)).first,
-              );
-              await tester.tap(find.text(LocaleService().tr(key)).first);
-              await tester.pumpAndSettle();
-              await tester.drag(
-                find.byType(ListView).first,
-                const Offset(0, -470),
-              );
-              await tester.pumpAndSettle();
-              await settlePreviewImages(tester);
-            }
-            if (media && (screen == 'products' || screen == 'practitioners')) {
-              final fixture = screen == 'products'
-                  ? 'fragrance_photo.jpg'
-                  : 'portrait_photo.png';
-              final expected = File.fromUri(
-                File('test/fixtures/media/$fixture').absolute.uri,
-              );
-              final primary = find.byWidgetPredicate(
-                (widget) =>
-                    widget is Image &&
-                    widget.image is ResizeImage &&
-                    (widget.image as ResizeImage).imageProvider is FileImage &&
-                    ((widget.image as ResizeImage).imageProvider as FileImage)
-                            .file
-                            .path ==
-                        expected.path,
-              );
-              expect(
-                primary,
-                findsOneWidget,
-                reason:
-                    'The actual file-URI fixture must render, not the brand fallback.',
-              );
-              final pixels = tester
-                  .widget<RawImage>(
-                    find.descendant(
-                      of: primary,
-                      matching: find.byType(RawImage),
+                    elevatedButtonTheme: ElevatedButtonThemeData(
+                      style: theme.elevatedButtonTheme.style?.copyWith(
+                        textStyle: WidgetStatePropertyAll(
+                          theme.elevatedButtonTheme.style?.textStyle
+                              ?.resolve({})
+                              ?.copyWith(fontFamily: 'PatientPreview'),
+                        ),
+                      ),
                     ),
-                  )
-                  .image!;
-              expect(pixels.width, greaterThan(0));
-              expect(pixels.height, greaterThan(0));
-            }
-            if (screen == 'busy') {
-              await tester.tap(find.byType(FilledButton).first);
-              await tester.pump(const Duration(milliseconds: 100));
-              await tester.pump(const Duration(milliseconds: 300));
-              expect(find.byType(CircularProgressIndicator), findsOneWidget);
-            }
-            for (final tier in [
-              'VIP',
-              'FEATURED',
-              'FEATURED CLINIC',
-              'عيادة مميزة',
-            ]) {
-              expect(
-                find.text(tier),
-                findsNothing,
-                reason:
-                    'Internal placement entitlement must never become a patient label.',
+                    outlinedButtonTheme: OutlinedButtonThemeData(
+                      style: theme.outlinedButtonTheme.style?.copyWith(
+                        textStyle: WidgetStatePropertyAll(
+                          theme.outlinedButtonTheme.style?.textStyle
+                              ?.resolve({})
+                              ?.copyWith(fontFamily: 'PatientPreview'),
+                        ),
+                      ),
+                    ),
+                    appBarTheme: theme.appBarTheme.copyWith(
+                      titleTextStyle: theme.appBarTheme.titleTextStyle
+                          ?.copyWith(fontFamily: 'PatientPreview'),
+                    ),
+                  ),
+                  home: Directionality(
+                    textDirection: entry.$3
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
+                    child: RepaintBoundary(
+                      key: const ValueKey('capture'),
+                      child: entry.$4(),
+                    ),
+                  ),
+                ),
               );
-            }
-            expect(tester.takeException(), isNull);
-            const output = String.fromEnvironment('MEDIA_FIRST_CAPTURE_DIR');
-            if (output.isNotEmpty) {
-              await expectLater(
-                find.byKey(const ValueKey('capture')),
-                matchesGoldenFile(Uri.file('$output/${entry.$1}.png')),
-              );
-            }
-            if (output.isNotEmpty &&
-                (screen == 'home' ||
-                    screen == 'consultation' ||
-                    screen == 'profile' ||
-                    screen == 'clinic')) {
-              final scrollable = find.byType(Scrollable).first;
-              await tester.drag(scrollable, const Offset(0, -540));
               await tester.pumpAndSettle();
-              await settlePreviewImages(tester);
-              await expectLater(
-                find.byKey(const ValueKey('capture')),
-                matchesGoldenFile(Uri.file('$output/${entry.$1}_scrolled.png')),
-              );
-            }
-            await tester.pumpWidget(const SizedBox.shrink());
-            busyCompletion?.complete();
-            busyCompletion = null;
-          });
+              if (failedMedia) {
+                await settleExpectedMediaErrors(
+                  tester,
+                  isExpectedFailure: isCorrupt,
+                );
+              } else {
+                await settlePreviewImages(tester);
+              }
+              if (screen.startsWith('clinic_')) {
+                final key = screen == 'clinic_staff'
+                    ? 'tab_staff'
+                    : screen == 'clinic_treatments'
+                    ? 'tab_treatments'
+                    : 'tab_offers';
+                await tester.ensureVisible(
+                  find.text(LocaleService().tr(key)).first,
+                );
+                await tester.tap(find.text(LocaleService().tr(key)).first);
+                await tester.pumpAndSettle();
+                await tester.drag(
+                  find.byType(ListView).first,
+                  const Offset(0, -470),
+                );
+                await tester.pumpAndSettle();
+                if (failedMedia) {
+                  await settleExpectedMediaErrors(
+                    tester,
+                    isExpectedFailure: isCorrupt,
+                  );
+                } else {
+                  await settlePreviewImages(tester);
+                }
+              }
+              if (media &&
+                  (screen == 'products' || screen == 'practitioners')) {
+                final fixture = screen == 'products'
+                    ? 'fragrance_photo.jpg'
+                    : 'portrait_photo.png';
+                final expected = File.fromUri(
+                  File('test/fixtures/media/$fixture').absolute.uri,
+                );
+                final primary = find.byWidgetPredicate(
+                  (widget) =>
+                      widget is Image &&
+                      widget.image is ResizeImage &&
+                      (widget.image as ResizeImage).imageProvider
+                          is FileImage &&
+                      ((widget.image as ResizeImage).imageProvider as FileImage)
+                              .file
+                              .path ==
+                          expected.path,
+                );
+                expect(
+                  primary,
+                  findsOneWidget,
+                  reason:
+                      'The actual file-URI fixture must render, not the brand fallback.',
+                );
+                final pixels = tester
+                    .widget<RawImage>(
+                      find.descendant(
+                        of: primary,
+                        matching: find.byType(RawImage),
+                      ),
+                    )
+                    .image!;
+                expect(pixels.width, greaterThan(0));
+                expect(pixels.height, greaterThan(0));
+              }
+              if (screen == 'busy') {
+                await tester.tap(find.byType(FilledButton).first);
+                await tester.pump(const Duration(milliseconds: 100));
+                await tester.pump(const Duration(milliseconds: 300));
+                expect(find.byType(CircularProgressIndicator), findsOneWidget);
+              }
+              for (final tier in [
+                'VIP',
+                'FEATURED',
+                'FEATURED CLINIC',
+                'عيادة مميزة',
+              ]) {
+                expect(
+                  find.text(tier),
+                  findsNothing,
+                  reason:
+                      'Internal placement entitlement must never become a patient label.',
+                );
+              }
+              expect(tester.takeException(), isNull);
+              const output = String.fromEnvironment('MEDIA_FIRST_CAPTURE_DIR');
+              if (output.isNotEmpty) {
+                await expectLater(
+                  find.byKey(const ValueKey('capture')),
+                  matchesGoldenFile(Uri.file('$output/${entry.$1}.png')),
+                );
+              }
+              if (output.isNotEmpty &&
+                  (screen == 'home' ||
+                      screen == 'consultation' ||
+                      screen == 'profile' ||
+                      screen == 'clinic')) {
+                final scrollable = find.byType(Scrollable).first;
+                await tester.drag(scrollable, const Offset(0, -540));
+                await tester.pumpAndSettle();
+                if (failedMedia) {
+                  await settleExpectedMediaErrors(
+                    tester,
+                    isExpectedFailure: isCorrupt,
+                  );
+                } else {
+                  await settlePreviewImages(tester);
+                }
+                await expectLater(
+                  find.byKey(const ValueKey('capture')),
+                  matchesGoldenFile(
+                    Uri.file('$output/${entry.$1}_scrolled.png'),
+                  ),
+                );
+              }
+              await tester.pumpWidget(const SizedBox.shrink());
+              busyCompletion?.complete();
+              busyCompletion = null;
+            });
+          }
         }
       }
     }

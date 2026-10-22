@@ -515,6 +515,7 @@ class _AppointmentRequestScreenState extends State<AppointmentRequestScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: PatientImage(
+                        category: PatientMediaCategory.consultation,
                         imageUrl: widget.clinic.primaryPhotoUrl,
                         width: 106,
                         height: 100,

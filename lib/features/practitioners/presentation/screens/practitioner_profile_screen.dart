@@ -178,6 +178,7 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
             child: Row(
               children: [
                 PatientImage(
+                  category: PatientMediaCategory.practitioner,
                   imageUrl: _practitioner.avatarUrl,
 
                   width: 76,

@@ -7,7 +7,7 @@ import 'core/localization/app_locale.dart';
 import 'core/auth/guest_auth_guard.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   configureImageCacheBudget();
   await Future.wait([

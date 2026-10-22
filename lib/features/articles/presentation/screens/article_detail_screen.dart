@@ -144,6 +144,7 @@ class ArticleDetailScreen extends StatelessWidget {
         children: [
           // Cover Image
           PatientMediaBanner(
+            category: PatientMediaCategory.article,
             source: article.coverImageUrl,
             height: 190,
             borderRadius: BorderRadius.circular(18),
@@ -234,6 +235,7 @@ class ArticleDetailScreen extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: PatientImage(
+                    category: PatientMediaCategory.practitioner,
                     imageUrl: article.authorDoctorAvatar,
                     width: 50,
                     height: 50,

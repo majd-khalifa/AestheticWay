@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#070C1A</color>
+    <!-- Neutral native launch canvas; Flutter restores the user's saved theme. -->
+    <color name="aw_launch_surface">#F7F5F1</color>
 </resources>

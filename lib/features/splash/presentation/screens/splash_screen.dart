@@ -2,6 +2,8 @@ import '../../../auth/data/auth_repository.dart';
 import '../../../../core/auth/session_snapshot.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/features/onboarding/services/onboarding_service.dart';
 import 'package:aesthetic_way/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -109,16 +111,26 @@ class _SplashScreenState extends State<SplashScreen>
     return GestureDetector(
       onTap: _navigateNext,
       behavior: HitTestBehavior.opaque,
-      child: Scaffold(
-        backgroundColor: AppBrandLogo.brandNavyCanvas,
-        body: Center(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: AppBrandLogo.splash(height: 300, width: 300),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value:
+            (AppColors.isDark(context)
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark)
+                .copyWith(
+                  statusBarColor: Colors.transparent,
+                  systemNavigationBarColor: AppColors.bg(context),
+                ),
+        child: Scaffold(
+          backgroundColor: AppColors.bg(context),
+          body: Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: AppBrandLogo.splash(height: 300, width: 300),
+                ),
               ),
             ),
           ),

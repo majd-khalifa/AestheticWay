@@ -138,6 +138,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         children: [
           // Hero Cover Image
           PatientImage(
+            category: PatientMediaCategory.treatment,
             imageUrl: _treatment.imageUrl,
 
             height: 200,
@@ -309,6 +310,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: PatientImage(
+                          category: PatientMediaCategory.clinicCover,
                           imageUrl: clinic.coverImageUrl,
                           width: 50,
                           height: 50,

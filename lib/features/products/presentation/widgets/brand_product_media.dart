@@ -1,4 +1,5 @@
 import '../../../../core/widgets/patient_media_placeholder.dart';
+import '../../../../core/widgets/patient_image.dart' show isKnownVideoSource;
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -29,7 +30,8 @@ class BrandProductMedia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final provider = resolveImageProvider(product.imageUrl);
+    final video = isKnownVideoSource(product.imageUrl);
+    final provider = video ? null : resolveImageProvider(product.imageUrl);
     return ColoredBox(
       color: AppColors.isDark(context)
           ? AppColors.cardSurfaceLight
@@ -45,6 +47,10 @@ class BrandProductMedia extends StatelessWidget {
           );
           if (provider == null) {
             return PatientMediaPlaceholder(
+              category: PatientMediaCategory.product,
+              reason: video
+                  ? PatientMediaFallbackReason.unsupportedSource
+                  : PatientMediaFallbackReason.missing,
               height: height,
               width: double.infinity,
             );
@@ -62,8 +68,12 @@ class BrandProductMedia extends StatelessWidget {
             width: double.infinity,
             fit: BoxFit.contain,
             semanticLabel: loc.isArabic ? product.nameAr : product.nameEn,
-            errorBuilder: (_, _, _) =>
-                PatientMediaPlaceholder(height: height, width: double.infinity),
+            errorBuilder: (_, _, _) => PatientMediaPlaceholder(
+              category: PatientMediaCategory.product,
+              reason: PatientMediaFallbackReason.loadFailed,
+              height: height,
+              width: double.infinity,
+            ),
           );
         },
       ),

@@ -59,7 +59,7 @@ void expectClinicGoldenGeometry(WidgetTester tester, String name) {
   final actual = clinicGoldenGeometry(tester);
   const capture = String.fromEnvironment('PATIENT_GOLDEN_CAPTURE_DIR');
   final expected = File(
-    'test/goldens/patient_placeholders_v3/geometry/$name.json',
+    'test/goldens/patient_category_placeholders_v4/geometry/$name.json',
   );
   if (capture.isNotEmpty) {
     final output = File.fromUri(Directory(capture).uri.resolve('$name.json'));

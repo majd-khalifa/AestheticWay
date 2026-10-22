@@ -25,6 +25,7 @@ class _PatientClinicGalleryState extends State<PatientClinicGallery> {
   Widget build(BuildContext context) {
     if (widget.images.isEmpty) {
       return const PatientMediaBanner(
+        category: PatientMediaCategory.clinicCover,
         source: null,
         aspectRatio: 16 / 9,
         borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -48,6 +49,7 @@ class _PatientClinicGalleryState extends State<PatientClinicGallery> {
                   );
                 },
                 child: PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
                   source: widget.images[_index],
                   aspectRatio: 16 / 9,
                 ),
@@ -118,6 +120,7 @@ class _PatientClinicGalleryState extends State<PatientClinicGallery> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: PatientMediaBanner(
+                        category: PatientMediaCategory.clinicCover,
                         source: widget.images[i],
                         height: 54,
                         borderRadius: BorderRadius.circular(7),

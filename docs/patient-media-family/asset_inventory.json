@@ -1,0 +1,173 @@
+{
+  "runtime_format": "Original Flutter Canvas paths, gradients and existing bundled font; resolution independent",
+  "runtime_source": "lib/core/widgets/patient_media_placeholder.dart",
+  "runtime_source_bytes": 18547,
+  "runtime_source_sha256": "c4242b6672646e78c3628842340e2579cec1aa1d7eaf2743ad53fbec5a0943e8",
+  "new_binary_application_assets": 0,
+  "new_dependencies": 0,
+  "network_requests_for_fallback": 0,
+  "artwork": [
+    {
+      "category": "clinicCover",
+      "renderer_method": "_architecture",
+      "composition_source_bytes": 1431,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        360,
+        280
+      ],
+      "viewbox_portrait": [
+        360,
+        280
+      ]
+    },
+    {
+      "category": "clinicLogo",
+      "renderer_method": "_identity",
+      "composition_source_bytes": 996,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        280,
+        280
+      ],
+      "viewbox_portrait": [
+        280,
+        280
+      ]
+    },
+    {
+      "category": "product",
+      "renderer_method": "_vessels",
+      "composition_source_bytes": 1215,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        300,
+        300
+      ],
+      "viewbox_portrait": [
+        270,
+        300
+      ]
+    },
+    {
+      "category": "treatment",
+      "renderer_method": "_skinCare",
+      "composition_source_bytes": 1717,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        340,
+        280
+      ],
+      "viewbox_portrait": [
+        340,
+        280
+      ]
+    },
+    {
+      "category": "offer",
+      "renderer_method": "_ribbon",
+      "composition_source_bytes": 1530,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        360,
+        300
+      ],
+      "viewbox_portrait": [
+        300,
+        300
+      ]
+    },
+    {
+      "category": "article",
+      "renderer_method": "_editorial",
+      "composition_source_bytes": 954,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        280,
+        300
+      ],
+      "viewbox_portrait": [
+        280,
+        300
+      ]
+    },
+    {
+      "category": "practitioner",
+      "renderer_method": "_portrait",
+      "composition_source_bytes": 970,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        260,
+        300
+      ],
+      "viewbox_portrait": [
+        220,
+        300
+      ]
+    },
+    {
+      "category": "consultation",
+      "renderer_method": "_conversation",
+      "composition_source_bytes": 854,
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "compact_detail_cutoff_dp": 96,
+      "format": "Dart Canvas vector composition",
+      "viewbox_landscape_or_square": [
+        360,
+        280
+      ],
+      "viewbox_portrait": [
+        360,
+        280
+      ]
+    }
+  ],
+  "review_contact_sheet": {
+    "path": "placeholder_family.png",
+    "pixels": [
+      1000,
+      1910
+    ],
+    "bytes": 657168,
+    "sha256": "e448fa853142fef21394dea2fe34d347ee8554fa1d4b8ba877d9c249d3605ccb",
+    "shipped_in_app": false
+  }
+}

@@ -172,6 +172,7 @@ class PatientOfferCard extends StatelessWidget {
                         SizedBox(
                           width: constraints.maxWidth * .38,
                           child: PatientImage(
+                            category: PatientMediaCategory.offer,
                             imageUrl: offer.imageUrl,
                             height: compact ? 150 : 190,
                             fit: BoxFit.cover,
@@ -185,6 +186,7 @@ class PatientOfferCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       PatientImage(
+                        category: PatientMediaCategory.offer,
                         imageUrl: offer.imageUrl,
                         height: compact ? 150 : 190,
                         width: double.infinity,

@@ -102,6 +102,7 @@ class PatientPractitionerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     PatientImage(
+                      category: PatientMediaCategory.practitioner,
                       imageUrl: p.avatarUrl,
                       height: 200,
                       fit: BoxFit.cover,
@@ -120,6 +121,7 @@ class PatientPractitionerCard extends StatelessWidget {
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(minHeight: 204),
                           child: PatientImage(
+                            category: PatientMediaCategory.practitioner,
                             imageUrl: p.avatarUrl,
                             height: 204,
                             fit: BoxFit.cover,

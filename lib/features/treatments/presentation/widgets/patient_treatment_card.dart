@@ -27,7 +27,11 @@ class PatientTreatmentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PatientMediaBanner(source: treatment.imageUrl, aspectRatio: 16 / 9),
+            PatientMediaBanner(
+              category: PatientMediaCategory.treatment,
+              source: treatment.imageUrl,
+              aspectRatio: 16 / 9,
+            ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(

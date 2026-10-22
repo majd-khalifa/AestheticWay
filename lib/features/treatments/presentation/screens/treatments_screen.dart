@@ -398,6 +398,8 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                                   child: Row(
                                     children: [
                                       PatientImage(
+                                        category:
+                                            PatientMediaCategory.treatment,
                                         imageUrl: treatment.imageUrl,
                                         width: 80,
                                         height: 80,

@@ -530,6 +530,7 @@ class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
     final loc = LocaleService();
     final hasVideo = resolveNetworkImageUrl(widget.videoUrl) != null;
     Widget media = PatientMediaBanner(
+      category: PatientMediaCategory.clinicCover,
       source: widget.imageUrl,
       aspectRatio: widget.aspectRatio,
     );

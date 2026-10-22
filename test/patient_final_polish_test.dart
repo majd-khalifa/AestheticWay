@@ -233,10 +233,12 @@ void main() {
                   body: Column(
                     children: [
                       const PatientMediaBanner(
+                        category: PatientMediaCategory.clinicCover,
                         source: 'assets/images/onboarding/onboarding_1.jpeg',
                         aspectRatio: 3 / 2,
                       ),
                       const PatientMediaBanner(
+                        category: PatientMediaCategory.clinicCover,
                         source: null,
                         aspectRatio: 3 / 2,
                       ),
@@ -284,7 +286,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: PatientMediaBanner(source: corrupt.path, height: 190),
+          body: PatientMediaBanner(
+            category: PatientMediaCategory.clinicCover,
+            source: corrupt.path,
+            height: 190,
+          ),
         ),
       ),
     );

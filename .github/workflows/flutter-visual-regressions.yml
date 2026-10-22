@@ -44,7 +44,8 @@ jobs:
         run: >-
           flutter test test/preview_image_settling_test.dart
           test/media_first_previews_test.dart test/patient_portal_visual_test.dart
-          test/image_display_regression_test.dart test/patient_ca15dc6_contract_test.dart --reporter expanded
+          test/image_display_regression_test.dart test/patient_ca15dc6_contract_test.dart
+          test/patient_media_family_test.dart test/patient_startup_preferences_test.dart --reporter expanded
       - name: Validate public-clinic capture redaction offline
         if: runner.os == 'Windows'
         shell: pwsh
@@ -55,9 +56,10 @@ jobs:
       - name: Capture candidates for review only
         if: always() && !cancelled()
         run: >-
-          flutter test test/patient_portal_visual_test.dart
-          --plain-name "Clinic profile golden" --update-goldens
+          flutter test test/patient_portal_visual_test.dart test/patient_media_family_test.dart
+          --name "Clinic profile golden|complete original vector family" --update-goldens
           --dart-define=PATIENT_GOLDEN_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
+          --dart-define=PATIENT_FAMILY_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
           --reporter expanded
       - name: Upload native evidence and failure diffs
         if: always() && !cancelled()

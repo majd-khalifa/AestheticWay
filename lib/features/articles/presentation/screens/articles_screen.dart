@@ -1,9 +1,9 @@
 import 'package:aesthetic_way/core/theme/patient_design.dart';
-import '../../../../core/widgets/luxury_image.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -318,6 +318,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                 Stack(
                   children: [
                     PatientMediaBanner(
+                      category: PatientMediaCategory.article,
                       source: article.coverImageUrl,
                       aspectRatio: 16 / 9,
                       borderRadius: const BorderRadius.vertical(
@@ -382,10 +383,14 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (article.authorDoctorAvatar.isNotEmpty) ...[
-                                  LuxuryAvatar(
-                                    imageUrl: article.authorDoctorAvatar,
-                                    radius: 12,
-                                    fallbackLogoUrl: article.clinicLogoUrl,
+                                  ClipOval(
+                                    child: PatientImage(
+                                      category:
+                                          PatientMediaCategory.practitioner,
+                                      imageUrl: article.authorDoctorAvatar,
+                                      width: 24,
+                                      height: 24,
+                                    ),
                                   ),
                                   const SizedBox(width: 6),
                                 ],

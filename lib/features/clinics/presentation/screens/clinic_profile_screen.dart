@@ -231,6 +231,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       PatientImage(
+                        category: PatientMediaCategory.clinicLogo,
                         imageUrl: clinic.logoUrl,
                         width: 62,
                         height: 62,

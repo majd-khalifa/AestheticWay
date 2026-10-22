@@ -290,6 +290,7 @@ class _ProductInquiryBottomSheetState extends State<ProductInquiryBottomSheet> {
                     child: Row(
                       children: [
                         PatientImage(
+                          category: PatientMediaCategory.product,
                           imageUrl: widget.product.imageUrl,
 
                           width: 64,

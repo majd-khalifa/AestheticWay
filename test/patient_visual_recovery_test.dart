@@ -198,10 +198,15 @@ void main() {
             body: Column(
               children: [
                 PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
                   source: 'assets/images/onboarding/onboarding_1.jpeg',
                   height: 180,
                 ),
-                PatientMediaBanner(source: '', height: 180),
+                PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
+                  source: '',
+                  height: 180,
+                ),
               ],
             ),
           ),
@@ -231,7 +236,11 @@ void main() {
           home: Scaffold(
             body: Column(
               children: [
-                PatientMediaBanner(source: file.path, height: 180),
+                PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
+                  source: file.path,
+                  height: 180,
+                ),
                 const Text('Actual clinic identity'),
               ],
             ),

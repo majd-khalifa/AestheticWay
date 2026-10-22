@@ -1,0 +1,21 @@
+{
+  "baseline_family": "patient_category_placeholders_v4",
+  "approved_previous_commit": "a4f56e492c58494c0912333139aeb58e5a4e9908",
+  "reason": "User-requested category-specific original artwork and portrait size classes; prior families preserved",
+  "flutter": "3.41.5",
+  "comparison": "Exact native host rasters and shared 1/16dp geometry/styles",
+  "native_windows_review": "Pending native candidate review/adoption; missing new-family Windows baselines are not a claimed Windows pass",
+  "linux_raster_sha256": {
+    "patient_clinic_dark_ar.png": "2694369a513e598dd6a54592b7cffeb13203e69e9a74a75b50cf84473ab16170",
+    "patient_clinic_dark_en.png": "9afcfa8bc4912cc0ad0dd92237abfa1f623e39cd1d98898d6df86e786ed35fe9",
+    "patient_clinic_light_ar.png": "a9103d3e311c3517641d83350c14b995cbd9278615bfc5a6b774ec0910092944",
+    "patient_clinic_light_en.png": "e8423543c542c07159212636f8aa2a2e37d103ab7d39f1c0718eaee3a28af6b3",
+    "placeholder_family.png": "e448fa853142fef21394dea2fe34d347ee8554fa1d4b8ba877d9c249d3605ccb"
+  },
+  "shared_geometry_sha256": {
+    "patient_clinic_dark_ar.json": "5e5fc596e44ffa453543a20bd2cc3f01a719f5f7e06b1bc1a372e2c0d40716d2",
+    "patient_clinic_dark_en.json": "6201fcd1c33782cfd66ffb46f7f42446e61a97e95786468aa813a9486bd85863",
+    "patient_clinic_light_ar.json": "6e3717de3510356240544d8a59bc3ba578264fa7ce35950d6cd46b681740b713",
+    "patient_clinic_light_en.json": "9056102b5d235b1288823133a4a539b6d086661ebfa8d28baddbd69d3108c7a9"
+  }
+}

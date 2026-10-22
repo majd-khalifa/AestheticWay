@@ -55,6 +55,7 @@ class PatientClinicCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           child: PatientImage(
+            category: PatientMediaCategory.clinicLogo,
             imageUrl: clinic.logoUrl,
             width: compact ? 38 : 48,
             height: compact ? 38 : 48,
@@ -110,6 +111,7 @@ class PatientClinicCard extends StatelessWidget {
             if (showCover)
               media ??
                   PatientMediaBanner(
+                    category: PatientMediaCategory.clinicCover,
                     source: clinic.primaryPhotoUrl,
                     aspectRatio: 3 / 2,
                   ),

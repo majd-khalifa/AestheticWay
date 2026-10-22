@@ -106,6 +106,9 @@ class LuxuryImage extends StatelessWidget {
   final double? iconSize;
   final Widget? customPlaceholder;
 
+  /// Optional patient-only error artwork; legacy portal fallbacks are unchanged.
+  final Widget? errorPlaceholder;
+
   const LuxuryImage({
     super.key,
     required this.imageUrl,
@@ -118,6 +121,7 @@ class LuxuryImage extends StatelessWidget {
     this.placeholderIcon = Icons.local_hospital_outlined,
     this.iconSize,
     this.customPlaceholder,
+    this.errorPlaceholder,
   });
 
   @override
@@ -191,12 +195,14 @@ class LuxuryImage extends StatelessWidget {
       );
     }
 
-    Widget buildSmartFallback() {
+    Widget buildSmartFallback({bool failed = false}) {
       final logoProvider = resolveImageProvider(fallbackLogoUrl);
       if (logoProvider != null && logoProvider != primaryProvider) {
         return buildClinicLogoFallback(logoProvider);
       }
-      return customPlaceholder ?? buildBrandEmblemFallback();
+      return (failed ? errorPlaceholder : null) ??
+          customPlaceholder ??
+          buildBrandEmblemFallback();
     }
 
     if (primaryProvider == null) {
@@ -213,7 +219,8 @@ class LuxuryImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
-      errorBuilder: (context, error, stackTrace) => buildSmartFallback(),
+      errorBuilder: (context, error, stackTrace) =>
+          buildSmartFallback(failed: true),
     );
 
     if (borderRadius != null) {
