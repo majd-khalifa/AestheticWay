@@ -91,8 +91,10 @@ jobs:
           xcodebuild -version | grep -q 'Xcode 26'
           flutter pub get
           cd ios
-          bundle install
-          bundle exec pod install
+          ruby --version
+          gem install bundler --version 4.0.20 --no-document
+          bundle _4.0.20_ install
+          bundle _4.0.20_ exec pod install
           cp Podfile.lock ../release-evidence/Podfile.lock
           cp Gemfile.lock ../release-evidence/Gemfile.lock
       - name: Actual unsigned iOS Release device compilation

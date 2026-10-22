@@ -1,6 +1,6 @@
 # Store publication worksheet — owner review required
 
-This is a preparation worksheet, not a submitted declaration. Audit date23 October2026. No console access, legal/operator approval or production data inventory was supplied. Fill the remaining items from actual operations; never invent contact details, legal entities, ratings, reviews, credentials or medical outcomes.
+This is a preparation worksheet, not a submitted declaration. Audit date: 23 October 2026. No console access, legal/operator approval or production data inventory was supplied. Fill the remaining items from actual operations; never invent contact details, legal entities, ratings, reviews, credentials or medical outcomes.
 
 ## Listing drafts
 
@@ -47,7 +47,7 @@ Complete the Health apps declaration in Play Console using the actual medical-cl
 
 Paid clinic/brand advertising placement exists internally even without an ad-network SDK. Evaluate the Play “contains ads” declaration accordingly; keep internal entitlements out of patient labels. Review commercial placement transparency with the owner without redesigning the approved interface.
 
-All four resolved iOS plugins (`image_picker_ios0.8.13+9`, `video_player_avfoundation2.12.0`, `flutter_secure_storage9.2.4`, `url_launcher_ios6.4.1`) have source privacy manifests and support iOS13 or lower. CI must verify those resources are actually packaged along with Flutter's framework manifest. Source-built plugins and binary frameworks have different SDK-signature responsibilities; inspect the final signed archive/Organizer privacy report, not just source files. No ATT prompt is added without an actual tracking use case.
+All four resolved iOS plugins (`image_picker_ios 0.8.13+9`, `video_player_avfoundation 2.12.0`, `flutter_secure_storage 9.2.4`, `url_launcher_ios 6.4.1`) have source privacy manifests and support iOS 13 or lower. CI must verify those resources are actually packaged along with Flutter's framework manifest. Source-built plugins and binary frameworks have different SDK-signature responsibilities; inspect the final signed archive/Organizer privacy report, not just source files. No ATT prompt is added without an actual tracking use case.
 
 ## Restricted-area review access
 
@@ -65,7 +65,7 @@ Record account validity/allowed mutations, testing schedule, contact person, bac
 
 ## Publication owner checklist
 
-- [ ] Signed AAB/IPA matches approved commit, identity, version and certificate; API36/16KB and Xcode26 evidence reviewed.
+- [ ] Signed AAB/IPA matches approved commit, identity, version and certificate; API 36/16 KB and Xcode 26 evidence reviewed.
 - [ ] All P0 blockers in the release report are closed, including real deletion and public policy availability.
 - [ ] Play App Signing/upload key and Apple team/provisioning are verified outside Git; no debug certificate or verification-only AAB is uploaded.
 - [ ] Data safety, App Privacy, Health Apps, Ads, age/audience, support, export compliance and app-access declarations match deployed behavior.

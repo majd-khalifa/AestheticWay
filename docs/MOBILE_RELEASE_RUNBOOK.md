@@ -6,7 +6,7 @@ Use the exact release-readiness commit reviewed in PR #11. Do not publish from a
 
 ## Windows: signed Android App Bundle
 
-Requirements: Flutter **3.41.5** / Dart3.11.3, Git, JDK17 (`java`, `keytool`, `jarsigner` on PATH), Android SDK command-line tools, accepted SDK licenses, platform API36, build-tools36.0.0 and NDK28.2.13676358. Android Studio's SDK Manager can install them. Keep the upload keystore outside the project; recover/register the existing upload key rather than generating a replacement for an existing Play listing. Never put passwords in a `.ps1`, `.env`, `key.properties`, chat, Git or Flutter dart-defines.
+Requirements: Flutter **3.41.5** / Dart 3.11.3, Git, JDK 17 (`java`, `keytool`, `jarsigner` on PATH), Android SDK command-line tools, accepted SDK licenses, platform API 36, build-tools 36.0.0 and NDK 28.2.13676358. Android Studio's SDK Manager can install them. Keep the upload keystore outside the project; recover/register the existing upload key rather than generating a replacement for an existing Play listing. Never put passwords in a `.ps1`, `.env`, `key.properties`, chat, Git or Flutter dart-defines.
 
 PowerShell (run at repository root):
 
@@ -53,7 +53,7 @@ keytool -printcert -jarfile .\build\app\outputs\bundle\release\app-release.aab
 
 Environment variables necessarily hold the passwords while Gradle runs. Use a trusted local terminal, do not print the environment or use command tracing, close the session afterwards and restrict filesystem access. The script requires all four settings, rejects a keystore inside the repository and checks native command exit codes. Release Gradle never falls back to debug signing.
 
-For independent bundle inspection, download [official bundletool1.18.3](https://github.com/google/bundletool/releases/tag/1.18.3), verify SHA256 `a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29`, then:
+For independent bundle inspection, download [official bundletool 1.18.3](https://github.com/google/bundletool/releases/tag/1.18.3), verify SHA256 `a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29`, then:
 
 ```powershell
 java -jar C:\ExternalTools\bundletool-all-1.18.3.jar validate --bundle=.\build\app\outputs\bundle\release\app-release.aab
@@ -61,7 +61,7 @@ java -jar C:\ExternalTools\bundletool-all-1.18.3.jar dump manifest --bundle=.\bu
 java -jar C:\ExternalTools\bundletool-all-1.18.3.jar dump config --bundle=.\build\app\outputs\bundle\release\app-release.aab
 ```
 
-Verify package `com.aestheticway.aesthetic_way`, target36/min24, debuggable absent/false, backups false, cleartext false and PAGE_ALIGNMENT_16K. The Linux CI verifier additionally verifies every signed ZIP entry and 64-bit ELF LOAD alignment; a Windows installation alone is not a 16KB-page device test.
+Verify package `com.aestheticway.aesthetic_way`, target 36/min 24, debuggable absent/false, backups false, cleartext false and PAGE_ALIGNMENT_16K. The Linux CI verifier additionally verifies every signed ZIP entry and 64-bit ELF LOAD alignment; a Windows installation alone is not a 16 KB-page device test.
 
 ### Play App Signing / protected build workflow
 
@@ -71,9 +71,9 @@ The signed AAB is signed with the **upload key**. Google Play signs delivered AP
 
 `.github/workflows/android-signed-bundle.yml` is prepared for owner use **after** review/merge. It only accepts main, uses protected environment `android-release`, and never calls Play APIs. The owner must configure required reviewers/branch restrictions and externally managed secrets `AW_ANDROID_UPLOAD_KEYSTORE_BASE64`, `AW_ANDROID_STORE_PASSWORD`, `AW_ANDROID_KEY_ALIAS`, `AW_ANDROID_KEY_PASSWORD`, plus public environment variable `AW_ANDROID_UPLOAD_CERT_SHA256`. None were configured by this task. Run manually with an unused versionCode; review the three-day AAB artifact before any later manual store action. The workflow verifies the actual upload-certificate fingerprint. Never attach signing material to a PR/issue/artifact.
 
-## macOS: Xcode26 / iOS IPA
+## macOS: Xcode 26 / iOS IPA
 
-Requirements: an Apple-supported Mac with macOS Sequoia15.6 or a compatible later version for the chosen **Xcode26.2**, iOS26.2 SDK, Xcode command-line tools/license accepted, Flutter3.41.5, Ruby/Bundler and CocoaPods1.16.2. Check [Apple's exact Xcode compatibility table](https://developer.apple.com/xcode/system-requirements) before installing. CI uses the available `macos-15` standard runner (actual first-run Flutter SDK architecture was ARM64) with `/Applications/Xcode_26.2.app`; it fails instead of silently using an older SDK. Native project minimum stays iOS13; compatibility on the oldest physical OS and iPad remains a device gate. Existing Bundle ID is **`com.aestheticway.aestheticWay`**, case preserved.
+Requirements: an Apple-supported Mac with macOS Sequoia 15.6 or a compatible later version for the chosen **Xcode 26.2**, iOS 26.2 SDK, Xcode command-line tools/license accepted, Flutter 3.41.5, Ruby/Bundler and CocoaPods 1.16.2. Check [Apple's exact Xcode compatibility table](https://developer.apple.com/xcode/system-requirements) before installing. CI uses the available `macos-15` standard runner (actual first-run Flutter SDK architecture was ARM64) with `/Applications/Xcode_26.2.app`; it fails instead of silently using an older SDK. Native project minimum stays iOS 13; compatibility on the oldest physical OS and iPad remains a device gate. Existing Bundle ID is **`com.aestheticway.aestheticWay`**, case preserved.
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode_26.2.app/Contents/Developer
@@ -82,8 +82,10 @@ xcrun --sdk iphoneos --show-sdk-version
 flutter --version
 flutter pub get
 cd ios
-bundle install
-bundle exec pod install
+ruby --version # Ruby >= 3.2; the system Ruby 2.6 is insufficient for Bundler 4.
+gem install bundler --version 4.0.20 --no-document
+bundle _4.0.20_ install
+bundle _4.0.20_ exec pod install
 cd ..
 
 # Real device-architecture compilation, WITHOUT signing; this is not an IPA.
@@ -92,6 +94,8 @@ open ios/Runner.xcworkspace
 ```
 
 In Xcode's Runner target choose the authorized Apple Developer team, register the exact App ID in Certificates/Identifiers/Profiles and the App Store Connect app record, and configure distribution signing/provisioning. Preserve Keychain group `$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)` and the existing Bundle ID/team prefix to retain credentials. No Associated Domains capability is claimed configured. Use Runner.xcworkspace, not the bare `.xcodeproj`.
+
+Minimum-OS gate: the existing project intentionally remains 13.0, now consistent with App.framework metadata. Apple's Xcode 26.2 support table starts deployment/device support at 15.0. An archive that compiles with 13.0 does not prove iOS 13/14 runtime support; obtain a product decision to raise the floor or validate an explicitly supported older-device strategy before claiming that compatibility.
 
 To create a **signed archive and IPA**, after the owner configures signing in Xcode, export the App Store distribution options from Organizer to an external `ExportOptions.plist` with the correct team ID and method. Keep any local copy named `ExportOptions.local.plist` outside Git:
 
@@ -103,7 +107,7 @@ flutter build ipa --release --build-name=1.0.0 --build-number="$next_build" \
 ls -lh build/ios/ipa/*.ipa
 ```
 
-The example build number is illustrative, not a claim that123 is available. `--no-codesign` cannot produce a distributable signed IPA. Apple team membership, app registration, valid distribution identity/profile, agreements, export-compliance answers and private credentials are owner prerequisites. No signing team/certificate/IPA/TestFlight acceptance is verified by an unsigned CI build.
+The example build number is illustrative, not a claim that 123 is available. `--no-codesign` cannot produce a distributable signed IPA. Apple team membership, app registration, valid distribution identity/profile, agreements, export-compliance answers and private credentials are owner prerequisites. No signing team/certificate/IPA/TestFlight acceptance is verified by an unsigned CI build.
 
 ### Explicit TestFlight owner steps (not performed here)
 
@@ -120,12 +124,12 @@ Use test accounts/records in a reachable isolated environment; never change JWT 
 |---|---|
 | Cold launch | Empty storage → English/Light; saved EN/AR and Light/Dark/System survive restart. Native Android/iOS launch → hydrated Flutter frame; no debug banners. Keychain retained on reinstall is tested separately from empty first install. |
 | Authentication/roles | Verified patient, clinic_admin, super_admin enter only their portal; expiry refresh/logout/account switching clears private routes and cached identity; denied roles fail on server. |
-| Patient inquiry/history | One POST per tap burst; exact Arabic success; no reference displayed/announced; actual history UUID/status persists; rejection retains all fields/consent and one notice; My Requests works immediately after a lead-specific429; Contacted/Closed reflect staff updates. |
-| Authorization negative cases | With two owned test patients A/B: B's UUID detail aliases return404 for A; references/path fragments are not lookups; list/count stay scoped to A; clinic users cannot access another clinic's requests. Preserve server enforcement independent of hidden labels. |
+| Patient inquiry/history | One POST per tap burst; exact Arabic success; no reference displayed/announced; actual history UUID/status persists; rejection retains all fields/consent and one notice; My Requests works immediately after a lead-specific 429; Contacted/Closed reflect staff updates. |
+| Authorization negative cases | With two owned test patients A/B: B's UUID detail aliases return 404 for A; references/path fragments are not lookups; list/count stay scoped to A; clinic users cannot access another clinic's requests. Preserve server enforcement independent of hidden labels. |
 | Media | Genuine uploaded logo/cover/images/video display; missing/failed decode keeps approved caption-free artwork; camera/gallery cancel/deny/limited-library states recover; Android activity death lost-data recovery, iOS HEIC on a real device and video playback/foreground lifecycle require native QA. |
-| API36 | API24 and API36 device/emulator, Android16 edge-to-edge/system bars/back, keyboard, rotation/large screen, font scaling, permissions and 16KB page-mode device. Compilation/ELF checks do not replace these tests. |
+| API 36 | API 24 and API 36 device/emulator, Android 16 edge-to-edge/system bars/back, keyboard, rotation/large screen, font scaling, permissions and 16 KB page-mode device. Compilation/ELF checks do not replace these tests. |
 | External links | Call/WhatsApp/Maps/Privacy/Terms/email success and missing-app failure; return/back safe. Incoming verified App Links/Universal Links are a documented separate blocker, not assumed to work. |
 | Privacy/deletion | Registration and every role can reach public policies; support-assisted email clearly requests rather than completes deletion. **Do not mark deletion compliance passed until the backend lifecycle and public web request route are deployed and tested.** |
 | Catalog/review | No patient subscription labels, fabricated Google ratings/reviews, product prices/cart/checkout, regulatory numbers or scheduling controls. Audit real records and media rights; fixtures are not store screenshots/demo data. |
 
-Closed-testing preparation: complete the P0 items in [the report](MOBILE_RELEASE_READINESS_REPORT.md), store worksheet and Ali handoff. For personal developer accounts created after13 November2023, [Google currently requires](https://support.google.com/googleplay/android-developer/answer/14151465) at least12 opted-in testers continuously for14 days before applying for production access. The owner must verify account type/eligibility and the actual console requirements; this audit has no console access and does not claim those criteria are met.
+Closed-testing preparation: complete the P0 items in [the report](MOBILE_RELEASE_READINESS_REPORT.md), store worksheet and Ali handoff. For personal developer accounts created after 13 November 2023, [Google currently requires](https://support.google.com/googleplay/android-developer/answer/14151465) at least 12 opted-in testers continuously for 14 days before applying for production access. The owner must verify account type/eligibility and the actual console requirements; this audit has no console access and does not claim those criteria are met.

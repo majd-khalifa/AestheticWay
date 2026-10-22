@@ -31,10 +31,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
-  image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
-  url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
-  video_player_avfoundation: e54d03b3b19f64f2c557354f72ce538387541ba6
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+  video_player_avfoundation: 3453f792138786248960ca029747fcd9f318ef52
 
 PODFILE CHECKSUM: ea35e0b445f3b2632db5f8f74de426895696194d
 
