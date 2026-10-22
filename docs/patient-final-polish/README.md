@@ -59,3 +59,10 @@ Scrolled Home/Clinic/Consultation/Profile images use `_scrolled.png` in [after](
 78 media preview cases produce 102 after frames. The 31-case request QA run produces 12 additional frames. 36 comparison boards retain the original screenshots without altering their UI. Fixture photography is never added as missing record content.
 
 The original eight-reference mapping remains in the [reference recovery report](../PATIENT_REFERENCE_FIDELITY_RECOVERY_REPORT.md). This task preserves that hierarchy, real photo crops/packshot containment, Featured carousel, five tabs and project boundaries.
+
+## Native golden review
+
+- [Linux golden review](native-linux-golden-review.jpg)
+- [Windows Server 2022 golden review](native-windows-golden-review.jpg)
+
+Windows candidates from run39732045569 were inspected before adoption. Their four geometry/style JSON records exactly equal the Linux shared records. Native glyph raster differences retain separate exact PNG ownership, without percentage tolerance. Candidate capture passed8 cases; final full-suite CI is reported separately.

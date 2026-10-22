@@ -3,11 +3,36 @@
   "reason": "User-authorized same-geometry branded missing-media panels; prior families unchanged",
   "flutter": "3.41.5",
   "comparison": "Exact native rasters plus shared 1/16dp geometry/styles",
-  "native_windows_review": "Pending native candidate capture and visual/geometry review",
+  "native_windows_review": {
+    "status": "Visually reviewed four native rasters; all four geometry/style records exactly match shared Linux geometry",
+    "source_commit": "f2553942b1980933277f2b672ba9e29667f60be5",
+    "workflow_run_id": 39732045569,
+    "windows_job_id": 119669068562,
+    "artifact_id": 12405711822,
+    "artifact_sha256": "e7797bbeff6795506143798b1a1b68d520c56ce8d08035e0d94741c62b50aafe",
+    "native_host": "Windows Server 2022",
+    "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+    "candidate_tests_passed": 8,
+    "initial_focused_result": "176 passed, 8 missing new-family baseline files; not a full-suite success",
+    "review_images": "docs/patient-final-polish/native-windows-golden-review.jpg",
+    "review_date": "2026-10-22"
+  },
   "linux_raster_sha256": {
     "patient_clinic_dark_ar.png": "97582a43bbedb2d429d199a98779c0bcdb5fef4712a9a111a3713cb02a3f12a0",
     "patient_clinic_dark_en.png": "471f33ee5eb4d01c639b723e4b98b7643055a66b4a4fa4439e7a0d2be34c2f03",
     "patient_clinic_light_ar.png": "c655c639a5cc5a7e86d66fd0f3749c79402e19dd2c80d1a5a4b732dacb5d21fe",
     "patient_clinic_light_en.png": "cc93dc7767b80b9e360eef8e30644625772c4c48a2d99a1a165436ed7897f4f3"
+  },
+  "windows_raster_sha256": {
+    "patient_clinic_dark_ar.png": "1c1655d747adff6536f8dd3cffec2f247e9338771a5aed5f9aed4269e5b73123",
+    "patient_clinic_dark_en.png": "5f4cad8803f0d6cee053095b58ba23dab69725db1d47e741f8d5491f3d2ad740",
+    "patient_clinic_light_ar.png": "932d96fc38efe60d713506c9a8d0a8dc3f4fb20b33147dc862b2b4edab762b94",
+    "patient_clinic_light_en.png": "817b94a2f843f89269884fc69dee8b7374310e732c0d253d86adffabad0d1c19"
+  },
+  "shared_geometry_sha256": {
+    "patient_clinic_dark_ar.json": "5e5fc596e44ffa453543a20bd2cc3f01a719f5f7e06b1bc1a372e2c0d40716d2",
+    "patient_clinic_dark_en.json": "6201fcd1c33782cfd66ffb46f7f42446e61a97e95786468aa813a9486bd85863",
+    "patient_clinic_light_ar.json": "6e3717de3510356240544d8a59bc3ba578264fa7ce35950d6cd46b681740b713",
+    "patient_clinic_light_en.json": "9056102b5d235b1288823133a4a539b6d086661ebfa8d28baddbd69d3108c7a9"
   }
 }
