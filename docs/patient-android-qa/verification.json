@@ -1,0 +1,19 @@
+{
+  "baseline_commit": "229ad3df34adaddd666a60153146fccf98fcacc7",
+  "branch": "codex/patient-luxury-design-reference-lock",
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "local_host": "Linux",
+  "full_tests": 608,
+  "new_qa_tests": 31,
+  "focused_qa_plus_offer_tests": 37,
+  "focused_media_preview_tests": 12,
+  "analyzer_issues": 0,
+  "format_check": "clean",
+  "diff_check": "clean",
+  "backend_unchanged_files": 390,
+  "native_android": "not verified",
+  "production_api": "not verified; aestheticway.ae excluded by runtime network policy",
+  "native_windows_current_commit": "CI pending after push",
+  "all_previous_history_preserved": true
+}

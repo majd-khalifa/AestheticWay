@@ -10,8 +10,10 @@ class ContentSizedPageView extends StatefulWidget {
     required this.itemCount,
     required this.itemBuilder,
     required this.onPageChanged,
+    this.padEnds = true,
   });
   final PageController controller;
+  final bool padEnds;
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
   final ValueChanged<int> onPageChanged;
@@ -36,6 +38,7 @@ class _ContentSizedPageViewState extends State<ContentSizedPageView> {
     height: _heights[_index] ?? 340,
     child: PageView.builder(
       controller: widget.controller,
+      padEnds: widget.padEnds,
       itemCount: widget.itemCount,
       onPageChanged: (index) {
         setState(() => _index = index);

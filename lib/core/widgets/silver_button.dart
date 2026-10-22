@@ -1,3 +1,4 @@
+import '../theme/patient_theme_tokens.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -33,10 +34,18 @@ class SilverButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = AppColors.isDark(context);
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
     final (background, foreground) = switch (variant) {
       SilverButtonVariant.primary => (
-        dark ? AppColors.primaryButtonFill : AppColors.primaryButtonFillLight,
-        dark ? AppColors.primaryButtonText : AppColors.primaryButtonTextLight,
+        patient?.goldFill ??
+            (dark
+                ? AppColors.primaryButtonFill
+                : AppColors.primaryButtonFillLight),
+        patient != null
+            ? const Color(0xFF171C26)
+            : (dark
+                  ? AppColors.primaryButtonText
+                  : AppColors.primaryButtonTextLight),
       ),
       SilverButtonVariant.secondary => (
         AppColors.surfaceHover(context),

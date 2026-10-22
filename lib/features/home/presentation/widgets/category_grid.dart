@@ -1,6 +1,6 @@
+import '../../../../core/theme/patient_design.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 
 class CategoryItem {
@@ -67,10 +67,9 @@ class CategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final isDark = AppColors.isDark(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -85,47 +84,36 @@ class CategoryGrid extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                loc.tr('categories_title'),
-                style: AppTypography.cardTitle.copyWith(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.silverPrimary
-                      : AppColors.lightTextPrimary,
-                  letterSpacing: 0.25,
+              Expanded(
+                child: Text(
+                  loc.tr('categories_title'),
+                  style: PatientDesign.heading(context),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final minWidth = MediaQuery.textScalerOf(context).scale(1) > 1.3
-                  ? 120.0
-                  : 76.0;
-              final columns = (constraints.maxWidth / minWidth).floor().clamp(
-                2,
-                4,
-              );
-              final width =
-                  (constraints.maxWidth - (columns - 1) * 12) / columns;
-              return Wrap(
-                spacing: 12,
-                runSpacing: 18,
-                children: [
-                  for (final category in categories)
-                    SizedBox(
-                      width: width,
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final category in categories)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 10),
+                    child: SizedBox(
+                      width: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                          ? 108
+                          : 82,
                       child: _CategoryItemWidget(
                         category: category,
                         label: loc.tr(category.translationKey),
                         onTap: () => onCategorySelected(category),
                       ),
                     ),
-                ],
-              );
-            },
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -133,116 +121,57 @@ class CategoryGrid extends StatelessWidget {
   }
 }
 
-class _CategoryItemWidget extends StatefulWidget {
-  final CategoryItem category;
-  final String label;
-  final VoidCallback onTap;
-
+class _CategoryItemWidget extends StatelessWidget {
   const _CategoryItemWidget({
     required this.category,
     required this.label,
     required this.onTap,
   });
-
+  final CategoryItem category;
+  final String label;
+  final VoidCallback onTap;
   @override
-  State<_CategoryItemWidget> createState() => _CategoryItemWidgetState();
-}
-
-class _CategoryItemWidgetState extends State<_CategoryItemWidget> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    final bgColors = isDark
-        ? [
-            _isPressed ? const Color(0xFF223454) : const Color(0xFF16233B),
-            _isPressed ? const Color(0xFF141E34) : const Color(0xFF0F172A),
-          ]
-        : [
-            _isPressed ? const Color(0xFFF1F5F9) : const Color(0xFFFFFFFF),
-            _isPressed ? const Color(0xFFE2E8F0) : const Color(0xFFF8FAFC),
-          ];
-
-    final borderColor = _isPressed
-        ? AppColors.accentChampagne.withValues(alpha: 0.8)
-        : (isDark
-              ? AppColors.silverBorder.withValues(alpha: 0.24)
-              : AppColors.lightBorder);
-
-    final iconColor = _isPressed
-        ? AppColors.accentChampagne
-        : (isDark ? AppColors.silverPrimary : AppColors.primarySoftNavy);
-
-    final textColor = _isPressed
-        ? (isDark ? AppColors.silverPrimary : AppColors.lightTextPrimary)
-        : (isDark ? AppColors.textSecondary : AppColors.lightTextSecondary);
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedScale(
-        scale: _isPressed ? 0.92 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOutCubic,
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.surface(context),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border(context), width: .7),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 54,
-              height: 54,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: bgColors,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: borderColor,
-                  width: _isPressed ? 1.0 : 0.8,
-                ),
-                boxShadow: isDark
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: const Color(
-                            0xFF0F172A,
-                          ).withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
+                shape: BoxShape.circle,
+                color: AppColors.surfaceSubtle(context),
               ),
-              child: Center(
-                child: Icon(widget.category.icon, size: 22, color: iconColor),
+              child: Icon(
+                category.icon,
+                size: 21,
+                color: AppColors.goldText(context),
               ),
             ),
-            const SizedBox(height: 7),
+            const SizedBox(height: 6),
             Text(
-              widget.label,
-              style: AppTypography.caption.copyWith(
-                color: textColor,
-                fontSize: 11,
-                fontWeight: _isPressed ? FontWeight.w700 : FontWeight.w500,
-                letterSpacing: -0.1,
-              ),
+              label,
               textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.4,
+                color: AppColors.text(context),
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }

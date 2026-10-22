@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -24,7 +25,9 @@ class AppointmentSuccessScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final clinicName = loc.isArabic

@@ -1,3 +1,4 @@
+import 'patient_theme_tokens.dart';
 import 'package:flutter/material.dart';
 
 /// AESTHETIC WAY Design System - Dual Theme Palette (Dark + Soft Light Luxury)
@@ -59,7 +60,8 @@ abstract class AppColors {
   // Normal-size labels need a deeper bronze to meet 4.5:1 on soft light surfaces.
   static const Color lightGoldText = Color(0xFF806615);
   static Color goldText(BuildContext context) =>
-      isDark(context) ? darkGold : lightGoldText;
+      Theme.of(context).extension<PatientThemeTokens>()?.gold ??
+      (isDark(context) ? darkGold : lightGoldText);
 
   static const Color accentChampagneBright = Color(0xFFDFC49F);
   static const Color accentChampagneSoft = Color(0xFF241B10);
@@ -111,44 +113,64 @@ abstract class AppColors {
   }
 
   static Color bg(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.background;
     return isDark(context) ? backgroundDeep : lightBackground;
   }
 
   static Color surface(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.surface;
     return isDark(context) ? cardSurface : lightCardSurface;
   }
 
   static Color surfaceHover(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.subtle;
     return isDark(context) ? cardSurfaceHover : lightCardSurfaceHover;
   }
 
   static Color surfaceSubtle(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.subtle;
     return isDark(context) ? cardSurfaceSubtle : lightCardSurfaceSubtle;
   }
 
   static const Color lightBackgroundAlt = lightCardSurfaceSubtle;
 
   static Color text(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.text;
     return isDark(context) ? textPrimary : lightTextPrimary;
   }
 
   static Color primaryText(BuildContext context) => text(context);
 
   static Color subtext(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.muted;
     return isDark(context) ? textSecondary : lightTextSecondary;
   }
 
   static Color secondaryText(BuildContext context) => subtext(context);
 
   static Color mutedText(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.muted;
     return isDark(context) ? textMuted : lightTextMuted;
   }
 
   static Color border(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) return patient.border;
     return isDark(context) ? silverBorder.withValues(alpha: 0.22) : lightBorder;
   }
 
   static LinearGradient cardGrad(BuildContext context) {
+    final patient = Theme.of(context).extension<PatientThemeTokens>();
+    if (patient != null) {
+      return LinearGradient(colors: [patient.surface, patient.surface]);
+    }
     if (isDark(context)) {
       return const LinearGradient(
         begin: Alignment.topLeft,

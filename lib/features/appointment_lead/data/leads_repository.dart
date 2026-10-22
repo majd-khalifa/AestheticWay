@@ -104,7 +104,7 @@ class LeadsRepository {
 
       return PageItems<AppointmentRequestModel>.fromResponse(
         response.data,
-        AppointmentRequestModel.fromJson,
+        AppointmentRequestModel.fromPatientJson,
         page: page,
       );
     } on ApiException {
@@ -118,7 +118,7 @@ class LeadsRepository {
     final endpoint = ApiConfig.leadDetail(cleanId);
 
     final response = await _apiClient.get(endpoint);
-    return AppointmentRequestModel.fromJson(
+    return AppointmentRequestModel.fromPatientJson(
       response.data as Map<String, dynamic>,
     );
   }

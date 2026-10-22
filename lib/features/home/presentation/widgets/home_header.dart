@@ -115,8 +115,9 @@ class HomeHeader extends StatelessWidget {
                 'AESTHETIC\nWAY',
                 style: TextStyle(
                   color: AppColors.text(context),
-                  fontSize: 11,
-                  height: 1.5,
+                  fontFamily: 'PatientDisplay',
+                  fontSize: 13,
+                  height: 1.35,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w600,
                 ),

@@ -54,9 +54,10 @@ class HomeRepository {
     final response = await feedRequest;
 
     final feed = HomeFeedModel.fromJson(response.data as Map<String, dynamic>);
-    // The Home serializer omits clinic subscription/media metadata. The existing
-    // public directory is active-only and tier ordered. One bounded page restores
-    // supported subscription visibility without inventing ads or using is_featured.
+    // The public directory is active-only and tier ordered. One bounded page
+    // enriches older Home deployments that omit public media/entitlement fields;
+    // the latest supplied serializer already inherits these fields. Keep genuine
+    // advertisement identity and never manufacture placements from is_featured.
     // Its failure must not discard genuine ad records from a successful feed.
     try {
       final clinics = await directory;

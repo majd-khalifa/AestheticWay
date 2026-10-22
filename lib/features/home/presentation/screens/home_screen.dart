@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../offers/presentation/offer_actions.dart';
 import 'dart:async';
@@ -255,7 +256,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
 
     return ListenableBuilder(
@@ -332,6 +335,23 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.isArabic
+                      ? 'عناية جمالية تليق بك'
+                      : 'Aesthetic Care, for You',
+                  style: PatientDesign.heading(context, size: 27),
+                ),
+              ],
+            ),
+          ),
+        ),
+
         // 2. Search Bar + Filter Trigger
         SliverToBoxAdapter(child: _buildSearchBar(context, loc)),
 
@@ -364,14 +384,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 4. Categories Quick Access Grid (8 Official Categories)
         SliverToBoxAdapter(
           child: CategoryGrid(onCategorySelected: _handleCategoryTap),
         ),
 
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 5. Active Medical Offers Section
         if (offersList.isNotEmpty)
@@ -383,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
         if (offersList.isNotEmpty)
-          const SliverToBoxAdapter(child: SizedBox(height: 18)),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 6. Nearby Verified Clinics Section
         if (nearbyList.isNotEmpty)

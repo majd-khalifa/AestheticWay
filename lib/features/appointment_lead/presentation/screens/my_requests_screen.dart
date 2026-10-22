@@ -1,7 +1,8 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
@@ -43,8 +44,9 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     },
   };
   void _setFilter(int index) {
+    if (index == _selectedFilterIndex) return;
     setState(() => _selectedFilterIndex = index);
-    _paging.search(_query);
+    _paging.refresh(query: _query);
   }
 
   @override
@@ -79,7 +81,9 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
       _paging.refresh(query: _query);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -98,7 +102,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                     : AppColors.lightTextPrimary,
               ),
             ),
-            automaticallyImplyLeading: false,
+            automaticallyImplyLeading: true,
           ),
           body: PagedScrollBoundary(
             onLoadMore: _paging.loadMore,
@@ -178,7 +182,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
           child: Row(
             children: [
               _FilterChip(
-                label: '${loc.tr("status_all")} (${_allRequests.length})',
+                label: loc.tr("status_all"),
                 isSelected: _selectedFilterIndex == 0,
                 onTap: () => _setFilter(0),
               ),
@@ -238,7 +242,11 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                loc.tr('no_requests'),
+                                loc.tr(
+                                  _selectedFilterIndex == 0
+                                      ? 'no_requests'
+                                      : 'no_requests_for_status',
+                                ),
                                 style: AppTypography.cardTitle.copyWith(
                                   color: isDark
                                       ? AppColors.silverPrimary
@@ -249,7 +257,11 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                loc.tr('no_requests_sub'),
+                                loc.tr(
+                                  _selectedFilterIndex == 0
+                                      ? 'no_requests_sub'
+                                      : 'no_requests_for_status_sub',
+                                ),
                                 style: AppTypography.caption.copyWith(
                                   color: AppColors.mutedText(context),
                                 ),
@@ -267,11 +279,26 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       if (index >= filteredRequests.length) {
-                        return PaginationFooter(
-                          loading: _paging.isLoadingMore,
-                          hasMore: _paging.hasMore,
-                          error: _paging.error,
-                          onLoadMore: _paging.loadMore,
+                        return Column(
+                          children: [
+                            if (_paging.error != null)
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _paging.error!,
+                                  style: TextStyle(
+                                    color: AppColors.subtext(context),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            PaginationFooter(
+                              loading: _paging.isLoadingMore,
+                              hasMore: _paging.hasMore,
+                              error: _paging.error,
+                              onLoadMore: _paging.loadMore,
+                            ),
+                          ],
                         );
                       }
 
@@ -317,36 +344,22 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = AppColors.isDark(context);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accentChampagne.withValues(alpha: isDark ? 0.2 : 0.16)
-              : AppColors.surface(context),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accentChampagne
-                : AppColors.border(context),
-            width: isSelected ? 1.2 : 0.8,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: isSelected
-                ? AppColors.goldText(context)
-                : (isDark
-                      ? AppColors.silverPrimary
-                      : AppColors.lightTextPrimary),
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            fontSize: 11.5,
-          ),
-        ),
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onTap(),
+      showCheckmark: false,
+      selectedColor: AppColors.accentChampagne.withValues(
+        alpha: isDark ? .2 : .16,
       ),
+      backgroundColor: AppColors.surface(context),
+      labelStyle: TextStyle(
+        color: isSelected
+            ? AppColors.goldText(context)
+            : AppColors.text(context),
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+      ),
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     );
   }
 }
@@ -434,6 +447,7 @@ class _LeadRequestCard extends StatelessWidget {
                 children: [
                   Text(
                     request.referenceCode,
+                    textDirection: TextDirection.ltr,
                     style: AppTypography.cardTitle.copyWith(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w800,
@@ -498,16 +512,20 @@ class _LeadRequestCard extends StatelessWidget {
               color: AppColors.mutedText(context),
             ),
           ),
-          if (!isProductLead && practitionerName != null) ...[
+          if (!isProductLead &&
+              practitionerName != null &&
+              practitionerName.isNotEmpty) ...[
             const SizedBox(height: 5),
             Row(
               children: [
-                Text(
-                  '${loc.tr("practitioner_label")} $practitionerName',
-                  style: AppTypography.caption.copyWith(
-                    color: isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary,
+                Expanded(
+                  child: Text(
+                    '${loc.tr("practitioner_label")} $practitionerName',
+                    style: AppTypography.caption.copyWith(
+                      color: isDark
+                          ? AppColors.silverPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
                   ),
                 ),
                 if (request.practitionerType != null) ...[
@@ -531,7 +549,7 @@ class _LeadRequestCard extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  '${loc.isArabic ? "تاريخ الطلب:" : "Submitted:"} ${DateFormat('yyyy/MM/dd').format(request.createdAt)}',
+                  '${loc.isArabic ? "تاريخ الطلب:" : "Submitted:"} ${DateFormat('yyyy/MM/dd').format(request.createdAt.toLocal())}',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.mutedText(context),
                     fontSize: 11,
@@ -547,7 +565,8 @@ class _LeadRequestCard extends StatelessWidget {
           ),
 
           // Actions
-          if (effectiveWhatsapp.isNotEmpty || effectivePhone.isNotEmpty) ...[
+          if (!isProductLead &&
+              (effectiveWhatsapp.isNotEmpty || effectivePhone.isNotEmpty)) ...[
             const SizedBox(height: 10),
             const Divider(),
             const SizedBox(height: 6),
@@ -706,6 +725,7 @@ class _LeadRequestCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               request.referenceCode,
+                              textDirection: TextDirection.ltr,
                               style: AppTypography.cardTitle.copyWith(
                                 color: AppColors.goldText(context),
                                 fontWeight: FontWeight.w800,
@@ -773,7 +793,7 @@ class _LeadRequestCard extends StatelessWidget {
                     label: loc.isArabic ? 'تاريخ الإرسال' : 'Created Date',
                     value: DateFormat(
                       'yyyy/MM/dd • hh:mm a',
-                    ).format(request.createdAt),
+                    ).format(request.createdAt.toLocal()),
                   ),
                   if (request.notes != null &&
                       request.notes!.trim().isNotEmpty) ...[
@@ -785,8 +805,9 @@ class _LeadRequestCard extends StatelessWidget {
                       value: request.notes!.trim(),
                     ),
                   ],
-                  if (effectiveWhatsapp.isNotEmpty ||
-                      effectivePhone.isNotEmpty) ...[
+                  if (!isProductLead &&
+                      (effectiveWhatsapp.isNotEmpty ||
+                          effectivePhone.isNotEmpty)) ...[
                     const SizedBox(height: 18),
                     Row(
                       children: [
@@ -885,10 +906,12 @@ class _DetailModalRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: AppColors.mutedText(context),
+        Flexible(
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.mutedText(context),
+            ),
           ),
         ),
         const SizedBox(width: 16),

@@ -4,8 +4,8 @@ import 'package:aesthetic_way/core/network/api_config.dart';
 /// Practitioner types strictly defined in AESTHETIC WAY
 enum PractitionerType {
   doctor, // طبيب / Doctor
-  nurse, // ممرض مرخص / Licensed Nurse
-  licensedProfessional, // أخصائي مرخص / Licensed Professional (Laser/Aesthetician)
+  nurse, // ممرض / Nurse
+  licensedProfessional, // أخصائي / Specialist (Laser/Aesthetician)
 }
 
 extension PractitionerTypeExtension on PractitionerType {
@@ -25,9 +25,9 @@ extension PractitionerTypeExtension on PractitionerType {
       case PractitionerType.doctor:
         return 'طبيب';
       case PractitionerType.nurse:
-        return 'ممرض مرخص';
+        return 'ممرض';
       case PractitionerType.licensedProfessional:
-        return 'أخصائي مرخص';
+        return 'أخصائي';
     }
   }
 
@@ -36,9 +36,9 @@ extension PractitionerTypeExtension on PractitionerType {
       case PractitionerType.doctor:
         return 'Doctor';
       case PractitionerType.nurse:
-        return 'Licensed Nurse';
+        return 'Nurse';
       case PractitionerType.licensedProfessional:
-        return 'Licensed Professional';
+        return 'Specialist';
     }
   }
 }

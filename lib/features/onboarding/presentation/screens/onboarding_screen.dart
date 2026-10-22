@@ -62,8 +62,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         icon: Icons.domain_rounded,
         imagePath: 'assets/images/onboarding/onboarding_1.jpeg',
         badgeText: loc.isArabic
-            ? 'عيادات معتمدة في الإمارات'
-            : 'Certified UAE Clinics',
+            ? 'عيادات طبية في الإمارات'
+            : 'UAE Medical Clinics',
         title: loc.tr('onboarding_title_1'),
         description: loc.tr('onboarding_desc_1'),
       ),
@@ -71,8 +71,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         icon: Icons.medical_services_rounded,
         imagePath: 'assets/images/onboarding/onboarding_2.webp',
         badgeText: loc.isArabic
-            ? 'أطباء وخبراء معتمدون'
-            : 'Licensed Doctors & Experts',
+            ? 'أطباء وممارسون صحيون'
+            : 'Doctors & Practitioners',
         title: loc.tr('onboarding_title_2'),
         description: loc.tr('onboarding_desc_2'),
       ),

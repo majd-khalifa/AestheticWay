@@ -1,10 +1,10 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/brand_product_media.dart';
 import '../../../../core/widgets/editorial_heading.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -83,7 +83,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -99,7 +101,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             automaticallyImplyLeading: false,
             title: Text(
               loc.tr('category_products_title'),
-              style: AppTypography.screenTitle.copyWith(
+              style: PatientDesign.heading(context, size: 23).copyWith(
                 color: isDark
                     ? AppColors.silverPrimary
                     : AppColors.lightTextPrimary,
@@ -177,8 +179,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ? 'علامات تجميلية'
                         : 'COSMETIC BRANDS',
                     title: loc.isArabic
-                        ? 'عناية تستحق التعرّف عليها'
-                        : 'A closer look at skincare',
+                        ? 'اكتشف عالم العناية'
+                        : 'Discover skincare',
                   ),
                 // Products Grid
                 Expanded(
@@ -343,78 +345,112 @@ class _ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = LocaleService();
     final brand = productBrandLabel(product, locale);
-    return RepaintBoundary(
-      child: LuxuryCard(
-        onTap: onTap,
-        padding: EdgeInsets.zero,
-        borderRadius: 16,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              BrandProductMedia(product: product),
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (brand.isNotEmpty && product.imageUrl.isNotEmpty) ...[
-                      Text(
-                        brand,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          height: 1.5,
-                          letterSpacing: locale.isArabic ? 0 : 0.8,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.subtext(context),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                    ],
-                    Text(
-                      locale.isArabic ? product.nameAr : product.nameEn,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.text(context),
-                        fontSize: 18,
-                        height: 1.4,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (product.sponsorCompany?.trim().isNotEmpty == true &&
-                        product.sponsorCompany != brand)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          '${locale.isArabic ? 'برعاية' : 'Presented by'} ${product.sponsorCompany}',
-                          style: TextStyle(
-                            color: AppColors.subtext(context),
-                            fontSize: 11,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 12),
-                    Text(
-                      locale.isArabic
-                          ? 'اكتشف العلامة ←'
-                          : 'Explore the brand →',
-                      style: TextStyle(
-                        color: AppColors.goldText(context),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+    final copy = Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 14, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (brand.isNotEmpty) ...[
+            Text(
+              brand,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.5,
+                height: 1.5,
+                letterSpacing: locale.isArabic ? 0 : 0.8,
+                fontWeight: FontWeight.w600,
+                color: AppColors.subtext(context),
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
+          Text(
+            locale.isArabic ? product.nameAr : product.nameEn,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: PatientDesign.heading(context, size: 20),
+          ),
+          if (product.sponsorCompany?.trim().isNotEmpty == true &&
+              product.sponsorCompany != brand)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(
+                '${locale.isArabic ? 'برعاية' : 'Presented by'} ${product.sponsorCompany}',
+                style: TextStyle(
+                  color: AppColors.subtext(context),
+                  fontSize: 11,
+                  height: 1.5,
                 ),
               ),
-            ],
+            ),
+          if ((locale.isArabic ? product.descriptionAr : product.descriptionEn)
+                  .trim()
+                  .isNotEmpty ==
+              true)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                (locale.isArabic
+                    ? product.descriptionAr
+                    : product.descriptionEn),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: AppColors.subtext(context),
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Text(
+            locale.isArabic ? 'اكتشف العلامة' : 'Explore the brand',
+            style: TextStyle(
+              color: AppColors.goldText(context),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+    return RepaintBoundary(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final split =
+              constraints.maxWidth >= 300 &&
+              MediaQuery.textScalerOf(context).scale(1) <= 1.3;
+          return LuxuryCard(
+            onTap: onTap,
+            padding: EdgeInsets.zero,
+            borderRadius: 18,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: split
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraints.maxWidth * .44,
+                          child: BrandProductMedia(
+                            product: product,
+                            hero: true,
+                          ),
+                        ),
+                        Expanded(child: copy),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        BrandProductMedia(product: product),
+                        copy,
+                      ],
+                    ),
+            ),
+          );
+        },
       ),
     );
   }

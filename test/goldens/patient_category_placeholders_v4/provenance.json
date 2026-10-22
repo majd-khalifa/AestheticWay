@@ -1,0 +1,68 @@
+{
+  "baseline_family": "patient_category_placeholders_v4",
+  "approved_previous_commit": "a4f56e492c58494c0912333139aeb58e5a4e9908",
+  "reason": "User-requested category-specific original artwork and portrait size classes; prior families preserved",
+  "flutter": "3.41.5",
+  "comparison": "Exact native host rasters and shared 1/16dp geometry/styles",
+  "native_windows_review": {
+    "status": "Five native rasters visually reviewed; all four clinic geometry/style JSON files exactly match shared Linux records",
+    "source_commit": "69ba0bf31b6fd4f21b0f12634fdc6f1d72098d42",
+    "workflow_run_id": 39754509562,
+    "windows_job_id": 119743018804,
+    "artifact_id": 12415311014,
+    "artifact_sha256": "853e4a12fe1401196030c9bf2c79d86dabe5f0270b8cf8388290bcb4e5d98018",
+    "candidate_capture_cases_passed": 9,
+    "native_host": "Windows Server 2022",
+    "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+    "review_date": "2026-10-22",
+    "initial_probe": "Not a Windows pass: nine absent new-family golden assertions, 96 corrupt-file fixture matcher failures and a mapped-temp-file cleanup failure. Fixture matching/lifetime corrected before final CI; production artwork unchanged."
+  },
+  "linux_raster_sha256": {
+    "patient_clinic_dark_ar.png": "e4f32c4f9e8a4609f531e54bd864a616c06d48794b5bedcdee8e8ca58eba838f",
+    "patient_clinic_dark_en.png": "689528ec88fa667481f2fa94f953a6c60761b839cb3dba714f5800749a454023",
+    "patient_clinic_light_ar.png": "14189ee6bc4a88d2d06e5d085566f6ad5a04717371f98b0eeee75a3f1ae36c17",
+    "patient_clinic_light_en.png": "945faada166b2109e70ca3a89b707ec6b7ccdbcde1e6db76b414dafed4108756",
+    "placeholder_family.png": "9c38499845f4163ff116dfb04563d188c81bb1b43b42bbdbb9ba7b6c54dec813"
+  },
+  "shared_geometry_sha256": {
+    "patient_clinic_dark_ar.json": "5e5fc596e44ffa453543a20bd2cc3f01a719f5f7e06b1bc1a372e2c0d40716d2",
+    "patient_clinic_dark_en.json": "6201fcd1c33782cfd66ffb46f7f42446e61a97e95786468aa813a9486bd85863",
+    "patient_clinic_light_ar.json": "6e3717de3510356240544d8a59bc3ba578264fa7ce35950d6cd46b681740b713",
+    "patient_clinic_light_en.json": "9056102b5d235b1288823133a4a539b6d086661ebfa8d28baddbd69d3108c7a9"
+  },
+  "windows_raster_sha256": {
+    "patient_clinic_dark_ar.png": "756978d53057499c6973dd1a680a665710eebb86e30757d24e4c1e274537cccd",
+    "patient_clinic_dark_en.png": "733c8c4e0e12cbef330ec5d325f0258e1807c60f0287d79b78bdbace358d2ed8",
+    "patient_clinic_light_ar.png": "9ab54d558f2c0d46fe3d2d3574caa5ee47344d4aa48c054d9a51e095075e8736",
+    "patient_clinic_light_en.png": "fda7a238068d1dd7655ba049ecb12d2a8abd6a2d2e7ab838a395e644332fbe37",
+    "placeholder_family.png": "f9605763ea02c22a581cd13cb5480c34ef719f517cfcfa8f4580143f4d397091"
+  },
+  "native_validation": {
+    "run_id": 39755812602,
+    "verified_code_commit": "cdc0e11f445ebd2b7a3baf770eae98346e80ea61",
+    "both_hosts": "737 full tests, 291 focused tests, analyzer 0; 9 capture cases also pass",
+    "result": "success",
+    "host_baselines": "Separate exact native rasters; no percentage tolerance"
+  },
+  "caption_removal": {
+    "approved_artwork_commit": "a75308f985b631be887d2724bdc4dff0c3888359",
+    "reason": "User-approved micro-polish: remove painted footer captions only; preserve motifs, palettes, geometry, AW hallmark and localized Semantics",
+    "production_source_sha256": "c3689b260f5e2bf237d384511111e780ef44340b84fdcc7ff94631a2a3b55825",
+    "geometry": "All four shared records remain byte-for-byte identical to approved artwork commit",
+    "native_windows": {
+      "status": "All five native rasters visually reviewed; only caption glyph bands differ from approved Windows artwork; all four geometry records byte-identical to Linux",
+      "source_commit": "612c0e9ba9cce3706967fe1dfecd65da741eed76",
+      "workflow_run_id": 39765113736,
+      "windows_job_id": 119778516469,
+      "artifact_id": 12419328285,
+      "artifact_sha256": "1537e19782ca49e1d06467599c4573d8a3ac36aab843740d0ebc94299a30db13",
+      "candidate_capture_cases_passed": 9,
+      "native_host": "Windows Server 2022",
+      "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+      "review_date": "2026-10-22",
+      "initial_probe": "298 focused checks passed; nine comparisons still used approved caption-bearing Windows baselines and failed as expected. Not a full Windows pass. Final baseline-adoption commit must pass native CI on both hosts.",
+      "family_changed_pixels": 3955,
+      "family_change_extent": "Seven nine-pixel footer text bands; all portrait/thumbnail panels and logo motif unchanged"
+    }
+  }
+}

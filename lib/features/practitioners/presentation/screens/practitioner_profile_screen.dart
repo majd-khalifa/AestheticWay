@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/utils/clinic_location.dart';
 import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +7,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/async_action_button.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
@@ -131,7 +132,9 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final clinicName = loc.isArabic
@@ -174,14 +177,13 @@ class _PractitionerProfileScreenState extends State<PractitionerProfileScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                LuxuryImage(
+                PatientImage(
+                  category: PatientMediaCategory.practitioner,
                   imageUrl: _practitioner.avatarUrl,
-                  fallbackLogoUrl: _practitioner.clinicLogoUrl,
+
                   width: 76,
                   height: 76,
                   borderRadius: BorderRadius.circular(16),
-                  placeholderIcon: Icons.person_rounded,
-                  iconSize: 36,
                 ),
                 const SizedBox(width: 16),
                 Expanded(

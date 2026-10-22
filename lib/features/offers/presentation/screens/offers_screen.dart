@@ -1,10 +1,10 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/patient_offer_card.dart';
 import '../offer_actions.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
-import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_error_view.dart';
 import 'package:aesthetic_way/core/widgets/luxury_loading_skeleton.dart';
@@ -96,7 +96,9 @@ class _OffersScreenState extends State<OffersScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -112,7 +114,7 @@ class _OffersScreenState extends State<OffersScreen> {
             automaticallyImplyLeading: false,
             title: Text(
               loc.tr('category_offers_title'),
-              style: AppTypography.screenTitle.copyWith(
+              style: PatientDesign.heading(context, size: 23).copyWith(
                 color: isDark
                     ? AppColors.silverPrimary
                     : AppColors.lightTextPrimary,

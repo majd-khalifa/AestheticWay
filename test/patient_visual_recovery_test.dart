@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/patient_media_placeholder.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,7 @@ class _Client implements ApiClient {
               {
                 ..._clinic('vip-no-ad', 'vip'),
                 'cover_image': '/media/genuine.jpg',
+                'google_place_id': 'fixture-configured-place',
                 'google_rating': 4.6,
                 'google_reviews_count': 30,
               },
@@ -188,7 +190,7 @@ void main() {
     );
   });
   testWidgets(
-    'Genuine photo decodes with cover geometry; absent media reserves no panel',
+    'Genuine photo decodes with cover geometry; absent media preserves the same frame',
     (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -196,10 +198,15 @@ void main() {
             body: Column(
               children: [
                 PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
                   source: 'assets/images/onboarding/onboarding_1.jpeg',
                   height: 180,
                 ),
-                PatientMediaBanner(source: '', height: 180),
+                PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
+                  source: '',
+                  height: 180,
+                ),
               ],
             ),
           ),
@@ -207,14 +214,18 @@ void main() {
       );
       await settlePreviewImages(tester);
       expect(tester.getSize(find.byType(PatientMediaBanner).first).height, 180);
-      expect(tester.getSize(find.byType(PatientMediaBanner).last).height, 0);
+      expect(
+        tester.getSize(find.byType(PatientMediaBanner).last).height,
+        180.0,
+      );
+      expect(find.byType(PatientMediaPlaceholder), findsOneWidget);
       final image = tester.widget<Image>(find.byType(Image));
       expect(image.fit, BoxFit.cover);
       expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
     },
   );
   testWidgets(
-    'Undecodable native media collapses instead of becoming a giant fallback panel',
+    'Undecodable native media uses the same full-frame placeholder without hiding identity',
     (tester) async {
       final dir = Directory.systemTemp.createTempSync('aw-broken-media-');
       addTearDown(() => dir.deleteSync(recursive: true));
@@ -225,7 +236,11 @@ void main() {
           home: Scaffold(
             body: Column(
               children: [
-                PatientMediaBanner(source: file.path, height: 180),
+                PatientMediaBanner(
+                  category: PatientMediaCategory.clinicCover,
+                  source: file.path,
+                  height: 180,
+                ),
                 const Text('Actual clinic identity'),
               ],
             ),
@@ -236,13 +251,14 @@ void main() {
       // async zone. Advance frames and yield real IO until Image.errorBuilder
       // has replaced it; observing a second stream can miss that first error.
       for (var frame = 0; frame < 30; frame++) {
-        if (tester.getSize(find.byType(PatientMediaBanner)).height == 0) break;
+        if (find.byType(PatientMediaPlaceholder).evaluate().isNotEmpty) break;
         await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 10)),
         );
         await tester.pump();
       }
-      expect(tester.getSize(find.byType(PatientMediaBanner)).height, 0);
+      expect(tester.getSize(find.byType(PatientMediaBanner)).height, 180.0);
+      expect(find.byType(PatientMediaPlaceholder), findsOneWidget);
       expect(find.text('Actual clinic identity'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
@@ -261,12 +277,15 @@ void main() {
           home: Scaffold(body: BrandProductMedia(product: product)),
         ),
       );
-      expect(find.text('Actual Brand'), findsOneWidget);
+      expect(find.byType(PatientMediaPlaceholder), findsOneWidget);
       expect(find.byType(Image), findsNothing);
       expect(find.textContaining('999'), findsNothing);
       expect(
         tester.getSize(find.byType(BrandProductMedia)).height,
-        lessThan(140),
+        (tester.getSize(find.byType(BrandProductMedia)).width * 1.25).clamp(
+          0.0,
+          360.0,
+        ),
       );
     },
   );

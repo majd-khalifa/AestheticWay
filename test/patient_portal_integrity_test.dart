@@ -125,6 +125,7 @@ void main() {
     for (final value in [0, -1, 5.1, 'NaN', 'Infinity', 'garbage']) {
       expect(
         ClinicModel.fromJson({
+          'google_place_id': 'fixture-place-id',
           'google_rating': value,
           'google_reviews_count': 10,
         }).hasGoogleRating,
@@ -134,6 +135,7 @@ void main() {
     for (final count in [0, -1, 1.5, 'invalid', true]) {
       expect(
         ClinicModel.fromJson({
+          'google_place_id': 'fixture-place-id',
           'google_rating': 4.8,
           'google_reviews_count': count,
         }).hasGoogleRating,
@@ -141,6 +143,7 @@ void main() {
       );
     }
     final clinic = ClinicModel.fromJson({
+      'google_place_id': 'fixture-place-id',
       'google_rating': '4.8',
       'google_reviews_count': '127',
     });
@@ -204,6 +207,7 @@ void main() {
       ) async {
         final clinic = patientClinic(
           extra: {
+            if (hasRating) 'google_place_id': 'fixture-place-id',
             if (hasRating) 'google_rating': 4.7,
             if (hasRating) 'google_reviews_count': 56,
             if (hasMap)
@@ -217,10 +221,7 @@ void main() {
         );
         expect(find.text('Google'), hasRating ? findsOneWidget : findsNothing);
         expect(find.text('4.7'), hasRating ? findsOneWidget : findsNothing);
-        expect(
-          find.byType(InkWell),
-          hasRating && hasMap ? findsOneWidget : findsNothing,
-        );
+        expect(find.byType(InkWell), hasRating ? findsOneWidget : findsNothing);
         expect(find.textContaining('New on Google'), findsNothing);
       });
     }

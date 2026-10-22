@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/patient_clinic_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
@@ -142,7 +143,9 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
@@ -157,7 +160,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
               loc.isArabic
                   ? 'دليل عيادات التجميل والجلدية'
                   : 'Aesthetic & Derma Clinics',
-              style: AppTypography.screenTitle.copyWith(
+              style: PatientDesign.heading(context, size: 23).copyWith(
                 color: isDark
                     ? AppColors.silverPrimary
                     : AppColors.lightTextPrimary,

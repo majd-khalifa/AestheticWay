@@ -1,3 +1,5 @@
+import '../../../../core/widgets/patient_media_placeholder.dart';
+import '../../../../core/widgets/patient_image.dart' show isKnownVideoSource;
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -16,8 +18,7 @@ String productBrandLabel(ProductModel product, LocaleService locale) {
       '';
 }
 
-/// Genuine product media is contained, never cropped. Without a photograph the
-/// supplied brand becomes the identity, rather than an empty grey photo panel.
+/// Genuine product media stays contained; absent media keeps the same frame.
 class BrandProductMedia extends StatelessWidget {
   const BrandProductMedia({
     super.key,
@@ -29,37 +30,8 @@ class BrandProductMedia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
-    final brand = productBrandLabel(product, loc);
-    Widget identity() => Container(
-      padding: EdgeInsets.all(hero ? 28 : 20),
-      decoration: BoxDecoration(
-        gradient: AppColors.isDark(context)
-            ? AppColors.vipCardGradient
-            : AppColors.vipCardGradientLight,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(width: 28, height: 2, color: AppColors.goldText(context)),
-          const SizedBox(height: 16),
-          Text(
-            brand.isEmpty
-                ? (loc.isArabic ? 'عرض علامة تجميل' : 'Brand showcase')
-                : brand,
-            style: TextStyle(
-              fontFamily: loc.isArabic ? null : 'serif',
-              fontSize: hero ? 30 : 23,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
-              color: AppColors.text(context),
-            ),
-          ),
-        ],
-      ),
-    );
-    final provider = resolveImageProvider(product.imageUrl);
-    if (provider == null) return identity();
+    final video = isKnownVideoSource(product.imageUrl);
+    final provider = video ? null : resolveImageProvider(product.imageUrl);
     return ColoredBox(
       color: AppColors.isDark(context)
           ? AppColors.cardSurfaceLight
@@ -69,7 +41,20 @@ class BrandProductMedia extends StatelessWidget {
           final width = constraints.hasBoundedWidth
               ? constraints.maxWidth
               : MediaQuery.sizeOf(context).width;
-          final height = (width * 5 / 4).clamp(0.0, hero ? 440.0 : 360.0);
+          final height = (width * (hero ? 1.5 : 5 / 4)).clamp(
+            0.0,
+            hero ? 440.0 : 360.0,
+          );
+          if (provider == null) {
+            return PatientMediaPlaceholder(
+              category: PatientMediaCategory.product,
+              reason: video
+                  ? PatientMediaFallbackReason.unsupportedSource
+                  : PatientMediaFallbackReason.missing,
+              height: height,
+              width: double.infinity,
+            );
+          }
           return Image(
             key: ValueKey(provider),
             image: boundedImageDecode(
@@ -83,7 +68,12 @@ class BrandProductMedia extends StatelessWidget {
             width: double.infinity,
             fit: BoxFit.contain,
             semanticLabel: loc.isArabic ? product.nameAr : product.nameEn,
-            errorBuilder: (_, _, _) => identity(),
+            errorBuilder: (_, _, _) => PatientMediaPlaceholder(
+              category: PatientMediaCategory.product,
+              reason: PatientMediaFallbackReason.loadFailed,
+              height: height,
+              width: double.infinity,
+            ),
           );
         },
       ),

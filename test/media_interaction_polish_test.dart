@@ -438,7 +438,7 @@ void main() {
 
   for (final width in [320.0, 600.0]) {
     testWidgets(
-      'responsive actual photo frame at $width has 3:2 ratio, missing media collapses',
+      'responsive actual photo frame at $width has 3:2 ratio, missing media uses compact identity',
       (tester) async {
         await tester.binding.setSurfaceSize(Size(width, 1200));
         addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -486,9 +486,17 @@ void main() {
         );
         await tester.pumpAndSettle();
         final media = find.byType(PatientMediaBanner);
+        expect(
+          media,
+          findsNWidgets(2),
+          reason: 'Real and missing clinic media preserve identical frames.',
+        );
         final image = tester.getSize(media.first);
-        expect(image.width / image.height, closeTo(1.5, .01));
-        expect(tester.getSize(media.last).height, 0);
+        expect(tester.getSize(media.last), image);
+        expect(image.width / image.height, closeTo(3 / 2, .01));
+        expect(find.text('Discover the details'), findsNothing);
+        expect(find.text('اكتشف التفاصيل'), findsNothing);
+
         expect(tester.takeException(), isNull);
       },
     );

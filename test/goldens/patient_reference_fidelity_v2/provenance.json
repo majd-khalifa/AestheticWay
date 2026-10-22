@@ -1,0 +1,25 @@
+{
+  "baseline_family": "patient_reference_fidelity_v2",
+  "reason": "Intentional production card/profile recovery from the supplied PR10 independent visual review; historical baselines unchanged.",
+  "capture_source_commit": "a7922ee675b8720bd120c8b97ac5514037f94431",
+  "native_windows_capture_run": "https://github.com/majd-khalifa/AestheticWay/actions/runs/39620681391",
+  "native_windows_job": 119292960819,
+  "artifact_id": 12355140829,
+  "windows_candidate_review": "All four native PNGs inspected before adoption; all four shared geometry/style JSONs exactly equal Linux expectations at existing precision.",
+  "initial_ci_result": "Ubuntu: analysis and full573 passed. Windows:172 focused tests passed,8 failed only because new native baseline files did not yet exist;8 candidate captures passed. Final native full-suite CI is required after adoption.",
+  "framework": "2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa",
+  "engine": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "comparison": "Exact native pixels plus shared geometry/styles at existing1/16dp; no tolerance or skip.",
+  "raster_sha256": {
+    "linux/patient_clinic_dark_ar.png": "373e7ba933b5e509337748285bd45905fcaf5b8b46c74ea977cca102c4d22b83",
+    "linux/patient_clinic_dark_en.png": "5c3261071d8f01d352427f8afa76830a8e8817181e319436b1f43667772b18c6",
+    "linux/patient_clinic_light_ar.png": "0543f048572765a05731f6502cc4da3ea8a426731cc5a03618882382c498c166",
+    "linux/patient_clinic_light_en.png": "b15b74e915dc86a19d607b8670ee2e38c5ef1ec2edaeb947767a218a838fb744",
+    "windows/patient_clinic_dark_ar.png": "196216c434f77b6c9359d534a91bc5aaf5a6225107965b590457036c8037d69f",
+    "windows/patient_clinic_dark_en.png": "343bf670997a9f777bbb0d6e99710ca35b75debce7555fd808f6bb21b53c53f7",
+    "windows/patient_clinic_light_ar.png": "9b97ddf94db7c4c49aabb6a99dbf10fb206f267300db8ae161975d1c30aa2e8b",
+    "windows/patient_clinic_light_en.png": "0702770fb43adcc75993389dc731abf2703c829658faecada16e76bc9fdd18cf"
+  }
+}

@@ -1,10 +1,11 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/utils/entity_id.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -100,7 +101,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final primaryClinic = _availableClinics.firstOrNull;
@@ -134,14 +137,13 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           // Hero Cover Image
-          LuxuryImage(
+          PatientImage(
+            category: PatientMediaCategory.treatment,
             imageUrl: _treatment.imageUrl,
-            fallbackLogoUrl: _treatment.clinicLogoUrl,
+
             height: 200,
             width: double.infinity,
             borderRadius: BorderRadius.circular(18),
-            placeholderIcon: Icons.medical_services_rounded,
-            iconSize: 48,
           ),
           const SizedBox(height: 16),
 
@@ -307,22 +309,12 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: LuxuryImage(
+                        child: PatientImage(
+                          category: PatientMediaCategory.clinicCover,
                           imageUrl: clinic.coverImageUrl,
                           width: 50,
                           height: 50,
                           fit: BoxFit.cover,
-                          customPlaceholder: Container(
-                            width: 50,
-                            height: 50,
-                            color: isDark
-                                ? AppColors.cardSurfaceHover
-                                : AppColors.lightCardSurfaceHover,
-                            child: const Icon(
-                              Icons.apartment_rounded,
-                              color: AppColors.accentChampagne,
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(width: 12),

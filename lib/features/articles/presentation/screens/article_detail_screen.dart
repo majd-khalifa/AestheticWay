@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/widgets/patient_image.dart';
+import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/utils/entity_id.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -8,7 +10,6 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/widgets/luxury_animations.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -95,7 +96,9 @@ class ArticleDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+
+  Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
     final categoryLabel = loc.isArabic
@@ -118,7 +121,7 @@ class ArticleDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.bg(context),
         title: Text(
           loc.tr('category_articles_title'),
-          style: AppTypography.screenTitle.copyWith(
+          style: PatientDesign.heading(context, size: 23).copyWith(
             color: isDark
                 ? AppColors.silverPrimary
                 : AppColors.lightTextPrimary,
@@ -141,6 +144,7 @@ class ArticleDetailScreen extends StatelessWidget {
         children: [
           // Cover Image
           PatientMediaBanner(
+            category: PatientMediaCategory.article,
             source: article.coverImageUrl,
             height: 190,
             borderRadius: BorderRadius.circular(18),
@@ -196,7 +200,7 @@ class ArticleDetailScreen extends StatelessWidget {
           // Article Title
           Text(
             loc.isArabic ? article.titleAr : article.titleEn,
-            style: AppTypography.screenTitle.copyWith(
+            style: PatientDesign.heading(context, size: 23).copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w900,
               color: isDark
@@ -230,22 +234,12 @@ class ArticleDetailScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: LuxuryImage(
+                  child: PatientImage(
+                    category: PatientMediaCategory.practitioner,
                     imageUrl: article.authorDoctorAvatar,
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
-                    customPlaceholder: Container(
-                      width: 50,
-                      height: 50,
-                      color: isDark
-                          ? AppColors.cardSurfaceHover
-                          : AppColors.lightCardSurfaceHover,
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: AppColors.accentChampagne,
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

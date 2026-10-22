@@ -1,0 +1,270 @@
+// Synthetic transport records only; these are never shipped as patient content.
+import 'dart:async';
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
+import 'package:aesthetic_way/core/data/paged_collection.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/network/api_client.dart';
+import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
+import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
+import 'package:aesthetic_way/features/auth/data/models/auth_models.dart';
+import 'package:aesthetic_way/features/profile/presentation/screens/profile_screen.dart';
+import 'package:aesthetic_way/features/appointment_lead/data/leads_repository.dart';
+import 'package:aesthetic_way/features/appointment_lead/models/appointment_request_model.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_success_screen.dart';
+import 'package:aesthetic_way/features/appointment_lead/presentation/screens/my_requests_screen.dart';
+import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
+import 'package:aesthetic_way/features/clinics/presentation/widgets/google_clinic_rating.dart';
+import 'package:aesthetic_way/features/practitioners/models/practitioner_model.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'support/patient_fixtures.dart';
+import 'support/patient_visual_harness.dart';
+
+const duplicateDetail =
+    'A request for this service at this clinic was already submitted recently.';
+ApiException rejection(Object body, {String? retryAfter}) =>
+    ApiException.fromDioError(
+      DioException.badResponse(
+        statusCode: 429,
+        requestOptions: RequestOptions(path: 'leads/'),
+        response: Response(
+          requestOptions: RequestOptions(path: 'leads/'),
+          statusCode: 429,
+          data: body,
+          headers: Headers.fromMap({
+            if (retryAfter != null) 'retry-after': [retryAfter],
+          }),
+        ),
+      ),
+    );
+Map<String, dynamic> historyRow(int index, {String status = 'new'}) => {
+  'id': 'test-lead-$index',
+  'reference_code': '#REQ-$index',
+  'status': status,
+  'created_at': '2026-10-22T09:10:00Z',
+  'clinic': patientClinicId,
+  'clinic_summary': {
+    'id': patientClinicId,
+    'name_en': 'Source Clinic',
+    'name_ar': 'عيادة المصدر',
+  },
+  'service_name': 'Submitted service',
+  'treatment_summary': {
+    'name_en': 'Source Treatment',
+    'name_ar': 'علاج المصدر',
+  },
+  'practitioner_summary': {
+    'name_en': 'Source Practitioner',
+    'name_ar': 'ممارس المصدر',
+    'type': 'doctor',
+  },
+};
+
+class QaLeads extends LeadsRepository {
+  final submissions = <Map<String, dynamic>>[];
+  final reads = <(int, String?)>[];
+  Completer<LeadSubmitResult>? pending;
+  ApiException? failure;
+  bool nextPageFails = false;
+  bool empty = false;
+  bool firstPageFails = false;
+  @override
+  Future<LeadSubmitResult> createLead(Map<String, dynamic> payload) async {
+    submissions.add(Map.of(payload));
+    if (pending != null) return pending!.future;
+    if (failure != null) throw failure!;
+    return LeadSubmitResult(
+      success: true,
+      leadReference: '#REQ-1',
+      confirmationMessage: 'تم إرسال طلبك وستتواصل العيادة معك',
+      createdAt: DateTime.utc(2026, 10, 22),
+    );
+  }
+
+  @override
+  Future<List<AppointmentRequestModel>> getMyLeads({
+    int page = 1,
+    String? status,
+  }) async {
+    reads.add((page, status));
+    if (firstPageFails) {
+      throw const ApiException(message: 'Unable to load requests');
+    }
+    if (empty) return PageItems([], hasMore: false, total: 0);
+    if (page == 2 && nextPageFails) {
+      throw const ApiException(message: 'Unable to load more');
+    }
+    final count = status == null ? 21 : 1;
+    return PageItems(
+      [
+        for (
+          var i = page == 1 ? 1 : 21;
+          i <= (page == 1 ? (status == null ? 20 : 1) : 21);
+          i++
+        )
+          AppointmentRequestModel.fromJson(
+            historyRow(i, status: status ?? 'new'),
+          ),
+      ],
+      hasMore: page == 1 && status == null,
+      total: count,
+    );
+  }
+}
+
+class QaAuth implements AuthRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  Future<UserModel> getMe() async => UserModel(
+    id: 'test-patient',
+    fullName: 'Test Patient',
+    phone: '+971501234567',
+    role: 'patient',
+  );
+}
+
+class RecordingHistoryClient implements ApiClient {
+  String? path;
+  Map<String, dynamic>? query;
+  @override
+  Future<Response<T>> get<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    this.path = path;
+    query = queryParameters;
+    return Response(
+      requestOptions: RequestOptions(path: path),
+      data:
+          {
+                'count': 1,
+                'next': null,
+                'results': [historyRow(1)],
+              }
+              as T,
+    );
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+Future<void> frame(
+  WidgetTester tester,
+  Widget child, {
+  bool dark = false,
+  bool ar = false,
+  double scale = 1,
+}) async {
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = const Size(390, 844);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  addTearDown(tester.view.resetPhysicalSize);
+  await LocaleService().setLanguage(
+    ar ? AppLanguage.arabic : AppLanguage.english,
+  );
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: patientVisualTheme(dark: dark),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(scale)),
+        child: Directionality(
+          textDirection: ar ? TextDirection.rtl : TextDirection.ltr,
+          child: RepaintBoundary(key: const ValueKey('android-qa'), child: child!),
+        ),
+      ),
+      home: child,
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> capture(WidgetTester tester, String name) async {
+  const output = String.fromEnvironment('ANDROID_QA_CAPTURE_DIR');
+  if (output.isEmpty) return;
+  await expectLater(
+    find.byKey(const ValueKey('android-qa')),
+    matchesGoldenFile(Uri.file('$output/$name.png')),
+  );
+}
+
+Future<void> prepareForm(
+  WidgetTester tester,
+  QaLeads repo, {
+  bool dark = false,
+  bool ar = false,
+}) async {
+  await frame(
+    tester,
+    AppointmentRequestScreen(
+      clinic: patientClinic(),
+      leadsRepository: repo,
+      preselectedServiceName: 'Selected service',
+      preselectedTreatmentId: '77777777-7777-4777-8777-777777777777',
+      preselectedPractitioner: PractitionerModel.fromJson({
+        'id': '44444444-4444-4444-8444-444444444444',
+        'clinic': patientClinicId,
+        'name_en': 'Selected Practitioner',
+        'name_ar': 'الممارس المختار',
+        'type': 'doctor',
+      }),
+    ),
+    dark: dark,
+    ar: ar,
+  );
+  await tester.enterText(find.byType(TextFormField).first, 'Test Patient');
+  await tester.enterText(find.byType(TextFormField).at(1), '501234567');
+  await tester.enterText(
+    find.byType(TextFormField).last,
+    'Please retain this inquiry',
+  );
+  await tester.ensureVisible(find.byType(Checkbox));
+  await tester.tap(find.byType(Checkbox));
+  await tester.ensureVisible(find.text(LocaleService().tr('submit_lead_btn')));
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  setUpAll(loadPatientVisualFonts);
+  setUp(() {FlutterSecureStorage.setMockInitialValues({}); AuthState().login(name:'Test Patient',phone:'+971501234567');});
+  for(final dark in [false,true]) {
+    for(final ar in [false,true]) {
+      testWidgets('Historical duplicate notice dark=$dark ar=$ar',(tester) async {
+        final repo=QaLeads()..failure=rejection({'detail':duplicateDetail});
+        await prepareForm(tester,repo,dark:dark,ar:ar);
+        await tester.tap(find.text(LocaleService().tr('submit_lead_btn'))); await tester.pumpAndSettle();
+        final banner=find.text(ar ? 'يرجى الانتظار لحظات قبل إرسال طلب جديد لنفس العيادة' : 'Please wait a moment before submitting another request to this clinic');
+        expect(banner,findsOneWidget); expect(find.byType(Dismissible),findsOneWidget);
+        await tester.ensureVisible(banner); await tester.pumpAndSettle();
+        await capture(tester,'rejection_${dark ? 'dark':'light'}_${ar ? 'ar':'en'}');
+      });
+    }
+  }
+  testWidgets('Historical pushed history',(tester) async {
+    await frame(tester,Builder(builder:(context)=>Scaffold(body:TextButton(onPressed:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>MyRequestsScreen(leadsRepository:QaLeads()))),child:const Text('Open history')))));
+    await tester.tap(find.text('Open history')); await tester.pumpAndSettle();
+    expect(find.byType(BackButton),findsNothing);
+    await capture(tester,'history_navigation_light_en');
+  });
+  testWidgets('Historical profile expanded',(tester) async {
+    await frame(tester,ProfileScreen(authRepository:QaAuth(),onNavigateToRequests:(){}));
+    await tester.tap(find.byKey(const Key('toggle_edit_profile_btn'))); await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text(LocaleService().tr('my_requests_title'))).dy,greaterThan(tester.getTopLeft(find.byKey(const Key('profile_full_name_field'))).dy));
+    await capture(tester,'profile_edit_light_en');
+  });
+  for(final ar in [false,true]) {
+    testWidgets('Historical role claims ar=$ar',(tester) async {
+      await frame(tester,Scaffold(body:Column(children:[for(final type in PractitionerType.values) PractitionerBadge(type:type)])),ar:ar);
+      expect(find.text(ar ? 'أخصائي مرخص':'Licensed Specialist'),findsOneWidget);
+      await capture(tester,'roles_light_${ar ? 'ar':'en'}');
+    });
+  }
+}

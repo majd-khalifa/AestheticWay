@@ -338,7 +338,12 @@ class ClinicModel {
     placeId: googlePlaceId,
   );
   bool get hasMapLocation => mapsUri != null;
-  bool get hasGoogleRating => rating.isFinite && rating >= 1 && rating <= 5;
+  bool get hasGoogleRating =>
+      googlePlaceId != null &&
+      googlePlaceId!.trim().isNotEmpty &&
+      rating.isFinite &&
+      rating >= 1 &&
+      rating <= 5;
   ClinicCoordinates? get coordinates =>
       ClinicCoordinates.parse(latitude, longitude);
 

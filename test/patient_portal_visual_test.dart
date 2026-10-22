@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'support/settle_preview_images.dart';
 import 'support/patient_visual_harness.dart';
 import 'support/clinic_golden_geometry.dart';
@@ -222,6 +223,7 @@ Widget _app(
 
 void main() {
   setUpAll(() async {
+    FlutterSecureStorage.setMockInitialValues({});
     await loadPatientVisualFonts();
   });
   tearDown(() {
@@ -353,7 +355,7 @@ void main() {
                       'PATIENT_GOLDEN_CAPTURE_DIR',
                     ).isEmpty
                     ? Uri.parse(
-                        'goldens/clinic_profile_v2/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
+                        'goldens/patient_category_placeholders_v4/${Platform.operatingSystem}/patient_clinic_${dark ? 'dark' : 'light'}_${arabic ? 'ar' : 'en'}.png',
                       )
                     : Directory(
                         const String.fromEnvironment(
@@ -443,7 +445,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text(LocaleService().tr('tab_staff')));
+      await tester.scrollUntilVisible(
+        find.text(LocaleService().tr('tab_staff')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text(LocaleService().tr('tab_staff')));
       await tester.pumpAndSettle();
       expect(find.text('No medical staff published'), findsNothing);

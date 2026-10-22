@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/luxury_card.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -587,7 +588,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     }
     expect(calls, 2);
-    expect(find.byType(BrandProductMedia), findsWidgets);
+    expect(find.text('Synthetic 0'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(ProductsScreen),
+        matching: find.byType(LuxuryCard),
+      ),
+      findsWidgets,
+    );
     expect(find.byType(LuxuryListSkeleton), findsNothing);
     gate.complete();
     await tester.pumpAndSettle();

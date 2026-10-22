@@ -161,6 +161,60 @@ class AppointmentRequestModel {
     this.internalNotes = const [],
   });
 
+  /// Patient history must never manufacture a reference, date or sent status.
+  factory AppointmentRequestModel.fromPatientJson(Map<String, dynamic> json) {
+    final reference = json['reference_code']?.toString().trim() ?? '';
+    final submitted = DateTime.tryParse(json['created_at']?.toString() ?? '');
+    if (reference.isEmpty ||
+        submitted == null ||
+        !const ['new', 'contacted', 'closed'].contains(json['status']) ||
+        (json['id']?.toString().trim().isEmpty ?? true)) {
+      throw const FormatException('Incomplete patient request record');
+    }
+    String name(Object? summary, String arKey, String enKey) {
+      if (summary is! Map) return '';
+      final ar = summary[arKey]?.toString().trim() ?? '';
+      final en = summary[enKey]?.toString().trim() ?? '';
+      return ar.isNotEmpty ? ar : en;
+    }
+
+    final clinic = json['clinic_summary'];
+    final branch = json['branch_summary'];
+    final practitioner = json['practitioner_summary'];
+    final service =
+        json['product_summary'] ??
+        json['treatment_summary'] ??
+        json['offer_summary'];
+    final isOffer =
+        json['offer_summary'] != null &&
+        json['product_summary'] == null &&
+        json['treatment_summary'] == null;
+    final serviceAr = name(
+      service,
+      isOffer ? 'title_ar' : 'name_ar',
+      isOffer ? 'title_en' : 'name_en',
+    );
+    final serviceEn = name(
+      service,
+      isOffer ? 'title_en' : 'name_en',
+      isOffer ? 'title_ar' : 'name_ar',
+    );
+    final submittedService = json['service_name']?.toString().trim() ?? '';
+    final parsed = AppointmentRequestModel.fromJson(json);
+    return parsed.copyWith(
+      referenceCode: reference,
+      createdAt: submitted,
+      clinicNameAr: name(clinic, 'name_ar', 'name_en'),
+      clinicNameEn: name(clinic, 'name_en', 'name_ar'),
+      branchNameAr: name(branch, 'name_ar', 'name_en'),
+      branchNameEn: name(branch, 'name_en', 'name_ar'),
+      serviceNameAr: serviceAr.isNotEmpty ? serviceAr : submittedService,
+      serviceNameEn: serviceEn.isNotEmpty ? serviceEn : submittedService,
+      practitionerNameAr: name(practitioner, 'name_ar', 'name_en'),
+      practitionerNameEn: name(practitioner, 'name_en', 'name_ar'),
+    );
+  }
+
   factory AppointmentRequestModel.fromJson(Map<String, dynamic> json) {
     // 1. Status mapping: backend returns 'new', 'contacted', 'closed'
     final rawStatus = (json['status'] ?? '').toString().toLowerCase();
