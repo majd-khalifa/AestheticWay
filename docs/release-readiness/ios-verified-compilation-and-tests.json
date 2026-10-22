@@ -1,0 +1,38 @@
+{
+  "kind": "Actual unsigned iOS Release device compilation and native hosted XCTest verification",
+  "source_commit": "44d8568f9805f1291a2f9fe2bd846d0163f6d60a",
+  "workflow_run_id": 39861474573,
+  "job_id": 120112991629,
+  "artifact_id": 12461913291,
+  "xcode": "Xcode 26.2\nBuild version 17C52",
+  "ios_sdk": "26.2",
+  "flutter_version": "3.41.5",
+  "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+  "runner_bundle_id": "com.aestheticway.aestheticWay",
+  "minimum_os_version": "13.0",
+  "device_families": [
+    1,
+    2
+  ],
+  "packaged_privacy_manifests": [
+    "build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/image_picker_ios.framework/image_picker_ios_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/video_player_avfoundation.framework/video_player_avfoundation_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/Flutter.framework/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/url_launcher_ios.framework/url_launcher_ios_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/flutter_secure_storage.framework/flutter_secure_storage.bundle/PrivacyInfo.xcprivacy"
+  ],
+  "podfile_lock_sha256": "524407b2a6373233f9fcfc054992abc4fd3022e130af9b7a6ae871b3d3bb3f98",
+  "gemfile_lock_sha256": "e8c20a25518aa232abf0abbaacf9b5b60aea88d9acd508131862a3afa96f380f",
+  "hosted_tests": {
+    "simulator": "iPhone 17 Pro",
+    "runtime": "iOS 26.0.1",
+    "passed": 2,
+    "failed": 0,
+    "tests": [
+      "RunnerTests.testBundleIdentityAndRequiredResources",
+      "RunnerTests.testNativeHostLoadsFlutterDelegate"
+    ]
+  },
+  "qualification": "Executed on native macOS ARM64/Xcode 26.2. Device-architecture Release build is unsigned; tests execute a Debug host in an iOS simulator. No signed IPA, TestFlight upload, physical iPhone/iPad QA or live API/media delivery is verified."
+}

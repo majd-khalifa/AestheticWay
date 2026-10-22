@@ -17,6 +17,7 @@ class ApiClient {
   late final Dio dio;
   final _reads = SingleFlight();
   final _backpressure = RequestBackpressure();
+  final _leadWriteBackpressure = RequestBackpressure();
 
   ApiClient._internal() {
     dio = Dio(
@@ -39,6 +40,7 @@ class ApiClient {
     dio.options.baseUrl = ApiConfig.baseUrl;
     _reads.clear();
     _backpressure.clear();
+    _leadWriteBackpressure.clear();
   }
 
   Options _sessionOptions(Options? options) {
@@ -190,6 +192,8 @@ class ApiClient {
   }) async {
     final scope = _scope();
     _backpressure.check(scope);
+    final isLeadWrite = method == 'POST' && path == ApiConfig.leads;
+    if (isLeadWrite) _leadWriteBackpressure.check(scope);
     if (method != 'GET') _reads.clear();
     try {
       final response = await dio.request<T>(
@@ -199,10 +203,18 @@ class ApiClient {
         options: options.copyWith(method: method),
       );
       _backpressure.succeeded(scope);
+      if (isLeadWrite) _leadWriteBackpressure.succeeded(scope);
       return response;
     } on DioException catch (error) {
       final mapped = ApiException.fromDioError(error);
-      _backpressure.record(scope, mapped);
+      // d1023b0 isolates lead creation/duplicate throttles. A rejected POST
+      // must not block the patient's recovery GET to My Requests. Global GET
+      // throttles and service-wide 503 protection still apply to every call.
+      if (isLeadWrite && mapped.statusCode == 429) {
+        _leadWriteBackpressure.record(scope, mapped);
+      } else {
+        _backpressure.record(scope, mapped);
+      }
       throw mapped;
     } finally {
       // A GET started before/during a write must not service a post-write read.

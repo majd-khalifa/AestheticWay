@@ -4,6 +4,7 @@ import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme_service.dart';
 import '../../../../core/widgets/luxury_card.dart';
+import '../../../../core/widgets/account_privacy_actions.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../widgets/admin_components.dart';
@@ -96,6 +97,7 @@ class AdminSettingsScreen extends StatelessWidget {
               adminText('Privacy & supervision', 'الخصوصية والمتابعة'),
             ),
             AdminNotice(message: locale.tr('admin_lead_monitoring_note')),
+            const AccountPrivacyActions(),
             const SizedBox(height: 20),
             OutlinedButton.icon(
               onPressed: () async {

@@ -439,23 +439,13 @@ class _LeadRequestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with Ref and Status
+          // Patient-facing type/status only; operational references stay internal.
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  Text(
-                    request.referenceCode,
-                    textDirection: TextDirection.ltr,
-                    style: AppTypography.cardTitle.copyWith(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.goldText(context),
-                    ),
-                  ),
                   if (isProductLead) ...[
-                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -720,16 +710,6 @@ class _LeadRequestCard extends StatelessWidget {
                                     ? AppColors.textPrimary
                                     : AppColors.lightTextPrimary,
                                 fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              request.referenceCode,
-                              textDirection: TextDirection.ltr,
-                              style: AppTypography.cardTitle.copyWith(
-                                color: AppColors.goldText(context),
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14,
                               ),
                             ),
                           ],

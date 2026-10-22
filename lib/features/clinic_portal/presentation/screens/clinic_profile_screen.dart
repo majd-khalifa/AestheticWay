@@ -1,4 +1,5 @@
 import '../../../../core/services/local_media_cache.dart';
+import '../../../../core/widgets/account_privacy_actions.dart';
 import '../widgets/clinic_catalog_cards.dart';
 import 'clinic_offers_screen.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
@@ -2501,6 +2502,8 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
               const SizedBox(height: 20),
 
               // Logout Clinic Portal Button
+              const AccountPrivacyActions(),
+              const SizedBox(height: 12),
               SilverButton(
                 label: loc.tr('clinic_logout'),
                 icon: Icons.logout_rounded,

@@ -1,0 +1,21 @@
+{
+  "kind": "First actual native iOS Release device compilation, not signed IPA or a passed simulator test",
+  "source_commit": "187124632eb82c60c13ce5cc255975274e03aa3e",
+  "workflow_run_id": 39857386058,
+  "job_id": 120099025854,
+  "artifact_id": 12461670021,
+  "xcode": "Xcode 26.2\nBuild version 17C52",
+  "ios_sdk": "26.2",
+  "flutter_version": "3.41.5",
+  "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+  "packaged_privacy_manifests": [
+    "build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/image_picker_ios.framework/image_picker_ios_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/video_player_avfoundation.framework/video_player_avfoundation_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/Flutter.framework/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/url_launcher_ios.framework/url_launcher_ios_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/flutter_secure_storage.framework/flutter_secure_storage.bundle/PrivacyInfo.xcprivacy"
+  ],
+  "podfile_lock_sha256": "29e09471c8db899b6c07fe2c80c281078ed020795ced2027196cb055f7fc9802",
+  "qualification": "Hosted XCTest attempt canceled after simulator/debugger launch stalled. It is not reported as passed. Final native verification belongs to the later PR-head CI."
+}

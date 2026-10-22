@@ -1,0 +1,64 @@
+{
+  "source_archive": "AESTHETIC_WAY_BACKEND_SOURCE_d1023b0.zip",
+  "user_reported_commit": "d1023b0",
+  "archive_sha256": "bf2a2855e672ee68e52cd16933c1c1e6a0e7b4ed95f5cf47ae5d4fe695b6c750",
+  "files_verified_read_only": 393,
+  "changed_or_new_vs_ca15dc6": [
+    ".env.example",
+    "core/cache_snapshots.py",
+    "core/throttles.py",
+    "apps/clinics/serializers.py",
+    "apps/clinics/scale_signals.py",
+    "apps/clinics/models.py",
+    "apps/home/views.py",
+    "apps/clinics/services/google_places.py",
+    "apps/clinics/tests/test_google_ratings_and_cache_invalidation.py",
+    "apps/leads/tests/test_lead_cooldown_and_throttles.py",
+    "apps/leads/views/patient_views.py",
+    "config/settings/base.py"
+  ],
+  "key_source_locations": {
+    "LeadCreationThrottle": {
+      "file": "apps/leads/views/patient_views.py",
+      "line": 23
+    },
+    "LeadCreateAPIView": {
+      "file": "apps/leads/views/patient_views.py",
+      "line": 28
+    },
+    "MyLeadsAPIView": {
+      "file": "apps/leads/views/patient_views.py",
+      "line": 210
+    },
+    "MyLeadDetailAPIView": {
+      "file": "apps/leads/views/patient_views.py",
+      "line": 231
+    },
+    "MyLeadsCountAPIView": {
+      "file": "apps/leads/views/patient_views.py",
+      "line": 245
+    }
+  },
+  "key_source_hashes": {
+    "apps/accounts/urls.py": "ff9485fe367f5b29eb53e7748c9ae5c3fe1aa7d796ca253e270a1adb2587cfe1",
+    "apps/accounts/views.py": "dbe7052f9421b44b22bda9f7221a0ec305f39684e855e853edcbb883e3b1b570",
+    "apps/leads/urls.py": "4569690b7937e1adf0fde51fa960f13e6cec72b65966a60532f010edf16ca7fe",
+    "apps/leads/serializers.py": "2d4ba848421048966984a62340184bedd28ac01d0a1f1f90c261eaa1eb574f17",
+    "apps/leads/views/patient_views.py": "b7774270ed45e2cc1dec655c87e4551324323284eedb84f53fa9c5be460b56a4",
+    "core/permissions/roles.py": "c493bf41b3ac6bdc51b7978252e893698ff22cb42c56e56ee1bf19de6695f468",
+    "apps/site_pages/urls.py": "bb90fddbf485ec45202c36b032f939ab482a1988144d2e1ebff7385bdf4b8cb4"
+  },
+  "findings": {
+    "consultation_duplicate_window_seconds": 15,
+    "dedicated_lead_rate": "20/hour",
+    "create_response_lead_uuid": false,
+    "own_account_deletion_route": false,
+    "dedicated_public_deletion_route": false,
+    "public_privacy_support_request_instructions": true,
+    "patient_detail_queryset_scoped_to_request_user": true,
+    "patient_reference_lookup_route": false,
+    "patient_serializer_excludes_internal_notes": true,
+    "IsPatient_also_permits_super_admin": true
+  },
+  "verification_kind": "Static source audit and Flutter protocol regression fixtures. Not an authenticated production penetration test, API deployment check or live privacy-page availability verification."
+}
