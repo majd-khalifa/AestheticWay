@@ -750,6 +750,86 @@ void main() {
   for (final dark in [false, true]) {
     for (final ar in [false, true]) {
       testWidgets(
+        'patient reference stays internal in success, history and details dark=$dark ar=$ar',
+        (tester) async {
+          final semantics = tester.ensureSemantics();
+          try {
+            final request = AppointmentRequestModel.fromPatientJson(
+              historyRow(1),
+            );
+            final repo = QaLeads();
+            void hidden() {
+              expect(find.textContaining('#REQ-'), findsNothing);
+              expect(find.bySemanticsLabel(RegExp('#REQ-')), findsNothing);
+              expect(request.id, 'test-lead-1');
+              expect(request.referenceCode, '#REQ-1');
+            }
+
+            await frame(
+              tester,
+              MyRequestsScreen(leadsRepository: repo),
+              dark: dark,
+              ar: ar,
+            );
+            hidden();
+            await capture(
+              tester,
+              'reference_free_history_${dark ? 'dark' : 'light'}_${ar ? 'ar' : 'en'}',
+            );
+            await tester.tap(
+              find.text(ar ? 'عيادة المصدر' : 'Source Clinic').first,
+            );
+            await tester.pumpAndSettle();
+            hidden();
+            expect(
+              find.text(ar ? 'تفاصيل الطلب' : 'Request Details'),
+              findsOneWidget,
+            );
+            await capture(
+              tester,
+              'reference_free_detail_${dark ? 'dark' : 'light'}_${ar ? 'ar' : 'en'}',
+            );
+            Navigator.of(
+              tester.element(
+                find.text(ar ? 'تفاصيل الطلب' : 'Request Details'),
+              ),
+            ).pop();
+            await tester.pumpAndSettle();
+            await frame(
+              tester,
+              AppointmentSuccessScreen(
+                request: request,
+                clinic: patientClinic(),
+              ),
+              dark: dark,
+              ar: ar,
+            );
+            hidden();
+            expect(
+              tester
+                  .widget<AppointmentSuccessScreen>(
+                    find.byType(AppointmentSuccessScreen),
+                  )
+                  .request,
+              same(request),
+            );
+            if (ar) {
+              expect(
+                find.text('تم إرسال طلبك وستتواصل العيادة معك'),
+                findsOneWidget,
+              );
+            }
+            await capture(
+              tester,
+              'reference_free_success_${dark ? 'dark' : 'light'}_${ar ? 'ar' : 'en'}',
+            );
+            expect(tester.takeException(), isNull);
+          } finally {
+            semantics.dispose();
+          }
+        },
+      );
+      testWidgets(
         'Android-sized rejection and history dark=$dark ar=$ar at 160%',
         (tester) async {
           final repo = QaLeads()

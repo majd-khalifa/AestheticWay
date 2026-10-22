@@ -30,6 +30,7 @@ Audit date: 23 October 2026 (Asia/Damascus). Base: `origin/main` merge `b402d3bf
 - Secure storage remains device-only unlocked Keychain for JWTs, ordered token writes, role-bound session epochs and explicit logout. Default Keychain group is now explicit in all iOS configurations. Keychain may survive uninstall; no destructive blanket purge was added. A reinstall with retained choices is not an empty first install. Empty storage still defaults English/Light.
 - Public legal links are discoverable from registration and each role's existing account/settings area. Deletion requests require confirmation and open email only after the user's tap, without auto-inserting names, phone numbers, JWTs or credentials; failure/duplicate taps/unmounted navigation are handled. The full server deletion gap stays P0. Support response aliases now match the verified Django `support_*` keys.
 - Patient success/history/detail no longer paint or announce operational request references. IDs, parser fields, API confirmations, status refresh and authorized Clinic/Super Admin references remain intact. Detail API calls require a UUID, not a reference/path fragment. This presentation preference does not replace server object authorization.
+- A confirmed client-side recovery bug was fixed: a lead-specific429 no longer globally blocks My Requests GET. Repeated lead writes still honor Retry-After; global read429 and service503 protection remains. Patient parsing also discards unexpected staff-only notes before constructing the model.
 
 ## Updated backend and consultation contract
 
@@ -47,7 +48,9 @@ The user reports a successful real-device patient submission → My Requests app
 
 ## Validation
 
-Implementation checks, actual Android native build evidence and macOS results are being collected. Final commit/run URLs and exact passing counts will be recorded in the PR description and final delivery. A failed network download or an unsigned iOS compile must not be called a production signed build.
+Local Linux: **768/768 Flutter tests**, zero analyzer issues, full formatting and diff checks clean. Fifteen new cases exercise the actual ApiClient transport/429 recovery/history/UUID handling, localized legal launch feedback and all patient reference-free surfaces/semantics. Existing test assertions for visible references were replaced with actual service/card/detail navigation plus retained model/reference assertions; no test was skipped or removed.
+
+The first macOS CI completed actual unsigned iOS Release device compilation with Xcode26.2. Native simulator tests and final Android build evidence are still being collected; final commit/run URLs and exact results will be recorded in the PR description and final delivery. Android's first CI attempt stopped before compilation because sdkmanager was not on PATH; its explicit installed path is now used. The local Android attempt remains a blocked artifact download, not a passed compile. An unsigned iOS compile must not be called a signed IPA/TestFlight result.
 
 See [exact Windows/macOS commands and smoke checklist](MOBILE_RELEASE_RUNBOOK.md), [bilingual backend handoff](RELEASE_BACKEND_HANDOFF_FOR_ALI.md), and [store metadata/privacy worksheet](STORE_LISTING_AND_PRIVACY_WORKSHEET.md).
 

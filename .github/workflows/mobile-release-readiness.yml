@@ -30,7 +30,7 @@ jobs:
       - name: Install reviewed Android toolchain
         shell: bash
         run: |
-          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
           flutter pub get
       - name: Signed release compilation with disposable verification key
         shell: bash
@@ -71,7 +71,7 @@ jobs:
           retention-days: 14
 
   ios-xcode26:
-    runs-on: macos-15
+    runs-on: macos-15-arm64
     timeout-minutes: 40
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
@@ -101,9 +101,14 @@ jobs:
           plutil -lint build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy
           flutter --version --machine > release-evidence/flutter-ios.json
       - name: Boot iOS26 simulator and execute native hosted tests
+        timeout-minutes: 12
         run: |
           simulator_id=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(v["udid"] for k,vs in d["devices"].items() if "iOS-26" in k for v in vs if v["name"].startswith("iPhone")))')
-          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug -destination "platform=iOS Simulator,id=$simulator_id" -resultBundlePath release-evidence/RunnerTests.xcresult CODE_SIGNING_ALLOWED=NO
+          if ! xcrun simctl list devices booted | grep -q "$simulator_id"; then
+            xcrun simctl boot "$simulator_id"
+          fi
+          xcrun simctl bootstatus "$simulator_id" -b
+          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug -destination "platform=iOS Simulator,id=$simulator_id" -destination-timeout 120 -parallel-testing-enabled NO -test-timeouts-enabled YES -maximum-test-execution-time-allowance 120 -resultBundlePath release-evidence/RunnerTests.xcresult CODE_SIGNING_ALLOWED=NO
       - name: Upload native build/test evidence, no signing material
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
