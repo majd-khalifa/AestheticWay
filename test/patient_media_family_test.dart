@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import 'package:aesthetic_way/core/widgets/patient_media_placeholder.dart';
 import 'package:aesthetic_way/features/products/models/product_model.dart';
 import 'package:aesthetic_way/features/products/presentation/widgets/brand_product_media.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/patient_visual_harness.dart';
@@ -162,6 +165,97 @@ void main() {
       );
       expect(tester.takeException(), isNull);
     });
+  }
+  for (final category in PatientMediaCategory.values) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        '${category.name} dark=$dark caption-free pixels retain localized semantics',
+        (tester) async {
+          final semantics = tester.ensureSemantics();
+          try {
+            Uint8List? reference;
+            for (final ar in [false, true]) {
+              await LocaleService().setLanguage(
+                ar ? AppLanguage.arabic : AppLanguage.english,
+              );
+              for (final reason in PatientMediaFallbackReason.values) {
+                await tester.pumpWidget(
+                  MaterialApp(
+                    theme: patientVisualTheme(dark: dark),
+                    home: Directionality(
+                      textDirection: ar ? TextDirection.rtl : TextDirection.ltr,
+                      child: Scaffold(
+                        body: Center(
+                          child: RepaintBoundary(
+                            key: const Key('caption-free'),
+                            child: PatientMediaPlaceholder(
+                              category: category,
+                              reason: reason,
+                              width: 300,
+                              height: 180,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+                await tester.pumpAndSettle();
+                final label = switch (reason) {
+                  PatientMediaFallbackReason.missing =>
+                    ar ? 'الصورة غير متوفرة' : 'Image unavailable',
+                  PatientMediaFallbackReason.loadFailed =>
+                    ar ? 'تعذّر تحميل الصورة' : 'Image could not load',
+                  PatientMediaFallbackReason.unsupportedSource =>
+                    ar ? 'هذا الملف ليس صورة' : 'This media is not an image',
+                };
+                final announcement = find.bySemanticsLabel(label);
+                expect(announcement, findsOneWidget);
+                final data = tester
+                    .getSemantics(announcement)
+                    .getSemanticsData();
+                expect(data.flagsCollection.isImage, isTrue);
+                expect(
+                  data.hint,
+                  contains(
+                    ar
+                        ? 'رسم توضيحي محايد، ليس صورة فعلية'
+                        : 'Neutral illustration, not a photograph',
+                  ),
+                );
+                final boundary = tester.renderObject<RenderRepaintBoundary>(
+                  find.byKey(const Key('caption-free')),
+                );
+                final pixels = await tester.runAsync(() async {
+                  final image = await boundary.toImage();
+                  try {
+                    return (await image.toByteData(
+                      format: ui.ImageByteFormat.rawRgba,
+                    ))!.buffer.asUint8List();
+                  } finally {
+                    image.dispose();
+                  }
+                });
+                expect(pixels, isNotNull);
+                if (reference == null) {
+                  reference = pixels;
+                } else {
+                  expect(
+                    pixels,
+                    orderedEquals(reference),
+                    reason:
+                        'Only the accessible announcement changes with locale or failure; no caption is painted.',
+                  );
+                }
+                expect(tester.takeException(), isNull);
+              }
+            }
+          } finally {
+            semantics.dispose();
+          }
+        },
+      );
+    }
   }
   testWidgets(
     'complete original vector family, light/dark and thumbnail/hero contact sheet',

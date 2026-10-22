@@ -53,8 +53,6 @@ class PatientMediaPlaceholder extends StatelessWidget {
             painter: _PremiumArtwork(
               category: category,
               dark: AppColors.isDark(context),
-              arabic: ar,
-              failed: reason != PatientMediaFallbackReason.missing,
             ),
             size: const Size(80, 120),
           ),
@@ -92,14 +90,9 @@ String _motifLabel(PatientMediaCategory category, bool ar) =>
 /// Original deterministic compositions, not Material icons or generated photos.
 /// All paths are local vector geometry. Small frames omit editorial detail.
 class _PremiumArtwork extends CustomPainter {
-  _PremiumArtwork({
-    required this.category,
-    required this.dark,
-    required this.arabic,
-    required this.failed,
-  });
+  _PremiumArtwork({required this.category, required this.dark});
   final PatientMediaCategory category;
-  final bool dark, arabic, failed;
+  final bool dark;
   Color get ink => dark ? const Color(0xFFDCC6A3) : const Color(0xFF725B42);
   Color get plane => dark ? const Color(0xFF28384B) : const Color(0xFFE6DBCA);
   Color get pearl => dark ? const Color(0xFF35475A) : const Color(0xFFFFFCF6);
@@ -163,7 +156,6 @@ class _PremiumArtwork extends CustomPainter {
       fill(pearl.withValues(alpha: dark ? .13 : .2)),
     );
     final compact = size.shortestSide < 96;
-    final logo = category == PatientMediaCategory.clinicLogo;
     final portrait = size.height > size.width * 1.05;
     final viewbox = switch (category) {
       PatientMediaCategory.clinicLogo => const Size(280, 280),
@@ -208,33 +200,6 @@ class _PremiumArtwork extends CustomPainter {
         _conversation(canvas, compact);
     }
     canvas.restore();
-    // Caption is part of the illustration, not substituted clinic/product copy.
-    // Semantics above always conveys the same distinction at small sizes.
-    if (!compact && size.width >= 140 && !logo) {
-      final caption = arabic
-          ? (failed ? 'تعذّر تحميل الصورة' : 'رسم توضيحي')
-          : (failed ? 'IMAGE UNAVAILABLE' : 'ILLUSTRATION');
-      final painter = TextPainter(
-        text: TextSpan(
-          text: caption,
-          style: TextStyle(
-            fontFamily: arabic ? 'PatientArabic' : 'PatientDisplay',
-            color: ink,
-            fontSize: 10,
-            letterSpacing: arabic ? 0 : 1.8,
-          ),
-        ),
-        textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
-      )..layout(maxWidth: size.width - 16);
-      painter.paint(
-        canvas,
-        Offset(
-          (size.width - painter.width) / 2,
-          size.height - painter.height - 10,
-        ),
-      );
-      painter.dispose();
-    }
   }
 
   void _architecture(Canvas c, bool compact) {
@@ -624,8 +589,5 @@ class _PremiumArtwork extends CustomPainter {
 
   @override
   bool shouldRepaint(_PremiumArtwork oldDelegate) =>
-      category != oldDelegate.category ||
-      dark != oldDelegate.dark ||
-      arabic != oldDelegate.arabic ||
-      failed != oldDelegate.failed;
+      category != oldDelegate.category || dark != oldDelegate.dark;
 }

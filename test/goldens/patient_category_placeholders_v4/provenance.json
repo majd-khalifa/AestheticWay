@@ -18,11 +18,11 @@
     "initial_probe": "Not a Windows pass: nine absent new-family golden assertions, 96 corrupt-file fixture matcher failures and a mapped-temp-file cleanup failure. Fixture matching/lifetime corrected before final CI; production artwork unchanged."
   },
   "linux_raster_sha256": {
-    "patient_clinic_dark_ar.png": "2694369a513e598dd6a54592b7cffeb13203e69e9a74a75b50cf84473ab16170",
-    "patient_clinic_dark_en.png": "9afcfa8bc4912cc0ad0dd92237abfa1f623e39cd1d98898d6df86e786ed35fe9",
-    "patient_clinic_light_ar.png": "a9103d3e311c3517641d83350c14b995cbd9278615bfc5a6b774ec0910092944",
-    "patient_clinic_light_en.png": "e8423543c542c07159212636f8aa2a2e37d103ab7d39f1c0718eaee3a28af6b3",
-    "placeholder_family.png": "e448fa853142fef21394dea2fe34d347ee8554fa1d4b8ba877d9c249d3605ccb"
+    "patient_clinic_dark_ar.png": "e4f32c4f9e8a4609f531e54bd864a616c06d48794b5bedcdee8e8ca58eba838f",
+    "patient_clinic_dark_en.png": "689528ec88fa667481f2fa94f953a6c60761b839cb3dba714f5800749a454023",
+    "patient_clinic_light_ar.png": "14189ee6bc4a88d2d06e5d085566f6ad5a04717371f98b0eeee75a3f1ae36c17",
+    "patient_clinic_light_en.png": "945faada166b2109e70ca3a89b707ec6b7ccdbcde1e6db76b414dafed4108756",
+    "placeholder_family.png": "9c38499845f4163ff116dfb04563d188c81bb1b43b42bbdbb9ba7b6c54dec813"
   },
   "shared_geometry_sha256": {
     "patient_clinic_dark_ar.json": "5e5fc596e44ffa453543a20bd2cc3f01a719f5f7e06b1bc1a372e2c0d40716d2",
@@ -43,5 +43,12 @@
     "both_hosts": "737 full tests, 291 focused tests, analyzer 0; 9 capture cases also pass",
     "result": "success",
     "host_baselines": "Separate exact native rasters; no percentage tolerance"
+  },
+  "caption_removal": {
+    "approved_artwork_commit": "a75308f985b631be887d2724bdc4dff0c3888359",
+    "reason": "User-approved micro-polish: remove painted footer captions only; preserve motifs, palettes, geometry, AW hallmark and localized Semantics",
+    "production_source_sha256": "c3689b260f5e2bf237d384511111e780ef44340b84fdcc7ff94631a2a3b55825",
+    "geometry": "All four shared records remain byte-for-byte identical to approved artwork commit",
+    "native_windows": "Native candidate capture/review pending; old Windows baseline not claimed as passed"
   }
 }
