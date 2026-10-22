@@ -31,11 +31,11 @@
     "patient_clinic_light_en.json": "9056102b5d235b1288823133a4a539b6d086661ebfa8d28baddbd69d3108c7a9"
   },
   "windows_raster_sha256": {
-    "patient_clinic_dark_ar.png": "34fe6263cfd0defb72806159264d33fa17ea38de6952dfeacf37f1fc7e16fbc3",
-    "patient_clinic_dark_en.png": "ab6f57e210245612ca3801906660adf45af09c56ad528b1e34226b78b7422942",
-    "patient_clinic_light_ar.png": "68756d9c1d9c2477204c3477789adbf42a6a23ed694f601f48d380b3ce8160df",
-    "patient_clinic_light_en.png": "2de8ae03ed6a0ec0e0d17d37ed18c067e7e2f1ee49f7a3496f81f855e759dce3",
-    "placeholder_family.png": "487121af58558bb767953d69664e6328f9f14549787030e4a29332d909e6d0d1"
+    "patient_clinic_dark_ar.png": "756978d53057499c6973dd1a680a665710eebb86e30757d24e4c1e274537cccd",
+    "patient_clinic_dark_en.png": "733c8c4e0e12cbef330ec5d325f0258e1807c60f0287d79b78bdbace358d2ed8",
+    "patient_clinic_light_ar.png": "9ab54d558f2c0d46fe3d2d3574caa5ee47344d4aa48c054d9a51e095075e8736",
+    "patient_clinic_light_en.png": "fda7a238068d1dd7655ba049ecb12d2a8abd6a2d2e7ab838a395e644332fbe37",
+    "placeholder_family.png": "f9605763ea02c22a581cd13cb5480c34ef719f517cfcfa8f4580143f4d397091"
   },
   "native_validation": {
     "run_id": 39755812602,
@@ -49,6 +49,20 @@
     "reason": "User-approved micro-polish: remove painted footer captions only; preserve motifs, palettes, geometry, AW hallmark and localized Semantics",
     "production_source_sha256": "c3689b260f5e2bf237d384511111e780ef44340b84fdcc7ff94631a2a3b55825",
     "geometry": "All four shared records remain byte-for-byte identical to approved artwork commit",
-    "native_windows": "Native candidate capture/review pending; old Windows baseline not claimed as passed"
+    "native_windows": {
+      "status": "All five native rasters visually reviewed; only caption glyph bands differ from approved Windows artwork; all four geometry records byte-identical to Linux",
+      "source_commit": "612c0e9ba9cce3706967fe1dfecd65da741eed76",
+      "workflow_run_id": 39765113736,
+      "windows_job_id": 119778516469,
+      "artifact_id": 12419328285,
+      "artifact_sha256": "1537e19782ca49e1d06467599c4573d8a3ac36aab843740d0ebc94299a30db13",
+      "candidate_capture_cases_passed": 9,
+      "native_host": "Windows Server 2022",
+      "engine_revision": "052f31d115eceda8cbff1b3481fcde4330c4ae12",
+      "review_date": "2026-10-22",
+      "initial_probe": "298 focused checks passed; nine comparisons still used approved caption-bearing Windows baselines and failed as expected. Not a full Windows pass. Final baseline-adoption commit must pass native CI on both hosts.",
+      "family_changed_pixels": 3955,
+      "family_change_extent": "Seven nine-pixel footer text bands; all portrait/thumbnail panels and logo motif unchanged"
+    }
   }
 }

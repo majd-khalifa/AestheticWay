@@ -49,7 +49,11 @@ Genuine corrupt-file decoder failures, with original reason announcements retain
 
 Local Linux: **753/753 full tests**, **307/307 focused regressions**, analyzer **0 issues**, full `dart format .` and `git diff --check` clean. The 16 new regressions, 120 after-render cases and nine Linux golden capture cases pass. The complete artwork-sheet comparison changes exactly 4,494 pixels in seven eight-pixel footer bands; all portrait/thumbnail frames and the logo row remain exactly unchanged.
 
-Native Windows/Ubuntu PR workflow validation is in progress. The initial Windows candidate pass compares against the prior caption-bearing Windows baselines; any expected stale-baseline failures are not a successful final native verification. Native candidate review and final results will be recorded before delivery.
+Native candidate review is complete: [run 39765113736](https://github.com/majd-khalifa/AestheticWay/actions/runs/39765113736), source commit `612c0e9ba9cce3706967fe1dfecd65da741eed76`. Ubuntu passed 753 full tests, 307 focused tests, analyzer zero and all nine capture cases. Windows passed 298 non-golden focused checks and all nine candidate capture cases; the nine expected comparisons against its old caption-bearing goldens failed. This initial Windows probe is **not** a full native Windows pass.
+
+The five Windows-native rasters were visually reviewed before adoption. All four shared clinic geometry/style records match Linux byte-for-byte. The Windows family differs from its own prior baseline only in 3,955 caption pixels across seven nine-pixel footer bands; all portrait/thumbnail frames and the AW motif remain unchanged. Native font rasterization explains the eight-pixel Linux versus nine-pixel Windows caption bands; separate exact host baselines remain mandatory. [Native clinic review](native-windows-clinic-review.png), [native complete family](native-windows-family.png), [exact difference bounds/hashes](native-windows-pixel-review.json).
+
+The authoritative **final revision's** native Windows/Ubuntu full-suite and analysis results are attached to [PR #10 checks](https://github.com/majd-khalifa/AestheticWay/pull/10/checks) and recorded with their exact tested SHA/run URL in its description. The candidate-review run above must not be confused with that final baseline-adoption verification. No tests or thresholds were weakened to adopt these baselines.
 
 ## Reproduce
 

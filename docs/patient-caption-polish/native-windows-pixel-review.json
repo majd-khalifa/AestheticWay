@@ -1,0 +1,106 @@
+{
+  "patient_clinic_dark_ar.png": {
+    "changed_pixels": 183,
+    "changed_bounds": [
+      168,
+      237,
+      222,
+      248
+    ],
+    "changed_y_bands": [
+      [
+        237,
+        247
+      ]
+    ],
+    "sha256": "756978d53057499c6973dd1a680a665710eebb86e30757d24e4c1e274537cccd"
+  },
+  "patient_clinic_dark_en.png": {
+    "changed_pixels": 287,
+    "changed_bounds": [
+      150,
+      241,
+      240,
+      250
+    ],
+    "changed_y_bands": [
+      [
+        241,
+        249
+      ]
+    ],
+    "sha256": "733c8c4e0e12cbef330ec5d325f0258e1807c60f0287d79b78bdbace358d2ed8"
+  },
+  "patient_clinic_light_ar.png": {
+    "changed_pixels": 183,
+    "changed_bounds": [
+      168,
+      237,
+      222,
+      248
+    ],
+    "changed_y_bands": [
+      [
+        237,
+        247
+      ]
+    ],
+    "sha256": "9ab54d558f2c0d46fe3d2d3574caa5ee47344d4aa48c054d9a51e095075e8736"
+  },
+  "patient_clinic_light_en.png": {
+    "changed_pixels": 287,
+    "changed_bounds": [
+      150,
+      241,
+      240,
+      250
+    ],
+    "changed_y_bands": [
+      [
+        241,
+        249
+      ]
+    ],
+    "sha256": "fda7a238068d1dd7655ba049ecb12d2a8abd6a2d2e7ab838a395e644332fbe37"
+  },
+  "placeholder_family.png": {
+    "changed_pixels": 3955,
+    "changed_bounds": [
+      140,
+      263,
+      711,
+      1749
+    ],
+    "changed_y_bands": [
+      [
+        263,
+        271
+      ],
+      [
+        685,
+        693
+      ],
+      [
+        896,
+        904
+      ],
+      [
+        1107,
+        1115
+      ],
+      [
+        1318,
+        1326
+      ],
+      [
+        1529,
+        1537
+      ],
+      [
+        1740,
+        1748
+      ]
+    ],
+    "sha256": "f9605763ea02c22a581cd13cb5480c34ef719f517cfcfa8f4580143f4d397091"
+  }
+}
