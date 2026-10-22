@@ -61,6 +61,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(calls, hasLength(3));
       expect(calls.last.scheme, 'mailto');
+      expect(calls.last.query, isNot(contains('+')));
       expect(
         calls.last.queryParameters['subject'],
         contains(ar ? 'حذف' : 'deletion'),

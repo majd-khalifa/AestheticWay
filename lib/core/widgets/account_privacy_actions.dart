@@ -85,19 +85,26 @@ class _AccountPrivacyActionsState extends State<AccountPrivacyActions> {
       if (mounted) setState(() => _confirming = false);
     }
     if (!mounted || confirmed != true) return;
+    final mailFields = {
+      'subject': ar
+          ? 'طلب حذف الحساب والبيانات'
+          : 'Account and data deletion request',
+      'body': ar
+          ? 'أطلب حذف حسابي في Aesthetic Way وبياناتي المرتبطة به. يرجى توضيح خطوات التحقق الآمن، وأي بيانات يجب الاحتفاظ بها ومدة الاحتفاظ بها.'
+          : 'I request deletion of my Aesthetic Way account and associated data. Please explain secure identity verification, any data that must be retained, and the retention period.',
+    };
     await _open(
       'deletion',
       Uri(
         scheme: 'mailto',
         path: SupportService().info.email,
-        queryParameters: {
-          'subject': ar
-              ? 'طلب حذف الحساب والبيانات'
-              : 'Account and data deletion request',
-          'body': ar
-              ? 'أطلب حذف حسابي في Aesthetic Way وبياناتي المرتبطة به. يرجى توضيح خطوات التحقق الآمن، وأي بيانات يجب الاحتفاظ بها ومدة الاحتفاظ بها.'
-              : 'I request deletion of my Aesthetic Way account and associated data. Please explain secure identity verification, any data that must be retained, and the retention period.',
-        },
+        // Non-HTTP mail handlers need percent-encoded spaces, not form '+'.
+        query: mailFields.entries
+            .map(
+              (e) =>
+                  '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+            )
+            .join('&'),
       ),
     );
   }

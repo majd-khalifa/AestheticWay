@@ -71,7 +71,8 @@ jobs:
           retention-days: 14
 
   ios-xcode26:
-    runs-on: macos-15-arm64
+    # macos-15 is the available standard ARM64 label (confirmed by native SDK provenance).
+    runs-on: macos-15
     timeout-minutes: 40
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
@@ -88,17 +89,20 @@ jobs:
           xcodebuild -version | tee release-evidence/xcode.txt
           xcrun --sdk iphoneos --show-sdk-version | tee release-evidence/ios-sdk.txt
           xcodebuild -version | grep -q 'Xcode 26'
-          gem install cocoapods -v 1.16.2 --no-document
           flutter pub get
           cd ios
-          pod _1.16.2_ install
+          bundle install
+          bundle exec pod install
           cp Podfile.lock ../release-evidence/Podfile.lock
+          cp Gemfile.lock ../release-evidence/Gemfile.lock
       - name: Actual unsigned iOS Release device compilation
         run: |
           flutter build ios --release --no-codesign
           find build/ios/iphoneos/Runner.app -name PrivacyInfo.xcprivacy > release-evidence/packaged-privacy-manifests.txt
           test -f build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy
           plutil -lint build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy
+          plutil -convert json -o release-evidence/runner-info.json build/ios/iphoneos/Runner.app/Info.plist
+          plutil -convert json -o release-evidence/app-framework-info.json build/ios/iphoneos/Runner.app/Frameworks/App.framework/Info.plist
           flutter --version --machine > release-evidence/flutter-ios.json
       - name: Boot iOS26 simulator and execute native hosted tests
         timeout-minutes: 12

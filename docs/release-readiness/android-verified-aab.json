@@ -1,0 +1,74 @@
+{
+  "application_id": "com.aestheticway.aesthetic_way",
+  "target_sdk": 36,
+  "minimum_sdk": 24,
+  "version_code": "1",
+  "debuggable": false,
+  "cleartext_allowed": false,
+  "backup_allowed": false,
+  "bundle_sha256": "1bb436c0d00a4a4eb9801c2d1bade68e682778ea687ede2e063df51d9f7cdfb5",
+  "upload_certificate_sha256": "9F9F4851E614D3479D12A875BF9F9220787E3F580D39B3883ED9A1A74A031617",
+  "signature_and_all_entry_digests_verified": true,
+  "bundle_16kb_packaging": true,
+  "native_64bit_libraries": [
+    {
+      "path": "base/lib/arm64-v8a/libapp.so",
+      "load_alignments": [
+        65536,
+        65536,
+        65536
+      ]
+    },
+    {
+      "path": "base/lib/arm64-v8a/libdartjni.so",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "path": "base/lib/arm64-v8a/libflutter.so",
+      "load_alignments": [
+        65536,
+        65536,
+        65536
+      ]
+    },
+    {
+      "path": "base/lib/x86_64/libapp.so",
+      "load_alignments": [
+        65536,
+        65536,
+        65536
+      ]
+    },
+    {
+      "path": "base/lib/x86_64/libdartjni.so",
+      "load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "path": "base/lib/x86_64/libflutter.so",
+      "load_alignments": [
+        65536,
+        65536,
+        65536
+      ]
+    }
+  ],
+  "permissions": [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.WAKE_LOCK",
+    "com.aestheticway.aesthetic_way.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "qualification": "Compilation and packaging evidence; not installed-device QA or Play upload acceptance. CI uses an ephemeral verification certificate, not the production upload key.",
+  "source_commit": "b35d1ed830116e722484b0d90db35a220b2b314c",
+  "workflow_run_id": 39859294955,
+  "job_id": 120106123965,
+  "artifact_id": 12461167518
+}

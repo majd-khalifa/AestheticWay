@@ -1,5 +1,7 @@
 # Reproducible release builds and smoke checks
 
+Reproducibility here means pinned toolchains/locked dependencies and an auditable artifact hash. Signed outputs are not promised byte-identical, especially when CI deliberately creates a fresh disposable certificate.
+
 Use the exact release-readiness commit reviewed in PR #11. Do not publish from a working tree containing unrelated changes. These steps build artifacts; they do not upload anything to Google Play or App Store Connect.
 
 ## Windows: signed Android App Bundle
@@ -71,7 +73,7 @@ The signed AAB is signed with the **upload key**. Google Play signs delivered AP
 
 ## macOS: Xcode26 / iOS IPA
 
-Requirements: an Apple-supported Mac/macOS compatible with the chosen **Xcode26.2**, iOS26.2 SDK, Xcode command-line tools/license accepted, Flutter3.41.5, Ruby/Bundler and CocoaPods1.16.2. The configured CI uses macOS15 with `/Applications/Xcode_26.2.app`; it deliberately fails instead of silently building with an older SDK. Native project minimum stays iOS13, with iPhone and iPad support. Existing Bundle ID is **`com.aestheticway.aestheticWay`**, case preserved.
+Requirements: an Apple-supported Mac with macOS Sequoia15.6 or a compatible later version for the chosen **Xcode26.2**, iOS26.2 SDK, Xcode command-line tools/license accepted, Flutter3.41.5, Ruby/Bundler and CocoaPods1.16.2. Check [Apple's exact Xcode compatibility table](https://developer.apple.com/xcode/system-requirements) before installing. CI uses the available `macos-15` standard runner (actual first-run Flutter SDK architecture was ARM64) with `/Applications/Xcode_26.2.app`; it fails instead of silently using an older SDK. Native project minimum stays iOS13; compatibility on the oldest physical OS and iPad remains a device gate. Existing Bundle ID is **`com.aestheticway.aestheticWay`**, case preserved.
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode_26.2.app/Contents/Developer
@@ -126,4 +128,4 @@ Use test accounts/records in a reachable isolated environment; never change JWT 
 | Privacy/deletion | Registration and every role can reach public policies; support-assisted email clearly requests rather than completes deletion. **Do not mark deletion compliance passed until the backend lifecycle and public web request route are deployed and tested.** |
 | Catalog/review | No patient subscription labels, fabricated Google ratings/reviews, product prices/cart/checkout, regulatory numbers or scheduling controls. Audit real records and media rights; fixtures are not store screenshots/demo data. |
 
-Closed-testing preparation: complete the P0 items in [the report](MOBILE_RELEASE_READINESS_REPORT.md), store worksheet and Ali handoff. Google account-specific closed-testing eligibility/tester-duration requirements must be checked in the owner's Play Console; this audit has no console access and does not invent account eligibility.
+Closed-testing preparation: complete the P0 items in [the report](MOBILE_RELEASE_READINESS_REPORT.md), store worksheet and Ali handoff. For personal developer accounts created after13 November2023, [Google currently requires](https://support.google.com/googleplay/android-developer/answer/14151465) at least12 opted-in testers continuously for14 days before applying for production access. The owner must verify account type/eligibility and the actual console requirements; this audit has no console access and does not claim those criteria are met.

@@ -54,6 +54,9 @@ app.*.map.json
 *.mobileprovision
 *.provisionprofile
 AuthKey_*.p8
+*.p8
+*.key
+*.pem
 ExportOptions.local.plist
 **/.bundle/
 **/vendor/bundle/

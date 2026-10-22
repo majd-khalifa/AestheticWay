@@ -33,6 +33,11 @@ jobs:
           flutter-version: '3.41.5'
           channel: stable
           cache: true
+      - name: Validate reviewed source before loading signing secrets
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
       - name: Compile using externally managed upload signing credentials
         shell: bash
         env:
