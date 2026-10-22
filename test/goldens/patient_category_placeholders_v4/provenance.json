@@ -36,5 +36,12 @@
     "patient_clinic_light_ar.png": "68756d9c1d9c2477204c3477789adbf42a6a23ed694f601f48d380b3ce8160df",
     "patient_clinic_light_en.png": "2de8ae03ed6a0ec0e0d17d37ed18c067e7e2f1ee49f7a3496f81f855e759dce3",
     "placeholder_family.png": "487121af58558bb767953d69664e6328f9f14549787030e4a29332d909e6d0d1"
+  },
+  "native_validation": {
+    "run_id": 39755812602,
+    "verified_code_commit": "cdc0e11f445ebd2b7a3baf770eae98346e80ea61",
+    "both_hosts": "737 full tests, 291 focused tests, analyzer 0; 9 capture cases also pass",
+    "result": "success",
+    "host_baselines": "Separate exact native rasters; no percentage tolerance"
   }
 }

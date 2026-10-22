@@ -78,3 +78,7 @@ Before renders use the approved baseline commit with the same review matrix and 
 - [Four native Windows clinic variants](native-windows-clinic-review.jpg)
 
 All five rasters were visually reviewed before adoption. All four clinic geometry/style JSON files exactly match Linux. The initial Windows probe exposed fixture path/lifetime issues and missing new baselines; final PR-head CI validates the corrected fixtures and exact raster comparisons.
+
+## Verified native validation
+
+[Run 39755812602](https://github.com/majd-khalifa/AestheticWay/actions/runs/39755812602) passed for code commit `cdc0e11f445ebd2b7a3baf770eae98346e80ea61` on native Ubuntu 24.04 and Windows Server 2022: **737 full tests, 291 focused tests and analyzer zero issues on each host**. Both also passed all nine native capture cases, and Windows passed the offline privacy check. This does not establish physical Android/iOS cold launches or live production data delivery. See the report for exact manual steps.

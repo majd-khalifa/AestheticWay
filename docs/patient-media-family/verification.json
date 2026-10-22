@@ -12,7 +12,7 @@
   "live_api_verified": false,
   "physical_device_verified": false,
   "native_android_build_verified": false,
-  "native_windows_status": "Five native candidates reviewed/adopted; final corrected-fixture PR-head CI pending",
+  "native_windows_status": "Passed native Windows Server 2022: 737 full tests, 291 focused tests, analyzer 0",
   "log_sha256": {
     "full-tests-final.log": "0f202f0cefedab0c8c862f09c3e96c14ffbc6c489744549d90e3d72c67bd5f72",
     "after-renders-final.log": "9a1dc384f66497a4d8992522606a04ece7f9d12f5f4a3175d89bc9a2e5bb4783",
@@ -28,7 +28,7 @@
     "capture_cases_passed": 9,
     "reviewed_rasters": 5,
     "shared_clinic_geometry": "Four exact matches",
-    "full_suite": "Pending final corrected-fixture PR-head CI"
+    "full_suite": "Validated in run 39755812602 after fixture correction"
   },
   "native_ubuntu_probe": {
     "run_id": 39754509562,
@@ -36,5 +36,25 @@
     "focused_passed": 291,
     "full_passed": 737,
     "analyze_issues": 0
+  },
+  "native_validation": {
+    "run_id": 39755812602,
+    "url": "https://github.com/majd-khalifa/AestheticWay/actions/runs/39755812602",
+    "verified_code_commit": "cdc0e11f445ebd2b7a3baf770eae98346e80ea61",
+    "result": "success",
+    "hosts": {
+      "ubuntu-24.04": {
+        "full_passed": 737,
+        "focused_passed": 291,
+        "analyze_issues": 0
+      },
+      "windows-2022": {
+        "full_passed": 737,
+        "focused_passed": 291,
+        "analyze_issues": 0,
+        "offline_privacy_check": "passed"
+      }
+    },
+    "limits": "No physical Android/iOS cold-launch or native Android resource-build verification"
   }
 }
