@@ -1,0 +1,13 @@
+{
+  "increment_base": "c8da3d76da2767db4614da87263fe72d14672120",
+  "main_at_delivery": "b402d3bf7cc46c73cc1f142c7e93c4066e92d594",
+  "preserved_ancestors": [
+    "c6fe01dfc16c0409c0766769cf51505b579cd85f",
+    "872f20f7b0f2703f561069671e40c76e4488e6bc",
+    "43e68249a522a69169cf1cb018dd63b0c2353ec1"
+  ],
+  "android_ios_dependency_diff_vs_increment_base": [],
+  "patient_goldens_changed": false,
+  "backend_source_modified": false,
+  "signing_policy_changed": false
+}

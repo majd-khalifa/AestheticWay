@@ -1,3 +1,6 @@
+import '../../services/admin_review_service.dart';
+import '../../../treatments/presentation/category_requests_screen.dart';
+import 'admin_clinic_reviews_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -19,11 +22,28 @@ class AdminDashboardScreen extends StatefulWidget {
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen>
+    with WidgetsBindingObserver {
   final _service = AdminPortalService();
+  final _reviews = AdminReviewService();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _reviews.refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _reviews.refresh();
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _service.loadOverview();
     });
@@ -31,13 +51,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([_service, LocaleService()]),
+    listenable: Listenable.merge([_service, _reviews, LocaleService()]),
     builder: (context, _) {
       final d = _service.dashboard;
       return Scaffold(
         backgroundColor: AppColors.bg(context),
         body: RefreshIndicator(
-          onRefresh: () => _service.loadOverview(refresh: true),
+          onRefresh: () async {
+            await Future.wait([
+              _service.loadOverview(refresh: true),
+              _reviews.refresh(),
+            ]);
+          },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
@@ -65,6 +90,78 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   error: true,
                   onRetry: () => _service.loadOverview(refresh: true),
                 ),
+              AdminSectionTitle(adminText('Review inboxes', 'صناديق المراجعة')),
+              Card(
+                child: ListTile(
+                  key: const ValueKey('admin-category-requests-quick-action'),
+                  leading: const Icon(Icons.playlist_add_check),
+                  title: Text(
+                    adminText('Category Requests', 'طلبات التصنيفات'),
+                  ),
+                  subtitle: Text(
+                    _reviews.loading
+                        ? adminText(
+                            'Loading pending requests…',
+                            'جارٍ تحميل الطلبات المعلقة…',
+                          )
+                        : _reviews.error ??
+                              (_reviews.pendingCategories == null
+                                  ? adminText(
+                                      'Pending count unavailable',
+                                      'عدد الطلبات المعلقة غير متاح',
+                                    )
+                                  : adminText(
+                                      'Pending: ${_reviews.pendingCategories}',
+                                      'قيد الانتظار: ${_reviews.pendingCategories}',
+                                    )),
+                  ),
+                  trailing: _reviews.loading
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.chevron_right),
+                  onTap: !_service.canManage
+                      ? null
+                      : () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  const CategoryRequestsScreen(admin: true),
+                            ),
+                          );
+                          if (mounted) _reviews.refresh();
+                        },
+                ),
+              ),
+              if (_reviews.error != null)
+                TextButton(
+                  onPressed: _reviews.loading ? null : _reviews.refresh,
+                  child: Text(adminText('Retry count', 'إعادة تحميل العدد')),
+                ),
+              Card(
+                child: ListTile(
+                  key: const ValueKey('admin-clinic-reviews-quick-action'),
+                  leading: const Icon(Icons.fact_check_outlined),
+                  title: Text(adminText('Clinic Reviews', 'مراجعة العيادات')),
+                  subtitle: Text(
+                    adminText(
+                      'Submitted profiles • global count unavailable',
+                      'الملفات المرسلة • العدد الإجمالي غير متاح',
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: !_service.canManage
+                      ? null
+                      : () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const AdminClinicReviewsScreen(),
+                          ),
+                        ),
+                ),
+              ),
               if (_service.overviewLoaded)
                 AdminMetricGrid(
                   children: [

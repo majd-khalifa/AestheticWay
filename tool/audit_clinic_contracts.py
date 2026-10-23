@@ -361,7 +361,7 @@ for collection, image_field, url_field, media_type, fields in cases:
     assert not record("get", public).json()[url_field]
 # Entitlement gates new uploads, not removal of an already-owned video.
 clinic.subscription_tier = "basic"
-clinic.save()
+clinic.save(update_fields=["subscription_tier"])
 assert (
     record(
         "patch", "/api/v1/clinic-portal/profile/", {"video_ad_file": None}
@@ -437,6 +437,59 @@ assert record("post", "/api/v1/auth/me/deletion/confirm/", {"code": "123456"}).s
 expired_user.refresh_from_db(); assert expired_user.is_active
 client.force_authenticate(user=None)
 assert record("post", "/api/v1/auth/me/deletion/request/", {}).status_code == 401
+
+# One complete supported setup cycle, isolated from production and source edits.
+from apps.clinics.models import ClinicBranch
+client.force_authenticate(user=user)
+setup = "/api/v1/clinic-portal/profile/"
+assert record("post", setup + "submit-for-review/", {}).status_code == 400
+# Genuine uploaded branding was persisted above. Provision only disposable data.
+clinic.refresh_from_db()
+clinic.description_en = "Disposable setup contract fixture."
+clinic.description_ar = "بيانات تجريبية مؤقتة لفحص عقد الإعداد."
+clinic.email = "qa@example.invalid"
+clinic.status = "pending"
+clinic.setup_status = "draft"
+clinic.save()
+ClinicBranch.objects.create(clinic=clinic, name_en="QA Main Branch", is_active=True)
+ready = record("get", setup + "setup-checklist/").json()
+assert ready["is_ready_for_review"] and ready["progress_percentage"] == 100
+assert record("post", setup + "submit-for-review/", {}).json()["setup_status"] == "submitted"
+assert record("get", setup).json()["setup_status"] == "submitted"
+review_clinic = f"/api/v1/admin/clinics/{clinic.id}/"
+client.force_authenticate(user=patient)
+assert record("post", review_clinic + "verify/", {}).status_code == 403
+client.force_authenticate(user=admin)
+listing = record("get", "/api/v1/admin/clinics/?setup_status=submitted").json()
+assert any(c["setup_status"] != "submitted" for c in listing["results"]), "Unknown filter must not be claimed as supported"
+assert record("get", review_clinic).json()["setup_status"] == "submitted"
+ack = record("post", review_clinic + "verify/", {"reason": "Clinic profile approved through platform review."}).json()
+assert ack["setup_status"] == "approved" and ack["new_status"] == "active"
+assert record("get", review_clinic).json()["setup_status"] == "approved"
+client.force_authenticate(user=user)
+profile = record("get", setup).json()
+assert profile["setup_status"] == "approved"
+clinic.refresh_from_db(); assert clinic.status == "active"
+assert "moderation_notes" not in profile and "rejection_reason" not in profile
+assert record("get", setup + "setup-checklist/").json()["setup_status"] == "approved"
+client.force_authenticate(user=admin)
+assert record("post", review_clinic + "reject/", {"reason": "QA unsupported transition"}).status_code == 404
+assert record("patch", review_clinic, {"setup_status": "rejected"}).status_code == 200
+assert record("get", review_clinic).json()["setup_status"] == "approved"
+assert record("post", review_clinic + "suspend/", {"reason": "QA access action"}).status_code == 200
+assert record("get", review_clinic).json()["setup_status"] == "approved"
+assert record("post", review_clinic + "activate/", {}).status_code == 200
+assert record("get", review_clinic).json()["setup_status"] == "approved"
+# Existing enum is readable and resubmittable, but no authorized reject API was
+# invented. This state is deliberately provisioned through the test fixture.
+clinic.refresh_from_db(); clinic.setup_status = "rejected"; clinic.save()
+client.force_authenticate(user=user)
+assert record("get", setup).json()["setup_status"] == "rejected"
+assert record("post", setup + "submit-for-review/", {}).json()["setup_status"] == "submitted"
+# Basic tier must reject a NEW binary video, even though removal was allowed.
+res = client.patch(setup, {"video_ad_file": SimpleUploadedFile("denied.mp4", video_path.read_bytes(), content_type="video/mp4")}, format="multipart")
+out.append({"method": "PATCH", "url": setup, "request": {"video_ad_file": "<real MP4 binary, basic tier>"}, "status": res.status_code, "response": res.json()})
+assert res.status_code == 400
 
 assert inventory() == before, "Backend source was changed"
 args.output.parent.mkdir(parents=True, exist_ok=True)

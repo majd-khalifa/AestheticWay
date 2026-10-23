@@ -1,5 +1,7 @@
 # Final backend integration and client-preview readiness
 
+> Subsequent PR13 onboarding, admin review and video-entitlement UX work: [current audit](ONBOARDING_ADMIN_REVIEW_UX_AUDIT.md). The native/test evidence below remains the historical consolidated integration baseline.
+
 Date: 23 October 2026 (Asia/Damascus). Backend source: supplied `1f1e4bf` archive, SHA-256 `48d385acc256ebba450ede43e515f475daf1ae8ed3de80319e68429833f7c1ff`.
 
 This report supersedes **contract availability** findings in the d1023b0 Clinic Portal and release reports. Those reports and their screenshots remain historical evidence, not the current category/deletion capability statement. No Django file was modified.

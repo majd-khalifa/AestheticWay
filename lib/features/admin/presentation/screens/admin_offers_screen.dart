@@ -1,3 +1,4 @@
+import '../../../treatments/presentation/category_requests_screen.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
@@ -134,6 +135,20 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                   adminText('Treatment Categories', 'تصنيفات العلاجات'),
                 ),
               ),
+            ),
+            OutlinedButton.icon(
+              key: const ValueKey('admin-content-category-requests'),
+              onPressed: !_service.canManage
+                  ? null
+                  : () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            const CategoryRequestsScreen(admin: true),
+                      ),
+                    ),
+              icon: const Icon(Icons.inbox_outlined),
+              label: Text(adminText('Category Requests', 'طلبات التصنيفات')),
             ),
             if (_module == 1) ...[
               const _BrandProductAvailability(),

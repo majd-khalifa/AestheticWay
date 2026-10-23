@@ -33,6 +33,7 @@ class ClinicSetupChecklistCard extends StatefulWidget {
 class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
   bool _isExpanded = true;
   bool _isSubmitting = false;
+  bool _isRefreshing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +41,17 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
     final isDark = AppColors.isDark(context);
     final clinicService = ClinicPortalService();
 
-    final isSubmitted = widget.clinic.setupStatus == 'submitted';
+    final setupStatus =
+        widget.checklist?.setupStatus ?? widget.clinic.setupStatus;
+    final isSubmitted = setupStatus == 'submitted';
+    final isApproved = setupStatus == 'approved';
+    final isRejected = setupStatus == 'rejected';
     final progress =
         widget.checklist?.progressPercentage ??
         _computeFallbackProgress(clinicService);
     final isReady =
-        progress >= 100 || (widget.checklist?.isReadyForReview == true);
+        (widget.checklist?.isReadyForReview == true) &&
+        (setupStatus == 'draft' || isRejected);
 
     return LuxuryCard(
       padding: const EdgeInsets.all(16),
@@ -83,8 +89,8 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                     children: [
                       Text(
                         loc.isArabic
-                            ? 'إكمال إعداد وتوثيق العيادة'
-                            : 'Complete Clinic Setup & Verification',
+                            ? 'إعداد ملف العيادة'
+                            : 'Clinic Profile Setup',
                         style: AppTypography.cardTitle.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -95,10 +101,18 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        isSubmitted
+                        isApproved
                             ? (loc.isArabic
-                                  ? 'قيد التدقيق الطبي من قبل الإدارة'
-                                  : 'Under medical compliance review')
+                                  ? 'وافقت المنصة على الملف'
+                                  : 'Profile approved by platform')
+                            : isRejected
+                            ? (loc.isArabic
+                                  ? 'يحتاج الملف إلى تعديلات — راجع التفاصيل'
+                                  : 'Profile changes requested — review details')
+                            : isSubmitted
+                            ? (loc.isArabic
+                                  ? 'قيد مراجعة المنصة'
+                                  : 'Under Platform Review')
                             : (loc.isArabic
                                   ? 'أكمل المتطلبات لنشر خدمات العيادة'
                                   : 'Complete items to publish clinic catalog'),
@@ -189,7 +203,47 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
             _buildChecklistRows(context, loc, clinicService),
             const SizedBox(height: 14),
 
-            // Submit Button
+            if (isRejected) _ReviewFeedback(ar: loc.isArabic),
+            if (isApproved)
+              Text(
+                loc.isArabic
+                    ? 'وافقت المنصة على الملف. تفعيل الحساب والظهور العام يخضعان لحالتهما المنفصلة.'
+                    : 'Profile approved by the platform. Account activation and public visibility retain their separate status.',
+              ),
+            TextButton.icon(
+              onPressed: _isSubmitting || _isRefreshing
+                  ? null
+                  : () async {
+                      setState(() => _isRefreshing = true);
+                      try {
+                        await clinicService.refreshClinicProfile();
+                        await clinicService.loadSetupChecklist();
+                      } catch (_) {
+                        if (context.mounted) {
+                          showAppSnackBar(
+                            context,
+                            loc.isArabic
+                                ? 'تعذر تحديث حالة الملف. حاول مجدداً.'
+                                : 'Could not refresh profile status. Try again.',
+                            type: AppSnackBarType.error,
+                          );
+                        }
+                      } finally {
+                        if (mounted) setState(() => _isRefreshing = false);
+                      }
+                    },
+              icon: _isRefreshing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh),
+              label: Text(
+                loc.isArabic ? 'تحديث حالة المراجعة' : 'Refresh review status',
+              ),
+            ),
+            // Already approved/submitted profiles are not resubmitted.
             if (isSubmitted)
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -213,29 +267,31 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                       size: 16,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      loc.isArabic
-                          ? 'تم تقديم الملف — بانتظار اعتماد الإدارة'
-                          : 'Profile Submitted — Awaiting Approval',
-                      style: const TextStyle(
-                        color: Color(0xFF10B981),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                    Expanded(
+                      child: Text(
+                        loc.isArabic
+                            ? 'تم تقديم الملف — بانتظار اعتماد الإدارة'
+                            : 'Profile Submitted — Awaiting Approval',
+                        style: const TextStyle(
+                          color: Color(0xFF10B981),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
               )
-            else
+            else if (!isApproved)
               SilverButton(
                 label: _isSubmitting
                     ? (loc.isArabic ? 'جاري الإرسال...' : 'Submitting...')
                     : (loc.isArabic
-                          ? 'إرسال ملف العيادة للتدقيق والاعتماد'
-                          : 'Submit for Platform Verification'),
+                          ? 'إرسال ملف العيادة للمراجعة'
+                          : 'Submit Clinic Profile for Review'),
                 icon: Icons.send_rounded,
                 height: 42,
-                onPressed: (isReady && !_isSubmitting)
+                onPressed: (isReady && !_isSubmitting && !_isRefreshing)
                     ? () async {
                         setState(() => _isSubmitting = true);
                         try {
@@ -244,8 +300,8 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                             showAppSnackBar(
                               context,
                               loc.isArabic
-                                  ? 'تم إرسال ملف العيادة للمراجعة والتدقيق الطبي من قبل الإدارة'
-                                  : 'Clinic profile submitted for platform verification',
+                                  ? 'تم إرسال ملف العيادة لمراجعة المنصة'
+                                  : 'Clinic profile submitted for platform review',
                               type: AppSnackBarType.success,
                             );
                           }
@@ -307,7 +363,11 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: _ChecklistTile(
-              title: loc.isArabic ? item.titleAr : item.titleEn,
+              title: item.key == 'practitioners'
+                  ? (loc.isArabic
+                        ? 'إضافة ممارس واحد على الأقل'
+                        : 'At Least One Practitioner')
+                  : (loc.isArabic ? item.titleAr : item.titleEn),
               isDone: item.isCompleted,
               actionLabel: actionLabel,
               onAction: action,
@@ -357,8 +417,8 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
         const SizedBox(height: 8),
         _ChecklistTile(
           title: loc.isArabic
-              ? 'إضافة طبيب أو ممارس مرخص واحد على الأقل'
-              : 'At least 1 Medical Practitioner',
+              ? 'إضافة ممارس واحد على الأقل'
+              : 'At Least One Practitioner',
           isDone: hasPractitioner,
           actionLabel: loc.isArabic ? '+ إضافة' : '+ Add',
           onAction: () {
@@ -516,4 +576,18 @@ class _ChecklistTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ReviewFeedback extends StatelessWidget {
+  const _ReviewFeedback({required this.ar});
+  final bool ar;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12),
+    child: Text(
+      ar
+          ? 'حالة الإعداد: مرفوض. حدّث بيانات الملف ثم أعد الإرسال عند اكتمال المتطلبات. الخادم الحالي لا يعيد سبب الرفض؛ راجع إدارة المنصة للتفاصيل.'
+          : 'Setup status: rejected. Update the profile and resubmit when requirements are complete. This backend does not return a rejection reason; contact the platform administrator for details.',
+    ),
+  );
 }

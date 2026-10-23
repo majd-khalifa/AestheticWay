@@ -354,6 +354,8 @@ class ApiException implements Exception {
         return isArabic ? 'تاريخ انتهاء العرض' : 'End Date';
       case 'avatar':
         return isArabic ? 'الصورة الشخصية' : 'Avatar';
+      case 'video_ad_file':
+        return isArabic ? 'فيديو عرض العيادة' : 'Clinic showcase video';
       case 'cover_image':
         return isArabic ? 'صورة الغلاف' : 'Cover Image';
       case 'logo':
@@ -420,6 +422,12 @@ class ApiException implements Exception {
   static String _localizeBackendMessage(String msg) {
     final lower = msg.toLowerCase();
     final isArabic = LocaleService().isArabic;
+
+    if (lower.contains('vip') && lower.contains('video')) {
+      return isArabic
+          ? 'رفع الفيديو غير متاح لصلاحيات هذه العيادة. حدّث الملف وتحقق من إدارة المنصة.'
+          : 'Video upload is not available for this clinic’s current entitlement. Refresh the profile and check with the platform administrator.';
+    }
 
     // Common DRF validation message localizations
     if (lower.contains('this field is required') ||

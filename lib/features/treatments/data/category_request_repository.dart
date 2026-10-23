@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../../core/auth/guest_auth_guard.dart';
 import '../../../core/auth/session_snapshot.dart';
 import '../../../core/data/paged_collection.dart';
@@ -6,6 +7,7 @@ import '../../../core/network/api_exception.dart';
 import '../models/category_request_model.dart';
 
 class CategoryRequestRepository {
+  static final decisions = ValueNotifier<int>(0);
   CategoryRequestRepository({ApiClient? apiClient})
     : _api = apiClient ?? ApiClient();
   final ApiClient _api;
@@ -75,6 +77,7 @@ class CategoryRequestRepository {
       data: approve ? <String, dynamic>{} : {'rejection_reason': reason.trim()},
     );
     session.ensureCurrent();
+    decisions.value++;
     return CategoryRequestModel.fromJson(
       Map<String, dynamic>.from(response.data as Map),
     );

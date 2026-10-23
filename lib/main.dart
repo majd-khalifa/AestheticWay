@@ -6,6 +6,8 @@ import 'core/theme/theme_service.dart';
 import 'core/localization/app_locale.dart';
 import 'core/auth/guest_auth_guard.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
+import 'features/onboarding/services/onboarding_service.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +15,7 @@ Future<void> main() async {
   await Future.wait([
     LocaleService().init(),
     ThemeService().init(),
+    OnboardingService().init(),
     AuthState().restoreSession(),
   ]);
   runApp(const AestheticWayApp());
@@ -49,7 +52,11 @@ class AestheticWayApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: homeScreen ?? const SplashScreen(),
+          home:
+              homeScreen ??
+              (!AuthState().isLoggedIn && AuthState().hasAuthenticatedSession
+                  ? const LoginScreen()
+                  : const SplashScreen()),
         );
       },
     );

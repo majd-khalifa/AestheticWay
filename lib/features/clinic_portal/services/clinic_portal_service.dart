@@ -1686,7 +1686,7 @@ class ClinicPortalService extends ChangeNotifier {
       clinicId: _activeClinic.id,
       setupStatus: _activeClinic.setupStatus,
       progressPercentage: progress,
-      isReadyForReview: completed == 5,
+      isReadyForReview: _mockMode && completed == 5,
       items: [
         ClinicSetupChecklistItem(
           key: 'branding',
@@ -1711,8 +1711,8 @@ class ClinicPortalService extends ChangeNotifier {
         ),
         ClinicSetupChecklistItem(
           key: 'practitioners',
-          titleEn: 'At least 1 Medical Practitioner',
-          titleAr: 'طبيب أو ممارس مرخص واحد على الأقل',
+          titleEn: 'At Least One Practitioner',
+          titleAr: 'ممارس واحد على الأقل',
           isCompleted: hasPractitioner,
           route: '/clinic/practitioners',
         ),

@@ -1,3 +1,4 @@
+import '../../onboarding/services/onboarding_service.dart';
 import 'package:dio/dio.dart';
 import '../../../core/auth/session_changed_exception.dart';
 import '../../../core/network/api_transport_policy.dart';
@@ -95,6 +96,11 @@ class AuthRepository {
     final saving = _tokenStorage.saveUser(response.user.toJson());
     current = _snapshot();
     await saving;
+    _check(current);
+    if (attempt != _authenticationAttempt) {
+      throw const SessionChangedException();
+    }
+    await OnboardingService().recordAuthenticatedSession();
     _check(current);
     if (attempt != _authenticationAttempt) {
       throw const SessionChangedException();

@@ -528,6 +528,22 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                                 ? 'رفع الفيديو متاح للعيادات ذات أهلية الفيديو فقط.'
                                 : 'Video upload requires the clinic’s video entitlement.'),
                     ),
+                    if (!vip && !clinic.hasVideoAd && _videoPath == null) ...[
+                      Text(
+                        ar
+                            ? 'رفع فيديو العرض غير مفعّل في صلاحيات ملف عيادتك الحالي. حدّث الملف أو راجع إدارة المنصة إذا كانت الصلاحية متوقعة.'
+                            : 'Showcase video upload is not enabled by your current clinic profile. Refresh the profile or contact the platform administrator if you expect access.',
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: null,
+                        icon: const Icon(Icons.video_library_outlined),
+                        label: Text(
+                          ar
+                              ? 'اختيار فيديو من المعرض'
+                              : 'Select gallery video',
+                        ),
+                      ),
+                    ],
                     if (vip || clinic.hasVideoAd || _videoPath != null) ...[
                       const SizedBox(height: 12),
                       AspectRatio(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:aesthetic_way/features/onboarding/services/onboarding_service.dart';
 import 'package:aesthetic_way/core/theme/app_theme.dart';
 import 'package:aesthetic_way/core/widgets/tier_badge.dart';
 import 'package:aesthetic_way/core/widgets/practitioner_badge.dart';
@@ -239,7 +241,7 @@ void main() {
 
         // Check Slide 1 content
         expect(find.text('عيادات التجميل والجلدية'), findsOneWidget);
-        expect(find.text('تخطي'), findsNothing);
+        expect(find.text('تخطي'), findsOneWidget);
         expect(find.text('التالي'), findsOneWidget);
         expect(find.text('المتابعة كزائر'), findsNothing);
 
@@ -484,14 +486,18 @@ void main() {
     testWidgets('SplashScreen auto-transitions smoothly to Onboarding/Home', (
       WidgetTester tester,
     ) async {
+      // Explicitly model empty device storage instead of relying on earlier
+      // tests' singleton state or an unavailable secure-storage platform.
+      FlutterSecureStorage.setMockInitialValues({});
+      await OnboardingService().init();
       await tester.pumpWidget(const AestheticWayApp());
       expect(find.byType(AppBrandLogo), findsOneWidget);
 
       // Advance time past splash duration (1600ms) + fade transition (400ms)
       await tester.pump(const Duration(milliseconds: 1700));
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
 
-      // Onboarding or Main navigation should now be active
+      // Empty storage must show introduction before authentication.
       expect(find.byType(OnboardingScreen), findsOneWidget);
     });
   });

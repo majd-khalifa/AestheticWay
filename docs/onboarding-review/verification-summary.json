@@ -1,0 +1,15 @@
+{
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "host": "Linux",
+  "local_analyzer_issues": 0,
+  "local_full_tests_passed": 852,
+  "local_full_tests_failed": 0,
+  "new_regressions": 34,
+  "focused_with_admin_tests_passed": 47,
+  "django_real_view_responses": 122,
+  "backend_source_files_unchanged": 403,
+  "rendered_pngs": 35,
+  "native_ci": "Check PR13 head Windows/Ubuntu and Android/macOS runs; historical baseline is recorded separately.",
+  "physical_device_and_live_r2_verified": false
+}

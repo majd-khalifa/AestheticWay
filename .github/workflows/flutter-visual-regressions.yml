@@ -61,6 +61,12 @@ jobs:
           flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
           --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
           --timeout 60s --reporter expanded
+      - name: Onboarding and admin review workflows and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/onboarding_review_workflows_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/onboarding-review"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -90,3 +96,4 @@ jobs:
             ${{ runner.temp }}/patient-golden-candidates/**
             ${{ runner.temp }}/clinic-portal-audit/**
             ${{ runner.temp }}/final-integration/**
+            ${{ runner.temp }}/onboarding-review/**

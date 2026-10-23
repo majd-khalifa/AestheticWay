@@ -70,6 +70,8 @@ class AdminClinicModel {
   final double? storedLatitude, storedLongitude;
   final String storedGoogleMapsUrl;
   final String status; // active, suspended, pending, rejected
+  final String descriptionEn, descriptionAr, website;
+  final DateTime? submittedForReviewAt;
   final String setupStatus; // draft, submitted, approved, rejected
   final String licenseNumber;
   final String licenseAuthority;
@@ -112,6 +114,10 @@ class AdminClinicModel {
     this.storedGoogleMapsUrl = '',
     required this.status,
     this.setupStatus = 'draft',
+    this.descriptionEn = '',
+    this.descriptionAr = '',
+    this.website = '',
+    this.submittedForReviewAt,
     this.licenseNumber = '',
     this.licenseAuthority = 'DHA',
     required this.subscriptionTier,
@@ -237,7 +243,11 @@ class AdminClinicModel {
           )?.toString() ??
           '',
       status: json['status']?.toString().toLowerCase() ?? 'unknown',
-      setupStatus: json['setup_status']?.toString() ?? 'draft',
+      setupStatus: json['setup_status']?.toString() ?? 'unknown',
+      descriptionEn: json['description_en']?.toString() ?? '',
+      descriptionAr: json['description_ar']?.toString() ?? '',
+      website: json['website']?.toString() ?? '',
+      submittedForReviewAt: parseDate(json['submitted_for_review_at']),
       licenseNumber: json['license_number']?.toString() ?? '',
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       subscriptionTier: tier,
@@ -301,6 +311,10 @@ class AdminClinicModel {
       storedGoogleMapsUrl: storedGoogleMapsUrl,
       status: status ?? this.status,
       setupStatus: setupStatus ?? this.setupStatus,
+      descriptionEn: descriptionEn,
+      descriptionAr: descriptionAr,
+      website: website,
+      submittedForReviewAt: submittedForReviewAt,
       licenseNumber: licenseNumber ?? this.licenseNumber,
       licenseAuthority: licenseAuthority ?? this.licenseAuthority,
       subscriptionTier: subscriptionTier ?? this.subscriptionTier,

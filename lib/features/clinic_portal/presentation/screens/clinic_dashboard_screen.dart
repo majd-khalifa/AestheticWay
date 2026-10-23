@@ -237,11 +237,7 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                       const SizedBox(height: 16),
 
                       // Clinic Onboarding Setup Checklist (Shown when setup is incomplete)
-                      if (clinic.setupStatus != 'approved' ||
-                          (clinicService.setupChecklist != null &&
-                              !clinicService
-                                  .setupChecklist!
-                                  .isReadyForReview)) ...[
+                      ...[
                         ClinicSetupChecklistCard(
                           clinic: clinic,
                           checklist: clinicService.setupChecklist,

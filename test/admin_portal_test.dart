@@ -124,8 +124,8 @@ void main() {
         expect(find.text('الرئيسية'), findsWidgets);
         expect(find.text('العيادات'), findsWidgets);
         expect(find.text('الطلبات'), findsWidgets);
-        expect(find.text('العروض'), findsWidgets);
-        expect(find.text('الإحصائيات'), findsWidgets);
+        expect(find.text('المحتوى'), findsWidgets);
+        expect(find.text('التحليلات'), findsWidgets);
       },
     );
 

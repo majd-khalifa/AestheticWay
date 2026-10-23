@@ -1,3 +1,5 @@
+import '../../../core/localization/app_locale.dart';
+import '../../../core/auth/guest_auth_guard.dart';
 import '../../../core/auth/session_snapshot.dart';
 import '../../../core/data/paged_collection.dart';
 import '../../../core/network/api_exception.dart';
@@ -159,6 +161,52 @@ class AdminRepository {
       data: {'reason': reason},
     );
     return response.data as Map<String, dynamic>? ?? {};
+  }
+
+  /// Setup approval is distinct from ordinary activation. Django verify also
+  /// activates the clinic; callers must explicitly confirm both effects.
+  Future<AdminClinicModel> approveClinicProfile(String id) async {
+    if (!AuthState().isLoggedIn || !AuthState().isSuperAdmin) {
+      throw const ApiException(
+        message: 'Super Admin access is required.',
+        statusCode: 403,
+      );
+    }
+    final session = SessionSnapshot();
+    // Re-read after the confirmation dialog; a stale inbox must not re-approve
+    // an already reviewed profile. Django still needs an atomic state guard.
+    final latest = await getClinicDetail(id);
+    session.ensureCurrent();
+    if (latest.id != id || latest.setupStatus != 'submitted') {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'تغيرت حالة الملف. حدّث المراجعة قبل اتخاذ إجراء.'
+            : 'The profile status changed. Refresh before reviewing.',
+      );
+    }
+    final response = await _api.post(
+      'admin/clinics/$id/verify/',
+      data: {'reason': 'Clinic profile approved through platform review.'},
+    );
+    session.ensureCurrent();
+    final ack = _object(response.data);
+    if (ack['status'] != 'success' ||
+        ack['clinic_id']?.toString() != id ||
+        ack['setup_status'] != 'approved' ||
+        ack['new_status'] != 'active') {
+      throw const ApiException(
+        message:
+            'The profile approval response could not be verified. Refresh before retrying.',
+      );
+    }
+    final refreshed = await getClinicDetail(id);
+    session.ensureCurrent();
+    if (refreshed.id != id || refreshed.setupStatus != 'approved') {
+      throw const ApiException(
+        message: 'Please refresh the clinic review status.',
+      );
+    }
+    return refreshed;
   }
 
   /// Atomically provision a new Clinic and its initial Administrator

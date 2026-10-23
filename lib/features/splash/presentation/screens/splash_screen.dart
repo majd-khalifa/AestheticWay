@@ -1,5 +1,4 @@
 import '../../../auth/data/auth_repository.dart';
-import '../../../../core/auth/session_snapshot.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,8 +14,9 @@ import 'package:aesthetic_way/features/auth/presentation/screens/login_screen.da
 
 /// Screen 1: Luxury Splash Screen with Official Brand Logo & Onboarding-Aware Navigation
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key, this.authRepository});
+  const SplashScreen({super.key, this.authRepository, this.onboardingService});
   final AuthRepository? authRepository;
+  final OnboardingService? onboardingService;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -56,18 +56,28 @@ class _SplashScreenState extends State<SplashScreen>
     _hasNavigated = true;
     _timer?.cancel();
 
-    // Cached roles are presentation hints, never proof of a live session.
-    // Verify the current identity (including refresh/revocation) before portals.
-    if (AuthState().isLoggedIn) {
-      final session = SessionSnapshot();
+    final onboarding = widget.onboardingService ?? OnboardingService();
+    await onboarding.init();
+    if (!mounted) return;
+    // Cached roles are not proof of a live session. An established user never
+    // sees introduction again, including when verification forces logout.
+    final hadSession = AuthState().isLoggedIn;
+    final identityEpoch = AuthState().sessionEpoch;
+    if (hadSession) {
+      await onboarding.recordAuthenticatedSession();
+      if (!mounted) return;
       try {
         await (widget.authRepository ?? AuthRepository()).getMe();
       } catch (_) {
-        if (mounted && session.isCurrent) AuthState().logout();
+        if (AuthState().sessionEpoch == identityEpoch) AuthState().logout();
       }
-      if (!mounted || !session.isCurrent) return;
+      if (!mounted) return;
+      // A replacement login owns navigation; never route it using an old check.
+      if (AuthState().isLoggedIn && AuthState().sessionEpoch != identityEpoch) {
+        return;
+      }
     }
-    final hasSeenOnboarding = OnboardingService().hasSeenOnboarding;
+    final hasSeenOnboarding = hadSession || onboarding.hasSeenOnboarding;
     Widget nextScreen;
 
     if (AuthState().isLoggedIn) {

@@ -1,5 +1,7 @@
 # Consolidated verification ledger
 
+> Historical integration baseline through `c8da3d7`. The later onboarding/admin-review increment and current verification are recorded in [ONBOARDING_ADMIN_REVIEW_UX_AUDIT.md](../ONBOARDING_ADMIN_REVIEW_UX_AUDIT.md) and [its ledger](../onboarding-review/VERIFICATION.md). The code-tree equivalence statement below applies only to that historical baseline.
+
 All results distinguish local execution, native CI, owner-reported QA and unverified production dependencies. No production content edits/deletions, store uploads or PR merges.
 
 | Check | Evidence/status |
@@ -23,7 +25,7 @@ Commands: `dart format .`, `flutter analyze`, `flutter test`, `git diff --check`
 
 ## Immutable evidence and branch state
 
-The links above identify the first fully verified consolidated **production-code** commit `75a7e199f7df959d254bf0b4401373a9da7447f9`. Subsequent evidence/report-only commits leave `lib/`, `test/`, `android/`, `ios/`, dependencies, tool scripts and workflow files unchanged. PR checks also run for the final documentation head; see the consolidated PR checks for the latest run. No APK/AAB/IPA or private signing material is committed.
+The links above identify the first fully verified consolidated **production-code** commit `75a7e199f7df959d254bf0b4401373a9da7447f9`. At baseline finalization, subsequent evidence/report-only commits left `lib/`, `test/`, `android/`, `ios/`, dependencies, tool scripts and workflow files unchanged. PR checks also run for the final documentation head; see the consolidated PR checks for the latest run. No APK/AAB/IPA or private signing material is committed.
 
 - Consolidated PR: https://github.com/majd-khalifa/AestheticWay/pull/13 — open, main target, unmerged.
 - Original PR11 head `872f20f7b0f2703f561069671e40c76e4488e6bc` and PR12 head `43e68249a522a69169cf1cb018dd63b0c2353ec1` are preserved as ancestors and their PRs remain open/unmerged.

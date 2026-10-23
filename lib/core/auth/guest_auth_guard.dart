@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import 'token_storage.dart';
+import '../../features/onboarding/services/onboarding_service.dart';
 import '../../features/clinic_portal/services/clinic_portal_service.dart';
 import '../../features/admin/services/admin_portal_service.dart';
 import '../../features/referral/services/referral_service.dart';
@@ -15,6 +16,8 @@ class AuthState extends ChangeNotifier {
   int _sessionEpoch = 0;
   int get sessionEpoch => _sessionEpoch;
   bool _isLoggedIn = false;
+  bool _hasAuthenticatedSession = false;
+  bool get hasAuthenticatedSession => _hasAuthenticatedSession;
   String _userName = '';
   String _userPhone = '';
   String _userEmail = '';
@@ -50,6 +53,7 @@ class AuthState extends ChangeNotifier {
       _favoriteClinicIds.clear();
     }
     if (changed) ++_sessionEpoch;
+    _hasAuthenticatedSession = true;
     _isLoggedIn = true;
     _userName = name;
     _userPhone = phone;
@@ -96,12 +100,23 @@ class AuthState extends ChangeNotifier {
   }
 
   /// Restore user session from persistent TokenStorage
-  Future<void> restoreSession() async {
+  Future<void> restoreSession({OnboardingService? onboardingService}) async {
+    final identity = _sessionEpoch;
     await TokenStorage().init();
+    final credentials = TokenStorage().sessionEpoch;
     final hasToken = await TokenStorage().hasToken();
     final user = TokenStorage().getUser();
     if (hasToken && user != null) {
+      await (onboardingService ?? OnboardingService())
+          .recordAuthenticatedSession();
+      // Preference I/O must never resurrect an identity after logout or a
+      // replacement login while startup restoration was waiting.
+      if (identity != _sessionEpoch ||
+          credentials != TokenStorage().sessionEpoch) {
+        return;
+      }
       ++_sessionEpoch;
+      _hasAuthenticatedSession = true;
       _isLoggedIn = true;
       _userName = user['full_name']?.toString() ?? '';
       _userPhone = user['phone']?.toString() ?? '';
