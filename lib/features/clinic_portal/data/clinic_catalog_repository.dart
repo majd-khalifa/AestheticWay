@@ -197,28 +197,15 @@ class ClinicCatalogRepository {
 
   Future<TreatmentModel> createTreatment(Map<String, dynamic> data) async {
     final sanitized = Map<String, dynamic>.from(data);
+    sanitized['category'] ??= sanitized.remove('category_id');
     if (sanitized['category'] == null ||
         sanitized['category'].toString().trim().isEmpty) {
-      if (sanitized['category_id'] != null &&
-          sanitized['category_id'].toString().trim().isNotEmpty) {
-        sanitized['category'] = sanitized['category_id'];
-      } else {
-        try {
-          final cats = await getCategories();
-          if (cats.isNotEmpty) {
-            sanitized['category'] = cats.first.id;
-          }
-        } catch (_) {}
-      }
+      throw const ApiException(
+        message: 'Select an existing medical category.',
+        errorCode: 'CATEGORY_REQUIRED',
+      );
     }
-    if (sanitized['category'] != null) {
-      sanitized['category_id'] = sanitized['category'];
-    }
-    if (sanitized['practitioners'] == null ||
-        (sanitized['practitioners'] is List &&
-            (sanitized['practitioners'] as List).isEmpty)) {
-      sanitized['practitioners'] = <String>[];
-    }
+    sanitized.remove('category_id');
     sanitized.remove('duration_minutes');
 
     final response = await _api.post(
@@ -233,14 +220,12 @@ class ClinicCatalogRepository {
     Map<String, dynamic> data,
   ) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized['category'] != null) {
-      sanitized['category_id'] = sanitized['category'];
+    if (!sanitized.containsKey('category') &&
+        sanitized.containsKey('category_id')) {
+      sanitized['category'] = sanitized['category_id'];
     }
-    if (sanitized['practitioners'] == null ||
-        (sanitized['practitioners'] is List &&
-            (sanitized['practitioners'] as List).isEmpty)) {
-      sanitized['practitioners'] = <String>[];
-    }
+    sanitized.remove('category_id');
+    // Omission preserves existing M2M assignments; [] explicitly clears them.
     sanitized.remove('duration_minutes');
 
     final response = await _api.patch(
@@ -354,11 +339,8 @@ class ClinicCatalogRepository {
 
   Future<ProductModel> createProduct(Map<String, dynamic> data) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized.containsKey('price') &&
-        (sanitized['price'] == null ||
-            sanitized['price'].toString().trim().isEmpty)) {
-      sanitized.remove('price');
-    }
+    // Cosmetic brand showcases never send commercial price fields.
+    sanitized.remove('price');
     final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
@@ -378,11 +360,8 @@ class ClinicCatalogRepository {
     Map<String, dynamic> data,
   ) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized.containsKey('price') &&
-        (sanitized['price'] == null ||
-            sanitized['price'].toString().trim().isEmpty)) {
-      sanitized.remove('price');
-    }
+    // Cosmetic brand showcases never send commercial price fields.
+    sanitized.remove('price');
     final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,

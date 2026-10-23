@@ -61,6 +61,12 @@ jobs:
           --dart-define=PATIENT_GOLDEN_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
           --dart-define=PATIENT_FAMILY_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
           --reporter expanded
+      - name: Capture Clinic Portal audit renders
+        if: always() && !cancelled()
+        run: >-
+          flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
+          --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
+          --reporter expanded
       - name: Upload native evidence and failure diffs
         if: always() && !cancelled()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -72,3 +78,4 @@ jobs:
             visual-manifest.json
             test/failures/**
             ${{ runner.temp }}/patient-golden-candidates/**
+            ${{ runner.temp }}/clinic-portal-audit/**
