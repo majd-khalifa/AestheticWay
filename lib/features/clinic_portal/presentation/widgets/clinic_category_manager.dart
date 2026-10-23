@@ -5,9 +5,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../treatments/data/category_repository.dart';
 import '../../../treatments/models/category_model.dart';
+import '../../../treatments/presentation/category_requests_screen.dart';
 import '../../services/clinic_portal_service.dart';
 
-/// Global treatment taxonomy is read-only in the supplied Django contract.
+/// Clinics select active categories or propose additions for approval.
 /// Selection never grants a clinic authority to mutate shared records.
 Future<void> showClinicCategoryManager(
   BuildContext context, {
@@ -33,6 +34,23 @@ class _CategoryDirectory extends StatefulWidget {
 class _CategoryDirectoryState extends State<_CategoryDirectory> {
   final _service = ClinicPortalService();
   final _session = SessionSnapshot();
+  bool _openingRequests = false;
+  Future<void> _requests() async {
+    if (_openingRequests || !_session.isCurrent) return;
+    setState(() => _openingRequests = true);
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const CategoryRequestsScreen()),
+      );
+      if (mounted && _session.isCurrent) {
+        await _service.loadCollection('categories', refresh: true);
+      }
+    } finally {
+      if (mounted) setState(() => _openingRequests = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +92,20 @@ class _CategoryDirectoryState extends State<_CategoryDirectory> {
                             ),
                           ),
                           IconButton(
+                            onPressed: () {
+                              if (_session.isCurrent) {
+                                _service.loadCollection(
+                                  'categories',
+                                  refresh: true,
+                                );
+                              }
+                            },
+                            tooltip: ar
+                                ? 'تحديث التصنيفات'
+                                : 'Refresh categories',
+                            icon: const Icon(Icons.refresh),
+                          ),
+                          IconButton(
                             onPressed: () => Navigator.pop(context),
                             tooltip: ar ? 'إغلاق' : 'Close',
                             icon: const Icon(Icons.close),
@@ -89,6 +121,15 @@ class _CategoryDirectoryState extends State<_CategoryDirectory> {
                         ),
                       ),
                       const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: _openingRequests ? null : _requests,
+                        icon: const Icon(Icons.playlist_add),
+                        label: Text(
+                          ar
+                              ? 'طلبات التصنيفات / طلب تصنيف'
+                              : 'Category requests / Request a category',
+                        ),
+                      ),
                       TextField(
                         decoration: InputDecoration(
                           labelText: ar

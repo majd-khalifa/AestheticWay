@@ -2,7 +2,7 @@ name: Mobile release readiness
 
 on:
   push:
-    branches: [codex/mobile-release-readiness]
+    branches: [codex/mobile-release-readiness, codex/final-backend-integration-client-preview]
   workflow_dispatch:
 
 permissions:
@@ -43,7 +43,11 @@ jobs:
           export AW_ANDROID_KEY_ALIAS=aw-release-verification-only
           export AW_ANDROID_KEY_PASSWORD="$AW_ANDROID_STORE_PASSWORD"
           keytool -genkeypair -keystore "$AW_ANDROID_STORE_FILE" -storetype JKS -alias "$AW_ANDROID_KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=AW Build Verification Only' -storepass:env AW_ANDROID_STORE_PASSWORD -keypass:env AW_ANDROID_KEY_PASSWORD
-          flutter build appbundle --release --build-number=1
+          flutter build appbundle --release --build-number=1 --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+          flutter build apk --release --build-number=1 --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+          mkdir -p release-evidence
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build/app/outputs/flutter-apk/app-release.apk > release-evidence/apk-signature.txt
+          sha256sum build/app/outputs/flutter-apk/app-release.apk > release-evidence/apk-sha256.txt
           cd android
           ./gradlew -q printReleaseConfiguration
       - name: Inspect actual AAB, signature, manifest and 16KB native libraries

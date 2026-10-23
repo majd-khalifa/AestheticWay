@@ -8,7 +8,7 @@ parser.add_argument("--output", required=True, type=pathlib.Path)
 args = parser.parse_args()
 backend = args.backend_root.resolve()
 if not (backend / "apps/treatments/portal_views.py").is_file():
-    raise SystemExit("Expected the supplied d1023b0 source root")
+    raise SystemExit("Expected the supplied Django source root")
 
 
 def inventory():
@@ -76,7 +76,7 @@ def record(method, url, payload=None):
             method=method.upper(),
             url=url,
             status=res.status_code,
-            request=payload,
+            request={k: ("<redacted disposable proof>" if k in {"code", "refresh_token"} else v) for k, v in payload.items()} if isinstance(payload, dict) else payload,
             response=body,
         )
     )
@@ -369,6 +369,75 @@ assert (
     == 200
 )
 assert not record("get", "/api/v1/clinic-portal/profile/").json()["video_ad_file"]
+# 1f1e4bf additions: real view/serializer execution, never production accounts.
+from apps.treatments.models import CategoryRequest
+from apps.accounts.services.sms import MockSmsProvider
+from django.core.cache import cache
+from apps.accounts.services.account_deletion import AccountDeletionService
+
+client.force_authenticate(user=user)
+requests_url = "/api/v1/clinic-portal/category-requests/"
+proposal = record("post", requests_url, {"name_en": "QA New Category", "name_ar": "تصنيف اختبار جديد"})
+assert proposal.status_code == 201 and proposal.json()["status"] == "pending"
+request_id = proposal.json()["id"]
+assert record("post", requests_url, {"name_en": "qa new category"}).status_code == 409
+assert record("post", requests_url, {"name_en": category.name_en}).json()["error"]["code"] == "CATEGORY_ALREADY_EXISTS"
+assert record("get", requests_url).status_code == 200
+other_user = User.objects.create_user(phone="+971500000021", role="clinic_admin")
+ClinicUser.objects.create(user=other_user, clinic=other_clinic, role_in_clinic="admin", is_active=True)
+client.force_authenticate(user=other_user)
+assert record("get", f"{requests_url}{request_id}/").status_code == 404
+admin = User.objects.create_user(phone="+971500000022", role="super_admin")
+admin_url = "/api/v1/admin-portal/treatment-categories/"
+review_url = "/api/v1/admin-portal/category-requests/"
+assert record("post", admin_url, {"name_en": "Forbidden"}).status_code == 403
+client.force_authenticate(user=admin)
+assert record("get", review_url + "?status=pending").json()["count"] == 1
+approved = record("post", f"{review_url}{request_id}/approve/", {})
+assert approved.status_code == 200 and approved.json()["status"] == "approved"
+resolved = approved.json()["resolved_category_id"]
+client.force_authenticate(user=user)
+assert record("get", f"{requests_url}{request_id}/").json()["resolved_category_id"] == resolved
+second = record("post", requests_url, {"name_en": "QA Rejection Candidate"}).json()["id"]
+client.force_authenticate(user=admin)
+assert record("post", f"{review_url}{second}/reject/", {"rejection_reason": "Use the existing taxonomy."}).json()["rejection_reason"] == "Use the existing taxonomy."
+created = record("post", admin_url, {"name_en": "QA Disposable Category", "name_ar": "اختبار", "display_order": 4})
+assert created.status_code == 201
+created_id, slug = created.json()["id"], created.json()["slug"]
+assert record("patch", f"{admin_url}{created_id}/", {"name_en": "QA Renamed", "display_order": 8, "is_active": False}).json()["slug"] == slug
+assert record("delete", f"{admin_url}{created_id}/").status_code == 204
+in_use = Treatment.objects.create(clinic=clinic, category=category, name_en="QA Protected")
+assert record("delete", f"{admin_url}{category.id}/").json()["error"]["code"] == "CATEGORY_IN_USE"
+assert record("patch", f"{admin_url}{category.id}/", {"is_active": False}).status_code == 200
+client.force_authenticate(user=user)
+assert record("patch", f"/api/v1/clinic-portal/treatments/{in_use.id}/", {"category": str(category.id), "name_en": "QA Preserve Archived"}).status_code == 200
+assert record("post", "/api/v1/clinic-portal/treatments/", {"category": str(category.id), "name_en": "QA Reject Archived"}).status_code == 400
+client.force_authenticate(user=admin)
+assert record("post", "/api/v1/clinic-portal/treatments/", {"category": resolved, "name_en": "QA No Membership"}).status_code == 403
+
+# Only purpose-bound disposable challenges. Never include OTPs or JWTs in output.
+for index, role in enumerate(["patient", "clinic_admin", "super_admin"]):
+    disposable = User.objects.create_user(phone=f"+97150000003{index}", role=role, full_name="Disposable QA")
+    client.force_authenticate(user=disposable)
+    cache.clear(); MockSmsProvider.reset()
+    start = record("post", "/api/v1/auth/me/deletion/request/", {})
+    assert start.status_code == 200 and start.json()["success"]
+    proof = MockSmsProvider.sent_messages[-1]["code"]
+    assert record("post", "/api/v1/auth/me/deletion/confirm/", {"code": "incorrect"}).status_code == 400
+    assert record("post", "/api/v1/auth/me/deletion/confirm/", {"code": proof}).json()["success"]
+    disposable.refresh_from_db()
+    assert not disposable.is_active and disposable.deleted_at and disposable.full_name == "Deleted User"
+client.force_authenticate(user=user)
+assert record("post", "/api/v1/auth/me/deletion/request/", {}).json()["code"] == "SOLE_CLINIC_ADMIN"
+client.force_authenticate(user=admin)
+assert record("post", "/api/v1/auth/me/deletion/request/", {}).json()["code"] == "LAST_SUPER_ADMIN"
+expired_user = User.objects.create_user(phone="+971500000040", role="patient")
+client.force_authenticate(user=expired_user)
+assert record("post", "/api/v1/auth/me/deletion/confirm/", {"code": "123456"}).status_code == 400
+expired_user.refresh_from_db(); assert expired_user.is_active
+client.force_authenticate(user=None)
+assert record("post", "/api/v1/auth/me/deletion/request/", {}).status_code == 401
+
 assert inventory() == before, "Backend source was changed"
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(

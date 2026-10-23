@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_locale.dart';
 import '../network/api_config.dart';
-import '../services/support_service.dart';
+import '../auth/guest_auth_guard.dart';
+import '../../features/auth/presentation/screens/account_deletion_screen.dart';
 import 'app_snackbar.dart';
 
-/// Public legal routes verified in Django. This support-assisted request does
-/// not pretend that an email composer performs server-side account deletion.
+/// Public legal routes and authenticated purpose-bound account deletion.
 class AccountPrivacyActions extends StatefulWidget {
   const AccountPrivacyActions({super.key, this.includeDeletion = true});
   final bool includeDeletion;
@@ -44,69 +44,14 @@ class _AccountPrivacyActionsState extends State<AccountPrivacyActions> {
   Future<void> _requestDeletion() async {
     if (_busy) return;
     setState(() => _confirming = true);
-    final ar = LocaleService().isArabic;
-    bool? confirmed;
     try {
-      confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(ar ? 'طلب حذف الحساب' : 'Request account deletion'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ar
-                      ? 'أرسل طلباً لحذف حسابك والبيانات المرتبطة به إلى الدعم. فتح البريد لا يرسل الطلب ولا يحذف الحساب. قد يلزم التحقق من الهوية. لا ترسل كلمة المرور أو رموز التحقق.'
-                      : 'Email support to request deletion of your account and associated data. Opening email does not send the request or delete your account. Identity verification may be required. Do not send passwords or verification codes.',
-                ),
-                const SizedBox(height: 12),
-                SelectableText(
-                  SupportService().info.email,
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(ar ? 'إلغاء' : 'Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(ar ? 'فتح البريد' : 'Open email'),
-            ),
-          ],
-        ),
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const AccountDeletionScreen()),
       );
     } finally {
       if (mounted) setState(() => _confirming = false);
     }
-    if (!mounted || confirmed != true) return;
-    final mailFields = {
-      'subject': ar
-          ? 'طلب حذف الحساب والبيانات'
-          : 'Account and data deletion request',
-      'body': ar
-          ? 'أطلب حذف حسابي في Aesthetic Way وبياناتي المرتبطة به. يرجى توضيح خطوات التحقق الآمن، وأي بيانات يجب الاحتفاظ بها ومدة الاحتفاظ بها.'
-          : 'I request deletion of my Aesthetic Way account and associated data. Please explain secure identity verification, any data that must be retained, and the retention period.',
-    };
-    await _open(
-      'deletion',
-      Uri(
-        scheme: 'mailto',
-        path: SupportService().info.email,
-        // Non-HTTP mail handlers need percent-encoded spaces, not form '+'.
-        query: mailFields.entries
-            .map(
-              (e) =>
-                  '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
-            )
-            .join('&'),
-      ),
-    );
   }
 
   Widget _link(String action, String label, VoidCallback onPressed) =>
@@ -131,7 +76,7 @@ class _AccountPrivacyActionsState extends State<AccountPrivacyActions> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: LocaleService(),
+    listenable: Listenable.merge([LocaleService(), AuthState()]),
     builder: (context, _) {
       final ar = LocaleService().isArabic;
       return Wrap(
@@ -149,10 +94,10 @@ class _AccountPrivacyActionsState extends State<AccountPrivacyActions> {
             ar ? 'شروط الاستخدام' : 'Terms of Use',
             () => _open('terms', Uri.parse('${ApiConfig.siteOrigin}/terms/')),
           ),
-          if (widget.includeDeletion)
+          if (widget.includeDeletion && AuthState().isLoggedIn)
             _link(
               'deletion',
-              ar ? 'طلب حذف الحساب' : 'Request account deletion',
+              ar ? 'حذف الحساب' : 'Delete account',
               _requestDeletion,
             ),
         ],

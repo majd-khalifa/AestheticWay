@@ -304,6 +304,50 @@ class AuthRepository {
   }
 
   /// Get current user profile from server (GET /api/v1/auth/me/)
+  Future<Map<String, dynamic>> requestAccountDeletion() async {
+    final stamp = _snapshot();
+    final response = await _api.post(
+      'auth/me/deletion/request/',
+      data: <String, dynamic>{},
+    );
+    _check(stamp);
+    final data = Map<String, dynamic>.from(response.data as Map);
+    if (data['success'] != true) {
+      throw const ApiException(
+        message: 'The deletion challenge was not confirmed by the server.',
+      );
+    }
+    return data;
+  }
+
+  /// Only an acknowledged deletion invalidates this session. No real-account
+  /// probes or local "success" substitute for the purpose-bound server OTP.
+  Future<void> confirmAccountDeletion(String code) async {
+    final stamp = _snapshot();
+    final refresh = _tokenStorage.currentRefreshToken;
+    final response = await _api.post(
+      'auth/me/deletion/confirm/',
+      data: {
+        'code': code.trim(),
+        if (refresh != null && refresh.isNotEmpty) 'refresh_token': refresh,
+      },
+    );
+    _check(stamp);
+    if (response.data is! Map || (response.data as Map)['success'] != true) {
+      throw const ApiException(
+        message: 'The server did not confirm account deletion.',
+      );
+    }
+    ++_authenticationAttempt;
+    final deviceClearing = DeviceTokenService().clearLocalToken();
+    final clearing = _tokenStorage.clear();
+    AuthState()
+        .logout(); // Clears clinic, admin, referral and local-media caches.
+    await clearing;
+    await deviceClearing;
+  }
+
+  /// Get current user profile from server (GET /api/v1/auth/me/)
   Future<UserModel> getMe() async {
     final stamp = _snapshot();
     final response = await _api.get(ApiConfig.me);

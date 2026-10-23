@@ -1,5 +1,7 @@
 # Clinic Portal contract remediation — handoff for Ali / تسليم تدقيق بوابة العيادة لعلي
 
+> Historical d1023b0 evidence. Backend availability conclusions are superseded by [the 1f1e4bf integration report](FINAL_BACKEND_INTEGRATION_REPORT.md) and [current bilingual handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md).
+
 Date: 2026-10-23 (Asia/Damascus). Flutter base: `origin/main` at `b402d3bf7cc46c73cc1f142c7e93c4066e92d594`. Dedicated branch: `codex/clinic-portal-contract-remediation`. Release Readiness PR #11 remains separate. No Django/native signing files were changed.
 
 ## Decision / القرار

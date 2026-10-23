@@ -1,5 +1,7 @@
 # Android / iOS release readiness
 
+> Historical d1023b0 evidence. Backend availability conclusions are superseded by [the 1f1e4bf integration report](FINAL_BACKEND_INTEGRATION_REPORT.md) and [current bilingual handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md).
+
 Audit date: 23 October 2026 (Asia/Damascus). Base: `origin/main` merge `b402d3bf7cc46c73cc1f142c7e93c4066e92d594`; branch `codex/mobile-release-readiness`. PR #10's patient artwork/design remains approved. No store publication, automatic merge, production account operation or Django modification is authorized/performed by this work.
 
 ## Evidence and release gates

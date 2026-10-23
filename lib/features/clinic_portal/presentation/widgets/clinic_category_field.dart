@@ -51,7 +51,7 @@ class ClinicCategoryField extends StatelessWidget {
               (c) => DropdownMenuItem(
                 value: c.id,
                 child: Text(
-                  loc.isArabic ? c.nameAr : c.nameEn,
+                  loc.isArabic && c.nameAr.isNotEmpty ? c.nameAr : c.nameEn,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

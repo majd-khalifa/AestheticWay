@@ -1,5 +1,7 @@
 # Release handoff for Ali / تسليم متطلبات الإصدار إلى علي
 
+> Historical d1023b0 evidence. Backend availability conclusions are superseded by [the 1f1e4bf integration report](FINAL_BACKEND_INTEGRATION_REPORT.md) and [current bilingual handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md).
+
 Source / المصدر: user-supplied `AESTHETIC_WAY_BACKEND_SOURCE_d1023b0.zip`, compared against ca15dc6. The Flutter branch contains no Django modifications. The supplied newer snapshot is authoritative; production deployment is not inferred from an archive.
 
 ## Completed backend changes recognized / تغييرات الباك إند المعترف بها

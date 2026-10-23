@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/widgets/account_privacy_actions.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +10,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const channel = MethodChannel('plugins.flutter.io/url_launcher');
   for (final ar in [false, true]) {
-    testWidgets('public legal links and honest deletion request ar=$ar', (
+    testWidgets('public legal links and genuine deletion entry ar=$ar', (
       tester,
     ) async {
       FlutterSecureStorage.setMockInitialValues({});
       await LocaleService().setLanguage(
         ar ? AppLanguage.arabic : AppLanguage.english,
       );
+      AuthState().login(name: 'QA', phone: '', role: 'patient');
+      addTearDown(() => AuthState().logout());
       final calls = <Uri>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
         call,
@@ -52,29 +55,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(calls, hasLength(2));
       expect(
-        find.textContaining(
-          ar ? 'لا يحذف الحساب' : 'does not send the request or delete',
-        ),
+        find.text(ar ? 'حذف الحساب نهائي' : 'Account deletion is permanent'),
         findsOneWidget,
       );
-      await tester.tap(find.text(ar ? 'فتح البريد' : 'Open email'));
-      await tester.pumpAndSettle();
-      expect(calls, hasLength(3));
-      expect(calls.last.scheme, 'mailto');
-      expect(calls.last.query, isNot(contains('+')));
       expect(
-        calls.last.queryParameters['subject'],
-        contains(ar ? 'حذف' : 'deletion'),
+        find.byKey(const ValueKey('deletion-request-code')),
+        findsOneWidget,
       );
-      for (final secretOrPersonalField in [
-        'JWT',
-        'access_token',
-        'refresh_token',
-        '+971',
-        'patient_id',
-      ]) {
-        expect(calls.last.toString(), isNot(contains(secretOrPersonalField)));
-      }
+      expect(
+        calls,
+        hasLength(2),
+      ); // No mailto or destructive API call on entry.
       expect(tester.takeException(), isNull);
     });
   }

@@ -178,6 +178,35 @@ class ApiException implements Exception {
       }
     }
 
+    final ar = LocaleService().isArabic;
+    message = switch (errorCode) {
+      'CATEGORY_ALREADY_EXISTS' =>
+        ar
+            ? 'يوجد تصنيف نشط بهذا الاسم. حدّث الدليل واختره.'
+            : 'An active category already exists. Refresh the directory and select it.',
+      'DUPLICATE_CATEGORY_REQUEST' =>
+        ar
+            ? 'يوجد طلب قيد المراجعة بهذا الاسم. راجع طلبات التصنيفات.'
+            : 'A request with this name is already pending. Review your category requests.',
+      'CATEGORY_IN_USE' =>
+        ar
+            ? 'هذا التصنيف مرتبط بعلاجات. أرشفه أو أعد تعيين العلاجات قبل الحذف.'
+            : 'This category has treatments. Archive it or reassign its treatments before deleting.',
+      'LAST_SUPER_ADMIN' =>
+        ar
+            ? 'لا يمكن حذف حساب المشرف العام الوحيد. عيّن مشرفاً عاماً آخر أولاً.'
+            : 'The last Super Admin cannot be deleted. Assign another Super Admin first.',
+      'SOLE_CLINIC_ADMIN' =>
+        ar
+            ? 'أنت المشرف الوحيد لعيادة نشطة. عيّن مشرفاً آخر للعيادة أولاً.'
+            : 'You are the only administrator of an active clinic. Assign another clinic administrator first.',
+      'ACCOUNT_ALREADY_INACTIVE' =>
+        ar
+            ? 'الحساب غير نشط بالفعل. يرجى تسجيل الخروج.'
+            : 'The account is already inactive. Please sign out.',
+      _ => message,
+    };
+
     return ApiException(
       message: message,
       statusCode: statusCode,
@@ -198,6 +227,12 @@ class ApiException implements Exception {
             'INVALID_CREDENTIALS',
             'DUPLICATE_LEAD',
             'CLINIC_SUSPENDED',
+            'CATEGORY_ALREADY_EXISTS',
+            'DUPLICATE_CATEGORY_REQUEST',
+            'CATEGORY_IN_USE',
+            'LAST_SUPER_ADMIN',
+            'SOLE_CLINIC_ADMIN',
+            'ACCOUNT_ALREADY_INACTIVE',
           }.contains(errorCode)
           ? errorCode
           : 'REQUEST_REJECTED',
@@ -217,7 +252,11 @@ class ApiException implements Exception {
           (LocaleService().isArabic ? 'الحقل' : 'Field')) {
         return;
       }
-      if (key == 'code' || key == 'message' || key == 'status_code') return;
+      if ((key == 'code' && val is! List) ||
+          key == 'message' ||
+          key == 'status_code') {
+        return;
+      }
       if (val is List) {
         final list = val
             .map((e) => _localizeBackendMessage(e.toString()))
@@ -261,6 +300,7 @@ class ApiException implements Exception {
       case 'referral_code':
         return isArabic ? 'كود الإحالة' : 'Referral Code';
       case 'otp_code':
+      case 'code':
         return isArabic ? 'رمز التحقق' : 'Verification Code';
       case 'clinic':
       case 'clinic_id':
@@ -368,6 +408,8 @@ class ApiException implements Exception {
         return isArabic ? 'الفرع الرئيسي' : 'Main Branch';
       case 'display_order':
         return isArabic ? 'ترتيب العرض' : 'Display Order';
+      case 'is_active':
+        return isArabic ? 'النشر' : 'Publication';
       case 'subscription_tier':
         return isArabic ? 'باقة الاشتراك' : 'Subscription Tier';
       default:
@@ -388,6 +430,24 @@ class ApiException implements Exception {
       return isArabic
           ? 'هذا الحقل لا يمكن تركه فارغاً'
           : 'This field may not be blank.';
+    }
+    if (lower.contains('category with this english name already exists')) {
+      return isArabic
+          ? 'يوجد تصنيف بهذا الاسم بالإنجليزية.'
+          : 'A category with this English name already exists.';
+    }
+    if (lower.contains('verification code')) {
+      if (lower.contains('expired') ||
+          lower.contains('not requested') ||
+          lower.contains('state') ||
+          lower.contains('too many')) {
+        return isArabic
+            ? 'انتهى رمز التحقق أو لم يعد صالحاً. اطلب رمزاً جديداً.'
+            : 'The verification challenge has expired or is no longer valid. Request a new code.';
+      }
+      return isArabic
+          ? 'رمز التحقق غير صحيح. تحقّق منه وحاول مجدداً.'
+          : 'The verification code is invalid. Check it and try again.';
     }
     if (lower.contains('not a file') ||
         lower.contains('submitted data was not a file')) {
