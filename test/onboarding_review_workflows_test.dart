@@ -889,4 +889,27 @@ void main() {
       },
     );
   }
+  test(
+    'moderation invalidates a pre-decision pending count and rejects its late response',
+    () async {
+      AuthState().login(name: 'QA', phone: 'qa', role: 'super_admin');
+      final before = Completer<List<CategoryRequestModel>>();
+      final repo = Requests()..pending = before;
+      final counter = AdminReviewService.withRepository(repo);
+      final old = counter.refresh();
+      final after = Completer<List<CategoryRequestModel>>();
+      repo.pending = after;
+      CategoryRequestRepository.decisions.value++;
+      expect(repo.calls, 2);
+      final current = counter.refresh();
+      after.complete(PageItems([], hasMore: false, total: 2));
+      await current;
+      expect(counter.pendingCategories, 2);
+      before.complete(PageItems([], hasMore: true, total: 99));
+      await old;
+      expect(counter.pendingCategories, 2);
+      expect(counter.loading, isFalse);
+      counter.dispose();
+    },
+  );
 }

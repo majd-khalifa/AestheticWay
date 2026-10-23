@@ -36,7 +36,12 @@ class AdminReviewService extends ChangeNotifier {
   }
 
   void _decisionChanged() {
-    if (AuthState().isLoggedIn && AuthState().isSuperAdmin) refresh();
+    if (!AuthState().isLoggedIn || !AuthState().isSuperAdmin) return;
+    // A pre-decision GET may still be in flight. It must neither satisfy nor
+    // overwrite this post-write read, even when its response arrives last.
+    ++_generation;
+    _flight = null;
+    refresh();
   }
 
   Future<void> refresh() {
