@@ -51,6 +51,12 @@ jobs:
         shell: pwsh
         run: ./tool/test_public_clinic_capture.ps1
       - run: flutter analyze
+      - name: Clinic Portal regressions and render capture
+        timeout-minutes: 3
+        run: >-
+          flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
+          --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
+          --timeout 60s --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Capture candidates for review only
@@ -60,12 +66,6 @@ jobs:
           --name "Clinic profile golden|complete original vector family" --update-goldens
           --dart-define=PATIENT_GOLDEN_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
           --dart-define=PATIENT_FAMILY_CAPTURE_DIR="${{ runner.temp }}/patient-golden-candidates"
-          --reporter expanded
-      - name: Capture Clinic Portal audit renders
-        if: always() && !cancelled()
-        run: >-
-          flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
-          --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
           --reporter expanded
       - name: Upload native evidence and failure diffs
         if: always() && !cancelled()
