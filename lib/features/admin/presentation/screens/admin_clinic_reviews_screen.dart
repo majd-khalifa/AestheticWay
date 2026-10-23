@@ -4,7 +4,9 @@ import '../../../../core/auth/guest_auth_guard.dart';
 import '../../../../core/auth/session_snapshot.dart';
 import '../../../../core/data/paged_collection.dart';
 import '../../../../core/network/api_exception.dart';
-import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/portal_media_frame.dart';
+import '../../../../core/widgets/luxury_card.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../data/admin_repository.dart';
 import '../../models/admin_clinic_model.dart';
@@ -323,16 +325,70 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
     }
   }
 
-  Widget _field(String en, String ar, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 7),
-    child: SelectableText(
-      '${adminText(en, ar)}: ${value.isEmpty ? '—' : value}',
-    ),
-  );
+  Widget _field(String en, String ar, String value, {bool ltr = false}) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              adminText(en, ar),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.mutedText(context),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 3),
+            SelectableText(
+              value.isEmpty ? '—' : value,
+              textDirection: ltr ? TextDirection.ltr : null,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.text(context),
+                height: 1.6,
+              ),
+            ),
+          ],
+        ),
+      );
+  Widget _section(String en, String ar, IconData icon, List<Widget> children) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: LuxuryCard(
+          borderRadius: 24,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 20, color: AppColors.goldText(context)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      adminText(en, ar),
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ...children,
+            ],
+          ),
+        ),
+      );
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: Scaffold(
+      backgroundColor: AppColors.bg(context),
       appBar: AppBar(
         title: Text(
           adminText('Submitted clinic profile', 'ملف العيادة المرسل'),
@@ -350,102 +406,292 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  24 + MediaQuery.paddingOf(context).bottom,
+                ),
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   if (_loading || _sending) const LinearProgressIndicator(),
                   if (_error != null)
                     AdminNotice(message: _error!, error: true, onRetry: _load),
                   if (_clinic case final c?) ...[
-                    Text(
-                      c.nameEn,
-                      style: Theme.of(context).textTheme.titleLarge,
+                    _section(
+                      'Clinic identity',
+                      'هوية العيادة',
+                      Icons.apartment_outlined,
+                      [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PortalMediaFrame(
+                              imageUrl: c.logo,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.contain,
+                              radius: 18,
+                              expandable: true,
+                              label: adminText('Clinic logo', 'شعار العيادة'),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    c.localizedName(
+                                      arabic:
+                                          Directionality.of(context) ==
+                                          TextDirection.rtl,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 19,
+                                      height: 1.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.text(context),
+                                    ),
+                                  ),
+                                  if (c.nameAr.isNotEmpty &&
+                                      c.nameEn.isNotEmpty &&
+                                      c.nameAr != c.nameEn)
+                                    Text(
+                                      Directionality.of(context) ==
+                                              TextDirection.rtl
+                                          ? c.nameEn
+                                          : c.nameAr,
+                                      style: TextStyle(
+                                        color: AppColors.mutedText(context),
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  if (c.city.isNotEmpty)
+                                    Text(
+                                      c.locationLabel(
+                                        arabic:
+                                            Directionality.of(context) ==
+                                            TextDirection.rtl,
+                                      ),
+                                      style: TextStyle(
+                                        color: AppColors.mutedText(context),
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 28),
+                        _field(
+                          'Setup status',
+                          'حالة الإعداد',
+                          _statusLabel(c.setupStatus),
+                        ),
+                        _field(
+                          'Account activation',
+                          'تفعيل الحساب',
+                          _statusLabel(c.status),
+                        ),
+                      ],
                     ),
-                    if (c.nameAr.isNotEmpty) Text(c.nameAr),
-                    _field(
-                      'Setup status',
-                      'حالة الإعداد',
-                      _statusLabel(c.setupStatus),
-                    ),
-                    _field(
-                      'Account activation',
-                      'تفعيل الحساب',
-                      _statusLabel(c.status),
-                    ),
-                    LuxuryImage(
-                      imageUrl: c.coverImage,
-                      height: 180,
-                      width: double.infinity,
-                    ),
-                    const SizedBox(height: 12),
-                    LuxuryImage(imageUrl: c.logo, height: 80, width: 80),
-                    if (c.videoAdFile?.isNotEmpty == true)
-                      _ReviewVideo(url: c.videoAdFile!),
-                    _field(
-                      'Description (English)',
-                      'الوصف بالإنجليزية',
-                      c.descriptionEn,
-                    ),
-                    _field(
-                      'Description (Arabic)',
-                      'الوصف بالعربية',
-                      c.descriptionAr,
-                    ),
-                    _field('Phone', 'الهاتف', c.phone),
-                    _field('WhatsApp', 'واتساب', c.whatsapp),
-                    _field('Email', 'البريد الإلكتروني', c.email),
-                    _field('Website', 'الموقع الإلكتروني', c.website),
-                    _field(
-                      'Address (English)',
-                      'العنوان بالإنجليزية',
-                      c.addressEn,
-                    ),
-                    _field('Address (Arabic)', 'العنوان بالعربية', c.addressAr),
-                    _field('City', 'المدينة', c.city),
-                    _field(
-                      'Coordinates',
-                      'الإحداثيات',
-                      '${c.storedLatitude ?? '—'}, ${c.storedLongitude ?? '—'}',
-                    ),
-                    _field(
-                      'Submitted at',
-                      'وقت الإرسال',
-                      c.submittedForReviewAt?.toIso8601String() ?? '',
-                    ),
-                    for (final b in c.branches)
-                      _field(
-                        'Branch',
-                        'الفرع',
-                        '${b.nameEn} ${b.nameAr} — ${b.addressEn} — ${b.latitude ?? '—'}, ${b.longitude ?? '—'}',
-                      ),
-                    _field(
-                      'Practitioners / Treatments / Offers',
-                      'الممارسون / العلاجات / العروض',
-                      '${c.practitionersCount} / ${c.treatmentsCount} / ${c.offersCount}',
-                    ),
-                    _field(
-                      'Platform notes',
-                      'ملاحظات المنصة',
-                      ApiException.sanitizeRegulatoryCompliance(
-                        c.moderationNotes,
-                      ),
-                    ),
-                    if (c.setupStatus == 'submitted')
-                      FilledButton(
-                        key: const ValueKey('approve-clinic-profile'),
-                        onPressed: _busy ? null : _approve,
-                        child: Text(
+                    _section(
+                      'Uploaded media',
+                      'الوسائط المرفوعة',
+                      Icons.photo_library_outlined,
+                      [
+                        PortalMediaFrame(
+                          imageUrl: c.coverImage,
+                          expandable: true,
+                          label: adminText('Clinic cover', 'غلاف العيادة'),
+                        ),
+                        if (c.videoAdFile?.isNotEmpty == true) ...[
+                          const SizedBox(height: 12),
+                          _ReviewVideo(url: c.videoAdFile!),
+                        ],
+                        const SizedBox(height: 12),
+                        Text(
                           adminText(
-                            'Approve clinic profile',
-                            'الموافقة على ملف العيادة',
+                            'This review API does not return the clinic gallery. Only supplied media is shown.',
+                            'لا يعيد عقد المراجعة الحالي معرض صور العيادة. تُعرض الوسائط المتاحة فقط.',
+                          ),
+                          style: TextStyle(
+                            color: AppColors.mutedText(context),
+                            fontSize: 12,
+                            height: 1.6,
                           ),
                         ),
-                      ),
-                    AdminNotice(
-                      message: adminText(
-                        'Setup rejection and clinic-visible feedback are BLOCKED BY BACKEND. Activation/suspension is a separate account action and must not substitute for a setup decision. The API supplies catalog counts, not complete staff/treatment records.',
-                        'رفض الإعداد وملاحظاته المرئية للعيادة محجوبان من الخادم. التفعيل والإيقاف إجراءان منفصلان للحساب ولا يحلان محل قرار الإعداد. يوفر الرد أعداد الكتالوج وليس سجلات الفريق والعلاجات الكاملة.',
-                      ),
+                      ],
+                    ),
+                    _section(
+                      'Clinic profile',
+                      'ملف العيادة',
+                      Icons.description_outlined,
+                      [
+                        _field(
+                          'Description (English)',
+                          'الوصف بالإنجليزية',
+                          c.descriptionEn,
+                          ltr: true,
+                        ),
+                        _field(
+                          'Description (Arabic)',
+                          'الوصف بالعربية',
+                          c.descriptionAr,
+                        ),
+                      ],
+                    ),
+                    _section(
+                      'Contact details',
+                      'معلومات الاتصال',
+                      Icons.contact_phone_outlined,
+                      [
+                        _field('Phone', 'الهاتف', c.phone, ltr: true),
+                        _field('WhatsApp', 'واتساب', c.whatsapp, ltr: true),
+                        _field(
+                          'Email',
+                          'البريد الإلكتروني',
+                          c.email,
+                          ltr: true,
+                        ),
+                        _field(
+                          'Website',
+                          'الموقع الإلكتروني',
+                          c.website,
+                          ltr: true,
+                        ),
+                      ],
+                    ),
+                    _section(
+                      'Location and branches',
+                      'الموقع والفروع',
+                      Icons.location_on_outlined,
+                      [
+                        _field(
+                          'Address (English)',
+                          'العنوان بالإنجليزية',
+                          c.addressEn,
+                          ltr: true,
+                        ),
+                        _field(
+                          'Address (Arabic)',
+                          'العنوان بالعربية',
+                          c.addressAr,
+                        ),
+                        _field('City', 'المدينة', c.city),
+                        _field('Emirate', 'الإمارة', c.emirate),
+                        _field(
+                          'Coordinates',
+                          'الإحداثيات',
+                          '${c.storedLatitude ?? '—'}, ${c.storedLongitude ?? '—'}',
+                          ltr: true,
+                        ),
+                        _field(
+                          'Google Maps',
+                          'خرائط جوجل',
+                          c.googleMapsUrl,
+                          ltr: true,
+                        ),
+                        for (final b in c.branches) ...[
+                          const Divider(height: 20),
+                          _field('Branch', 'الفرع', '${b.nameEn} ${b.nameAr}'),
+                          _field(
+                            'Branch location',
+                            'موقع الفرع',
+                            '${b.addressEn} • ${b.city}',
+                          ),
+                          _field(
+                            'Branch phone',
+                            'هاتف الفرع',
+                            b.phone,
+                            ltr: true,
+                          ),
+                          _field(
+                            'Branch coordinates',
+                            'إحداثيات الفرع',
+                            '${b.latitude ?? '—'}, ${b.longitude ?? '—'}',
+                            ltr: true,
+                          ),
+                        ],
+                      ],
+                    ),
+                    _section(
+                      'Practitioners and treatments',
+                      'الممارسون والعلاجات',
+                      Icons.medical_services_outlined,
+                      [
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 8,
+                          children: [
+                            _field(
+                              'Practitioners',
+                              'الممارسون',
+                              '${c.practitionersCount}',
+                            ),
+                            _field(
+                              'Treatments',
+                              'العلاجات',
+                              '${c.treatmentsCount}',
+                            ),
+                            _field('Offers', 'العروض', '${c.offersCount}'),
+                          ],
+                        ),
+                        Text(
+                          adminText(
+                            'The API supplies counts, not complete staff/treatment records.',
+                            'يوفر الرد الأعداد وليس سجلات الفريق والعلاجات الكاملة.',
+                          ),
+                          style: TextStyle(
+                            color: AppColors.mutedText(context),
+                            fontSize: 12,
+                            height: 1.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                    _section(
+                      'Submission and decision',
+                      'الإرسال والقرار',
+                      Icons.fact_check_outlined,
+                      [
+                        _field(
+                          'Submitted at',
+                          'وقت الإرسال',
+                          c.submittedForReviewAt?.toLocal().toIso8601String() ??
+                              '',
+                          ltr: true,
+                        ),
+                        _field(
+                          'Platform notes',
+                          'ملاحظات المنصة',
+                          ApiException.sanitizeRegulatoryCompliance(
+                            c.moderationNotes,
+                          ),
+                        ),
+                        if (c.setupStatus == 'submitted')
+                          FilledButton(
+                            key: const ValueKey('approve-clinic-profile'),
+                            onPressed: _busy ? null : _approve,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Text(
+                                adminText(
+                                  'Approve clinic profile',
+                                  'الموافقة على ملف العيادة',
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 12),
+                        AdminNotice(
+                          message: adminText(
+                            'Setup rejection and clinic-visible feedback are BLOCKED BY BACKEND. Activation/suspension remains a separate account action.',
+                            'رفض الإعداد وملاحظاته المرئية للعيادة محجوبان من الخادم. يظل التفعيل والإيقاف إجراءين منفصلين للحساب.',
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],

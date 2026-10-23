@@ -1,3 +1,4 @@
+import '../../../core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../../../core/auth/guest_auth_guard.dart';
 import '../../../core/auth/session_snapshot.dart';
@@ -161,6 +162,7 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
   };
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.bg(context),
     appBar: AppBar(
       title: Text(categoryText('Category requests', 'طلبات التصنيفات')),
     ),
@@ -178,7 +180,12 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
             builder: (context, _) => RefreshIndicator(
               onRefresh: _refresh,
               child: ListView(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  24 + MediaQuery.paddingOf(context).bottom,
+                ),
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   if (widget.admin) ...[
@@ -195,6 +202,11 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
                       initialValue: _status,
                       decoration: InputDecoration(
                         labelText: categoryText('Request status', 'حالة الطلب'),
+                        filled: true,
+                        fillColor: AppColors.surface(context),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                       items: ['pending', 'approved', 'rejected']
                           .map(
@@ -252,6 +264,16 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
                     ),
                   for (final request in _page.items)
                     Card(
+                      elevation: 0,
+                      color: AppColors.surface(context),
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                        side: BorderSide(
+                          color: AppColors.border(context),
+                          width: .8,
+                        ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(

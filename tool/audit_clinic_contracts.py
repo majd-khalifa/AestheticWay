@@ -491,6 +491,34 @@ res = client.patch(setup, {"video_ad_file": SimpleUploadedFile("denied.mp4", vid
 out.append({"method": "PATCH", "url": setup, "request": {"video_ad_file": "<real MP4 binary, basic tier>"}, "status": res.status_code, "response": res.json()})
 assert res.status_code == 400
 
+# Video entitlement projection mismatch: compare real private/admin/public DTOs.
+# Admin changes a disposable record using its supported API, not a UI override.
+client.force_authenticate(user=admin)
+assert record("patch", review_clinic, {"subscription_tier": "vip", "status": "active"}).status_code == 200
+assert record("get", review_clinic).json()["subscription_tier"] == "vip"
+client.force_authenticate(user=user)
+private = record("get", setup).json()
+assert "subscription_tier" not in private
+assert record("get", f"/api/v1/clinics/{clinic.id}/").json()["subscription_tier"] == "vip"
+# No setup-approval check is added to an otherwise authorized VIP write.
+for tier in ["featured", "basic", "vip"]:
+    client.force_authenticate(user=admin)
+    state = "pending" if tier == "vip" else "active"
+    assert record("patch", review_clinic, {"subscription_tier": tier, "status": state}).status_code == 200
+    client.force_authenticate(user=user)
+    private = record("get", setup).json()
+    assert "subscription_tier" not in private
+    visible = record("get", f"/api/v1/clinics/{clinic.id}/")
+    if state == "active":
+        assert visible.status_code == 200 and visible.json()["subscription_tier"] == tier
+    else:
+        assert visible.status_code == 404
+    video = client.patch(setup, {"video_ad_file": SimpleUploadedFile("qa-entitlement.mp4", video_path.read_bytes(), content_type="video/mp4")}, format="multipart")
+    out.append({"method": "PATCH", "url": setup, "request": {"video_ad_file": "<real MP4 binary>", "fixture_tier": tier, "fixture_account_state": state}, "status": video.status_code, "response": video.json()})
+    assert video.status_code == (200 if tier == "vip" else 400)
+client.force_authenticate(user=patient)
+assert record("patch", setup, {"video_ad_file": None}).status_code == 403
+
 assert inventory() == before, "Backend source was changed"
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(

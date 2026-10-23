@@ -1,3 +1,5 @@
+import '../../../core/localization/app_locale.dart';
+import '../../../core/network/api_exception.dart';
 import '../../treatments/data/category_repository.dart';
 import '../../../core/services/local_media_cache.dart';
 import 'dart:collection';
@@ -108,6 +110,7 @@ class ClinicPortalService extends ChangeNotifier {
       rating: 0.0,
       reviewCount: 0,
       subscriptionTier: SubscriptionTier.basic,
+      subscriptionTierKnown: false,
       city: '',
       areaAr: '',
       areaEn: '',
@@ -1477,10 +1480,24 @@ class ClinicPortalService extends ChangeNotifier {
 
   Future<void> updateShowcaseVideo(String? path) async {
     final epoch = _sessionEpoch;
+    final clinicId = _activeClinic.id;
     final profile = await _inSession(
       _catalogRepository.updateClinicProfile({'video_ad_file': path}),
       epoch,
     );
+    final uri = Uri.tryParse(profile.videoUrl ?? '');
+    final saved =
+        uri != null &&
+        uri.host.isNotEmpty &&
+        ['http', 'https'].contains(uri.scheme);
+    if (profile.id != clinicId ||
+        (path == null ? profile.hasVideoAd : !saved)) {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'لم يؤكد الخادم حفظ الفيديو. حدّث ملف العيادة قبل المحاولة مجدداً.'
+            : 'The server did not confirm the video change. Refresh the clinic profile before retrying.',
+      );
+    }
     _activeClinic = profile;
     notifyListeners();
   }

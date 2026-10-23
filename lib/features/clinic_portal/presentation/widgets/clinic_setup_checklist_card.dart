@@ -151,8 +151,12 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                     ),
                   ),
                   child: Text(
-                    isSubmitted
+                    isApproved
+                        ? (loc.isArabic ? 'مقبول' : 'Approved')
+                        : isSubmitted
                         ? (loc.isArabic ? 'قيد المراجعة' : 'Under Review')
+                        : isRejected
+                        ? (loc.isArabic ? 'مرفوض' : 'Rejected')
                         : '$progress%',
                     style: TextStyle(
                       fontSize: 11,
@@ -487,95 +491,74 @@ class _ChecklistTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.cardSurfaceHover
-            : AppColors.lightCardSurfaceHover,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border(context), width: 0.8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            isDone
-                ? Icons.check_circle_rounded
-                : Icons.radio_button_unchecked_rounded,
-            size: 18,
-            color: isDone
-                ? const Color(0xFF10B981)
-                : AppColors.mutedText(context),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: isDone ? FontWeight.w600 : FontWeight.normal,
-                color: isDone
-                    ? (isDark
-                          ? AppColors.silverPrimary
-                          : AppColors.lightTextPrimary)
-                    : AppColors.mutedText(context),
-              ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      color: AppColors.surfaceHover(context),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: AppColors.border(context), width: .8),
+    ),
+    child: LayoutBuilder(
+      builder: (context, box) {
+        final titleRow = Row(
+          children: [
+            Icon(
+              isDone
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              semanticLabel: LocaleService().isArabic
+                  ? (isDone ? 'مكتمل' : 'غير مكتمل')
+                  : (isDone ? 'Completed' : 'Incomplete'),
+              size: 20,
+              color: isDone
+                  ? AppColors.positiveText(context)
+                  : AppColors.mutedText(context),
             ),
-          ),
-          if (isDone) ...[
-            const SizedBox(width: 6),
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  LocaleService().isArabic ? 'مكتمل' : 'Completed ✓',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? const Color(0xFF6EE7B7)
-                        : const Color(0xFF166534),
-                  ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  fontWeight: isDone ? FontWeight.w600 : FontWeight.normal,
+                  color: AppColors.text(context),
                 ),
               ),
             ),
           ],
-          if (onAction != null) ...[
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onAction,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.backgroundDeep : Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: AppColors.accentChampagne.withValues(alpha: 0.4),
-                    width: 0.8,
-                  ),
+        );
+        final action = onAction == null
+            ? const SizedBox.shrink()
+            : TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.goldText(context),
+                  minimumSize: const Size(48, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                 ),
-                child: Text(
-                  actionLabel,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.goldText(context),
-                  ),
-                ),
-              ),
-            ),
+                onPressed: onAction,
+                child: Text(actionLabel),
+              );
+        if (box.maxWidth < 300 ||
+            MediaQuery.textScalerOf(context).scale(1) > 1.4) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              titleRow,
+              if (onAction != null)
+                Align(alignment: AlignmentDirectional.centerEnd, child: action),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: titleRow),
+            if (onAction != null) ...[const SizedBox(width: 8), action],
           ],
-        ],
-      ),
-    );
-  }
+        );
+      },
+    ),
+  );
 }
 
 class _ReviewFeedback extends StatelessWidget {

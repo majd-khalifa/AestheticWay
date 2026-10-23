@@ -67,6 +67,12 @@ jobs:
           flutter test test/onboarding_review_workflows_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/onboarding-review"
           --reporter expanded
+      - name: VIP entitlement and admin media regressions and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/admin_media_polish_test.dart test/admin_media_visual_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/admin-media-polish"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -97,3 +103,4 @@ jobs:
             ${{ runner.temp }}/clinic-portal-audit/**
             ${{ runner.temp }}/final-integration/**
             ${{ runner.temp }}/onboarding-review/**
+            ${{ runner.temp }}/admin-media-polish/**

@@ -2073,6 +2073,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
           : (p.brandNameEn ?? p.brandNameAr ?? ''),
       imageUrl: p.imageUrl,
       mediaCacheKey: LocalMediaCache.entity('product', p.id),
+      preserveImageShape: true,
       icon: Icons.auto_awesome_outlined,
       onEdit: () => _showProductFormDialog(context, loc, existing: p),
       onDelete: () => _deleteCatalogItem(

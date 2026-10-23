@@ -5,7 +5,7 @@ import '../../../../core/localization/app_locale.dart';
 import '../../../../core/services/local_media_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/portal_media_frame.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../models/admin_lead_model.dart';
 
@@ -273,14 +273,14 @@ class AdminEntityImage extends StatelessWidget {
       color: AppColors.surfaceHover(context),
       borderRadius: BorderRadius.circular(15),
     ),
-    child: LuxuryImage(
+    child: PortalMediaFrame(
       imageUrl: url,
       mediaCacheKey: mediaKey,
-      fallbackLogoUrl: logo,
       width: size,
       height: size,
       fit: isLogo ? BoxFit.contain : BoxFit.cover,
-      borderRadius: BorderRadius.circular(15),
+      radius: 15,
+      expandable: size >= 100,
     ),
   );
 }

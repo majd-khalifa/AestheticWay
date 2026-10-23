@@ -1,0 +1,34 @@
+{
+  "date_utc": "2026-10-23",
+  "branch": "codex/final-backend-integration-client-preview",
+  "baseline": "86c82bdd7900728bb336b4d8cb6bbd845e5fdd23",
+  "local_host": "Linux",
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "format": "dart format .; no outstanding formatting after final repeat",
+  "analyze": {
+    "issues": 0
+  },
+  "full_flutter_suite": {
+    "passed": 923,
+    "failed": 0,
+    "elapsed": "2m17s"
+  },
+  "added_flutter_tests": 70,
+  "focused_affected_screens": {
+    "passed": 94,
+    "failed": 0
+  },
+  "baseline_visual_tests": {
+    "passed": 24,
+    "failed": 0
+  },
+  "rendered_pngs": 64,
+  "actual_django_view_responses": 139,
+  "django_source_hashes_unchanged": 403,
+  "native_current_commit_verification": "See PR13 Checks: https://github.com/majd-khalifa/AestheticWay/pull/13/checks ; match run head to delivered commit. Historical86c success is not a substitute.",
+  "physical_android_qa_performed_here": false,
+  "production_vip_profile_or_r2_verified": false,
+  "production_signing_changed": false,
+  "django_changed": false
+}

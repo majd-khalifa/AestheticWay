@@ -1,0 +1,391 @@
+{
+  "renderer": "Flutter 3.41.5 Linux software renderer; actual decoded fixture files; DPR 1; 430\u00d71000 standard, 320\u00d71000 large-text tests",
+  "baseline": "86c82bdd7900728bb336b4d8cb6bbd845e5fdd23",
+  "production_or_physical_device_evidence": false,
+  "renders": [
+    {
+      "file": "before/polish_categories_dark_ar.png",
+      "sha256": "21ef734c771059c179a755123c4a0a21a037bb56fca274826d7f38729b6acce2",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_categories_dark_en.png",
+      "sha256": "3db35c11c5abf668fc559573155db46fb59a52a2cc250dc34c531874066bac2b",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_categories_light_ar.png",
+      "sha256": "fd9e72efbffe758f48f4556db3b07a5d7917e6395cb3654537bf78a857a7c395",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_categories_light_en.png",
+      "sha256": "52d9464a6dd610bb7f0cf542b8d219de3148086a8b4105edd414cfed3a2d0846",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_dashboard_dark_ar.png",
+      "sha256": "45e9ace92496d2c321e94f30079115787f3467944a2a5066a916c5799e365128",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_dashboard_dark_en.png",
+      "sha256": "9ffde63704f97c9889e97889b27d5c9b9ee516a1280d421d8257a913cfeb54e8",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_dashboard_light_ar.png",
+      "sha256": "e332e94a410433ef71a6b369272ff8e827bc6ef57499c2605503f453a9fb43fc",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_dashboard_light_en.png",
+      "sha256": "495fb35e77886453f38b3faf37757d01b7b4098213fe6d3831cdd099aa14c19c",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_details_dark_ar.png",
+      "sha256": "5b87ffa44b0b58d9de050f2b75d2b5b9ed8f2acdbf4ca14b632e4008d939b223",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_details_dark_en.png",
+      "sha256": "3b55b93cee2326d458af53da5acfc6e32bd235389353f5d8560a236f505f9922",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_details_light_ar.png",
+      "sha256": "3aceea2428ed45baa55c9adec3bc2e818eae34ec2a8572f9fe434d393d8b81dd",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_details_light_en.png",
+      "sha256": "bd442dd5192c073c9b138fd9d0d82bc2e1131e5f28674214ed1451ceea7cef08",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_media_dark_ar.png",
+      "sha256": "ac072ac125541326a6776f3aa4c9b9f6f63d66de42b245a9d9fbc49b1c46aeb0",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_media_dark_en.png",
+      "sha256": "989c94bf99a437c4c749602d5bd5a3305abcea22d0f5a2810150033be74132d9",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_media_light_ar.png",
+      "sha256": "564ccf168cc07c033a6fd643db5fcd71e5e67ebd1c3942a2028ccb5efd25f155",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_media_light_en.png",
+      "sha256": "9c9586a866f573eca374fba2079bb21905c3df41bf9fb8499f343a7fff283ad0",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_profile_dark_ar.png",
+      "sha256": "05badf6dbda78593e7319a633dc8b6107152d56ae9c5405e36ccc24f7f416a44",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_profile_dark_en.png",
+      "sha256": "f1b0a2b9fbd96cf99f9bc12f7b92bd033f2ea253e1a9fa9678895f49cac75758",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_profile_light_ar.png",
+      "sha256": "4c2c0d9594e1c5674941ea583323b58ae8c8b45905b6c714fc36c86765a929e4",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_profile_light_en.png",
+      "sha256": "bf19e64a857514e2696c0f64218b27f469271f71d0ccccc9fe50a5222cabc33c",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_review_dark_ar.png",
+      "sha256": "81052a7fb3805f67f2ddcab136120c24c6ccccb5cdb429886547590bd8b62a66",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_review_dark_en.png",
+      "sha256": "3778a83f9524bf915aee94c7119cfb34e1ce5b1bee91791a7e842793874e4556",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_review_light_ar.png",
+      "sha256": "30629bc5d24989909e0c264e5024e6b4f5e21d8b71fb845bd69d7490f7385f0b",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_review_light_en.png",
+      "sha256": "b3e7cd16b291d4b59d2f2021b3a819af1c38f4a1fb03755aa7ff10aaf9936750",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_video_dark_ar.png",
+      "sha256": "899e27cec08ad9053334bd7d6f5de6902aa0e0e86e3b480701284a080e89c62a",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_video_dark_en.png",
+      "sha256": "6c263d21ed45dc81eefde1b92b25cb57b833c47806533193cc4966dd9ffabc35",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_video_light_ar.png",
+      "sha256": "84ec7fd609c8eceffc3eff58da51654651f51c0e3988ff63329fe8505d3661cb",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "before/polish_video_light_en.png",
+      "sha256": "8ea007618060b237226929ac3b4256689cd538740517860350ed8bd1f63e9901",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_categories_dark_ar.png",
+      "sha256": "5ce336e942d69469d48225988d80d2142cf1e0b30128ba9f201678715c539bac",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_categories_dark_en.png",
+      "sha256": "369f60e9a387de8294608376e50cb59746a43ce855483a40d4259a80ed80a793",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_categories_light_ar.png",
+      "sha256": "079f9213f346c3562957824f959d30924ff13f85bc314eebc243f9568ad91391",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_categories_light_en.png",
+      "sha256": "d9d5f18c24a27f0ccff388c1c19d59657179356cbdee590815286d31b49c1100",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_dashboard_dark_ar.png",
+      "sha256": "8b85aad184bb32500c4c3eb2169ea70144efd419558b5ec15b2f248243d26f59",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_dashboard_dark_en.png",
+      "sha256": "9e520f028cae94e2d0f74e5b57413e1ebc1ff0ceaa35c168b4f2327fcfa8c82a",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_dashboard_light_ar.png",
+      "sha256": "31fe18fda9ee106451503f19df6581dafef5d8146aeb054780f39074c06d2a6e",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_dashboard_light_en.png",
+      "sha256": "2b72c4473515dcc6f0f859dccd7732fd07d35c4a0bc92a1cb31753fb01c538e4",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_details_dark_ar.png",
+      "sha256": "0db5fbd067ff40f74f698b8e3afb6642ef5b212e49351d8f60017a6ee8a7ddce",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_details_dark_en.png",
+      "sha256": "1abf488c6029339ec91c44b6a68ed19a864a69165ec87799604667b23bd10371",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_details_light_ar.png",
+      "sha256": "0b0fabeebd9559ad32532af0e1c5a792e33dd60bf8f73840fab61d320fe06194",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_details_light_en.png",
+      "sha256": "4023883a527989d36e18e2ef531147872dd022d7856ec73771cb62e7e5ff6e08",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_gallery_error_dark_ar.png",
+      "sha256": "f855bd1bda4247659458ffc9d74e3a3ae396fed78a7f4ec69ecfe5cc5cd9ef01",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_gallery_error_dark_en.png",
+      "sha256": "98070eccb44e2778c78b12eacbdb92a191ba9b879e844d2bea89cd9a16946b56",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_gallery_error_light_ar.png",
+      "sha256": "f17fa388eb8e698640ff15508de149be1a0599d88ae46be94b7cfb94a8640d8e",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_gallery_error_light_en.png",
+      "sha256": "3e20796da3d19862239f653c466b8e92177427d06abf050e3f1346d129fa9690",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_media_dark_ar.png",
+      "sha256": "7ca9d425c5cb2c9afc424634449b730ad798b3d30aa7b3a929ceff32270a136f",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_media_dark_en.png",
+      "sha256": "b322b78fe571d114354c56c08abcd7772308570e757fc6a1d9b98b753bb288ce",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_media_light_ar.png",
+      "sha256": "ba458c04308503c70630872d52251a2f769867d339853be4847e64dbdf075bc5",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_media_light_en.png",
+      "sha256": "0e9395d55e2ed42a1656b6089ea16535ce90f6181d9bcc353414180ad7ba0c08",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_profile_dark_ar.png",
+      "sha256": "ab3ed8bccfbaa2b726c4a554c2d2511c4b3e92235298aa91ca2050ae19459e8b",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_profile_dark_en.png",
+      "sha256": "8012c32294e567cb52a5835e23a18770d961f8cfde0e2b8ebd7d9444b84eabe6",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_profile_light_ar.png",
+      "sha256": "0604e3d403dc82fd2036b2a44a8e4f3668a26cc02333729e911d7aad42926600",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_profile_light_en.png",
+      "sha256": "c5881cc0628d813722bddac871338ee7cfaf792218349198f344672603e6821f",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_dark_ar.png",
+      "sha256": "46760cafc2b2b669e609c3e06c20dceb6399f4c0e72fdfe12bdaf0c0679e55f3",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_dark_en.png",
+      "sha256": "daeda04ce33c141d351f1cba4a509d775b0875a926ebaae4a3da4d26b058528d",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_light_ar.png",
+      "sha256": "3e38cc918a14b341b2fb8e4c62e35ac7e14378ecfab163745cb9b6ec9b319315",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_light_en.png",
+      "sha256": "aae1ccd54a3584210ebdc815bcbbc4dd33fdce3b69a893736693101efa4a5ca3",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_scaled_dark_ar.png",
+      "sha256": "54e96760f95c133cdf0a0ef5a6023df462fc243868bc0318a5854e78f51416f7",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_scaled_dark_en.png",
+      "sha256": "ccc02ec3c836b8eea428f50466d709b5a4b93e98a5a20406e735f8c913d67daf",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_scaled_light_ar.png",
+      "sha256": "5c6f1aac71b16894c7ea6cb96cf9f505e94d2ac06d5bce4ec0b3321007a8523f",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_review_scaled_light_en.png",
+      "sha256": "f548a8687d0bf1e50641cadbe78cc7b6c7f500bdcfc291430fe27eb346278fec",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_video_dark_ar.png",
+      "sha256": "7eedda759bcf1e21b438901ab2d0aa4978191a67a315778a342ef7866a5bde84",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_video_dark_en.png",
+      "sha256": "7204127c45d8a84dd3410ce8187c416515951156fcbccb7feacd1cfe9a98ea14",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_video_light_ar.png",
+      "sha256": "f489851c904c81b430e9fab90f0181785ab2d301c181ea5ebad871d1049b10d2",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "after/polish_video_light_en.png",
+      "sha256": "d137a88f71b3296817b2f91e46fa0c21f012447bebee030dd4d45ca610f1d0ed",
+      "width": 430,
+      "height": 1000
+    }
+  ]
+}

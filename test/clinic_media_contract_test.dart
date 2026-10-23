@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'support/patient_visual_harness.dart';
 import 'dart:async';
 import 'dart:io';
@@ -181,6 +182,11 @@ void main() {
     original = ImagePickerPlatform.instance;
     picker = Picker();
     ImagePickerPlatform.instance = picker;
+    AuthState().login(
+      name: 'Disposable QA',
+      phone: 'fixture-clinic',
+      role: 'clinic_admin',
+    );
     profile = Profile();
     service.resetTestingState();
     service.setCatalogRepositoryForTesting(profile);
@@ -189,6 +195,7 @@ void main() {
   tearDown(() {
     ImagePickerPlatform.instance = original;
     service.resetTestingState();
+    AuthState().logout();
   });
   test(
     'gallery records require image MIME, asset UUID and matching clinic; MP4 never enters image collection',

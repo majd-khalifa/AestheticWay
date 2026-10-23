@@ -1,3 +1,4 @@
+import '../../../../core/widgets/portal_media_frame.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -170,6 +171,14 @@ class _AdminClinicDetailSheetState extends State<AdminClinicDetailSheet> {
                             ],
                           ),
                           const SizedBox(height: 14),
+                          if (c.coverImage.isNotEmpty) ...[
+                            PortalMediaFrame(
+                              imageUrl: c.coverImage,
+                              expandable: true,
+                              label: adminText('Clinic cover', 'غلاف العيادة'),
+                            ),
+                            const SizedBox(height: 14),
+                          ],
                           Wrap(
                             spacing: 10,
                             runSpacing: 8,

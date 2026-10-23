@@ -115,6 +115,9 @@ class ClinicModel {
   final double rating;
   final int reviewCount;
   final SubscriptionTier subscriptionTier;
+
+  /// An omitted/unrecognized API tier is not a confirmed Basic entitlement.
+  final bool subscriptionTierKnown;
   final String licenseAuthority; // DHA, DOH, MOHAP
   final String licenseNumber;
   final String city; // Dubai, Abu Dhabi
@@ -160,6 +163,7 @@ class ClinicModel {
     required this.rating,
     required this.reviewCount,
     required this.subscriptionTier,
+    this.subscriptionTierKnown = true,
     this.licenseAuthority = 'DHA',
     this.licenseNumber = '',
     required this.city,
@@ -192,7 +196,7 @@ class ClinicModel {
   });
 
   factory ClinicModel.fromJson(Map<String, dynamic> json) {
-    final tier = json['subscription_tier']?.toString().toLowerCase();
+    final tier = json['subscription_tier']?.toString().trim().toLowerCase();
     final googleRating = double.tryParse('${json['google_rating']}');
     final googleCount = int.tryParse('${json['google_reviews_count']}');
     final validRating =
@@ -273,6 +277,12 @@ class ClinicModel {
       logoUrl: logo,
       rating: validRating ? googleRating : 0,
       reviewCount: validRating && googleCount != null ? googleCount : 0,
+      subscriptionTierKnown: const [
+        'vip',
+        'vip_platinum',
+        'featured',
+        'basic',
+      ].contains(tier),
       subscriptionTier: switch (tier) {
         'vip' || 'vip_platinum' => SubscriptionTier.vipPlatinum,
         'featured' => SubscriptionTier.featured,
@@ -359,6 +369,7 @@ class ClinicModel {
     double? rating,
     int? reviewCount,
     SubscriptionTier? subscriptionTier,
+    bool? subscriptionTierKnown,
     String? licenseAuthority,
     String? licenseNumber,
     String? city,
@@ -401,6 +412,9 @@ class ClinicModel {
       rating: rating ?? this.rating,
       reviewCount: reviewCount ?? this.reviewCount,
       subscriptionTier: subscriptionTier ?? this.subscriptionTier,
+      subscriptionTierKnown:
+          subscriptionTierKnown ??
+          (subscriptionTier != null ? true : this.subscriptionTierKnown),
       licenseAuthority: licenseAuthority ?? this.licenseAuthority,
       licenseNumber: licenseNumber ?? this.licenseNumber,
       city: city ?? this.city,

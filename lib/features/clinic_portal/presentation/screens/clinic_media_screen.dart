@@ -9,7 +9,8 @@ import '../../../../core/data/paged_collection.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/media_file_policy.dart';
-import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/portal_media_frame.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_image_picker_field.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/silver_button.dart';
@@ -30,7 +31,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     with WidgetsBindingObserver {
   final _service = ClinicPortalService();
   final _session = SessionSnapshot();
-  late final String _clinicId;
+  late String _clinicId;
   late final ClinicMediaRepository _repository;
   late final PagedCollection<ClinicGalleryAsset> _gallery;
   final _pending = <String>[];
@@ -38,9 +39,24 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   int _completed = 0, _batchSize = 0;
   String? _error, _notice, _videoPath, _posterPath;
   bool _posterChanged = false;
+  bool _profileLoading = false, _profileVerified = false;
+  String? _profileError;
   VideoPlayerController? _player;
   bool get ar => LocaleService().isArabic;
-  bool get _locked => _busy || _confirming || !_session.isCurrent;
+  bool get _roleAllowed =>
+      AuthState().isLoggedIn &&
+      (AuthState().isClinicAdmin || AuthState().isClinicStaff);
+  bool get _locked =>
+      _busy ||
+      _confirming ||
+      _profileLoading ||
+      !_profileVerified ||
+      !_roleAllowed ||
+      !_session.isCurrent;
+  bool get _videoAllowed =>
+      _profileVerified &&
+      _service.activeClinic.subscriptionTierKnown &&
+      _service.activeClinic.subscriptionTier == SubscriptionTier.vipPlatinum;
   int get _remaining => math
       .max(
         0,
@@ -60,7 +76,10 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     );
     WidgetsBinding.instance.addObserver(this);
     AuthState().addListener(_sessionChanged);
-    _gallery.refresh();
+    if (_roleAllowed) {
+      if (_clinicId.isNotEmpty) _gallery.refresh();
+      _loadOwnedProfile();
+    }
   }
 
   void _sessionChanged() {
@@ -84,7 +103,11 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) _player?.pause();
+    if (state != AppLifecycleState.resumed) {
+      _player?.pause();
+    } else if (!_busy && !_confirming && _session.isCurrent && _roleAllowed) {
+      _loadOwnedProfile();
+    }
   }
 
   @override
@@ -94,6 +117,41 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     _gallery.dispose();
     _player?.dispose();
     super.dispose();
+  }
+
+  Future<bool> _loadOwnedProfile() async {
+    if (_profileLoading || !_session.isCurrent || !_roleAllowed) return false;
+    setState(() {
+      _profileLoading = true;
+      _profileError = null;
+    });
+    try {
+      await _service.refreshClinicProfile();
+      _session.ensureCurrent();
+      final id = _service.activeClinic.id;
+      if (id.isEmpty || (_clinicId.isNotEmpty && id != _clinicId)) {
+        throw const ApiException(
+          message: 'Clinic identity changed. Close and reopen this screen.',
+        );
+      }
+      final first = _clinicId.isEmpty;
+      _clinicId = id;
+      if (first) await _gallery.refresh();
+      if (mounted) setState(() => _profileVerified = true);
+      return true;
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _profileVerified = false;
+          _profileError = ar
+              ? 'تعذر التحقق من ملف العيادة الحالي. حدّث البيانات قبل إدارة الوسائط.'
+              : 'Could not verify the current clinic profile. Refresh before managing media.';
+        });
+      }
+      return false;
+    } finally {
+      if (mounted) setState(() => _profileLoading = false);
+    }
   }
 
   void _selected(List<String> paths) {
@@ -110,15 +168,16 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       ? (ar
             ? 'تغيرت الجلسة. أغلق الشاشة وأعد فتحها.'
             : 'Your session changed. Close and reopen this screen.')
-      : e is ApiException && e.statusCode != null
+      : e is ApiException
       ? e.message
       : (ar
             ? 'تعذر إتمام العملية. تحقق من الملف والاتصال والصلاحيات وحاول مجدداً.'
             : 'Could not complete this operation. Check the file, connection and permissions, then try again.');
 
-  Future<void> _refreshProfile() async {
+  Future<bool> _refreshProfile() async {
     try {
       await _service.refreshClinicProfile();
+      return true;
     } catch (_) {
       if (mounted) {
         setState(
@@ -128,6 +187,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
         );
       }
     }
+    return false;
   }
 
   Future<void> _upload() async {
@@ -218,6 +278,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
 
   Future<void> _chooseVideo() async {
     if (_locked) return;
+    if (!await _loadOwnedProfile() || !_videoAllowed || !mounted) return;
     setState(() {
       _busy = true;
       _batchSize = 0;
@@ -237,7 +298,11 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       if (probe.value.duration <= Duration.zero ||
           probe.value.duration >
               const Duration(seconds: 15, milliseconds: 500)) {
-        throw const ApiException(message: 'Select a video up to 15 seconds.');
+        throw ApiException(
+          message: ar
+              ? 'اختر فيديو لا تتجاوز مدته 15 ثانية.'
+              : 'Select a video up to 15 seconds.',
+        );
       }
       _session.ensureCurrent();
       await _player?.dispose();
@@ -253,6 +318,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
 
   Future<void> _saveVideo({bool remove = false}) async {
     if (_locked || (!remove && _videoPath == null)) return;
+    if (!await _loadOwnedProfile() || (!remove && !_videoAllowed) || !mounted) {
+      return;
+    }
     if (remove) {
       setState(() => _confirming = true);
       final confirmed = await showDialog<bool>(
@@ -289,12 +357,25 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _session.ensureCurrent();
       await _service.updateShowcaseVideo(remove ? null : _videoPath);
       _session.ensureCurrent();
+      final refreshed = await _refreshProfile();
+      _session.ensureCurrent();
+      if (refreshed &&
+          (remove
+              ? _service.activeClinic.hasVideoAd
+              : !_service.activeClinic.hasVideoAd)) {
+        throw const ApiException(
+          message:
+              'The server did not return the expected saved video state. Refresh before retrying.',
+        );
+      }
       await _player?.dispose();
       _player = null;
       if (mounted) {
         setState(() {
           _videoPath = null;
-          _notice = ar ? 'تم حفظ فيديو العيادة.' : 'Clinic video saved.';
+          if (refreshed) {
+            _notice = ar ? 'تم حفظ فيديو العيادة.' : 'Clinic video saved.';
+          }
         });
       }
     } catch (e) {
@@ -381,8 +462,20 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: Scaffold(
-      appBar: AppBar(title: Text(ar ? 'وسائط العيادة' : 'Clinic Media')),
-      body: !_session.isCurrent
+      appBar: AppBar(
+        title: Text(ar ? 'وسائط العيادة' : 'Clinic Media'),
+        actions: [
+          IconButton(
+            onPressed: _busy || _profileLoading ? null : _loadOwnedProfile,
+            tooltip: ar
+                ? 'تحديث ملف العيادة والصلاحيات'
+                : 'Refresh clinic profile and permissions',
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      backgroundColor: AppColors.bg(context),
+      body: !_session.isCurrent || !_roleAllowed
           ? Center(
               child: Text(
                 ar
@@ -394,11 +487,27 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
               listenable: Listenable.merge([_gallery, _service]),
               builder: (context, _) {
                 final clinic = _service.activeClinic;
-                final vip =
-                    clinic.subscriptionTier == SubscriptionTier.vipPlatinum;
+                final vip = _videoAllowed;
+                final unknownTier = !clinic.subscriptionTierKnown;
                 return ListView(
                   padding: const EdgeInsets.all(20),
                   children: [
+                    if (_profileLoading) const LinearProgressIndicator(),
+                    if (_profileError != null) ...[
+                      Text(
+                        _profileError!,
+                        style: TextStyle(color: AppColors.dangerText(context)),
+                      ),
+                      TextButton.icon(
+                        onPressed: _profileLoading ? null : _loadOwnedProfile,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(
+                          ar
+                              ? 'إعادة التحقق من الملف'
+                              : 'Retry profile verification',
+                        ),
+                      ),
+                    ],
                     if (_error != null)
                       Semantics(
                         liveRegion: true,
@@ -439,13 +548,12 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       Card(
                         child: Column(
                           children: [
-                            SizedBox(
-                              height: 150,
-                              width: double.infinity,
-                              child: LuxuryImage(
-                                imageUrl: asset.url,
-                                fit: BoxFit.cover,
-                              ),
+                            PortalMediaFrame(
+                              imageUrl: asset.url,
+                              expandable: true,
+                              label: ar
+                                  ? 'صورة من معرض العيادة'
+                                  : 'Clinic gallery photo',
                             ),
                             TextButton.icon(
                               onPressed: _locked ? null : () => _remove(asset),
@@ -476,7 +584,10 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                           children: [
                             SizedBox(
                               height: 120,
-                              child: LuxuryImage(imageUrl: path),
+                              child: PortalMediaFrame(
+                                imageUrl: path,
+                                height: 120,
+                              ),
                             ),
                             TextButton(
                               onPressed: _locked
@@ -519,6 +630,15 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       ar ? 'فيديو عرض العيادة' : 'Clinic showcase video',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    if (_profileLoading)
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          ar
+                              ? 'جارٍ التحقق من صلاحية الفيديو…'
+                              : 'Checking video permission…',
+                        ),
+                      ),
                     Text(
                       vip
                           ? (ar
@@ -528,11 +648,18 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                                 ? 'رفع الفيديو متاح للعيادات ذات أهلية الفيديو فقط.'
                                 : 'Video upload requires the clinic’s video entitlement.'),
                     ),
-                    if (!vip && !clinic.hasVideoAd && _videoPath == null) ...[
+                    if (!_profileLoading &&
+                        !vip &&
+                        !clinic.hasVideoAd &&
+                        _videoPath == null) ...[
                       Text(
-                        ar
-                            ? 'رفع فيديو العرض غير مفعّل في صلاحيات ملف عيادتك الحالي. حدّث الملف أو راجع إدارة المنصة إذا كانت الصلاحية متوقعة.'
-                            : 'Showcase video upload is not enabled by your current clinic profile. Refresh the profile or contact the platform administrator if you expect access.',
+                        unknownTier
+                            ? (ar
+                                  ? 'لم يُعِد الخادم صلاحية الفيديو لهذه العيادة. حدّث الملف للتحقق؛ لا يمكن افتراض الأهلية من الشارة.'
+                                  : 'The server did not establish this clinic’s video entitlement. Refresh to verify; a badge cannot grant permission.')
+                            : (ar
+                                  ? 'رفع فيديو العرض غير مفعّل في صلاحيات ملف عيادتك الحالي. حدّث الملف أو راجع إدارة المنصة إذا كانت الصلاحية متوقعة.'
+                                  : 'Showcase video upload is not enabled by your current clinic profile. Refresh the profile or contact the platform administrator if you expect access.'),
                       ),
                       OutlinedButton.icon(
                         onPressed: null,
@@ -544,6 +671,16 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                         ),
                       ),
                     ],
+                    if (unknownTier || _profileError != null)
+                      TextButton.icon(
+                        onPressed: _profileLoading ? null : _loadOwnedProfile,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(
+                          ar
+                              ? 'التحقق من صلاحية الفيديو'
+                              : 'Verify video entitlement',
+                        ),
+                      ),
                     if (vip || clinic.hasVideoAd || _videoPath != null) ...[
                       const SizedBox(height: 12),
                       AspectRatio(
@@ -552,10 +689,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                             : 16 / 9,
                         child: _player?.value.isInitialized == true
                             ? VideoPlayer(_player!)
-                            : LuxuryImage(
-                                imageUrl: clinic.coverImageUrl,
-                                fit: BoxFit.cover,
-                              ),
+                            : PortalMediaFrame(imageUrl: clinic.coverImageUrl),
                       ),
                       Wrap(
                         spacing: 8,
@@ -609,7 +743,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                               ? 'رفع وحفظ الفيديو'
                               : 'Upload and save video',
                           isLoading: _busy,
-                          onPressed: _locked ? null : () => _saveVideo(),
+                          onPressed: _locked || !vip
+                              ? null
+                              : () => _saveVideo(),
                         ),
                       Text(
                         ar

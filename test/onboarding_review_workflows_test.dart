@@ -537,6 +537,11 @@ void main() {
             500,
             scrollable: find.byType(Scrollable).first,
           );
+          await tester.pumpAndSettle();
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('approve-clinic-profile')),
+          );
+          await tester.pumpAndSettle();
           await tester.tap(
             find.byKey(const ValueKey('approve-clinic-profile')),
           );

@@ -1,3 +1,4 @@
+import '../localization/app_locale.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import '../network/api_exception.dart';
@@ -7,14 +8,22 @@ abstract class MediaFilePolicy {
   static Future<DioMediaType> inspect(String path, {bool video = false}) async {
     final file = File(path);
     if (!await file.exists()) {
-      throw const ApiException(message: 'Please select the media file again.');
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'يرجى اختيار ملف الوسائط مجدداً.'
+            : 'Please select the media file again.',
+      );
     }
     final size = await file.length();
     if (size <= 0 || size > (video ? 25 : 5) * 1024 * 1024) {
       throw ApiException(
-        message: video
-            ? 'Select a video no larger than 25 MB.'
-            : 'Select an image no larger than 5 MB.',
+        message: LocaleService().isArabic
+            ? (video
+                  ? 'اختر فيديو لا يتجاوز حجمه 25 MB.'
+                  : 'اختر صورة لا يتجاوز حجمها 5 MB.')
+            : (video
+                  ? 'Select a video no larger than 25 MB.'
+                  : 'Select an image no larger than 5 MB.'),
       );
     }
     final ext = path.split('.').last.toLowerCase();
@@ -56,9 +65,10 @@ abstract class MediaFilePolicy {
         return DioMediaType('video', ext == 'mov' ? 'quicktime' : 'mp4');
       }
     }
-    throw const ApiException(
-      message:
-          'The selected media format is not supported or its content is invalid.',
+    throw ApiException(
+      message: LocaleService().isArabic
+          ? 'تنسيق الملف المحدد غير مدعوم أو محتواه غير صالح.'
+          : 'The selected media format is not supported or its content is invalid.',
     );
   }
 }

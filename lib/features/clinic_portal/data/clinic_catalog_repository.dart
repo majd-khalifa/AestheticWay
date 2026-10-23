@@ -485,12 +485,53 @@ class ClinicCatalogRepository {
   // -------------------------------------------------------------
 
   Future<ClinicModel> getClinicProfile() async {
+    final session = SessionSnapshot();
     final response = await _api.get(ApiConfig.clinicProfile);
-    final body = response.data;
-    final rawData = body is Map<String, dynamic>
-        ? (body['data'] ?? body)
-        : body;
-    return ClinicModel.fromJson(rawData as Map<String, dynamic>);
+    session.ensureCurrent();
+    return _profileFromResponse(response.data, session);
+  }
+
+  Future<ClinicModel> _profileFromResponse(
+    dynamic body,
+    SessionSnapshot session,
+  ) async {
+    final data = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final raw = Map<String, dynamic>.from(data as Map);
+    final profile = ClinicModel.fromJson(raw);
+    // 1f1e4bf omits subscription_tier from the private serializer. Its existing
+    // public detail exposes that read-only DB field for active clinics. Join
+    // ONLY the current authenticated clinic's matching UUID and ONLY its tier;
+    // never replace portal data, infer from is_featured, use labels or cache it.
+    final reported = raw['subscription_tier']?.toString().trim() ?? '';
+    if (profile.subscriptionTierKnown ||
+        reported.isNotEmpty ||
+        !RegExp(
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+        ).hasMatch(profile.id)) {
+      return profile;
+    }
+    try {
+      final result = await _api.get(ApiConfig.clinicDetail(profile.id));
+      session.ensureCurrent();
+      final public = result.data is Map
+          ? Map<String, dynamic>.from(result.data as Map)
+          : <String, dynamic>{};
+      if (public['id']?.toString() != profile.id) return profile;
+      final tier = ClinicModel.fromJson({
+        'subscription_tier': public['subscription_tier'],
+      });
+      if (tier.subscriptionTierKnown) {
+        return profile.copyWith(
+          subscriptionTier: tier.subscriptionTier,
+          subscriptionTierKnown: true,
+        );
+      }
+    } catch (_) {
+      session.ensureCurrent();
+      // Unpublished/suspended clinics may legitimately be absent publicly.
+      // Keep unknown; Ali must expose the private read-only tier for them.
+    }
+    return profile;
   }
 
   Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
@@ -505,11 +546,8 @@ class ClinicCatalogRepository {
       ApiConfig.clinicProfile,
       data: requestData,
     );
-    final body = response.data;
-    final rawData = body is Map<String, dynamic>
-        ? (body['data'] ?? body)
-        : body;
-    return ClinicModel.fromJson(rawData as Map<String, dynamic>);
+    session.ensureCurrent();
+    return _profileFromResponse(response.data, session);
   }
 
   // -------------------------------------------------------------
