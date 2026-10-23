@@ -46,3 +46,11 @@ PYTHONDONTWRITEBYTECODE=1 python tool/audit_clinic_contracts.py \
 Source-only script execution cannot prove production CDN configuration or mobile restart persistence. Complete the device acceptance checklist in the [bilingual handoff](../CLINIC_PORTAL_FULL_AUDIT_FOR_ALI.md) before declaring live delivery verified.
 
 **نتائج Linux مثبتة محلياً، ونتائج Windows/Ubuntu المستضافة تؤخذ من Checks للـSHA المختبر.** اختبارات Django محلية ومعزولة دون تعديل ملف واحد. لا تمثل اختبارات الكاميرا أو فك الفيديو الأصلي أو R2 على جهاز حقيقي. نجاح دورة الاستشارة على أندرويد منقول عن صاحب المشروع، وليس تنفيذاً جديداً هنا.
+
+## Windows fixture correction discovered by hosted CI
+
+The first bounded Windows Clinic Portal run caught an invalid test adapter response in the new video save/reopen scenario (`test/clinic_media_contract_test.dart`): it echoed the input device filename into `video_ad_file`. On Windows, `C:\...` is not a valid backend media URL, so `ClinicModel` correctly discarded it and “Remove saved video” was absent. Linux masked the invalid fixture by resolving its `/...` absolute path against the configured server origin. Real Django returns a storage URL (independently demonstrated by the MP4 contract probe), not the client's filename.
+
+The adapter now returns an explicit test-only canonical HTTPS storage URL after save and preserves null removal. The test still asserts the original native input path, actual file signature/duration preflight, lazy playback/disposal, independent cover, reopened saved URL and removal. No production resolver was loosened, no assertion removed and no timeout increased. CI runs the 21 Clinic Portal cases with a bounded diagnostic step before the full suite so a stall cannot obscure their result.
+
+**صححنا بيانات الاختبار، لا عقد الإنتاج:** كان المحاكي يعيد مسار ملف الجهاز بدلاً من رابط التخزين. يقبل الاختبار الآن رد الخادم الصحيح ويؤكد الرابط المحفوظ بعد إعادة فتح المحرر، مع بقاء فحوص الملف والتشغيل والحذف والغلاف كما هي. لا تغيير في Django أو محلل الوسائط الإنتاجي لهذا التصحيح.

@@ -24,6 +24,7 @@ import 'support/settle_preview_images.dart';
 
 const clinicId = '11111111-1111-4111-8111-111111111111';
 const assetId = '22222222-2222-4222-8222-222222222222';
+const savedVideoUrl = 'https://aestheticway.ae/media/qa-saved-showcase.mp4';
 final fixture = File('test/fixtures/media/portrait_photo.png').absolute;
 Map<String, dynamic> asset({
   String id = assetId,
@@ -139,7 +140,8 @@ class Profile implements ClinicCatalogRepository {
       'subscription_tier': 'vip',
       'cover_image': fixture.uri.toString(),
       'video_ad_file': data.containsKey('video_ad_file')
-          ? data['video_ad_file']
+          // Django returns a storage URL, never the device's upload path.
+          ? (data['video_ad_file'] == null ? null : savedVideoUrl)
           : current.videoUrl,
     });
     return current;
@@ -573,10 +575,13 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(profile.patches.single, {'video_ad_file': picker.video});
+      expect(profile.current.videoUrl, savedVideoUrl);
+      expect(service.activeClinic.videoUrl, savedVideoUrl);
       expect(profile.current.coverImageUrl, cover);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
       await mount();
+      expect(service.activeClinic.videoUrl, savedVideoUrl);
       expect(find.text('Upload and save video'), findsNothing);
       await tester.scrollUntilVisible(find.text('Remove saved video'), 300);
       await tester.tap(find.text('Remove saved video'));
