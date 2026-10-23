@@ -1,5 +1,7 @@
 # Reproducible release builds and smoke checks
 
+> Update: self-service deletion and category contracts now exist in supplied backend 1f1e4bf. Use [the consolidated report](FINAL_BACKEND_INTEGRATION_REPORT.md) and [current handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md) for current availability and remaining gates; original release/declaration evidence below remains historical.
+
 Reproducibility here means pinned toolchains/locked dependencies and an auditable artifact hash. Signed outputs are not promised byte-identical, especially when CI deliberately creates a fresh disposable certificate.
 
 Use the exact release-readiness commit reviewed in PR #11. Do not publish from a working tree containing unrelated changes. These steps build artifacts; they do not upload anything to Google Play or App Store Connect.

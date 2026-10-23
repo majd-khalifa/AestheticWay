@@ -1,5 +1,7 @@
 # Store publication worksheet — owner review required
 
+> Update: self-service deletion and category contracts now exist in supplied backend 1f1e4bf. Use [the consolidated report](FINAL_BACKEND_INTEGRATION_REPORT.md) and [current handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md) for current availability and remaining gates; original release/declaration evidence below remains historical.
+
 This is a preparation worksheet, not a submitted declaration. Audit date: 23 October 2026. No console access, legal/operator approval or production data inventory was supplied. Fill the remaining items from actual operations; never invent contact details, legal entities, ratings, reviews, credentials or medical outcomes.
 
 ## Listing drafts

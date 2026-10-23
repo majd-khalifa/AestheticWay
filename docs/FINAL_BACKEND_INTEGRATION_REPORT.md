@@ -65,4 +65,6 @@ Existing Flutter media/treatment regression tests cover native pickers, queue se
 
 See the bilingual [Ali handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md). Self-service UI is implemented, but store compliance is not declared complete while public deletion guidance, accurate retention/privacy disclosures, lifecycle completeness and real-device/native checks remain outstanding. No real account was deleted. No release was published.
 
+Other inherited release gates remain: privately provisioned review accounts for all roles; production Play upload identity/App Signing and Apple provisioning; accurate Data Safety/App Privacy/Health Apps declarations and operator/media-rights metadata. API36 physical smoke, Android picker activity-death recovery (`retrieveLostData` remains absent), verified incoming invite App Links/Universal Links, and the iOS13/14 support decision remain P1 work/verification from PR11. Unsigned/synthetic CI does not close those gates. No role bypass or new production content was added.
+
 Client-preview Windows commands and the MacBook/iOS handoff: [runbook](FINAL_CLIENT_PREVIEW_RUNBOOK.md).

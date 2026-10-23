@@ -5,7 +5,9 @@ docs/FINAL_BACKEND_INTEGRATION_REPORT.md
 docs/FINAL_CLIENT_PREVIEW_RUNBOOK.md
 docs/FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md
 docs/MOBILE_RELEASE_READINESS_REPORT.md
+docs/MOBILE_RELEASE_RUNBOOK.md
 docs/RELEASE_BACKEND_HANDOFF_FOR_ALI.md
+docs/STORE_LISTING_AND_PRIVACY_WORKSHEET.md
 docs/final-integration/CHANGED_FILES.txt
 docs/final-integration/INTEGRATION_FILES.txt
 docs/final-integration/RENDERS.md
@@ -19,10 +21,15 @@ docs/final-integration/admin_category_requests_dark_ar.png
 docs/final-integration/admin_category_requests_dark_en.png
 docs/final-integration/admin_category_requests_light_ar.png
 docs/final-integration/admin_category_requests_light_en.png
+docs/final-integration/android-aab.json
+docs/final-integration/apk-sha256.txt
+docs/final-integration/apk-signature.txt
 docs/final-integration/backend-delta.json
 docs/final-integration/clinic_category_requests_light_en.png
 docs/final-integration/controlled-django-contracts.json
+docs/final-integration/ios-compilation.json
 docs/final-integration/source-integrity.json
+docs/final-integration/verified-code-trees.json
 lib/core/network/api_exception.dart
 lib/core/widgets/account_privacy_actions.dart
 lib/features/admin/presentation/screens/admin_categories_screen.dart

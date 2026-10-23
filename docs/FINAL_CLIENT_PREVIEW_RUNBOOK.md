@@ -65,6 +65,8 @@ open ios/Runner.xcworkspace
 
 Verify Bundle ID **`com.aestheticway.aestheticWay` in the actual project before provisioning**; the application ID is recorded in the CI evidence/runbook. Do not substitute an arbitrary registered ID. Confirm supported iPhone/iPad families, deployment targets, URL/link association entitlements, aggregated native privacy manifests and actual App Store privacy declarations in Xcode.
 
+The declared minimum remains iOS13.0 to preserve PR11 support intent. Xcode26.2 documented deployment/device support starts at iOS15; a successful iOS26 build does not verify iOS13/14 devices. The owner must decide the supported minimum and validate real target OS devices before release.
+
 For a signed IPA: Apple Developer Program access, registered App ID, matching App Store Connect app, distribution identity/profile and private signing access are required. Select the correct team in Runner in the **workspace**, then use Xcode Product → Archive / Validate App. Alternatively, with an owner-maintained external export-options plist matching actual provisioning:
 
 ```bash

@@ -59,10 +59,15 @@ docs/final-integration/admin_category_requests_dark_ar.png
 docs/final-integration/admin_category_requests_dark_en.png
 docs/final-integration/admin_category_requests_light_ar.png
 docs/final-integration/admin_category_requests_light_en.png
+docs/final-integration/android-aab.json
+docs/final-integration/apk-sha256.txt
+docs/final-integration/apk-signature.txt
 docs/final-integration/backend-delta.json
 docs/final-integration/clinic_category_requests_light_en.png
 docs/final-integration/controlled-django-contracts.json
+docs/final-integration/ios-compilation.json
 docs/final-integration/source-integrity.json
+docs/final-integration/verified-code-trees.json
 docs/release-readiness/android-verified-aab.json
 docs/release-readiness/backend-contract-audit.json
 docs/release-readiness/ios-initial-compilation.json

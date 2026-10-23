@@ -18,3 +18,5 @@ Reproduce:
 flutter test test/final_integration_contract_test.dart --timeout 60s --reporter expanded \
   --dart-define=FINAL_INTEGRATION_CAPTURE_DIR=/absolute/path/outside/repository
 ```
+
+Native Windows captures also passed and were visually reviewed (Arabic Dark categories and deletion error state): [Windows artifact](https://github.com/majd-khalifa/AestheticWay/actions/runs/39955100633/artifacts/12501219972), 14-day retention. The regular committed renders above remain permanent local Flutter evidence.
