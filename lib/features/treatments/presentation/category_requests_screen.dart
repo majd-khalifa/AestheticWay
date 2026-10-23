@@ -198,6 +198,7 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
                                   'اختر بانتظار الموافقة للتحديث',
                                 )),
                     ),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _status,
                       decoration: InputDecoration(

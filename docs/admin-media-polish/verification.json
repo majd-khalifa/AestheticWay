@@ -12,7 +12,7 @@
   "full_flutter_suite": {
     "passed": 923,
     "failed": 0,
-    "elapsed": "2m17s"
+    "elapsed": "2m16s"
   },
   "added_flutter_tests": 70,
   "focused_affected_screens": {
@@ -30,5 +30,9 @@
   "physical_android_qa_performed_here": false,
   "production_vip_profile_or_r2_verified": false,
   "production_signing_changed": false,
-  "django_changed": false
+  "django_changed": false,
+  "final_category_spacing_regressions": {
+    "passed": 4,
+    "failed": 0
+  }
 }
