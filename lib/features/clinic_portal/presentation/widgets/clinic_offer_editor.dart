@@ -1,3 +1,4 @@
+import '../../../../core/auth/session_snapshot.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -16,6 +17,7 @@ Future<void> showClinicOfferEditor(
   OfferModel? existing,
 }) async {
   final formKey = GlobalKey<FormState>();
+  final editorSession = SessionSnapshot();
   String? offerImagePath;
   bool imageChanged = false;
   final titleEnController = TextEditingController(text: existing?.titleEn);
@@ -544,6 +546,14 @@ Future<void> showClinicOfferEditor(
                           : () async {
                               setModalState(() => modalErrorMessage = null);
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
 
                               if (!endsAt.isAfter(startsAt)) {
                                 setModalState(() {
@@ -581,14 +591,8 @@ Future<void> showClinicOfferEditor(
                                     titleArController.text.trim().isNotEmpty
                                     ? titleArController.text.trim()
                                     : titleEnController.text.trim(),
-                                'description_en':
-                                    termsEnController.text.trim().isNotEmpty
-                                    ? termsEnController.text.trim()
-                                    : 'Special promotional aesthetic offer.',
-                                'description_ar':
-                                    termsArController.text.trim().isNotEmpty
-                                    ? termsArController.text.trim()
-                                    : 'عرض ترويجي تجميلي خاص.',
+                                'description_en': termsEnController.text.trim(),
+                                'description_ar': termsArController.text.trim(),
                                 'original_price': origPrice,
                                 'offer_price': offPrice,
                                 'starts_at': startsAt.toIso8601String(),

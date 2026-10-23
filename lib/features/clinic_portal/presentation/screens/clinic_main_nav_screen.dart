@@ -40,6 +40,7 @@ class _ClinicMainNavScreenState extends State<ClinicMainNavScreen> {
     setState(() {
       _currentIndex = index;
     });
+    if (index == 0) ClinicPortalService().loadPortalData();
   }
 
   void _navigateToProfileSection(String section) {
