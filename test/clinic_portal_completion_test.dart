@@ -40,42 +40,9 @@ const _category = CategoryModel(
 const _remote = 'https://aestheticway.ae/media/new.png';
 
 class _Catalog implements ClinicCatalogRepository {
-  Completer<CategoryModel>? creation;
   Completer<List<CategoryModel>>? listing;
   bool reject = false;
   String? categorySearch;
-  @override
-  Future<CategoryModel> createCategory({
-    required String nameEn,
-    required String nameAr,
-  }) async {
-    if (reject) {
-      throw const ApiException(message: 'Unavailable', statusCode: 405);
-    }
-    return creation == null
-        ? CategoryModel(
-            id: _category.id,
-            nameEn: nameEn,
-            nameAr: nameAr,
-            slug: 'skin-care',
-          )
-        : creation!.future;
-  }
-
-  @override
-  Future<CategoryModel> updateCategory(
-    String id, {
-    required String nameEn,
-    required String nameAr,
-  }) async =>
-      CategoryModel(id: id, nameEn: nameEn, nameAr: nameAr, slug: 'skin-care');
-  @override
-  Future<void> deleteCategory(String id) async {
-    if (reject) {
-      throw const ApiException(message: 'Category is in use', statusCode: 409);
-    }
-  }
-
   @override
   Future<List<CategoryModel>> getCategories({
     int page = 1,
@@ -371,98 +338,87 @@ void main() {
     },
   );
   test(
-    'category endpoints fall back only on missing route and persist POST/PATCH/DELETE',
+    'unsupported category writes fail locally without probing public or clinic routes',
     () async {
       final paths = <String>[];
       final api = FakeApiClient(
         onGet: (_, _) => {},
         onPost: (path, data) {
           paths.add(path);
-          if (path.startsWith('clinic-portal/')) {
-            throw const ApiException(message: 'Missing', statusCode: 404);
-          }
-          return {'id': 'category-a', ...data as Map<String, dynamic>};
+          return {};
         },
         onPatch: (path, data) {
           paths.add(path);
-          if (path.startsWith('clinic-portal/')) {
-            throw const ApiException(message: 'Unsupported', statusCode: 405);
-          }
-          return {'id': 'category-a', ...data as Map<String, dynamic>};
+          return {};
         },
         onDelete: (path) {
           paths.add(path);
-          if (path.startsWith('clinic-portal/')) {
-            throw const ApiException(message: 'Missing', statusCode: 404);
-          }
         },
       );
       final repo = ClinicCatalogRepository(apiClient: api);
-      expect(
-        (await repo.createCategory(
-          nameEn: ' Skin ',
-          nameAr: ' البشرة ',
-        )).nameEn,
-        'Skin',
-      );
-      expect(
-        (await repo.updateCategory(
-          'category-a',
-          nameEn: 'Laser',
-          nameAr: 'الليزر',
-        )).nameAr,
-        'الليزر',
-      );
-      await repo.deleteCategory('category-a');
-      expect(paths, [
-        'clinic-portal/categories/',
-        'categories/',
-        'clinic-portal/categories/category-a/',
-        'categories/category-a/',
-        'clinic-portal/categories/category-a/',
-        'categories/category-a/',
-      ]);
-      final publicRepo = TreatmentsRepository(apiClient: api);
-      expect(
-        (await publicRepo.createCategory(nameEn: 'Care', nameAr: 'عناية')).id,
-        'category-a',
-      );
+      for (final write in [
+        () => repo.createCategory(
+          nameEn: ' skin care ',
+          nameAr: ' عناية بالبشرة ',
+        ),
+        () =>
+            repo.updateCategory(_category.id, nameEn: 'Skin', nameAr: 'البشرة'),
+        () => repo.deleteCategory(_category.id),
+        () => TreatmentsRepository(
+          apiClient: api,
+        ).createCategory(nameEn: 'Skin', nameAr: 'البشرة'),
+      ]) {
+        await expectLater(
+          write(),
+          throwsA(
+            isA<ApiException>().having(
+              (e) => e.errorCode,
+              'contract guard',
+              'CATEGORY_WRITES_UNSUPPORTED',
+            ),
+          ),
+        );
+      }
+      expect(paths, isEmpty);
     },
   );
   test(
-    'category rejection/timeouts never retry writes or fabricate IDs',
+    'category read errors retain safe typed status/field feedback and never try writes',
     () async {
-      for (final code in [400, 401, 403, 409, 500, null]) {
-        var calls = 0;
+      for (final code in [400, 403, 404, 405, 409, 500]) {
+        var reads = 0;
         final repo = ClinicCatalogRepository(
           apiClient: FakeApiClient(
-            onGet: (_, _) => {},
-            onPost: (_, data) {
-              calls++;
-              throw ApiException(message: 'Rejected', statusCode: code);
+            onGet: (_, _) {
+              reads++;
+              throw ApiException(
+                message: 'Rejected',
+                statusCode: code,
+                fieldErrors: const {
+                  'name_en': ['Invalid input'],
+                },
+              );
             },
           ),
         );
         await expectLater(
-          repo.createCategory(nameEn: 'A', nameAr: 'أ'),
-          throwsA(isA<ApiException>()),
+          repo.getCategories(),
+          throwsA(
+            isA<ApiException>()
+                .having((e) => e.statusCode, 'status', code)
+                .having(
+                  (e) => e.getFieldError('name_en'),
+                  'safe field error',
+                  'Invalid input',
+                ),
+          ),
         );
-        expect(calls, 1);
+        expect(reads, 1);
       }
-      final invalid = ClinicCatalogRepository(
-        apiClient: FakeApiClient(
-          onGet: (_, _) => {},
-          onPost: (_, _) => {'name_en': 'No ID'},
-        ),
-      );
-      await expectLater(
-        invalid.createCategory(nameEn: 'A', nameAr: 'أ'),
-        throwsA(isA<ApiException>()),
-      );
     },
   );
   test(
-    'category search/pagination are sent and acknowledged changes survive stale reads',
+    'category search/pagination and existing records survive all blocked mutations',
     () async {
       Map<String, dynamic>? query;
       final repo = ClinicCatalogRepository(
@@ -473,54 +429,36 @@ void main() {
           },
         ),
       );
-      await repo.getCategories(page: 3, search: ' laser ');
+      await repo.getCategories(page: 3, search: ' skin ');
       expect(query!['page'], 3);
-      expect(query!['search'], 'laser');
-      catalog.listing = Completer<List<CategoryModel>>();
-      final read = service.loadCollection(
-        'categories',
-        query: {'search': 'skin'},
-      );
-      expect(catalog.categorySearch, 'skin');
-      catalog.creation = Completer<CategoryModel>();
-      final create = service.createCategory(
-        nameEn: 'Skin care',
-        nameAr: 'العناية بالبشرة',
-      );
-      expect(service.categories, isEmpty);
-      catalog.creation!.complete(_category);
-      await create;
-      catalog.listing!.complete([]);
-      await read;
-      expect(service.categories.single.id, _category.id);
-      final updated = await service.updateCategory(
-        _category.id,
-        nameEn: 'New name',
-        nameAr: 'اسم جديد',
-      );
-      expect(service.categories.single.nameEn, updated.nameEn);
-      catalog.reject = true;
-      await expectLater(
-        service.deleteCategory(_category.id),
-        throwsA(isA<ApiException>()),
-      );
-      expect(service.categories, hasLength(1));
-      catalog.reject = false;
-      await service.deleteCategory(_category.id);
-      expect(service.categories, isEmpty);
+      expect(query!['search'], 'skin');
+      catalog.listing = Completer<List<CategoryModel>>()..complete([_category]);
+      await service.loadCollection('categories');
+      for (final write in [
+        () => service.createCategory(nameEn: 'Skin', nameAr: 'البشرة'),
+        () => service.updateCategory(
+          _category.id,
+          nameEn: 'Skin',
+          nameAr: 'البشرة',
+        ),
+        () => service.deleteCategory(_category.id),
+      ]) {
+        await expectLater(write(), throwsA(isA<ApiException>()));
+        expect(service.categories.single, _category);
+      }
     },
   );
-  testWidgets('Add Category dialog auto-selects the server category UUID', (
-    tester,
-  ) async {
-    String? selected;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.lightTheme,
-        home: Scaffold(
-          body: ListenableBuilder(
-            listenable: service,
-            builder: (context, _) => StatefulBuilder(
+  testWidgets(
+    'read-only category directory selects an existing UUID without add/edit/delete controls',
+    (tester) async {
+      catalog.listing = Completer<List<CategoryModel>>()..complete([_category]);
+      await service.loadCollection('categories');
+      String? selected;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: StatefulBuilder(
               builder: (context, setLocal) => ClinicCategoryField(
                 categories: service.categories,
                 value: selected,
@@ -530,70 +468,43 @@ void main() {
             ),
           ),
         ),
-      ),
-    );
-    await tester.tap(find.text('Add Category'));
-    await tester.pumpAndSettle();
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'Skin care');
-    await tester.enterText(fields.at(1), 'العناية بالبشرة');
-    await tester.tap(find.text('Save Category'));
-    await tester.pumpAndSettle();
-    expect(selected, _category.id);
-    expect(find.text('Skin care'), findsWidgets);
-    expect(service.categories.single.nameAr, _category.nameAr);
-    expect(tester.takeException(), isNull);
-  });
-  testWidgets(
-    'category manager renames, preserves rejected deletes, and clears a deleted selection',
-    (tester) async {
-      final created = await service.createCategory(
-        nameEn: 'Skin care',
-        nameAr: 'العناية بالبشرة',
       );
-      catalog.listing = Completer<List<CategoryModel>>()..complete([created]);
+      expect(find.text('Add Category'), findsNothing);
+      await tester.tap(find.text('Browse all categories'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('shared across the platform'), findsOneWidget);
+      expect(find.text('Add New Category'), findsNothing);
+      expect(find.byIcon(Icons.delete_outline), findsNothing);
+      await tester.tap(find.text(_category.nameEn).last);
+      await tester.pumpAndSettle();
+      expect(selected, _category.id);
+      expect(service.categories.single, _category);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'closing category directory preserves a previously selected category',
+    (tester) async {
+      catalog.listing = Completer<List<CategoryModel>>()..complete([_category]);
       await service.loadCollection('categories');
-      CategoryModel? selected = created;
+      CategoryModel? selected = _category;
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.lightTheme,
           home: Scaffold(
-            body: StatefulBuilder(
-              builder: (context, setLocal) => ClinicCategoryField(
-                categories: service.categories,
-                value: selected?.id,
-                valueLabel: selected?.nameEn,
-                onChanged: (value) => setLocal(() => selected = value),
-              ),
+            body: ClinicCategoryField(
+              categories: service.categories,
+              value: selected.id,
+              valueLabel: selected.nameEn,
+              onChanged: (c) => selected = c,
             ),
           ),
         ),
       );
-      await tester.tap(find.text('Manage Categories'));
+      await tester.tap(find.text('Browse all categories'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Edit'));
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextFormField).first, 'Skin health');
-      await tester.enterText(find.byType(TextFormField).last, 'صحة البشرة');
-      await tester.tap(find.text('Save Category'));
-      await tester.pumpAndSettle();
-      expect(service.categories.single.nameEn, 'Skin health');
-      expect(selected?.nameAr, 'صحة البشرة');
-      catalog.reject = true;
-      await tester.tap(find.text('Delete'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Delete').last);
-      await tester.pumpAndSettle();
-      expect(find.text('Category is in use'), findsOneWidget);
-      expect(service.categories, hasLength(1));
-      expect(selected?.id, created.id);
-      catalog.reject = false;
-      await tester.tap(find.text('Delete'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Delete').last);
-      await tester.pumpAndSettle();
-      expect(service.categories, isEmpty);
-      expect(selected, isNull);
+      expect(selected, _category);
       expect(tester.takeException(), isNull);
     },
   );

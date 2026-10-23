@@ -1,3 +1,4 @@
+import '../../../../core/auth/session_snapshot.dart';
 import '../widgets/clinic_catalog_cards.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
     PractitionerModel? existing,
   }) {
     final formKey = GlobalKey<FormState>();
+    final editorSession = SessionSnapshot();
     final isEditing = existing != null;
 
     String? avatarPath = existing?.avatarUrl;
@@ -553,6 +555,14 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                           : () async {
                               setModalState(() => modalErrorMessage = null);
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
 
                               final data = <String, dynamic>{
                                 'name_en': nameEnController.text.trim(),
@@ -568,14 +578,10 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                                     titleArController.text.trim().isNotEmpty
                                     ? titleArController.text.trim()
                                     : specialtyArController.text.trim(),
-                                'speciality_en':
-                                    specialtyEnController.text.trim().isNotEmpty
-                                    ? specialtyEnController.text.trim()
-                                    : 'Aesthetic Practitioner',
-                                'speciality_ar':
-                                    specialtyArController.text.trim().isNotEmpty
-                                    ? specialtyArController.text.trim()
-                                    : 'ممارس تجميلي معتمد',
+                                'speciality_en': specialtyEnController.text
+                                    .trim(),
+                                'speciality_ar': specialtyArController.text
+                                    .trim(),
                                 'type': selectedType.value,
                                 'bio_en': bioEnController.text.trim(),
                                 'bio_ar': bioArController.text.trim(),

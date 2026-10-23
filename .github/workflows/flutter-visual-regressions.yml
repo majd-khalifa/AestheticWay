@@ -51,6 +51,12 @@ jobs:
         shell: pwsh
         run: ./tool/test_public_clinic_capture.ps1
       - run: flutter analyze
+      - name: Clinic Portal regressions and render capture
+        timeout-minutes: 3
+        run: >-
+          flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
+          --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
+          --timeout 60s --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Capture candidates for review only
@@ -72,3 +78,4 @@ jobs:
             visual-manifest.json
             test/failures/**
             ${{ runner.temp }}/patient-golden-candidates/**
+            ${{ runner.temp }}/clinic-portal-audit/**
