@@ -57,7 +57,7 @@
         "previous": null,
         "results": [
           {
-            "id": "d411d4ec-f780-452d-895f-b9e918b24874",
+            "id": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
             "name_en": "QA Skin care",
             "name_ar": "عناية بالبشرة",
             "slug": "qa-skin-care",
@@ -72,17 +72,17 @@
       "url": "/api/v1/clinic-portal/treatments/",
       "status": 201,
       "request": {
-        "category": "d411d4ec-f780-452d-895f-b9e918b24874",
+        "category": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
         "name_en": "QA Treatment",
         "name_ar": "إجراء اختبار",
         "price": "250.75",
         "practitioners": [
-          "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe"
+          "fa1bc3e7-06ca-4708-9917-5b32452512d4"
         ]
       },
       "response": {
-        "id": "cda69b3e-4bed-4531-bf63-edbc137b2e24",
-        "category": "d411d4ec-f780-452d-895f-b9e918b24874",
+        "id": "4acacf59-600e-4cc1-8108-052ead2de490",
+        "category": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
         "category_name": "QA Skin care",
         "name_en": "QA Treatment",
         "name_ar": "إجراء اختبار",
@@ -92,20 +92,20 @@
         "status": "active",
         "is_active": true,
         "practitioners": [
-          "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe"
+          "fa1bc3e7-06ca-4708-9917-5b32452512d4"
         ],
-        "created_at": "2026-10-23T11:22:13.278608+04:00",
-        "updated_at": "2026-10-23T11:22:13.278624+04:00"
+        "created_at": "2026-10-23T12:21:43.040166+04:00",
+        "updated_at": "2026-10-23T12:21:43.040177+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/clinic-portal/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "cda69b3e-4bed-4531-bf63-edbc137b2e24",
-        "category": "d411d4ec-f780-452d-895f-b9e918b24874",
+        "id": "4acacf59-600e-4cc1-8108-052ead2de490",
+        "category": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
         "category_name": "QA Skin care",
         "name_en": "QA Treatment",
         "name_ar": "إجراء اختبار",
@@ -115,22 +115,22 @@
         "status": "active",
         "is_active": true,
         "practitioners": [
-          "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe"
+          "fa1bc3e7-06ca-4708-9917-5b32452512d4"
         ],
-        "created_at": "2026-10-23T11:22:13.278608+04:00",
-        "updated_at": "2026-10-23T11:22:13.278624+04:00"
+        "created_at": "2026-10-23T12:21:43.040166+04:00",
+        "updated_at": "2026-10-23T12:21:43.040177+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/clinic-portal/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 200,
       "request": {
         "description_en": "Updated QA description"
       },
       "response": {
-        "id": "cda69b3e-4bed-4531-bf63-edbc137b2e24",
-        "category": "d411d4ec-f780-452d-895f-b9e918b24874",
+        "id": "4acacf59-600e-4cc1-8108-052ead2de490",
+        "category": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
         "category_name": "QA Skin care",
         "name_en": "QA Treatment",
         "name_ar": "إجراء اختبار",
@@ -140,20 +140,20 @@
         "status": "active",
         "is_active": true,
         "practitioners": [
-          "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe"
+          "fa1bc3e7-06ca-4708-9917-5b32452512d4"
         ],
-        "created_at": "2026-10-23T11:22:13.278608+04:00",
-        "updated_at": "2026-10-23T11:22:13.288627+04:00"
+        "created_at": "2026-10-23T12:21:43.040166+04:00",
+        "updated_at": "2026-10-23T12:21:43.048674+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/clinic-portal/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "cda69b3e-4bed-4531-bf63-edbc137b2e24",
-        "category": "d411d4ec-f780-452d-895f-b9e918b24874",
+        "id": "4acacf59-600e-4cc1-8108-052ead2de490",
+        "category": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
         "category_name": "QA Skin care",
         "name_en": "QA Treatment",
         "name_ar": "إجراء اختبار",
@@ -163,19 +163,19 @@
         "status": "active",
         "is_active": true,
         "practitioners": [
-          "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe"
+          "fa1bc3e7-06ca-4708-9917-5b32452512d4"
         ],
-        "created_at": "2026-10-23T11:22:13.278608+04:00",
-        "updated_at": "2026-10-23T11:22:13.288627+04:00"
+        "created_at": "2026-10-23T12:21:43.040166+04:00",
+        "updated_at": "2026-10-23T12:21:43.048674+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/clinic-portal/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 400,
       "request": {
         "practitioners": [
-          "4d267d1f-2a27-4d93-9f6b-6a189131c69b"
+          "ce1928b7-804b-4194-bd06-781f33109cf8"
         ]
       },
       "response": {
@@ -192,18 +192,18 @@
     },
     {
       "method": "GET",
-      "url": "/api/v1/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "cda69b3e-4bed-4531-bf63-edbc137b2e24",
+        "id": "4acacf59-600e-4cc1-8108-052ead2de490",
         "name_en": "QA Treatment",
         "name_ar": "إجراء اختبار",
         "description_en": "Updated QA description",
         "description_ar": "",
         "price": "250.75",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -211,7 +211,7 @@
           "logo": null
         },
         "category": {
-          "id": "d411d4ec-f780-452d-895f-b9e918b24874",
+          "id": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
           "name_en": "QA Skin care",
           "name_ar": "عناية بالبشرة",
           "slug": "qa-skin-care",
@@ -220,7 +220,7 @@
         },
         "practitioners": [
           {
-            "id": "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe",
+            "id": "fa1bc3e7-06ca-4708-9917-5b32452512d4",
             "name_en": "QA Practitioner",
             "name_ar": "",
             "title_en": "",
@@ -233,7 +233,7 @@
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/treatments/a4735005-1fd6-4839-8af5-598c415b8936/",
+      "url": "/api/v1/clinic-portal/treatments/0595eaa4-5ce2-4190-af18-29f35ba184a7/",
       "status": 404,
       "request": null,
       "response": {
@@ -245,7 +245,7 @@
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/treatments/a4735005-1fd6-4839-8af5-598c415b8936/",
+      "url": "/api/v1/clinic-portal/treatments/0595eaa4-5ce2-4190-af18-29f35ba184a7/",
       "status": 404,
       "request": {},
       "response": {
@@ -257,7 +257,7 @@
     },
     {
       "method": "DELETE",
-      "url": "/api/v1/clinic-portal/treatments/a4735005-1fd6-4839-8af5-598c415b8936/",
+      "url": "/api/v1/clinic-portal/treatments/0595eaa4-5ce2-4190-af18-29f35ba184a7/",
       "status": 404,
       "request": null,
       "response": {
@@ -269,7 +269,7 @@
     },
     {
       "method": "DELETE",
-      "url": "/api/v1/clinic-portal/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/clinic-portal/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 204,
       "request": null,
       "response": {
@@ -279,7 +279,7 @@
     },
     {
       "method": "GET",
-      "url": "/api/v1/treatments/cda69b3e-4bed-4531-bf63-edbc137b2e24/",
+      "url": "/api/v1/treatments/4acacf59-600e-4cc1-8108-052ead2de490/",
       "status": 404,
       "request": null,
       "response": {
@@ -294,17 +294,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "b3b7fda0-02be-4144-b528-f783f025edf2",
+        "id": "0de80afd-9fe0-4f05-a33e-8a789791e63b",
         "media_type": "clinic_gallery",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/28200cad803543bea7e6e18e9bca1386.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/79caa22a173f4292a0c115a0c3decd1d.png",
         "original_filename": "qa-gallery-0.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.322731+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.080780+04:00"
       }
     },
     {
@@ -312,17 +312,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "6a1c2b44-cc45-4f8f-b773-8e4b3dfc08be",
+        "id": "d19caea7-e50f-4ffd-9af5-51432eca0900",
         "media_type": "clinic_gallery",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
         "original_filename": "qa-gallery-1.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.327102+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.085774+04:00"
       }
     },
     {
@@ -330,17 +330,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "2e22de96-a800-41ad-8a19-0cf86fec9753",
+        "id": "ad659ffe-4dd6-49f7-b966-e9e20497f618",
         "media_type": "clinic_gallery",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png",
         "original_filename": "qa-gallery-2.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.331714+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.089313+04:00"
       }
     },
     {
@@ -349,7 +349,7 @@
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -370,9 +370,9 @@
         "logo": null,
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/28200cad803543bea7e6e18e9bca1386.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/79caa22a173f4292a0c115a0c3decd1d.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": null,
         "is_featured": false,
@@ -386,17 +386,17 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.154393+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:42.912778+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/",
+      "url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -417,9 +417,9 @@
         "logo": null,
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/28200cad803543bea7e6e18e9bca1386.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/79caa22a173f4292a0c115a0c3decd1d.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_url": null,
         "video_ad_file": null,
@@ -427,11 +427,11 @@
         "is_featured": false,
         "google_rating": null,
         "google_reviews_count": 0,
-        "branches_directory_url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/branches/",
+        "branches_directory_url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/branches/",
         "branches": [],
         "practitioners": [
           {
-            "id": "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe",
+            "id": "fa1bc3e7-06ca-4708-9917-5b32452512d4",
             "name_en": "QA Practitioner",
             "name_ar": "",
             "title_en": "",
@@ -459,43 +459,43 @@
         "previous": null,
         "results": [
           {
-            "id": "2e22de96-a800-41ad-8a19-0cf86fec9753",
+            "id": "ad659ffe-4dd6-49f7-b966-e9e20497f618",
             "media_type": "clinic_gallery",
-            "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png",
+            "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png",
             "original_filename": "qa-gallery-2.png",
             "file_size": 98,
             "mime_type": "image/png",
             "width": 32,
             "height": 32,
-            "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-            "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-            "created_at": "2026-10-23T11:22:13.331714+04:00"
+            "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+            "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+            "created_at": "2026-10-23T12:21:43.089313+04:00"
           },
           {
-            "id": "6a1c2b44-cc45-4f8f-b773-8e4b3dfc08be",
+            "id": "d19caea7-e50f-4ffd-9af5-51432eca0900",
             "media_type": "clinic_gallery",
-            "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
+            "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
             "original_filename": "qa-gallery-1.png",
             "file_size": 98,
             "mime_type": "image/png",
             "width": 32,
             "height": 32,
-            "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-            "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-            "created_at": "2026-10-23T11:22:13.327102+04:00"
+            "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+            "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+            "created_at": "2026-10-23T12:21:43.085774+04:00"
           },
           {
-            "id": "b3b7fda0-02be-4144-b528-f783f025edf2",
+            "id": "0de80afd-9fe0-4f05-a33e-8a789791e63b",
             "media_type": "clinic_gallery",
-            "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/28200cad803543bea7e6e18e9bca1386.png",
+            "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/79caa22a173f4292a0c115a0c3decd1d.png",
             "original_filename": "qa-gallery-0.png",
             "file_size": 98,
             "mime_type": "image/png",
             "width": 32,
             "height": 32,
-            "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-            "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-            "created_at": "2026-10-23T11:22:13.322731+04:00"
+            "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+            "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+            "created_at": "2026-10-23T12:21:43.080780+04:00"
           }
         ]
       }
@@ -505,7 +505,7 @@
       "url": "/api/v1/clinic-portal/treatments/",
       "status": 403,
       "request": {
-        "category": "d411d4ec-f780-452d-895f-b9e918b24874",
+        "category": "8c5dfff0-ca84-44f2-92c9-6e50d8d6eb16",
         "name_en": "Unauthorized"
       },
       "response": {
@@ -528,7 +528,7 @@
     },
     {
       "method": "DELETE",
-      "url": "/api/v1/media/b3b7fda0-02be-4144-b528-f783f025edf2/",
+      "url": "/api/v1/media/0de80afd-9fe0-4f05-a33e-8a789791e63b/",
       "status": 403,
       "request": null,
       "response": {
@@ -540,7 +540,7 @@
     },
     {
       "method": "DELETE",
-      "url": "/api/v1/media/b3b7fda0-02be-4144-b528-f783f025edf2/",
+      "url": "/api/v1/media/0de80afd-9fe0-4f05-a33e-8a789791e63b/",
       "status": 204,
       "request": null,
       "response": {
@@ -554,7 +554,7 @@
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -575,8 +575,8 @@
         "logo": null,
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": null,
         "is_featured": false,
@@ -590,8 +590,8 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.154393+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:42.912778+04:00"
       }
     },
     {
@@ -599,7 +599,7 @@
       "url": "/api/v1/clinic-portal/profile/",
       "status": 200,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -620,8 +620,8 @@
         "logo": null,
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "is_featured": false,
@@ -635,8 +635,8 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.361736+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.117950+04:00"
       }
     },
     {
@@ -645,7 +645,7 @@
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -666,8 +666,8 @@
         "logo": null,
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "is_featured": false,
@@ -681,17 +681,17 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.361736+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.117950+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/",
+      "url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -712,8 +712,8 @@
         "logo": null,
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_url": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
@@ -721,11 +721,11 @@
         "is_featured": false,
         "google_rating": null,
         "google_reviews_count": 0,
-        "branches_directory_url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/branches/",
+        "branches_directory_url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/branches/",
         "branches": [],
         "practitioners": [
           {
-            "id": "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe",
+            "id": "fa1bc3e7-06ca-4708-9917-5b32452512d4",
             "name_en": "QA Practitioner",
             "name_ar": "",
             "title_en": "",
@@ -747,7 +747,7 @@
       },
       "status": 200,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -768,8 +768,8 @@
         "logo": "http://testserver/media/clinics/logos/qa-logo.png",
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "is_featured": false,
@@ -783,8 +783,8 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.390665+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.146080+04:00"
       }
     },
     {
@@ -793,7 +793,7 @@
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -814,8 +814,8 @@
         "logo": "http://testserver/media/clinics/logos/qa-logo.png",
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "is_featured": false,
@@ -829,17 +829,17 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.390665+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.146080+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/",
+      "url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -860,8 +860,8 @@
         "logo": "http://testserver/media/clinics/logos/qa-logo.png",
         "cover_image": null,
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_url": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
@@ -869,11 +869,11 @@
         "is_featured": false,
         "google_rating": null,
         "google_reviews_count": 0,
-        "branches_directory_url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/branches/",
+        "branches_directory_url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/branches/",
         "branches": [],
         "practitioners": [
           {
-            "id": "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe",
+            "id": "fa1bc3e7-06ca-4708-9917-5b32452512d4",
             "name_en": "QA Practitioner",
             "name_ar": "",
             "title_en": "",
@@ -895,7 +895,7 @@
       },
       "status": 200,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -916,8 +916,8 @@
         "logo": "http://testserver/media/clinics/logos/qa-logo.png",
         "cover_image": "http://testserver/media/clinics/covers/qa-cover_image.png",
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "is_featured": false,
@@ -931,8 +931,8 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.407076+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.161057+04:00"
       }
     },
     {
@@ -941,7 +941,7 @@
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -962,8 +962,8 @@
         "logo": "http://testserver/media/clinics/logos/qa-logo.png",
         "cover_image": "http://testserver/media/clinics/covers/qa-cover_image.png",
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "is_featured": false,
@@ -977,17 +977,17 @@
         "google_last_synced_at": null,
         "google_sync_status": "not_configured",
         "google_sync_error": "",
-        "created_at": "2026-10-23T11:22:13.154376+04:00",
-        "updated_at": "2026-10-23T11:22:13.407076+04:00"
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.161057+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/",
+      "url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
         "name_en": "Isolated QA Clinic A",
         "name_ar": "",
         "slug": "isolated-qa-clinic-a",
@@ -1008,8 +1008,8 @@
         "logo": "http://testserver/media/clinics/logos/qa-logo.png",
         "cover_image": "http://testserver/media/clinics/covers/qa-cover_image.png",
         "gallery_images": [
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/adf532180bfc4ba39a9dbb03c44d9482.png",
-          "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/clinic_gallery/2026/10/00414a315da34dedb031279e73020a6a.png"
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
         ],
         "video_url": "http://testserver/media/clinics/videos/qa-showcase.mp4",
         "video_ad_file": "http://testserver/media/clinics/videos/qa-showcase.mp4",
@@ -1017,11 +1017,11 @@
         "is_featured": false,
         "google_rating": null,
         "google_reviews_count": 0,
-        "branches_directory_url": "/api/v1/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/branches/",
+        "branches_directory_url": "/api/v1/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/branches/",
         "branches": [],
         "practitioners": [
           {
-            "id": "0aa85f9e-dc4c-4ff0-aba6-8aa36a312afe",
+            "id": "fa1bc3e7-06ca-4708-9917-5b32452512d4",
             "name_en": "QA Practitioner",
             "name_ar": "",
             "title_en": "",
@@ -1040,17 +1040,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "e951a57e-6cc1-4ad5-abb6-e3a15fe3e194",
+        "id": "4958507a-a8d1-4983-aa90-57ecbd1e80ed",
         "media_type": "practitioner_avatar",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/practitioner_avatar/2026/10/f6c52361f4f44bf7aed54e18d845ee8e.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/practitioner_avatar/2026/10/722a23ec55ab4c18aaf25987300a6cdc.png",
         "original_filename": "qa-catalog.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.421259+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.174775+04:00"
       }
     },
     {
@@ -1061,11 +1061,11 @@
         "name_en": "QA Portrait",
         "type": "doctor",
         "status": "active",
-        "media_asset": "e951a57e-6cc1-4ad5-abb6-e3a15fe3e194",
-        "avatar": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/practitioner_avatar/2026/10/f6c52361f4f44bf7aed54e18d845ee8e.png"
+        "media_asset": "4958507a-a8d1-4983-aa90-57ecbd1e80ed",
+        "avatar": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/practitioner_avatar/2026/10/722a23ec55ab4c18aaf25987300a6cdc.png"
       },
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "name_en": "QA Portrait",
         "name_ar": "",
         "title_en": "",
@@ -1078,21 +1078,21 @@
         "license_number": "",
         "license_authority": "",
         "avatar": null,
-        "media_asset": "e951a57e-6cc1-4ad5-abb6-e3a15fe3e194",
-        "avatar_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/practitioner_avatar/2026/10/f6c52361f4f44bf7aed54e18d845ee8e.png",
+        "media_asset": "4958507a-a8d1-4983-aa90-57ecbd1e80ed",
+        "avatar_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/practitioner_avatar/2026/10/722a23ec55ab4c18aaf25987300a6cdc.png",
         "status": "active",
         "display_order": 0,
-        "created_at": "2026-10-23T11:22:13.424631+04:00",
-        "updated_at": "2026-10-23T11:22:13.424640+04:00"
+        "created_at": "2026-10-23T12:21:43.178039+04:00",
+        "updated_at": "2026-10-23T12:21:43.178049+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/practitioners/a09ec824-09be-4731-be30-ea035ea94d4a/",
+      "url": "/api/v1/clinic-portal/practitioners/61b32971-870c-44dd-8b62-42e578f0595c/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "name_en": "QA Portrait",
         "name_ar": "",
         "title_en": "",
@@ -1105,23 +1105,23 @@
         "license_number": "",
         "license_authority": "",
         "avatar": null,
-        "media_asset": "e951a57e-6cc1-4ad5-abb6-e3a15fe3e194",
-        "avatar_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/practitioner_avatar/2026/10/f6c52361f4f44bf7aed54e18d845ee8e.png",
+        "media_asset": "4958507a-a8d1-4983-aa90-57ecbd1e80ed",
+        "avatar_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/practitioner_avatar/2026/10/722a23ec55ab4c18aaf25987300a6cdc.png",
         "status": "active",
         "display_order": 0,
-        "created_at": "2026-10-23T11:22:13.424631+04:00",
-        "updated_at": "2026-10-23T11:22:13.424640+04:00"
+        "created_at": "2026-10-23T12:21:43.178039+04:00",
+        "updated_at": "2026-10-23T12:21:43.178049+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/practitioners/a09ec824-09be-4731-be30-ea035ea94d4a/",
+      "url": "/api/v1/practitioners/61b32971-870c-44dd-8b62-42e578f0595c/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1137,18 +1137,18 @@
         "bio_ar": "",
         "speciality_en": "",
         "speciality_ar": "",
-        "avatar_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/practitioner_avatar/2026/10/f6c52361f4f44bf7aed54e18d845ee8e.png",
+        "avatar_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/practitioner_avatar/2026/10/722a23ec55ab4c18aaf25987300a6cdc.png",
         "display_order": 0,
         "treatments": []
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/practitioners/a09ec824-09be-4731-be30-ea035ea94d4a/",
+      "url": "/api/v1/clinic-portal/practitioners/61b32971-870c-44dd-8b62-42e578f0595c/",
       "status": 200,
       "request": {},
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "name_en": "QA Portrait",
         "name_ar": "",
         "title_en": "",
@@ -1161,24 +1161,24 @@
         "license_number": "",
         "license_authority": "",
         "avatar": null,
-        "media_asset": "e951a57e-6cc1-4ad5-abb6-e3a15fe3e194",
-        "avatar_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/practitioner_avatar/2026/10/f6c52361f4f44bf7aed54e18d845ee8e.png",
+        "media_asset": "4958507a-a8d1-4983-aa90-57ecbd1e80ed",
+        "avatar_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/practitioner_avatar/2026/10/722a23ec55ab4c18aaf25987300a6cdc.png",
         "status": "active",
         "display_order": 0,
-        "created_at": "2026-10-23T11:22:13.424631+04:00",
-        "updated_at": "2026-10-23T11:22:13.434241+04:00"
+        "created_at": "2026-10-23T12:21:43.178039+04:00",
+        "updated_at": "2026-10-23T12:21:43.187662+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/practitioners/a09ec824-09be-4731-be30-ea035ea94d4a/",
+      "url": "/api/v1/clinic-portal/practitioners/61b32971-870c-44dd-8b62-42e578f0595c/",
       "status": 200,
       "request": {
         "avatar": null,
         "media_asset": null
       },
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "name_en": "QA Portrait",
         "name_ar": "",
         "title_en": "",
@@ -1195,17 +1195,17 @@
         "avatar_url": "",
         "status": "active",
         "display_order": 0,
-        "created_at": "2026-10-23T11:22:13.424631+04:00",
-        "updated_at": "2026-10-23T11:22:13.437746+04:00"
+        "created_at": "2026-10-23T12:21:43.178039+04:00",
+        "updated_at": "2026-10-23T12:21:43.191053+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/practitioners/a09ec824-09be-4731-be30-ea035ea94d4a/",
+      "url": "/api/v1/clinic-portal/practitioners/61b32971-870c-44dd-8b62-42e578f0595c/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "name_en": "QA Portrait",
         "name_ar": "",
         "title_en": "",
@@ -1222,19 +1222,19 @@
         "avatar_url": "",
         "status": "active",
         "display_order": 0,
-        "created_at": "2026-10-23T11:22:13.424631+04:00",
-        "updated_at": "2026-10-23T11:22:13.437746+04:00"
+        "created_at": "2026-10-23T12:21:43.178039+04:00",
+        "updated_at": "2026-10-23T12:21:43.191053+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/practitioners/a09ec824-09be-4731-be30-ea035ea94d4a/",
+      "url": "/api/v1/practitioners/61b32971-870c-44dd-8b62-42e578f0595c/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a09ec824-09be-4731-be30-ea035ea94d4a",
+        "id": "61b32971-870c-44dd-8b62-42e578f0595c",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1260,17 +1260,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "174a7b4c-17a7-4b94-864b-b6eb88c2b078",
+        "id": "55856f19-6784-4648-b153-7c79dcf5e6aa",
         "media_type": "offer_image",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/offer_image/2026/10/32f8becae1534b7085f8ffe2eed7d5aa.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/offer_image/2026/10/8987906043d148f99abc27f70fe4b711.png",
         "original_filename": "qa-catalog.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.447013+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.199986+04:00"
       }
     },
     {
@@ -1281,66 +1281,66 @@
         "title_en": "QA Offer",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T07:22:13.417810+00:00",
-        "ends_at": "2026-10-24T07:22:13.417810+00:00",
+        "starts_at": "2026-10-22T08:21:43.171540+00:00",
+        "ends_at": "2026-10-24T08:21:43.171540+00:00",
         "status": "active",
-        "media_asset": "174a7b4c-17a7-4b94-864b-b6eb88c2b078",
-        "image": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/offer_image/2026/10/32f8becae1534b7085f8ffe2eed7d5aa.png"
+        "media_asset": "55856f19-6784-4648-b153-7c79dcf5e6aa",
+        "image": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/offer_image/2026/10/8987906043d148f99abc27f70fe4b711.png"
       },
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "title_en": "QA Offer",
         "title_ar": "",
         "description_en": "",
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
         "image": null,
-        "media_asset": "174a7b4c-17a7-4b94-864b-b6eb88c2b078",
+        "media_asset": "55856f19-6784-4648-b153-7c79dcf5e6aa",
         "treatment": null,
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/offer_image/2026/10/32f8becae1534b7085f8ffe2eed7d5aa.png",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/offer_image/2026/10/8987906043d148f99abc27f70fe4b711.png",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.451032+04:00",
-        "updated_at": "2026-10-23T11:22:13.451037+04:00"
+        "created_at": "2026-10-23T12:21:43.205022+04:00",
+        "updated_at": "2026-10-23T12:21:43.205027+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/offers/206974c1-f170-4173-985d-a11ce3496174/",
+      "url": "/api/v1/clinic-portal/offers/f2340ec7-f13b-4cb3-a90e-b9a731dbb853/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "title_en": "QA Offer",
         "title_ar": "",
         "description_en": "",
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
         "image": null,
-        "media_asset": "174a7b4c-17a7-4b94-864b-b6eb88c2b078",
+        "media_asset": "55856f19-6784-4648-b153-7c79dcf5e6aa",
         "treatment": null,
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/offer_image/2026/10/32f8becae1534b7085f8ffe2eed7d5aa.png",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/offer_image/2026/10/8987906043d148f99abc27f70fe4b711.png",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.451032+04:00",
-        "updated_at": "2026-10-23T11:22:13.451037+04:00"
+        "created_at": "2026-10-23T12:21:43.205022+04:00",
+        "updated_at": "2026-10-23T12:21:43.205027+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/offers/206974c1-f170-4173-985d-a11ce3496174/",
+      "url": "/api/v1/offers/f2340ec7-f13b-4cb3-a90e-b9a731dbb853/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1353,98 +1353,98 @@
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/offer_image/2026/10/32f8becae1534b7085f8ffe2eed7d5aa.png"
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/offer_image/2026/10/8987906043d148f99abc27f70fe4b711.png"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/offers/206974c1-f170-4173-985d-a11ce3496174/",
+      "url": "/api/v1/clinic-portal/offers/f2340ec7-f13b-4cb3-a90e-b9a731dbb853/",
       "status": 200,
       "request": {},
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "title_en": "QA Offer",
         "title_ar": "",
         "description_en": "",
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
         "image": null,
-        "media_asset": "174a7b4c-17a7-4b94-864b-b6eb88c2b078",
+        "media_asset": "55856f19-6784-4648-b153-7c79dcf5e6aa",
         "treatment": null,
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/offer_image/2026/10/32f8becae1534b7085f8ffe2eed7d5aa.png",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/offer_image/2026/10/8987906043d148f99abc27f70fe4b711.png",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.451032+04:00",
-        "updated_at": "2026-10-23T11:22:13.504696+04:00"
+        "created_at": "2026-10-23T12:21:43.205022+04:00",
+        "updated_at": "2026-10-23T12:21:43.258323+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/offers/206974c1-f170-4173-985d-a11ce3496174/",
+      "url": "/api/v1/clinic-portal/offers/f2340ec7-f13b-4cb3-a90e-b9a731dbb853/",
       "status": 200,
       "request": {
         "image": null,
         "media_asset": null
       },
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "title_en": "QA Offer",
         "title_ar": "",
         "description_en": "",
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
         "image": null,
         "media_asset": null,
         "treatment": null,
         "image_url": "",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.451032+04:00",
-        "updated_at": "2026-10-23T11:22:13.508537+04:00"
+        "created_at": "2026-10-23T12:21:43.205022+04:00",
+        "updated_at": "2026-10-23T12:21:43.262276+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/offers/206974c1-f170-4173-985d-a11ce3496174/",
+      "url": "/api/v1/clinic-portal/offers/f2340ec7-f13b-4cb3-a90e-b9a731dbb853/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "title_en": "QA Offer",
         "title_ar": "",
         "description_en": "",
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
         "image": null,
         "media_asset": null,
         "treatment": null,
         "image_url": "",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.451032+04:00",
-        "updated_at": "2026-10-23T11:22:13.508537+04:00"
+        "created_at": "2026-10-23T12:21:43.205022+04:00",
+        "updated_at": "2026-10-23T12:21:43.262276+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/offers/206974c1-f170-4173-985d-a11ce3496174/",
+      "url": "/api/v1/offers/f2340ec7-f13b-4cb3-a90e-b9a731dbb853/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "206974c1-f170-4173-985d-a11ce3496174",
+        "id": "f2340ec7-f13b-4cb3-a90e-b9a731dbb853",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1457,8 +1457,8 @@
         "description_ar": "",
         "original_price": "100.00",
         "offer_price": "80.00",
-        "starts_at": "2026-10-22T11:22:13.417810+04:00",
-        "ends_at": "2026-10-24T11:22:13.417810+04:00",
+        "starts_at": "2026-10-22T12:21:43.171540+04:00",
+        "ends_at": "2026-10-24T12:21:43.171540+04:00",
         "image_url": ""
       }
     },
@@ -1467,17 +1467,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "c9cbdfa5-d97a-4e9e-9d0c-912c992fbda8",
+        "id": "9d7b2c07-721e-4fdf-b1ef-31c2fe5d7428",
         "media_type": "product_image",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/product_image/2026/10/99ac206813e34ac88292e21f067b500d.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/product_image/2026/10/9b7843d4c8d54a1d932caf8df96d4127.png",
         "original_filename": "qa-catalog.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.516935+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.271251+04:00"
       }
     },
     {
@@ -1488,11 +1488,11 @@
         "name_en": "QA Brand Showcase",
         "brand_name_en": "QA Fixture Brand",
         "status": "active",
-        "media_asset": "c9cbdfa5-d97a-4e9e-9d0c-912c992fbda8",
-        "image": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/product_image/2026/10/99ac206813e34ac88292e21f067b500d.png"
+        "media_asset": "9d7b2c07-721e-4fdf-b1ef-31c2fe5d7428",
+        "image": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/product_image/2026/10/9b7843d4c8d54a1d932caf8df96d4127.png"
       },
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "name_en": "QA Brand Showcase",
         "name_ar": "",
         "description_en": "",
@@ -1502,21 +1502,21 @@
         "sponsor_company": "",
         "price": null,
         "image": null,
-        "media_asset": "c9cbdfa5-d97a-4e9e-9d0c-912c992fbda8",
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/product_image/2026/10/99ac206813e34ac88292e21f067b500d.png",
+        "media_asset": "9d7b2c07-721e-4fdf-b1ef-31c2fe5d7428",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/product_image/2026/10/9b7843d4c8d54a1d932caf8df96d4127.png",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.519917+04:00",
-        "updated_at": "2026-10-23T11:22:13.520020+04:00"
+        "created_at": "2026-10-23T12:21:43.274388+04:00",
+        "updated_at": "2026-10-23T12:21:43.274524+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/products/d0695878-e2f9-4e43-a05f-4a2b24220d4f/",
+      "url": "/api/v1/clinic-portal/products/077ba595-2581-4bf5-b5e9-92dd15548a72/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "name_en": "QA Brand Showcase",
         "name_ar": "",
         "description_en": "",
@@ -1526,23 +1526,23 @@
         "sponsor_company": "",
         "price": null,
         "image": null,
-        "media_asset": "c9cbdfa5-d97a-4e9e-9d0c-912c992fbda8",
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/product_image/2026/10/99ac206813e34ac88292e21f067b500d.png",
+        "media_asset": "9d7b2c07-721e-4fdf-b1ef-31c2fe5d7428",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/product_image/2026/10/9b7843d4c8d54a1d932caf8df96d4127.png",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.519917+04:00",
-        "updated_at": "2026-10-23T11:22:13.520020+04:00"
+        "created_at": "2026-10-23T12:21:43.274388+04:00",
+        "updated_at": "2026-10-23T12:21:43.274524+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/products/d0695878-e2f9-4e43-a05f-4a2b24220d4f/",
+      "url": "/api/v1/products/077ba595-2581-4bf5-b5e9-92dd15548a72/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1557,17 +1557,17 @@
         "brand_name_ar": "",
         "sponsor_company": "",
         "price": null,
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/product_image/2026/10/99ac206813e34ac88292e21f067b500d.png",
-        "created_at": "2026-10-23T11:22:13.519917+04:00"
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/product_image/2026/10/9b7843d4c8d54a1d932caf8df96d4127.png",
+        "created_at": "2026-10-23T12:21:43.274388+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/products/d0695878-e2f9-4e43-a05f-4a2b24220d4f/",
+      "url": "/api/v1/clinic-portal/products/077ba595-2581-4bf5-b5e9-92dd15548a72/",
       "status": 200,
       "request": {},
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "name_en": "QA Brand Showcase",
         "name_ar": "",
         "description_en": "",
@@ -1577,24 +1577,24 @@
         "sponsor_company": "",
         "price": null,
         "image": null,
-        "media_asset": "c9cbdfa5-d97a-4e9e-9d0c-912c992fbda8",
-        "image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/product_image/2026/10/99ac206813e34ac88292e21f067b500d.png",
+        "media_asset": "9d7b2c07-721e-4fdf-b1ef-31c2fe5d7428",
+        "image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/product_image/2026/10/9b7843d4c8d54a1d932caf8df96d4127.png",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.519917+04:00",
-        "updated_at": "2026-10-23T11:22:13.527985+04:00"
+        "created_at": "2026-10-23T12:21:43.274388+04:00",
+        "updated_at": "2026-10-23T12:21:43.331851+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/products/d0695878-e2f9-4e43-a05f-4a2b24220d4f/",
+      "url": "/api/v1/clinic-portal/products/077ba595-2581-4bf5-b5e9-92dd15548a72/",
       "status": 200,
       "request": {
         "image": null,
         "media_asset": null
       },
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "name_en": "QA Brand Showcase",
         "name_ar": "",
         "description_en": "",
@@ -1608,17 +1608,17 @@
         "image_url": "",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.519917+04:00",
-        "updated_at": "2026-10-23T11:22:13.531553+04:00"
+        "created_at": "2026-10-23T12:21:43.274388+04:00",
+        "updated_at": "2026-10-23T12:21:43.335239+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/products/d0695878-e2f9-4e43-a05f-4a2b24220d4f/",
+      "url": "/api/v1/clinic-portal/products/077ba595-2581-4bf5-b5e9-92dd15548a72/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "name_en": "QA Brand Showcase",
         "name_ar": "",
         "description_en": "",
@@ -1632,19 +1632,19 @@
         "image_url": "",
         "status": "active",
         "is_active": true,
-        "created_at": "2026-10-23T11:22:13.519917+04:00",
-        "updated_at": "2026-10-23T11:22:13.531553+04:00"
+        "created_at": "2026-10-23T12:21:43.274388+04:00",
+        "updated_at": "2026-10-23T12:21:43.335239+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/products/d0695878-e2f9-4e43-a05f-4a2b24220d4f/",
+      "url": "/api/v1/products/077ba595-2581-4bf5-b5e9-92dd15548a72/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "d0695878-e2f9-4e43-a05f-4a2b24220d4f",
+        "id": "077ba595-2581-4bf5-b5e9-92dd15548a72",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1660,7 +1660,7 @@
         "sponsor_company": "",
         "price": null,
         "image_url": "",
-        "created_at": "2026-10-23T11:22:13.519917+04:00"
+        "created_at": "2026-10-23T12:21:43.274388+04:00"
       }
     },
     {
@@ -1668,17 +1668,17 @@
       "url": "/api/v1/media/upload/",
       "status": 201,
       "response": {
-        "id": "bd235bbd-5e06-4e4d-b697-8fae569b5c4c",
+        "id": "6bdf8488-735c-4767-a992-9ab471f525f7",
         "media_type": "article_cover",
-        "url": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/article_cover/2026/10/cc54b2ed6dce4b1a8a763c457868fa3c.png",
+        "url": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/article_cover/2026/10/7dfd7943d56f4414bc34d83be2187667.png",
         "original_filename": "qa-catalog.png",
         "file_size": 98,
         "mime_type": "image/png",
         "width": 32,
         "height": 32,
-        "clinic_id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
-        "uploader_id": "9d226e1a-79ef-4b11-9bdf-4668c43733c9",
-        "created_at": "2026-10-23T11:22:13.539635+04:00"
+        "clinic_id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "uploader_id": "89ac41f6-27fd-4186-9b5d-003ab1f97f24",
+        "created_at": "2026-10-23T12:21:43.343469+04:00"
       }
     },
     {
@@ -1690,11 +1690,11 @@
         "content_en": "Synthetic contract test content.",
         "status": "active",
         "is_published": true,
-        "media_asset": "bd235bbd-5e06-4e4d-b697-8fae569b5c4c",
-        "cover_image": "http://testserver/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/article_cover/2026/10/cc54b2ed6dce4b1a8a763c457868fa3c.png"
+        "media_asset": "6bdf8488-735c-4767-a992-9ab471f525f7",
+        "cover_image": "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/article_cover/2026/10/7dfd7943d56f4414bc34d83be2187667.png"
       },
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
@@ -1702,22 +1702,22 @@
         "content_ar": "",
         "author_practitioner": null,
         "cover_image": null,
-        "media_asset": "bd235bbd-5e06-4e4d-b697-8fae569b5c4c",
-        "cover_image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/article_cover/2026/10/cc54b2ed6dce4b1a8a763c457868fa3c.png",
+        "media_asset": "6bdf8488-735c-4767-a992-9ab471f525f7",
+        "cover_image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/article_cover/2026/10/7dfd7943d56f4414bc34d83be2187667.png",
         "is_published": true,
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
         "status": "active",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
-        "updated_at": "2026-10-23T11:22:13.543649+04:00"
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
+        "updated_at": "2026-10-23T12:21:43.347771+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/articles/a1ebf156-03d2-451d-988f-e157b0e20b88/",
+      "url": "/api/v1/clinic-portal/articles/a1460a17-2c79-40a1-8555-37a719f0a167/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
@@ -1725,32 +1725,32 @@
         "content_ar": "",
         "author_practitioner": null,
         "cover_image": null,
-        "media_asset": "bd235bbd-5e06-4e4d-b697-8fae569b5c4c",
-        "cover_image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/article_cover/2026/10/cc54b2ed6dce4b1a8a763c457868fa3c.png",
+        "media_asset": "6bdf8488-735c-4767-a992-9ab471f525f7",
+        "cover_image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/article_cover/2026/10/7dfd7943d56f4414bc34d83be2187667.png",
         "is_published": true,
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
         "status": "active",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
-        "updated_at": "2026-10-23T11:22:13.543649+04:00"
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
+        "updated_at": "2026-10-23T12:21:43.347771+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/articles/a1ebf156-03d2-451d-988f-e157b0e20b88/",
+      "url": "/api/v1/articles/a1460a17-2c79-40a1-8555-37a719f0a167/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
         "content_en": "Synthetic contract test content.",
         "content_ar": "",
-        "cover_image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/article_cover/2026/10/cc54b2ed6dce4b1a8a763c457868fa3c.png",
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
+        "cover_image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/article_cover/2026/10/7dfd7943d56f4414bc34d83be2187667.png",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1762,11 +1762,11 @@
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/articles/a1ebf156-03d2-451d-988f-e157b0e20b88/",
+      "url": "/api/v1/clinic-portal/articles/a1460a17-2c79-40a1-8555-37a719f0a167/",
       "status": 200,
       "request": {},
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
@@ -1774,25 +1774,25 @@
         "content_ar": "",
         "author_practitioner": null,
         "cover_image": null,
-        "media_asset": "bd235bbd-5e06-4e4d-b697-8fae569b5c4c",
-        "cover_image_url": "/media/media_assets/clinics/246251b7-741d-4a0b-860e-9b6a7893ca57/article_cover/2026/10/cc54b2ed6dce4b1a8a763c457868fa3c.png",
+        "media_asset": "6bdf8488-735c-4767-a992-9ab471f525f7",
+        "cover_image_url": "/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/article_cover/2026/10/7dfd7943d56f4414bc34d83be2187667.png",
         "is_published": true,
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
         "status": "active",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
-        "updated_at": "2026-10-23T11:22:13.600281+04:00"
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
+        "updated_at": "2026-10-23T12:21:43.356601+04:00"
       }
     },
     {
       "method": "PATCH",
-      "url": "/api/v1/clinic-portal/articles/a1ebf156-03d2-451d-988f-e157b0e20b88/",
+      "url": "/api/v1/clinic-portal/articles/a1460a17-2c79-40a1-8555-37a719f0a167/",
       "status": 200,
       "request": {
         "cover_image": null,
         "media_asset": null
       },
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
@@ -1803,19 +1803,19 @@
         "media_asset": null,
         "cover_image_url": "",
         "is_published": true,
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
         "status": "active",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
-        "updated_at": "2026-10-23T11:22:13.603932+04:00"
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
+        "updated_at": "2026-10-23T12:21:43.360054+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/clinic-portal/articles/a1ebf156-03d2-451d-988f-e157b0e20b88/",
+      "url": "/api/v1/clinic-portal/articles/a1460a17-2c79-40a1-8555-37a719f0a167/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
@@ -1826,29 +1826,29 @@
         "media_asset": null,
         "cover_image_url": "",
         "is_published": true,
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
         "status": "active",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
-        "updated_at": "2026-10-23T11:22:13.603932+04:00"
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
+        "updated_at": "2026-10-23T12:21:43.360054+04:00"
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/articles/a1ebf156-03d2-451d-988f-e157b0e20b88/",
+      "url": "/api/v1/articles/a1460a17-2c79-40a1-8555-37a719f0a167/",
       "status": 200,
       "request": null,
       "response": {
-        "id": "a1ebf156-03d2-451d-988f-e157b0e20b88",
+        "id": "a1460a17-2c79-40a1-8555-37a719f0a167",
         "title_en": "QA Article",
         "title_ar": "",
         "slug": "qa-article",
         "content_en": "Synthetic contract test content.",
         "content_ar": "",
         "cover_image_url": "",
-        "published_at": "2026-10-23T11:22:13.543032+04:00",
-        "created_at": "2026-10-23T11:22:13.543123+04:00",
+        "published_at": "2026-10-23T12:21:43.347140+04:00",
+        "created_at": "2026-10-23T12:21:43.347235+04:00",
         "clinic": {
-          "id": "246251b7-741d-4a0b-860e-9b6a7893ca57",
+          "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
           "name_en": "Isolated QA Clinic A",
           "name_ar": "",
           "slug": "isolated-qa-clinic-a",
@@ -1856,6 +1856,100 @@
           "logo": "http://testserver/media/clinics/logos/qa-logo.png"
         },
         "author_practitioner": null
+      }
+    },
+    {
+      "method": "PATCH",
+      "url": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "request": {
+        "video_ad_file": null
+      },
+      "response": {
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "name_en": "Isolated QA Clinic A",
+        "name_ar": "",
+        "slug": "isolated-qa-clinic-a",
+        "description_en": "",
+        "description_ar": "",
+        "phone": "",
+        "whatsapp": "",
+        "email": "",
+        "website": "",
+        "address_en": "",
+        "address_ar": "",
+        "city": "",
+        "emirate": "",
+        "latitude": null,
+        "longitude": null,
+        "google_place_id": "",
+        "google_maps_url": "",
+        "logo": null,
+        "cover_image": null,
+        "gallery_images": [
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
+        ],
+        "video_ad_file": null,
+        "is_featured": false,
+        "setup_status": "draft",
+        "submitted_for_review_at": null,
+        "onboarding_completed_at": null,
+        "license_number": "",
+        "license_authority": "",
+        "google_rating": null,
+        "google_reviews_count": 0,
+        "google_last_synced_at": null,
+        "google_sync_status": "not_configured",
+        "google_sync_error": "",
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.369886+04:00"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "request": null,
+      "response": {
+        "id": "d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa",
+        "name_en": "Isolated QA Clinic A",
+        "name_ar": "",
+        "slug": "isolated-qa-clinic-a",
+        "description_en": "",
+        "description_ar": "",
+        "phone": "",
+        "whatsapp": "",
+        "email": "",
+        "website": "",
+        "address_en": "",
+        "address_ar": "",
+        "city": "",
+        "emirate": "",
+        "latitude": null,
+        "longitude": null,
+        "google_place_id": "",
+        "google_maps_url": "",
+        "logo": null,
+        "cover_image": null,
+        "gallery_images": [
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/3fa03b537ab04a98b6b000d9aab1a55c.png",
+          "http://testserver/media/media_assets/clinics/d1d0f797-eaf8-4a3e-84e2-0f3b07b0c1fa/clinic_gallery/2026/10/b75e6e8b9cf44aada7b1ed4925102955.png"
+        ],
+        "video_ad_file": null,
+        "is_featured": false,
+        "setup_status": "draft",
+        "submitted_for_review_at": null,
+        "onboarding_completed_at": null,
+        "license_number": "",
+        "license_authority": "",
+        "google_rating": null,
+        "google_reviews_count": 0,
+        "google_last_synced_at": null,
+        "google_sync_status": "not_configured",
+        "google_sync_error": "",
+        "created_at": "2026-10-23T12:21:42.912759+04:00",
+        "updated_at": "2026-10-23T12:21:43.369886+04:00"
       }
     }
   ]

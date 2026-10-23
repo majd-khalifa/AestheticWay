@@ -137,7 +137,7 @@ class Profile implements ClinicCatalogRepository {
     current = ClinicModel.fromJson({
       'id': clinicId,
       'name_en': 'QA Clinic',
-      'subscription_tier': 'vip',
+      'subscription_tier': current.subscriptionTier.apiValue,
       'cover_image': fixture.uri.toString(),
       'video_ad_file': data.containsKey('video_ad_file')
           // Django returns a storage URL, never the device's upload path.
@@ -596,6 +596,39 @@ void main() {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 10)),
       );
+    },
+  );
+  testWidgets(
+    'expired video entitlement allows removing a saved file but never enables replacement uploads',
+    (tester) async {
+      profile.current = profile.current.copyWith(
+        subscriptionTier: SubscriptionTier.basic,
+      );
+      service.setActiveClinicForTesting(profile.current);
+      final cover = profile.current.coverImageUrl;
+      await tester.binding.setSurfaceSize(const Size(600, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(home: ClinicMediaScreen(repository: Gallery())),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Remove saved video'), 300);
+      expect(find.text('Select gallery video'), findsNothing);
+      expect(find.text('Upload and save video'), findsNothing);
+      await tester.tap(find.text('Remove saved video'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(profile.patches, isEmpty);
+      await tester.tap(find.text('Remove saved video'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove').last);
+      await tester.pumpAndSettle();
+      expect(profile.patches.single, {'video_ad_file': null});
+      expect(profile.current.videoUrl, isNull);
+      expect(profile.current.coverImageUrl, cover);
+      expect(profile.current.subscriptionTier, SubscriptionTier.basic);
+      await tester.pumpWidget(const SizedBox());
     },
   );
   testWidgets(

@@ -359,6 +359,16 @@ for collection, image_field, url_field, media_type, fields in cases:
     )
     assert not record("get", route).json()[url_field]
     assert not record("get", public).json()[url_field]
+# Entitlement gates new uploads, not removal of an already-owned video.
+clinic.subscription_tier = "basic"
+clinic.save()
+assert (
+    record(
+        "patch", "/api/v1/clinic-portal/profile/", {"video_ad_file": None}
+    ).status_code
+    == 200
+)
+assert not record("get", "/api/v1/clinic-portal/profile/").json()["video_ad_file"]
 assert inventory() == before, "Backend source was changed"
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(

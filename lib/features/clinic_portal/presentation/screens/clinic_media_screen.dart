@@ -574,7 +574,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                                     : 'Discard selected video',
                               ),
                             ),
-                          if (clinic.hasVideoAd && vip)
+                          if (clinic.hasVideoAd)
                             TextButton(
                               onPressed: _locked
                                   ? null
