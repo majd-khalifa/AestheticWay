@@ -508,17 +508,14 @@ void main() {
             find.byKey(const ValueKey('admin-clinic-reviews-quick-action')),
           );
           await tester.pumpAndSettle();
-          expect(
-            find.text(ar ? 'المرسلة (المحمّلة)' : 'Submitted (loaded)'),
-            findsOneWidget,
-          );
+          expect(find.text(ar ? 'المرسلة' : 'Submitted'), findsOneWidget);
           expect(
             adapter.requests
                 .where((r) => r.path == 'admin/clinics/')
                 .last
                 .queryParameters
                 .containsKey('setup_status'),
-            isFalse,
+            isTrue,
           );
           await capture(
             tester,
@@ -717,7 +714,7 @@ void main() {
           if (state == 'rejected') {
             expect(
               find.textContaining(
-                ar ? 'لا يعيد سبب الرفض' : 'does not return a rejection reason',
+                ar ? 'لم يُرفق سبب' : 'No reason was supplied',
               ),
               findsOneWidget,
             );

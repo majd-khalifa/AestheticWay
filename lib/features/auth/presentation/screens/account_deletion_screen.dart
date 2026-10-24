@@ -37,6 +37,14 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
   }
 
   void _changed() {
+    if (!_allowed) {
+      _timer?.cancel();
+      _code.clear();
+      _consent = false;
+      _requested = false;
+      _expiresAt = null;
+      _resendAt = null;
+    }
     if (mounted) setState(() {});
   }
 
@@ -61,6 +69,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
       final expiry = int.tryParse('${result['expires_in']}') ?? 600;
       setState(() {
         _requested = true;
+        _consent = false;
         _resendAt = DateTime.now().add(
           Duration(seconds: cooldown.clamp(0, 3600)),
         );

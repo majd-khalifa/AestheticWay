@@ -1,3 +1,4 @@
+import '../widgets/admin_clinic_inspection.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../../../core/auth/guest_auth_guard.dart';
@@ -9,6 +10,7 @@ import '../../../../core/widgets/luxury_card.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../data/admin_repository.dart';
+import '../../services/admin_review_service.dart';
 import '../../models/admin_clinic_model.dart';
 import '../../services/admin_portal_service.dart';
 import '../widgets/admin_components.dart';
@@ -24,8 +26,7 @@ String _statusLabel(String value) => switch (value) {
   _ => adminText('Unknown', 'غير معروف'),
 };
 
-/// 1f1e4bf has no setup-status filter/count or rejection transition. Inspect
-/// paged server results honestly; never substitute account status=pending.
+/// Server-filtered setup reviews. Account activation is a separate field.
 class AdminClinicReviewsScreen extends StatefulWidget {
   const AdminClinicReviewsScreen({super.key, this.repository});
   final AdminRepository? repository;
@@ -39,7 +40,8 @@ class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>
   final _session = SessionSnapshot();
   late final _repo = widget.repository ?? AdminRepository();
   late final _page = PagedCollection<AdminClinicModel>(
-    loader: (page, _) => _repo.getClinics(page: page),
+    loader: (page, q) =>
+        _repo.getClinics(page: page, setupStatus: q['setup_status'] as String?),
     keyOf: (c) => c.id,
   );
   bool _submitted = true;
@@ -50,8 +52,11 @@ class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     AuthState().addListener(_changed);
-    if (_allowed) _page.refresh();
+    if (_allowed) _refresh();
   }
+
+  Future<void> _refresh() =>
+      _page.refresh(query: {'setup_status': _submitted ? 'submitted' : 'all'});
 
   void _changed() {
     if (!_allowed) _page.clear();
@@ -60,7 +65,7 @@ class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _allowed) _page.refresh();
+    if (state == AppLifecycleState.resumed && _allowed) _refresh();
   }
 
   @override
@@ -86,51 +91,38 @@ class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>
         : ListenableBuilder(
             listenable: _page,
             builder: (context, _) {
-              final submitted = _page.items
-                  .where((c) => c.setupStatus == 'submitted')
-                  .toList();
-              final rows = _submitted ? submitted : _page.items;
+              final rows = _page.items;
               return RefreshIndicator(
-                onRefresh: () => _page.refresh(),
+                onRefresh: _refresh,
                 child: ListView(
                   padding: const EdgeInsets.all(20),
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
-                    AdminNotice(
-                      message: adminText(
-                        'Global pending count and server-side Submitted filtering are not provided by this backend. The Submitted filter covers loaded pages only. Profile rejection is not supported yet.',
-                        'لا يوفر الخادم العدد الإجمالي المعلق أو تصفية المرسلة على الخادم. مرشح المرسلة يشمل الصفحات المحملة فقط. رفض ملف الإعداد غير مدعوم بعد.',
-                      ),
-                    ),
                     Wrap(
                       spacing: 8,
                       children: [
                         ChoiceChip(
-                          label: Text(
-                            adminText(
-                              'Submitted (loaded)',
-                              'المرسلة (المحمّلة)',
-                            ),
-                          ),
+                          label: Text(adminText('Submitted', 'المرسلة')),
                           selected: _submitted,
-                          onSelected: (_) => setState(() => _submitted = true),
+                          onSelected: (_) {
+                            setState(() => _submitted = true);
+                            _refresh();
+                          },
                         ),
                         ChoiceChip(
-                          label: Text(
-                            adminText(
-                              'All loaded profiles',
-                              'كل الملفات المحمّلة',
-                            ),
-                          ),
+                          label: Text(adminText('All profiles', 'كل الملفات')),
                           selected: !_submitted,
-                          onSelected: (_) => setState(() => _submitted = false),
+                          onSelected: (_) {
+                            setState(() => _submitted = false);
+                            _refresh();
+                          },
                         ),
                       ],
                     ),
                     Text(
                       adminText(
-                        'Submitted in loaded pages: ${submitted.length}',
-                        'المرسلة في الصفحات المحمّلة: ${submitted.length}',
+                        'Matching profiles: ${_page.total ?? '—'}',
+                        'الملفات المطابقة: ${_page.total ?? '—'}',
                       ),
                     ),
                     if (_page.isLoaded && rows.isEmpty)
@@ -138,8 +130,8 @@ class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>
                         padding: const EdgeInsets.all(16),
                         child: Text(
                           adminText(
-                            'No matching profiles in loaded pages. Additional pages may contain submissions.',
-                            'لا توجد ملفات مطابقة في الصفحات المحملة. قد تتضمن الصفحات التالية ملفات مرسلة.',
+                            'No profiles match this filter.',
+                            'لا توجد ملفات مطابقة لهذا المرشح.',
                           ),
                         ),
                       ),
@@ -168,7 +160,7 @@ class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>
                               ),
                             );
                             if (mounted && _allowed) {
-                              await _page.refresh();
+                              await _refresh();
                               AdminPortalService().loadCollection(
                                 'clinics',
                                 refresh: true,
@@ -306,6 +298,8 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
       }
     } catch (e) {
       if (mounted && _allowed) {
+        await _load();
+        if (!mounted || !_allowed) return;
         setState(
           () => _error = e is ApiException
               ? e.message
@@ -316,6 +310,50 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
         );
       }
     } finally {
+      if (_allowed) AdminReviewService().refresh();
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _sending = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _reject() async {
+    if (_busy || !_allowed || _clinic?.setupStatus != 'submitted') return;
+    setState(() => _busy = true);
+    try {
+      final reason = await showDialog<String>(
+        context: context,
+        builder: (_) => const _ClinicRejectionDialog(),
+      );
+      if (reason == null || !mounted || !_allowed) return;
+      setState(() => _sending = true);
+      final updated = await _repo.rejectClinicSetup(widget.clinicId, reason);
+      if (mounted && _allowed) {
+        setState(() {
+          _clinic = updated;
+          _error = null;
+        });
+        await AdminPortalService().loadClinicDetail(updated.id, refresh: true);
+      }
+    } catch (e) {
+      if (mounted && _allowed) {
+        await _load();
+        if (mounted && _allowed) {
+          setState(
+            () => _error = e is ApiException
+                ? e.message
+                : adminText(
+                    'The decision was not confirmed. Refresh before retrying.',
+                    'لم يتم تأكيد القرار. حدّث الحالة قبل المحاولة.',
+                  ),
+          );
+        }
+      }
+    } finally {
+      if (_allowed) AdminReviewService().refresh();
       if (mounted) {
         setState(() {
           _busy = false;
@@ -510,17 +548,10 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
                           const SizedBox(height: 12),
                           _ReviewVideo(url: c.videoAdFile!),
                         ],
-                        const SizedBox(height: 12),
-                        Text(
-                          adminText(
-                            'This review API does not return the clinic gallery. Only supplied media is shown.',
-                            'لا يعيد عقد المراجعة الحالي معرض صور العيادة. تُعرض الوسائط المتاحة فقط.',
-                          ),
-                          style: TextStyle(
-                            color: AppColors.mutedText(context),
-                            fontSize: 12,
-                            height: 1.6,
-                          ),
+                        AdminClinicInspection(
+                          key: ValueKey('gallery-${c.id}'),
+                          clinic: c,
+                          content: false,
                         ),
                       ],
                     ),
@@ -638,16 +669,10 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
                             _field('Offers', 'العروض', '${c.offersCount}'),
                           ],
                         ),
-                        Text(
-                          adminText(
-                            'The API supplies counts, not complete staff/treatment records.',
-                            'يوفر الرد الأعداد وليس سجلات الفريق والعلاجات الكاملة.',
-                          ),
-                          style: TextStyle(
-                            color: AppColors.mutedText(context),
-                            fontSize: 12,
-                            height: 1.6,
-                          ),
+                        AdminClinicInspection(
+                          key: ValueKey('content-${c.id}'),
+                          clinic: c,
+                          gallery: false,
                         ),
                       ],
                     ),
@@ -684,11 +709,23 @@ class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {
                               ),
                             ),
                           ),
+                        if (c.setupStatus == 'submitted')
+                          OutlinedButton.icon(
+                            key: const ValueKey('reject-clinic-profile'),
+                            onPressed: _busy ? null : _reject,
+                            icon: const Icon(Icons.edit_note),
+                            label: Text(
+                              adminText(
+                                'Request profile changes',
+                                'طلب تعديلات على الملف',
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 12),
                         AdminNotice(
                           message: adminText(
-                            'Setup rejection and clinic-visible feedback are BLOCKED BY BACKEND. Activation/suspension remains a separate account action.',
-                            'رفض الإعداد وملاحظاته المرئية للعيادة محجوبان من الخادم. يظل التفعيل والإيقاف إجراءين منفصلين للحساب.',
+                            'Rejection changes profile review only. Account activation/suspension remains a separate action.',
+                            'الرفض يغير مراجعة الملف فقط. يظل التفعيل والإيقاف إجراءين منفصلين للحساب.',
                           ),
                         ),
                       ],
@@ -786,6 +823,66 @@ class _ReviewVideoState extends State<_ReviewVideo>
         ),
       ),
       if (_error != null) Text(_error!),
+    ],
+  );
+}
+
+class _ClinicRejectionDialog extends StatefulWidget {
+  const _ClinicRejectionDialog();
+  @override
+  State<_ClinicRejectionDialog> createState() => _ClinicRejectionDialogState();
+}
+
+class _ClinicRejectionDialogState extends State<_ClinicRejectionDialog> {
+  final _reason = TextEditingController();
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(adminText('Request profile changes', 'طلب تعديلات على الملف')),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            adminText(
+              'Explain what the clinic must correct. Account activation will remain unchanged.',
+              'وضّح ما يجب على العيادة تصحيحه. لن تتغير حالة تفعيل الحساب.',
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            key: const ValueKey('clinic-review-reason'),
+            controller: _reason,
+            maxLength: 1000,
+            maxLines: 4,
+            decoration: InputDecoration(
+              labelText: adminText(
+                'Required correction details',
+                'تفاصيل التعديل المطلوبة',
+              ),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: Text(adminText('Cancel', 'إلغاء')),
+      ),
+      FilledButton(
+        key: const ValueKey('confirm-clinic-rejection'),
+        onPressed: _reason.text.trim().isEmpty
+            ? null
+            : () => Navigator.pop(context, _reason.text.trim()),
+        child: Text(adminText('Send changes request', 'إرسال طلب التعديل')),
+      ),
     ],
   );
 }

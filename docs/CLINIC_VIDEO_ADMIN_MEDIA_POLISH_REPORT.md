@@ -1,3 +1,5 @@
+> Historical source snapshot: the current 09f49bb findings supersede the old missing-tier/filter/count/reject/gallery items. See [the current integration report](BACKEND_09F49BB_INTEGRATION_QA_REPORT.md) and [remaining confirmed issues](BACKEND_09F49BB_REMAINING_GAPS_FOR_ALI.md).
+
 # PR #13 — Clinic video entitlement and administrative media polish
 
 Date: 2026-10-23. Branch: `codex/final-backend-integration-client-preview`.

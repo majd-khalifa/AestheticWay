@@ -73,6 +73,12 @@ jobs:
           flutter test test/admin_media_polish_test.dart test/admin_media_visual_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/admin-media-polish"
           --reporter expanded
+      - name: Backend 09f49bb contracts and review renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/backend_09_integration_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-09-review"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -104,3 +110,4 @@ jobs:
             ${{ runner.temp }}/final-integration/**
             ${{ runner.temp }}/onboarding-review/**
             ${{ runner.temp }}/admin-media-polish/**
+            ${{ runner.temp }}/backend-09-review/**

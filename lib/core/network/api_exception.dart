@@ -124,7 +124,11 @@ class ApiException implements Exception {
         message = _formatFieldErrorsMessage(fieldErrors);
       }
       // 3. Simple DRF detail: {"detail": "..."}
-      else if (data['detail'] != null) {
+      else if (data['error'] is String && data['message'] is String) {
+        errorCode = data['error'] as String;
+        rawBackendMsg = data['message'] as String;
+        message = _localizeBackendMessage(rawBackendMsg);
+      } else if (data['detail'] != null) {
         rawBackendMsg = data['detail'].toString();
         message = _localizeBackendMessage(rawBackendMsg);
         errorCode = data['code']?.toString();
@@ -192,6 +196,26 @@ class ApiException implements Exception {
         ar
             ? 'هذا التصنيف مرتبط بعلاجات. أرشفه أو أعد تعيين العلاجات قبل الحذف.'
             : 'This category has treatments. Archive it or reassign its treatments before deleting.',
+      'INVALID_SETUP_TRANSITION' || 'CLINIC_NOT_SUBMITTED' =>
+        ar
+            ? 'تغيرت حالة الملف. حدّث المراجعة قبل اتخاذ قرار جديد.'
+            : 'The profile is no longer submitted. Refresh before making another decision.',
+      'INCOMPLETE_ONBOARDING' || 'CLINIC_SETUP_INCOMPLETE' =>
+        ar
+            ? 'متطلبات الملف غير مكتملة. راجع قائمة الإعداد وحدّث البيانات قبل إعادة الإرسال أو الموافقة.'
+            : 'The profile requirements are incomplete. Review the setup checklist before resubmitting or approving.',
+      'ALREADY_APPROVED' =>
+        ar
+            ? 'الملف معتمد بالفعل ولا يحتاج إلى إعادة الإرسال.'
+            : 'The profile is already approved and does not need resubmission.',
+      'REJECTION_REASON_REQUIRED' || 'REJECTION_REASON_TOO_LONG' =>
+        ar
+            ? 'أدخل سبباً واضحاً من 1 إلى 1000 حرف.'
+            : 'Enter a clear correction reason from 1 to 1000 characters.',
+      'ALREADY_REVIEWED' =>
+        ar
+            ? 'تمت مراجعة الطلب بالفعل. حدّث القائمة.'
+            : 'This request has already been reviewed. Refresh the list.',
       'LAST_SUPER_ADMIN' =>
         ar
             ? 'لا يمكن حذف حساب المشرف العام الوحيد. عيّن مشرفاً عاماً آخر أولاً.'
@@ -230,6 +254,14 @@ class ApiException implements Exception {
             'CATEGORY_ALREADY_EXISTS',
             'DUPLICATE_CATEGORY_REQUEST',
             'CATEGORY_IN_USE',
+            'INVALID_SETUP_TRANSITION',
+            'CLINIC_NOT_SUBMITTED',
+            'INCOMPLETE_ONBOARDING',
+            'CLINIC_SETUP_INCOMPLETE',
+            'ALREADY_APPROVED',
+            'REJECTION_REASON_REQUIRED',
+            'REJECTION_REASON_TOO_LONG',
+            'ALREADY_REVIEWED',
             'LAST_SUPER_ADMIN',
             'SOLE_CLINIC_ADMIN',
             'ACCOUNT_ALREADY_INACTIVE',

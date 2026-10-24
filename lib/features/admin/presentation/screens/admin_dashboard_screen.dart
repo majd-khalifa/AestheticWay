@@ -146,20 +146,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(adminText('Clinic Reviews', 'مراجعة العيادات')),
                   subtitle: Text(
-                    adminText(
-                      'Submitted profiles • global count unavailable',
-                      'الملفات المرسلة • العدد الإجمالي غير متاح',
-                    ),
+                    _reviews.loading
+                        ? adminText(
+                            'Loading submitted profiles…',
+                            'جارٍ تحميل الملفات المرسلة…',
+                          )
+                        : _reviews.clinicCountError ??
+                              (_reviews.submittedClinics == null
+                                  ? adminText(
+                                      'Submitted count unavailable',
+                                      'عدد الملفات المرسلة غير متاح',
+                                    )
+                                  : adminText(
+                                      'Submitted profiles: ${_reviews.submittedClinics}',
+                                      'الملفات المرسلة: ${_reviews.submittedClinics}',
+                                    )),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: !_service.canManage
                       ? null
-                      : () => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) => const AdminClinicReviewsScreen(),
-                          ),
-                        ),
+                      : () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) => const AdminClinicReviewsScreen(),
+                            ),
+                          );
+                          if (mounted) await _reviews.refresh();
+                        },
                 ),
               ),
               if (_service.overviewLoaded)

@@ -1,3 +1,5 @@
+> Historical source snapshot: the current 09f49bb findings supersede the old missing-tier/filter/count/reject/gallery items. See [the current integration report](BACKEND_09F49BB_INTEGRATION_QA_REPORT.md) and [remaining confirmed issues](BACKEND_09F49BB_REMAINING_GAPS_FOR_ALI.md).
+
 # 1f1e4bf — remaining backend and release dependencies / المتطلبات المتبقية
 
 23 October 2026, Asia/Damascus. Read-only source audit; **660 supplied tests pass locally**, plus 101 controlled responses. No live deployment, production OTP or Cloudflare R2 delivery claim. Earlier d1023b0 reports are historical; category management and deletion endpoints now exist.

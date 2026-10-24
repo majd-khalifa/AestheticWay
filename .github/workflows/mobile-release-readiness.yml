@@ -90,6 +90,8 @@ jobs:
       - name: Record Xcode and SDK; install pinned CocoaPods
         run: |
           mkdir -p release-evidence
+          sudo xcode-select --switch "$DEVELOPER_DIR"
+          sudo xcodebuild -runFirstLaunch
           xcodebuild -version | tee release-evidence/xcode.txt
           xcrun --sdk iphoneos --show-sdk-version | tee release-evidence/ios-sdk.txt
           xcodebuild -version | grep -q 'Xcode 26'
@@ -113,12 +115,7 @@ jobs:
       - name: Boot iOS26 simulator and execute native hosted tests
         timeout-minutes: 12
         run: |
-          simulator_id=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(v["udid"] for k,vs in d["devices"].items() if "iOS-26" in k for v in vs if v["name"].startswith("iPhone")))')
-          if ! xcrun simctl list devices booted | grep -q "$simulator_id"; then
-            xcrun simctl boot "$simulator_id"
-          fi
-          xcrun simctl bootstatus "$simulator_id" -b
-          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug -destination "platform=iOS Simulator,id=$simulator_id" -destination-timeout 120 -parallel-testing-enabled NO -test-timeouts-enabled YES -maximum-test-execution-time-allowance 120 -resultBundlePath release-evidence/RunnerTests.xcresult CODE_SIGNING_ALLOWED=NO
+          python3 tool/run_ios_hosted_tests.py
       - name: Upload native build/test evidence, no signing material
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -1,3 +1,4 @@
+import '../widgets/admin_clinic_inspection.dart';
 import '../../../../core/widgets/portal_media_frame.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
@@ -406,6 +407,10 @@ class _AdminClinicDetailSheetState extends State<AdminClinicDetailSheet> {
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size.fromHeight(48),
                             ),
+                          ),
+                          AdminClinicInspection(
+                            key: ValueKey('inspection-${c.id}'),
+                            clinic: c,
                           ),
                           AdminSectionTitle(
                             LocaleService().tr('clinic_nav_offers'),

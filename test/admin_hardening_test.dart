@@ -120,6 +120,7 @@ class _Repository implements AdminRepository {
     int pageSize = 20,
     String? status,
     String? tier,
+    String? setupStatus,
     String? search,
   }) async {
     clinicReads++;

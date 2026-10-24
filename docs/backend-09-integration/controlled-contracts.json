@@ -1,0 +1,359 @@
+{
+  "source_commit": "09f49bbd22131f6dad49a65a5167de5396f03797",
+  "source_files_unchanged": 405,
+  "environment": "isolated in-memory SQLite / local test files / force-authenticated disposable roles; no live JWT, R2 or production verification",
+  "facts": {
+    "detail_projections_tenant_scoped": true,
+    "resubmission_retains_prior_moderation_notes": true,
+    "reject_accepts_previously_approved": true,
+    "filtered_pagination_and_global_total_beyond_first_page": true,
+    "deleted_patient_phone_retained_in_received_invite": true,
+    "received_invite_note_retained": true
+  },
+  "responses": [
+    {
+      "method": "GET",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "vip",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/",
+      "status": 404,
+      "summary": {
+        "error_code": "NOT_FOUND"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "vip",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "vip",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "vip",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "featured",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 400,
+      "summary": {
+        "error_code": "VALIDATION_ERROR"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "featured",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "basic",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 400,
+      "summary": {
+        "error_code": "VALIDATION_ERROR"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "submitted",
+        "subscription_tier": "basic",
+        "setup_rejection_reason": "",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/clinics/?setup_status=submitted",
+      "status": 200,
+      "summary": {
+        "count": 1
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard/",
+      "status": 200,
+      "summary": {
+        "submitted_setup_count": 1
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/",
+      "status": 200,
+      "summary": {
+        "status": "pending",
+        "setup_status": "submitted",
+        "subscription_tier": "basic",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/reject-setup/",
+      "status": 400,
+      "summary": {
+        "error_code": "REJECTION_REASON_REQUIRED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/reject-setup/",
+      "status": 200,
+      "summary": {
+        "status": "success",
+        "setup_status": "rejected",
+        "rejection_reason": "Replace the QA cover.",
+        "moderation_notes": "Replace the QA cover."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard/",
+      "status": 200,
+      "summary": {
+        "submitted_setup_count": 0
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/clinic-portal/profile/",
+      "status": 200,
+      "summary": {
+        "setup_status": "rejected",
+        "subscription_tier": "basic",
+        "setup_rejection_reason": "Replace the QA cover.",
+        "moderation_notes": "Replace the QA cover."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/clinic-portal/profile/setup-checklist/",
+      "status": 200,
+      "summary": {
+        "setup_status": "rejected",
+        "setup_rejection_reason": "Replace the QA cover.",
+        "moderation_notes": "Replace the QA cover."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/clinic-portal/profile/submit-for-review/",
+      "status": 200,
+      "summary": {
+        "status": "success",
+        "setup_status": "submitted"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/verify/",
+      "status": 200,
+      "summary": {
+        "status": "success",
+        "setup_status": "approved",
+        "new_status": "active",
+        "moderation_notes": ""
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/verify/",
+      "status": 409,
+      "summary": {
+        "error_code": "CLINIC_NOT_SUBMITTED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/clinic-portal/profile/submit-for-review/",
+      "status": 409,
+      "summary": {
+        "error_code": "ALREADY_APPROVED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/reject-setup/",
+      "status": 200,
+      "summary": {
+        "status": "success",
+        "setup_status": "rejected",
+        "rejection_reason": "QA transition probe",
+        "moderation_notes": "QA transition probe"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/12e37808-e27a-4ed1-a403-ccceb1495809/verify/",
+      "status": 409,
+      "summary": {
+        "error_code": "CLINIC_SETUP_INCOMPLETE"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/verify/",
+      "status": 403,
+      "summary": {
+        "error_code": "PERMISSION_DENIED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/reject-setup/",
+      "status": 403,
+      "summary": {
+        "error_code": "PERMISSION_DENIED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/verify/",
+      "status": 403,
+      "summary": {
+        "error_code": "PERMISSION_DENIED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/reject-setup/",
+      "status": 403,
+      "summary": {
+        "error_code": "PERMISSION_DENIED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/verify/",
+      "status": 401,
+      "summary": {
+        "error_code": "AUTHENTICATION_REQUIRED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/clinics/2bbe9098-2675-4e54-98cb-51aca902828b/reject-setup/",
+      "status": 401,
+      "summary": {
+        "error_code": "AUTHENTICATION_REQUIRED"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/clinics/?setup_status=submitted&page_size=20&page=1",
+      "status": 200,
+      "summary": {
+        "count": 22
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/clinics/?setup_status=submitted&page_size=20&page=2",
+      "status": 200,
+      "summary": {
+        "count": 22
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard/",
+      "status": 200,
+      "summary": {
+        "submitted_setup_count": 22
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/account-deletion/",
+      "status": 200,
+      "summary": {}
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/me/deletion/request/",
+      "status": 200,
+      "summary": {
+        "success": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/me/deletion/confirm/",
+      "status": 400,
+      "summary": {
+        "error_code": "VALIDATION_ERROR"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/me/deletion/confirm/",
+      "status": 200,
+      "summary": {
+        "success": true
+      }
+    }
+  ]
+}

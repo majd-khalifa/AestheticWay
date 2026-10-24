@@ -702,7 +702,11 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                                   : Icons.play_arrow,
                             ),
                             label: Text(
-                              ar ? 'معاينة الفيديو' : 'Preview video',
+                              _player?.value.isPlaying == true
+                                  ? (ar
+                                        ? 'إيقاف الفيديو مؤقتاً'
+                                        : 'Pause video')
+                                  : (ar ? 'معاينة الفيديو' : 'Preview video'),
                             ),
                           ),
                           if (vip)

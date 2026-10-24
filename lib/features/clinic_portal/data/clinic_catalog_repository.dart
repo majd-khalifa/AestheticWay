@@ -611,8 +611,19 @@ class ClinicCatalogRepository {
   }
 
   Future<Map<String, dynamic>> submitProfileForReview() async {
+    final session = SessionSnapshot();
     final response = await _api.post(ApiConfig.clinicSubmitForReview, data: {});
-    return response.data as Map<String, dynamic>? ?? {};
+    session.ensureCurrent();
+    final data = response.data;
+    if (data is! Map ||
+        data['status'] != 'success' ||
+        data['setup_status'] != 'submitted') {
+      throw const ApiException(
+        message:
+            'The server did not confirm submission. Refresh the profile before retrying.',
+      );
+    }
+    return Map<String, dynamic>.from(data);
   }
 
   Future<CategoryModel> createCategory({

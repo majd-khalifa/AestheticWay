@@ -30,6 +30,10 @@ class AdminStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (status.toLowerCase()) {
+      'inactive' => (
+        adminText('Inactive', 'غير نشط'),
+        AppColors.mutedText(context),
+      ),
       'active' => (adminText('Active', 'نشط'), AppColors.positiveText(context)),
       'suspended' => (
         adminText('Suspended', 'موقوف'),

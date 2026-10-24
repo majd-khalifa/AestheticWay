@@ -1,3 +1,4 @@
+import 'admin_clinic_inspection.dart';
 import '../../../core/utils/clinic_location.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
@@ -93,6 +94,10 @@ class AdminClinicModel {
   final int articlesCount;
   final int leadsCount;
   final List<AdminClinicBranchModel> branches;
+  final List<AdminReviewMedia> galleryAssets;
+  final List<AdminReviewPractitioner> practitioners;
+  final List<AdminReviewTreatment> treatments;
+  final bool hasGalleryProjection, hasContentProjection;
   final Map<String, int> leadsByStatus;
   final String moderationNotes;
   final DateTime? createdAt;
@@ -138,6 +143,11 @@ class AdminClinicModel {
     this.articlesCount = 0,
     this.leadsCount = 0,
     this.branches = const [],
+    this.galleryAssets = const [],
+    this.practitioners = const [],
+    this.treatments = const [],
+    this.hasGalleryProjection = false,
+    this.hasContentProjection = false,
     this.leadsByStatus = const {},
     this.moderationNotes = '',
     this.createdAt,
@@ -279,6 +289,40 @@ class AdminClinicModel {
       articlesCount: (json['articles_count'] as num?)?.toInt() ?? 0,
       leadsCount: (json['leads_count'] as num?)?.toInt() ?? 0,
       branches: parsedBranches,
+      hasGalleryProjection:
+          json['gallery_assets'] is List || json['gallery_images'] is List,
+      hasContentProjection:
+          json['practitioners'] is List || json['treatments'] is List,
+      galleryAssets: json['gallery_assets'] is List
+          ? (json['gallery_assets'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map(AdminReviewMedia.fromJson)
+                .where((a) => a.isImage)
+                .toList(growable: false)
+          : (json['gallery_images'] is List
+                ? (json['gallery_images'] as List)
+                      .whereType<String>()
+                      .map(
+                        (url) => AdminReviewMedia(
+                          id: url,
+                          url: ApiConfig.firstMediaUrl([url]),
+                        ),
+                      )
+                      .where((a) => a.isImage)
+                      .toList(growable: false)
+                : const []),
+      practitioners:
+          (json['practitioners'] is List
+                  ? json['practitioners'] as List
+                  : const [])
+              .whereType<Map<String, dynamic>>()
+              .map(AdminReviewPractitioner.fromJson)
+              .toList(growable: false),
+      treatments:
+          (json['treatments'] is List ? json['treatments'] as List : const [])
+              .whereType<Map<String, dynamic>>()
+              .map(AdminReviewTreatment.fromJson)
+              .toList(growable: false),
       leadsByStatus: parseCountMap(json['leads_by_status']),
       moderationNotes: json['moderation_notes']?.toString() ?? '',
       createdAt: parseDate(json['created_at']),
@@ -335,6 +379,11 @@ class AdminClinicModel {
       articlesCount: articlesCount,
       leadsCount: leadsCount,
       branches: branches,
+      galleryAssets: galleryAssets,
+      practitioners: practitioners,
+      treatments: treatments,
+      hasGalleryProjection: hasGalleryProjection,
+      hasContentProjection: hasContentProjection,
       leadsByStatus: leadsByStatus,
       moderationNotes: moderationNotes ?? this.moderationNotes,
       createdAt: createdAt,

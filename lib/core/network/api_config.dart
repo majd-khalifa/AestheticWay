@@ -252,10 +252,12 @@ class ApiConfig {
   // Super Admin Portal Endpoints (Always with trailing slash!)
   static const String adminDashboard = 'admin/dashboard/';
   static const String adminClinics = 'admin/clinics/';
+  static String adminClinicVerify(String id) => 'admin/clinics/$id/verify/';
+  static String adminClinicRejectSetup(String id) =>
+      'admin/clinics/$id/reject-setup/';
   static String adminClinicDetail(String id) => 'admin/clinics/$id/';
   static String adminClinicSuspend(String id) => 'admin/clinics/$id/suspend/';
   static String adminClinicActivate(String id) => 'admin/clinics/$id/activate/';
-  static String adminClinicVerify(String id) => 'admin/clinics/$id/verify/';
   static String adminClinicResetPassword(String id) =>
       'admin/clinics/$id/reset-admin-password/';
   static const String adminLeads = 'admin/leads/';

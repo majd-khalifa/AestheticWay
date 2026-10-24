@@ -161,10 +161,12 @@ void main() {
   late VideoPlayerPlatform oldVideo;
   late ShortVideoPlatform video;
   String? privateTier, publicTier, saved;
+  String accountState = 'active', setupState = 'approved';
   int? failure;
   bool offline = false;
   Map<String, dynamic> profile() => {
-    ...f.clinic(status: 'approved'),
+    ...f.clinic(status: setupState),
+    'status': accountState,
     'subscription_tier': ?privateTier,
     'cover_image': File(
       'test/fixtures/media/fragrance_photo.jpg',
@@ -209,6 +211,8 @@ void main() {
     );
     original = api.dio.httpClientAdapter;
     api.updateBaseUrl('https://fixture.invalid/api/v1/');
+    accountState = 'active';
+    setupState = 'approved';
     privateTier = null;
     publicTier = 'vip';
     saved = null;
@@ -899,4 +903,84 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.binding.setSurfaceSize(null);
   });
+  for (final setup in ['draft', 'submitted', 'rejected']) {
+    testWidgets(
+      '09f49bb unpublished private VIP full video journey and cold service restart: $setup',
+      (tester) async {
+        accountState = 'pending';
+        setupState = setup;
+        privateTier = 'vip';
+        publicTier = null;
+        picker.video = File(
+          'test/fixtures/clinic_media/short_showcase.mp4',
+        ).absolute.path;
+        await openMedia(tester);
+        expect(service.activeClinic.subscriptionTierKnown, isTrue);
+        expect(
+          wire.requests.where((r) => r.path == ApiConfig.clinicDetail(f.id)),
+          isEmpty,
+        );
+        await tester.tap(find.text('Select gallery video'));
+        await finishNativeWork(tester, () => video.probed.isCompleted);
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text('Upload and save video'),
+          150,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Upload and save video'));
+        await finishNativeWork(tester, () => saved != null);
+        await tester.pumpAndSettle();
+        expect(service.activeClinic.videoUrl, saved);
+        expect(
+          wire.sent.any((bytes) => latin1.decode(bytes).contains('ftyp')),
+          isTrue,
+        );
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpAndSettle();
+        // Cold in-memory service: retain only the independently acknowledged server fixture.
+        service.resetTestingState();
+        service.setCatalogRepositoryForTesting(
+          ClinicCatalogRepository(apiClient: api),
+        );
+        await openMedia(tester);
+        expect(service.activeClinic.videoUrl, saved);
+        await settlePreviewImages(tester);
+        await f.capture(tester, 'backend09_vip_cold_$setup');
+        await tester.ensureVisible(find.text('Preview video'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Preview video'));
+        await finishNativeWork(tester, () => video.created >= 2);
+        await tester.pumpAndSettle();
+        expect(find.text('Pause video'), findsOneWidget);
+        await tester.ensureVisible(find.text('Remove saved video'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Remove saved video'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Remove'));
+        await finishNativeWork(
+          tester,
+          () =>
+              saved == null &&
+              !service.activeClinic.hasVideoAd &&
+              tester
+                      .widget<TextButton>(
+                        find.ancestor(
+                          of: find.text('Select gallery video'),
+                          matching: find.byType(TextButton),
+                        ),
+                      )
+                      .onPressed !=
+                  null,
+        );
+        await tester.pumpAndSettle();
+        expect(saved, isNull);
+        expect(service.activeClinic.hasVideoAd, isFalse);
+        expect(service.activeClinic.coverImageUrl, isNotEmpty);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        await tester.binding.setSurfaceSize(null);
+      },
+    );
+  }
 }

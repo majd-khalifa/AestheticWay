@@ -144,6 +144,7 @@ class ClinicModel {
   final String? videoUrl;
   final String mediaType; // 'image' | 'video'
   final String setupStatus; // 'draft' | 'submitted' | 'approved' | 'rejected'
+  final String setupRejectionReason;
   final bool hasBranchDirectory;
   final List<dynamic>? rawPractitioners;
   final List<dynamic>? rawTreatments;
@@ -190,6 +191,7 @@ class ClinicModel {
     this.videoUrl,
     this.mediaType = 'image',
     this.setupStatus = 'approved',
+    this.setupRejectionReason = '',
     this.hasBranchDirectory = false,
     this.rawPractitioners,
     this.rawTreatments,
@@ -313,6 +315,10 @@ class ClinicModel {
       videoUrl: hasVideoUrl ? resolvedVideoUrl : null,
       mediaType: resolvedMediaType,
       setupStatus: json['setup_status']?.toString() ?? 'unknown',
+      setupRejectionReason: json['setup_status'] == 'rejected'
+          ? (json['setup_rejection_reason'] ?? json['moderation_notes'] ?? '')
+                .toString()
+          : '',
       hasBranchDirectory: json['branches_directory_url'] != null,
       rawPractitioners: practitionersRaw,
       rawTreatments: treatmentsRaw,
@@ -396,6 +402,7 @@ class ClinicModel {
     String? videoUrl,
     String? mediaType,
     String? setupStatus,
+    String? setupRejectionReason,
     bool? hasBranchDirectory,
     List<dynamic>? rawPractitioners,
     List<dynamic>? rawTreatments,
@@ -441,6 +448,7 @@ class ClinicModel {
       videoUrl: videoUrl ?? this.videoUrl,
       mediaType: mediaType ?? this.mediaType,
       setupStatus: setupStatus ?? this.setupStatus,
+      setupRejectionReason: setupRejectionReason ?? this.setupRejectionReason,
       hasBranchDirectory: hasBranchDirectory ?? this.hasBranchDirectory,
       rawPractitioners: rawPractitioners ?? this.rawPractitioners,
       rawTreatments: rawTreatments ?? this.rawTreatments,

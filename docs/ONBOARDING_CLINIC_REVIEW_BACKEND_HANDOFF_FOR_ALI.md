@@ -1,3 +1,5 @@
+> Historical source snapshot: the current 09f49bb findings supersede the old missing-tier/filter/count/reject/gallery items. See [the current integration report](BACKEND_09F49BB_INTEGRATION_QA_REPORT.md) and [remaining confirmed issues](BACKEND_09F49BB_REMAINING_GAPS_FOR_ALI.md).
+
 # Clinic review workflow — handoff for review only / للمراجعة فقط
 
 Source audited: **1f1e4bf**. No Django files changed. These are findings/proposals for review; no backend implementation, deployment or communication with Ali was authorized or performed.

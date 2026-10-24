@@ -1702,6 +1702,7 @@ class ClinicPortalService extends ChangeNotifier {
     _setupChecklist = ClinicSetupChecklistModel(
       clinicId: _activeClinic.id,
       setupStatus: _activeClinic.setupStatus,
+      setupRejectionReason: _activeClinic.setupRejectionReason,
       progressPercentage: progress,
       isReadyForReview: _mockMode && completed == 5,
       items: [
@@ -1751,8 +1752,16 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.submitProfileForReview(),
       sessionEpoch,
     );
-    final newStatus = res['setup_status']?.toString() ?? 'submitted';
-    _activeClinic = _activeClinic.copyWith(setupStatus: newStatus);
+    if (res['status'] != 'success' || res['setup_status'] != 'submitted') {
+      throw const ApiException(
+        message:
+            'The server did not confirm submission. Refresh before retrying.',
+      );
+    }
+    _activeClinic = _activeClinic.copyWith(
+      setupStatus: 'submitted',
+      setupRejectionReason: '',
+    );
     try {
       _setupChecklist = await _inSession(
         _catalogRepository.getSetupChecklist(),

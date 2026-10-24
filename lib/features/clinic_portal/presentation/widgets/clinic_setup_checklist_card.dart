@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/network/api_exception.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
@@ -207,7 +208,14 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
             _buildChecklistRows(context, loc, clinicService),
             const SizedBox(height: 14),
 
-            if (isRejected) _ReviewFeedback(ar: loc.isArabic),
+            if (isRejected)
+              _ReviewFeedback(
+                ar: loc.isArabic,
+                reason:
+                    widget.checklist?.setupRejectionReason.isNotEmpty == true
+                    ? widget.checklist!.setupRejectionReason
+                    : widget.clinic.setupRejectionReason,
+              ),
             if (isApproved)
               Text(
                 loc.isArabic
@@ -562,15 +570,22 @@ class _ChecklistTile extends StatelessWidget {
 }
 
 class _ReviewFeedback extends StatelessWidget {
-  const _ReviewFeedback({required this.ar});
+  const _ReviewFeedback({required this.ar, required this.reason});
   final bool ar;
+  final String reason;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 12),
     child: Text(
-      ar
-          ? 'حالة الإعداد: مرفوض. حدّث بيانات الملف ثم أعد الإرسال عند اكتمال المتطلبات. الخادم الحالي لا يعيد سبب الرفض؛ راجع إدارة المنصة للتفاصيل.'
-          : 'Setup status: rejected. Update the profile and resubmit when requirements are complete. This backend does not return a rejection reason; contact the platform administrator for details.',
+      ApiException.sanitizeRegulatoryCompliance(
+        reason.isNotEmpty
+            ? (ar
+                  ? 'ملاحظات المراجعة: $reason\nصحّح البيانات وأعد الإرسال عند اكتمال المتطلبات.'
+                  : 'Review feedback: $reason\nCorrect the profile and resubmit when requirements are complete.')
+            : (ar
+                  ? 'يحتاج الملف إلى تعديلات. لم يُرفق سبب؛ راجع إدارة المنصة.'
+                  : 'Profile changes are required. No reason was supplied; contact the platform team.'),
+      ),
     ),
   );
 }
