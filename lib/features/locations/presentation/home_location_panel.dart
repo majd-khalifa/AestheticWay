@@ -1,3 +1,5 @@
+import 'nearby_clinics_screen.dart';
+import '../../../core/widgets/async_action_button.dart';
 import 'package:flutter/material.dart';
 import '../../../core/localization/app_locale.dart';
 import '../services/patient_location_controller.dart';
@@ -8,9 +10,10 @@ class HomeLocationPanel extends StatelessWidget {
     super.key,
     required this.controller,
     this.nearbySupported = false,
+    this.showNearbyEntry = true,
   });
   final PatientLocationController controller;
-  final bool nearbySupported;
+  final bool nearbySupported, showNearbyEntry;
   @override
   Widget build(BuildContext context) {
     final ar = LocaleService().isArabic;
@@ -35,6 +38,8 @@ class HomeLocationPanel extends StatelessWidget {
             ),
             UaeLocationField(
               value: controller.city,
+              areaCode: controller.areaCode,
+              onLocalityChanged: controller.selectLocality,
               onChanged: controller.selectCity,
             ),
             OutlinedButton.icon(
@@ -52,6 +57,29 @@ class HomeLocationPanel extends StatelessWidget {
                     : t('Use my location', 'استخدام موقعي'),
               ),
             ),
+            if (controller.areaCode != null && !nearbySupported)
+              Text(
+                t(
+                  'Showing city results; area filtering is not available yet.',
+                  'ستُعرض نتائج المدينة؛ ترشيح المنطقة غير متاح بعد.',
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            if (showNearbyEntry)
+              AsyncActionButton(
+                label: t(
+                  'Nearby clinics · map & list',
+                  'العيادات القريبة · خريطة وقائمة',
+                ),
+                icon: Icons.map_outlined,
+                onPressed: (action) async => action.wait(
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => NearbyClinicsScreen(location: controller),
+                    ),
+                  ),
+                ),
+              ),
             Semantics(
               liveRegion: true,
               child: Text(switch (controller.state) {

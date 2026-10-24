@@ -1,3 +1,5 @@
+import '../../../../core/widgets/async_action_button.dart';
+import '../../../google_business/presentation/google_business_screen.dart';
 import '../../../../core/auth/session_snapshot.dart';
 import 'clinic_media_screen.dart';
 import '../../../../core/services/local_media_cache.dart';
@@ -1910,8 +1912,6 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                   emirate: selectedLocation?.emirate,
                                   latitude: selectedLocation?.latitude,
                                   longitude: selectedLocation?.longitude,
-                                  googleMapsUrl:
-                                      selectedLocation?.googleMapsUrl,
                                   logo: logoPath,
                                   coverImage: coverPath,
                                   clearLogo: logoChanged && logoPath == null,
@@ -1993,7 +1993,6 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
         emirate: result.emirate,
         latitude: result.latitude,
         longitude: result.longitude,
-        googleMapsUrl: result.googleMapsUrl,
       );
       if (context.mounted) {
         showAppSnackBar(
@@ -2158,7 +2157,9 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      loc.isArabic ? 'موقع العيادة' : 'Clinic Location',
+                      loc.isArabic
+                          ? 'الموقع ونشاط Google'
+                          : 'Location & Google Business',
                       style: TextStyle(
                         color: AppColors.text(context),
                         fontSize: 16,
@@ -2166,6 +2167,32 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    AsyncActionButton(
+                      icon: Icons.business_outlined,
+                      label: loc.isArabic
+                          ? 'مراجعة ارتباط Google Business'
+                          : 'Review Google Business association',
+                      onPressed: (action) async {
+                        await action.wait(
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => GoogleBusinessScreen(
+                                onEditManualPin: () =>
+                                    _updateClinicLocation(context, loc),
+                              ),
+                            ),
+                          ),
+                        );
+                        await action.wait(
+                          ClinicPortalService().refreshClinicProfile(),
+                        );
+                      },
+                    ),
+                    Text(
+                      loc.isArabic
+                          ? 'الدبوس اليدوي مستقل عن ارتباط نشاط Google.'
+                          : 'The manual pin is separate from Google Business linking.',
+                    ),
                     Text(
                       clinicLocationSummary(
                         clinic.city,
@@ -2232,21 +2259,25 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                 : 'Update Location',
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: () => MapsLauncher.openMapLocation(
-                            latitude: clinic.latitude,
-                            longitude: clinic.longitude,
-                            googleMapsUrl: clinic.googleMapsUrl,
-                            placeName: loc.isArabic
-                                ? clinic.nameAr
-                                : clinic.nameEn,
-                          ),
-                          icon: const Icon(Icons.open_in_new),
-                          label: Text(
-                            loc.isArabic
-                                ? 'فتح في خرائط Google'
-                                : 'Open in Google Maps',
-                          ),
+                        AsyncActionButton(
+                          icon: Icons.open_in_new,
+                          label: loc.isArabic
+                              ? 'فتح الدبوس اليدوي في خرائط Google'
+                              : 'Open manual pin in Google Maps',
+                          onPressed:
+                              !ClinicLocationSelection.validCoordinates(
+                                clinic.latitude,
+                                clinic.longitude,
+                              )
+                              ? null
+                              : (_) async {
+                                  if (!await MapsLauncher.openVerifiedLocation(
+                                    latitude: clinic.latitude,
+                                    longitude: clinic.longitude,
+                                  )) {
+                                    throw StateError('Directions unavailable');
+                                  }
+                                },
                         ),
                       ],
                     ),

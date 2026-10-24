@@ -55,4 +55,20 @@ const compatibilityUaeCatalog = UaeLocationCatalog(
       'Umm Al-Quwain',
     ]),
   ],
+  areas: [
+    UaeArea(
+      'dubai-healthcare-city',
+      'dubai',
+      'Dubai Healthcare City',
+      'مدينة دبي الطبية',
+    ),
+    UaeArea('jumeirah', 'dubai', 'Jumeirah', 'جميرا'),
+    UaeArea('al-barsha', 'dubai', 'Al Barsha', 'البرشاء'),
+    UaeArea('al-bateen', 'abu-dhabi', 'Al Bateen', 'البطين'),
+    UaeArea('khalifa-city', 'abu-dhabi', 'Khalifa City', 'مدينة خليفة'),
+    UaeArea('al-majaz', 'sharjah', 'Al Majaz', 'المجاز'),
+    UaeArea('al-nuaimiya', 'ajman', 'Al Nuaimiya', 'النعيمية'),
+    UaeArea('al-nakheel', 'ras-al-khaimah', 'Al Nakheel', 'النخيل'),
+    UaeArea('al-salamah', 'umm-al-quwain', 'Al Salamah', 'السلامة'),
+  ],
 );

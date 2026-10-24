@@ -1,0 +1,20 @@
+{
+  "baseline": "52dbc041a86a5eda0aa01c938aa410294a37558d",
+  "branch": "codex/final-backend-integration-client-preview",
+  "pr": 13,
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "host": "Linux",
+  "analyze_issues": 0,
+  "tests_passed": 1080,
+  "tests_failed": 0,
+  "new_regressions": 53,
+  "focused_with_existing_clinic_tests": 66,
+  "source_responses": 7,
+  "backend_source_files_unchanged": 405,
+  "flutter_screenshots": 19,
+  "diff_check": "clean",
+  "native_or_live_Google_business_or_nearby_verified": false,
+  "native_CI": "See final PR13 description and exact-commit checks; no prior-head result is claimed as current verification.",
+  "dependencies_or_signing_changed": false
+}

@@ -1,3 +1,4 @@
+import '../../../locations/models/uae_location.dart';
 import '../../../locations/presentation/uae_location_picker.dart';
 import '../../../locations/data/uae_location_repository.dart';
 import '../../../../core/utils/clinic_location.dart';
@@ -117,6 +118,7 @@ class _LocationSheetState extends State<_LocationSheet> {
   final _query = TextEditingController();
   late final TextEditingController _addressAr, _addressEn;
   late String _city;
+  String? _areaCode;
   late LatLng _point;
   bool _confirmed = false, _searching = false;
   String? _error;
@@ -166,6 +168,20 @@ class _LocationSheetState extends State<_LocationSheet> {
       _error = null;
     });
     if (move) _map.move(point, 15);
+  }
+
+  void _localityChanged(UaeLocality value) {
+    final e = _emirates[compatibilityUaeCatalog.emirateFor(value.city).nameEn]!;
+    setState(() {
+      _city = value.city.nameEn;
+      _areaCode = value.area?.code;
+      _confirmed = false;
+      _point = LatLng(e.$2, e.$3);
+      _results = [];
+      _addressEn.text = value.addressWithArea(_addressEn.text, arabic: false);
+      _addressAr.text = value.addressWithArea(_addressAr.text, arabic: true);
+    });
+    _map.move(_point, 10);
   }
 
   Future<void> _search() async {
@@ -260,9 +276,16 @@ class _LocationSheetState extends State<_LocationSheet> {
                 : 'Choose an area, then tap the clinic’s exact position on the map.',
             style: TextStyle(color: AppColors.mutedText(context)),
           ),
+          Text(
+            _ar
+                ? 'خريطة يدوية من OpenStreetMap؛ لا تربط نشاط Google ولا تتحقق منه.'
+                : 'Manual OpenStreetMap map; this does not link or verify a Google Business.',
+          ),
           const SizedBox(height: 16),
           UaeLocationField(
             value: _city,
+            areaCode: _areaCode,
+            onLocalityChanged: _localityChanged,
             allowAll: false,
             onChanged: (value) {
               final city = compatibilityUaeCatalog.resolve(value);

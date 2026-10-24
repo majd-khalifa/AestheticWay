@@ -11,11 +11,13 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 
 class ClinicFilterOptions {
   String selectedCity;
+  String? selectedAreaCode;
   String? selectedSpecialtyId;
   String? specialtyNameAr, specialtyNameEn;
 
   ClinicFilterOptions({
     this.selectedCity = 'الكل',
+    this.selectedAreaCode,
     this.selectedSpecialtyId,
     this.specialtyNameAr,
     this.specialtyNameEn,
@@ -27,6 +29,7 @@ class ClinicFilterOptions {
   }) {
     return ClinicFilterOptions(
       selectedCity: selectedCity ?? this.selectedCity,
+      selectedAreaCode: selectedCity == null ? selectedAreaCode : null,
       selectedSpecialtyId: selectedSpecialtyId ?? this.selectedSpecialtyId,
       specialtyNameAr: specialtyNameAr,
       specialtyNameEn: specialtyNameEn,
@@ -35,6 +38,7 @@ class ClinicFilterOptions {
 
   void reset() {
     selectedCity = 'الكل';
+    selectedAreaCode = null;
     selectedSpecialtyId = null;
     specialtyNameAr = null;
     specialtyNameEn = null;
@@ -173,10 +177,23 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   const SizedBox(height: 8),
                   UaeLocationField(
                     value: _filters.selectedCity,
-                    onChanged: (city) =>
-                        setState(() => _filters.selectedCity = city),
+                    areaCode: _filters.selectedAreaCode,
+                    onLocalityChanged: (value) => setState(() {
+                      _filters.selectedCity = value.city.nameEn;
+                      _filters.selectedAreaCode = value.area?.code;
+                    }),
+                    onChanged: (city) => setState(() {
+                      _filters.selectedCity = city;
+                      _filters.selectedAreaCode = null;
+                    }),
                   ),
 
+                  if (_filters.selectedAreaCode != null)
+                    Text(
+                      loc.isArabic
+                          ? 'ستُعرض نتائج المدينة؛ ترشيح المنطقة غير متاح بعد.'
+                          : 'Showing city results; area filtering is not available yet.',
+                    ),
                   const SizedBox(height: 18),
                   // 2. Specialty Filter
                   Text(

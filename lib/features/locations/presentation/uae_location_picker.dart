@@ -14,13 +14,34 @@ Future<UaeCity?> showUaeLocationPicker(
   builder: (_) => UaeLocationPicker(selected: selected, repository: repository),
 );
 
+Future<UaeLocality?> showUaeLocalityPicker(
+  BuildContext context, {
+  String? selected,
+  String? areaCode,
+  UaeLocationRepository repository = const BundledUaeLocationRepository(),
+}) => showModalBottomSheet<UaeLocality>(
+  context: context,
+  isScrollControlled: true,
+  useSafeArea: true,
+  builder: (_) => UaeLocationPicker(
+    selected: selected,
+    selectedAreaCode: areaCode,
+    includeAreas: true,
+    repository: repository,
+  ),
+);
+
 class UaeLocationPicker extends StatefulWidget {
   const UaeLocationPicker({
     super.key,
     this.selected,
+    this.selectedAreaCode,
+    this.includeAreas = false,
     this.repository = const BundledUaeLocationRepository(),
   });
   final String? selected;
+  final String? selectedAreaCode;
+  final bool includeAreas;
   final UaeLocationRepository repository;
   @override
   State<UaeLocationPicker> createState() => _UaeLocationPickerState();
@@ -30,6 +51,7 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
   UaeLocationCatalog? _catalog;
   String? _emirate, _error;
   String _query = '';
+  UaeCity? _city;
   final _search = TextEditingController();
   bool get ar => LocaleService().isArabic;
   @override
@@ -77,6 +99,17 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
             )
             .toList() ??
         [];
+    final areas =
+        c?.areas
+            .where(
+              (a) =>
+                  a.cityCode == _city?.code &&
+                  UaeLocationCatalog.normalize(
+                    '${a.nameEn} ${a.nameAr} ${a.aliases.join(' ')}',
+                  ).contains(UaeLocationCatalog.normalize(_query)),
+            )
+            .toList() ??
+        [];
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * .82,
       child: Padding(
@@ -93,7 +126,11 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    ar ? 'الإمارة ثم المدينة' : 'Emirate, then city',
+                    widget.includeAreas
+                        ? (ar
+                              ? 'الإمارة، المدينة، المنطقة'
+                              : 'Emirate, city, area')
+                        : (ar ? 'الإمارة ثم المدينة' : 'Emirate, then city'),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 12),
@@ -130,6 +167,7 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                           .toList(),
                       onChanged: (v) => setState(() {
                         _emirate = v;
+                        _city = null;
                         _query = '';
                         _search.clear();
                       }),
@@ -138,7 +176,9 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                       controller: _search,
                       onChanged: (v) => setState(() => _query = v),
                       decoration: InputDecoration(
-                        labelText: ar ? 'البحث عن مدينة' : 'Search cities',
+                        labelText: _city == null
+                            ? (ar ? 'البحث عن مدينة' : 'Search cities')
+                            : (ar ? 'البحث عن منطقة' : 'Search areas'),
                         prefixIcon: const Icon(Icons.search),
                       ),
                     ),
@@ -146,7 +186,7 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                 ],
               ),
             ),
-            if (c != null && cities.isEmpty)
+            if (c != null && _city == null && cities.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
@@ -157,7 +197,7 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                   ),
                 ),
               ),
-            if (c != null)
+            if (c != null && _city == null)
               SliverList.builder(
                 itemCount: cities.length,
                 itemBuilder: (ctx, i) {
@@ -166,7 +206,62 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                     title: Text(city.label(ar)),
                     subtitle: Text(c.emirateFor(city).label(ar)),
                     selected: c.resolve(widget.selected)?.code == city.code,
-                    onTap: () => Navigator.pop(context, city),
+                    onTap: () {
+                      if (!widget.includeAreas) {
+                        Navigator.pop(context, city);
+                      } else {
+                        setState(() {
+                          _city = city;
+                          _query = '';
+                          _search.clear();
+                        });
+                      }
+                    },
+                  );
+                },
+              ),
+            if (_city != null)
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => setState(() {
+                        _city = null;
+                        _query = '';
+                        _search.clear();
+                      }),
+                      icon: const Icon(Icons.arrow_back),
+                      label: Text(ar ? 'تغيير المدينة' : 'Change city'),
+                    ),
+                    ListTile(
+                      title: Text(
+                        ar
+                            ? 'كل مناطق ${_city!.nameAr}'
+                            : 'Whole city: ${_city!.nameEn}',
+                      ),
+                      onTap: () => Navigator.pop(context, UaeLocality(_city!)),
+                    ),
+                    if (areas.isEmpty)
+                      Text(
+                        ar
+                            ? 'لا توجد مناطق مطابقة في القائمة الجزئية المتاحة. يمكنك اختيار المدينة.'
+                            : 'No matching areas in this partial catalog. You can select the whole city.',
+                      ),
+                  ],
+                ),
+              ),
+            if (_city != null)
+              SliverList.builder(
+                itemCount: areas.length,
+                itemBuilder: (_, i) {
+                  final area = areas[i];
+                  return ListTile(
+                    title: Text(area.label(ar)),
+                    subtitle: Text(_city!.label(ar)),
+                    selected: area.code == widget.selectedAreaCode,
+                    onTap: () =>
+                        Navigator.pop(context, UaeLocality(_city!, area)),
                   );
                 },
               ),
@@ -185,10 +280,14 @@ class UaeLocationField extends StatelessWidget {
     required this.onChanged,
     this.enabled = true,
     this.allowAll = true,
+    this.areaCode,
+    this.onLocalityChanged,
   });
   final String value;
   final ValueChanged<String> onChanged;
   final bool enabled, allowAll;
+  final String? areaCode;
+  final ValueChanged<UaeLocality>? onLocalityChanged;
   @override
   Widget build(BuildContext context) {
     final ar = LocaleService().isArabic;
@@ -200,15 +299,30 @@ class UaeLocationField extends StatelessWidget {
             onPressed: !enabled
                 ? null
                 : () async {
-                    final city = await showUaeLocationPicker(
+                    final locality = await showUaeLocalityPicker(
                       context,
                       selected: value,
+                      areaCode: areaCode,
                     );
-                    if (context.mounted && city != null) onChanged(city.nameEn);
+                    if (context.mounted && locality != null) {
+                      if (onLocalityChanged != null) {
+                        onLocalityChanged!(locality);
+                      } else {
+                        onChanged(locality.city.nameEn);
+                      }
+                    }
                   },
             icon: const Icon(Icons.location_on_outlined),
             label: Text(
-              city?.label(ar) ??
+              (city == null
+                      ? null
+                      : UaeLocality(
+                          city,
+                          compatibilityUaeCatalog.resolveArea(
+                            areaCode,
+                            cityCode: city.code,
+                          ),
+                        ).label(ar)) ??
                   (compatibilityUaeCatalog.legacyCityQuery(value) ??
                       (ar ? 'كل الإمارات' : 'All Emirates')),
             ),

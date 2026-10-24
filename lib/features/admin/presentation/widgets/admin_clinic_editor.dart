@@ -29,6 +29,7 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
   bool _logoChanged = false, _coverChanged = false;
   bool _featured = false;
   String _city = 'Dubai', _tier = 'basic';
+  String? _areaCode;
   String? _logo, _cover, _error;
   bool get _creating => widget.clinic == null;
   TextEditingController _field(String key) => _fields[key]!;
@@ -431,6 +432,19 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
                         ),
                         UaeLocationField(
                           value: _city,
+                          areaCode: _areaCode,
+                          onLocalityChanged: (value) => setState(() {
+                            _city = value.city.nameEn;
+                            _areaCode = value.area?.code;
+                            _field('address_en').text = value.addressWithArea(
+                              _field('address_en').text,
+                              arabic: false,
+                            );
+                            _field('address_ar').text = value.addressWithArea(
+                              _field('address_ar').text,
+                              arabic: true,
+                            );
+                          }),
                           allowAll: false,
                           enabled: !_busy,
                           onChanged: (v) => setState(() => _city = v),

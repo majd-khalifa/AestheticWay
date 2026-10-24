@@ -1,3 +1,4 @@
+import '../models/uae_location.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
@@ -72,12 +73,30 @@ class PatientLocationController extends ChangeNotifier {
   bool _disposed = false;
   int _session = AuthState().sessionEpoch;
   String city = 'All';
+  String? areaCode;
+  UaeLocality? get locality {
+    final c = compatibilityUaeCatalog.resolve(city);
+    return c == null
+        ? null
+        : UaeLocality(
+            c,
+            compatibilityUaeCatalog.resolveArea(areaCode, cityCode: c.code),
+          );
+  }
+
+  void selectLocality(UaeLocality value) {
+    selectCity(value.city.nameEn);
+    areaCode = value.area?.code;
+    notifyListeners();
+  }
+
   PatientPosition? position;
   PatientLocationState state = PatientLocationState.manual;
   bool get busy => state == PatientLocationState.requesting;
   void selectCity(String value) {
     ++_generation;
     city = compatibilityUaeCatalog.legacyCityQuery(value) ?? 'All';
+    areaCode = null;
     position = null;
     state = PatientLocationState.manual;
     notifyListeners();
@@ -141,6 +160,37 @@ class PatientLocationController extends ChangeNotifier {
     position = found;
     state = result;
     notifyListeners();
+  }
+
+  Future<void> revalidatePermission() async {
+    if (_disposed || position == null || busy) return;
+    final g = _generation;
+    try {
+      final enabled = await _provider.servicesEnabled();
+      final permission = await _provider.permission();
+      if (_disposed || g != _generation) return;
+      if (!enabled ||
+          ![
+            LocationPermission.whileInUse,
+            LocationPermission.always,
+          ].contains(permission)) {
+        ++_generation;
+        position = null;
+        state = !enabled
+            ? PatientLocationState.disabled
+            : permission == LocationPermission.deniedForever
+            ? PatientLocationState.deniedForever
+            : PatientLocationState.denied;
+        notifyListeners();
+      }
+    } catch (_) {
+      if (!_disposed && g == _generation) {
+        ++_generation;
+        position = null;
+        state = PatientLocationState.unavailable;
+        notifyListeners();
+      }
+    }
   }
 
   /// Discard GPS on backgrounding; a later user action may reacquire it.

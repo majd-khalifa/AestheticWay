@@ -1,0 +1,266 @@
+import 'package:flutter/material.dart';
+import '../../../core/localization/app_locale.dart';
+import '../../../core/utils/maps_launcher.dart';
+import '../../../core/widgets/async_action_button.dart';
+import '../../../core/widgets/pagination_footer.dart';
+import '../../appointment_lead/presentation/screens/appointment_request_screen.dart';
+import '../../clinics/presentation/screens/clinics_list_screen.dart';
+import '../../clinics/presentation/screens/clinic_profile_screen.dart';
+import '../../clinics/presentation/widgets/patient_clinic_card.dart';
+import '../data/nearby_clinics_repository.dart';
+import '../services/nearby_discovery_controller.dart';
+import '../services/patient_location_controller.dart';
+import 'home_location_panel.dart';
+
+typedef NearbyGoogleMapBuilder =
+    Widget Function(BuildContext, List<NearbyClinic>);
+
+class NearbyClinicsScreen extends StatefulWidget {
+  const NearbyClinicsScreen({
+    super.key,
+    this.location,
+    this.repository = const UnavailableNearbyClinicsRepository(),
+    this.mapBuilder,
+  });
+  final PatientLocationController? location;
+  final NearbyClinicsRepository repository;
+  final NearbyGoogleMapBuilder? mapBuilder;
+  @override
+  State<NearbyClinicsScreen> createState() => _NearbyClinicsScreenState();
+}
+
+class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
+    with WidgetsBindingObserver {
+  late final _location = widget.location ?? PatientLocationController();
+  late final _discovery = NearbyDiscoveryController(
+    _location,
+    widget.repository,
+  );
+  bool _map = false, _opening = false;
+  bool get ar => LocaleService().isArabic;
+  String t(String en, String arabic) => ar ? arabic : en;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _discovery;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      _discovery.setActive(false);
+      _location.releasePosition();
+    } else {
+      _location.revalidatePermission();
+      _discovery.setActive(true);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _discovery.dispose();
+    if (widget.location == null) _location.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      _location,
+      _discovery.paging,
+      LocaleService(),
+    ]),
+    builder: (context, _) {
+      final page = _discovery.paging, rows = page.items;
+      return Scaffold(
+        appBar: AppBar(title: Text(t('Nearby clinics', 'العيادات القريبة'))),
+        body: !_discovery.allowed
+            ? Center(
+                child: Text(t('Sign in to continue.', 'سجّل الدخول للمتابعة.')),
+              )
+            : RefreshIndicator(
+                onRefresh: _discovery.refresh,
+                child: ListView(
+                  padding: const EdgeInsets.only(bottom: 28),
+                  children: [
+                    HomeLocationPanel(
+                      controller: _location,
+                      nearbySupported: widget.repository.supported,
+                      showNearbyEntry: false,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SegmentedButton<bool>(
+                            segments: [
+                              ButtonSegment(
+                                value: false,
+                                icon: const Icon(Icons.list),
+                                label: Text(t('List', 'قائمة')),
+                              ),
+                              ButtonSegment(
+                                value: true,
+                                icon: const Icon(Icons.map_outlined),
+                                label: Text(t('Map', 'خريطة')),
+                              ),
+                            ],
+                            selected: {_map},
+                            onSelectionChanged: (s) =>
+                                setState(() => _map = s.single),
+                          ),
+                          const SizedBox(height: 12),
+                          if (!widget.repository.supported)
+                            Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text(
+                                  t(
+                                    'Nearby search is not available yet. Browse genuine clinic listings by city; these are not distance-ranked results.',
+                                    'البحث عن الأقرب غير متاح حالياً. تصفح العيادات الحقيقية حسب المدينة؛ هذه النتائج ليست مرتبة حسب المسافة.',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          AsyncActionButton(
+                            label: t(
+                              'Browse city directory',
+                              'تصفح دليل المدينة',
+                            ),
+                            onPressed: (action) async => action.wait(
+                              Navigator.push<void>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ClinicsListScreen(
+                                    initialCity: _location.city,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (widget.repository.supported && page.isLoading)
+                            const Padding(
+                              padding: EdgeInsets.all(20),
+                              child: LinearProgressIndicator(),
+                            ),
+                          if (widget.repository.supported &&
+                              page.isLoaded &&
+                              rows.isEmpty &&
+                              page.error == null)
+                            Text(
+                              t(
+                                'No eligible clinics were returned for this location. Choose another area or refresh.',
+                                'لم تُرجع الخدمة عيادات متاحة لهذا الموقع. اختر منطقة أخرى أو حدّث.',
+                              ),
+                            ),
+                          if (_map && rows.isNotEmpty) ...[
+                            if (widget.mapBuilder != null)
+                              SizedBox(
+                                height: 260,
+                                child: widget.mapBuilder!(
+                                  context,
+                                  rows
+                                      .where((r) => r.branchLocation != null)
+                                      .toList(growable: false),
+                                ),
+                              )
+                            else
+                              Text(
+                                t(
+                                  'Embedded Google Maps is not configured. Open a confirmed clinic location in Google Maps below.',
+                                  'خرائط Google المدمجة غير مهيأة. افتح موقع عيادة مؤكد في خرائط Google أدناه.',
+                                ),
+                              ),
+                            for (final row in rows.where(
+                              (r) => r.branchLocation != null,
+                            ))
+                              AsyncActionButton(
+                                label: t(
+                                  'Directions to ${row.clinic.nameEn}',
+                                  'الاتجاهات إلى ${row.clinic.nameAr}',
+                                ),
+                                icon: Icons.directions_outlined,
+                                onPressed: (_) async {
+                                  final p = row.branchLocation!;
+                                  if (!await MapsLauncher.openVerifiedLocation(
+                                    latitude: p.latitude,
+                                    longitude: p.longitude,
+                                  )) {
+                                    throw StateError('Directions unavailable');
+                                  }
+                                },
+                              ),
+                          ],
+                          if (!_map)
+                            for (final row in rows)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    PatientClinicCard(
+                                      clinic: row.clinic,
+                                      onTap: () async {
+                                        if (_opening) return;
+                                        _opening = true;
+                                        try {
+                                          await Navigator.push<void>(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  ClinicProfileScreen(
+                                                    clinic: row.clinic,
+                                                  ),
+                                            ),
+                                          );
+                                        } finally {
+                                          _opening = false;
+                                        }
+                                      },
+                                    ),
+                                    if (_discovery
+                                        .distanceLabel(row)
+                                        .isNotEmpty)
+                                      Text(_discovery.distanceLabel(row)),
+                                    AsyncActionButton(
+                                      label: t(
+                                        'Request consultation',
+                                        'طلب استشارة',
+                                      ),
+                                      onPressed: (action) async => action.wait(
+                                        Navigator.push<void>(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                AppointmentRequestScreen(
+                                                  clinic: row.clinic,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          if (widget.repository.supported &&
+                              _discovery.canQuery)
+                            PaginationFooter(
+                              loading: page.isLoading || page.isLoadingMore,
+                              hasMore: page.hasMore,
+                              error: page.error,
+                              onLoadMore: page.loadMore,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      );
+    },
+  );
+}

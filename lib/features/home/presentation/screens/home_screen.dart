@@ -59,7 +59,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _locationSession = AuthState().sessionEpoch;
   void _locationChanged() {
     final epoch = AuthState().sessionEpoch;
-    if (_selectedCity == _location.city && _locationSession == epoch) return;
+    if (_selectedCity == _location.city && _locationSession == epoch) {
+      if (mounted) setState(() {});
+      return;
+    }
     _locationSession = epoch;
     _cityChanged(_location.city);
   }
@@ -311,6 +314,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: HomeHeader(
               selectedCity: _selectedCity,
               onCityChanged: _location.selectCity,
+              selectedAreaCode: _location.areaCode,
+              onLocalityChanged: _location.selectLocality,
             ),
           ),
           SliverToBoxAdapter(child: _buildSearchBar(context, loc)),
@@ -328,6 +333,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: HomeHeader(
               selectedCity: _selectedCity,
               onCityChanged: _location.selectCity,
+              selectedAreaCode: _location.areaCode,
+              onLocalityChanged: _location.selectLocality,
             ),
           ),
           SliverFillRemaining(
@@ -355,6 +362,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           child: HomeHeader(
             selectedCity: _selectedCity,
             onCityChanged: _location.selectCity,
+            selectedAreaCode: _location.areaCode,
+            onLocalityChanged: _location.selectLocality,
           ),
         ),
 

@@ -328,7 +328,10 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                     _filterOptions.selectedCity == 'الكل' ||
                     _filterOptions.selectedCity == 'All',
                 onTap: () {
-                  setState(() => _filterOptions.selectedCity = 'الكل');
+                  setState(() {
+                    _filterOptions.selectedCity = 'الكل';
+                    _filterOptions.selectedAreaCode = null;
+                  });
                   _paging.search({
                     'search': _searchQuery,
                     'city': _filterOptions.selectedCity,
@@ -341,8 +344,23 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                 width: 210,
                 child: UaeLocationField(
                   value: _filterOptions.selectedCity,
+                  areaCode: _filterOptions.selectedAreaCode,
+                  onLocalityChanged: (value) {
+                    setState(() {
+                      _filterOptions.selectedCity = value.city.nameEn;
+                      _filterOptions.selectedAreaCode = value.area?.code;
+                    });
+                    _paging.search({
+                      'search': _searchQuery,
+                      'city': value.city.nameEn,
+                      'category': _categoryUuid,
+                    });
+                  },
                   onChanged: (city) {
-                    setState(() => _filterOptions.selectedCity = city);
+                    setState(() {
+                      _filterOptions.selectedCity = city;
+                      _filterOptions.selectedAreaCode = null;
+                    });
                     _paging.search({
                       'search': _searchQuery,
                       'city': city,
@@ -409,6 +427,16 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
             ],
           ),
         ),
+
+        if (_filterOptions.selectedAreaCode != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Text(
+              loc.isArabic
+                  ? 'ستُعرض نتائج المدينة؛ ترشيح المنطقة غير متاح بعد.'
+                  : 'Showing city results; area filtering is not available yet.',
+            ),
+          ),
 
         // Results Count Indicator
         if (!_isLoading && _errorMessage == null)

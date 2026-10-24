@@ -1,0 +1,420 @@
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/localization/app_locale.dart';
+import '../../../core/widgets/async_action_button.dart';
+import '../data/google_business_repository.dart';
+import '../models/google_business.dart';
+import '../services/google_business_controller.dart';
+
+/// Native Google Maps renderer is injectable only after restricted Android/iOS
+/// keys and an approved SDK are configured. Never render Places content on OSM.
+typedef GoogleBusinessMapBuilder =
+    Widget Function(BuildContext, GoogleBusinessPlace);
+
+class GoogleBusinessScreen extends StatefulWidget {
+  const GoogleBusinessScreen({
+    super.key,
+    this.repository,
+    this.onEditManualPin,
+    this.mapBuilder,
+  });
+  final GoogleBusinessRepository? repository;
+  final Future<void> Function()? onEditManualPin;
+  final GoogleBusinessMapBuilder? mapBuilder;
+  @override
+  State<GoogleBusinessScreen> createState() => _GoogleBusinessScreenState();
+}
+
+class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
+  late final _controller = GoogleBusinessController(
+    widget.repository ?? CurrentClinicGoogleBusinessRepository(),
+  );
+  final _query = TextEditingController();
+  bool _confirming = false;
+  bool get ar => LocaleService().isArabic;
+  String t(String en, String arabic) => ar ? arabic : en;
+  @override
+  void initState() {
+    super.initState();
+    _controller.reload();
+  }
+
+  @override
+  void dispose() {
+    _query.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _unlink() async {
+    if (_confirming || _controller.busy) return;
+    setState(() => _confirming = true);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        scrollable: true,
+        title: Text(t('Unlink Google Business?', 'إلغاء ارتباط نشاط Google؟')),
+        content: Text(
+          t(
+            'This clears the stored Google association and its cached ratings. Your manual clinic pin, photos and video are preserved.',
+            'سيُزال ارتباط Google وتقييماته المخزنة. يبقى الدبوس اليدوي والصور والفيديو.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t('Cancel', 'إلغاء')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t('Unlink', 'إلغاء الارتباط')),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _confirming = false);
+    if (ok == true) await _controller.unlink();
+  }
+
+  Future<void> _open(String placeId) async {
+    if (!GoogleBusinessPlace.validPlaceId(placeId)) {
+      throw StateError('No confirmed place identity');
+    }
+    final uri = Uri.https('www.google.com', '/maps/search/', {
+      'api': '1',
+      'query': placeId,
+      'query_place_id': placeId,
+    });
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw StateError('Maps could not open');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([_controller, LocaleService()]),
+    builder: (context, _) {
+      final c = _controller, current = c.association, place = c.selected;
+      return PopScope(
+        canPop: !c.saving,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                ? 80
+                : 56,
+            title: Text(t('Location & Google Business', 'الموقع ونشاط Google')),
+          ),
+          body: !c.allowed
+              ? Center(
+                  child: Text(
+                    t(
+                      'Clinic administrator access is required. Reopen this screen after signing in.',
+                      'يلزم دخول مشرف العيادة. أعد فتح الشاشة بعد تسجيل الدخول.',
+                    ),
+                  ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    Text(
+                      t(
+                        'Link the exact clinic business',
+                        'اربط نشاط العيادة الصحيح',
+                      ),
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      t(
+                        'Google Business identity and your manual clinic pin are separate. A similar name is not proof that a business belongs to your clinic.',
+                        'هوية نشاط Google والدبوس اليدوي مستقلان. تشابه الاسم لا يثبت أن النشاط يتبع لعيادتك.',
+                      ),
+                    ),
+                    if (c.loading || c.saving)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: LinearProgressIndicator(),
+                      ),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              current == null
+                                  ? t(
+                                      'Association not loaded',
+                                      'لم يُحمّل الارتباط',
+                                    )
+                                  : current.linked
+                                  ? t(
+                                      'Google association stored',
+                                      'ارتباط Google محفوظ',
+                                    )
+                                  : t(
+                                      'No Google Business linked',
+                                      'لا يوجد نشاط Google مرتبط',
+                                    ),
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            if (current?.linked == true) ...[
+                              SelectableText(
+                                current!.placeId,
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(switch (current.verification) {
+                                GoogleBusinessVerification.notProvided => t(
+                                  'The stored Place ID identifies the association. Ownership verification is not supplied by the current service.',
+                                  'معرّف المكان المحفوظ يحدد الارتباط. الخدمة الحالية لا توفر تحقق ملكية النشاط.',
+                                ),
+                                GoogleBusinessVerification.pending => t(
+                                  'Business association verification is pending. Ownership has not been confirmed.',
+                                  'التحقق من ارتباط النشاط قيد الانتظار. لم يتم تأكيد الملكية.',
+                                ),
+                                GoogleBusinessVerification.verified => t(
+                                  'Association review completed by the platform.',
+                                  'اكتملت مراجعة الارتباط من المنصة.',
+                                ),
+                                GoogleBusinessVerification.rejected => t(
+                                  'Association review was rejected. Refresh to review the current state.',
+                                  'رُفضت مراجعة الارتباط. حدّث للاطلاع على الحالة الحالية.',
+                                ),
+                              }),
+                              Text(switch (current.syncStatus) {
+                                'pending' => t(
+                                  'Ratings sync pending',
+                                  'مزامنة التقييمات قيد الانتظار',
+                                ),
+                                'synced' => t(
+                                  'Ratings synchronized — this does not verify ownership',
+                                  'تمت مزامنة التقييمات؛ هذا لا يثبت الملكية',
+                                ),
+                                'failed' => t(
+                                  'Ratings sync failed; refresh or ask platform management to review it',
+                                  'تعذرت مزامنة التقييمات؛ حدّث أو اطلب المراجعة من إدارة المنصة',
+                                ),
+                                _ => t(
+                                  'Ratings sync status unavailable',
+                                  'حالة مزامنة التقييمات غير متاحة',
+                                ),
+                              }),
+                              AsyncActionButton(
+                                label: t(
+                                  'Review business in Google Maps',
+                                  'مراجعة النشاط في خرائط Google',
+                                ),
+                                icon: Icons.open_in_new,
+                                onPressed: (_) => _open(current.placeId),
+                              ),
+                              if (c.repository.capabilities.unlink)
+                                TextButton.icon(
+                                  onPressed:
+                                      c.busy || _confirming || c.needsRefresh
+                                      ? null
+                                      : _unlink,
+                                  icon: const Icon(Icons.link_off),
+                                  label: Text(
+                                    t(
+                                      'Unlink Google Business',
+                                      'إلغاء ارتباط نشاط Google',
+                                    ),
+                                  ),
+                                ),
+                            ],
+                            TextButton.icon(
+                              onPressed: c.busy ? null : c.reload,
+                              icon: const Icon(Icons.refresh),
+                              label: Text(
+                                t('Refresh association', 'تحديث الارتباط'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      t('Search Google Business', 'البحث عن نشاط Google'),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    if (!c.repository.capabilities.search)
+                      Text(
+                        t(
+                          'Google Business search is not available yet. You can review an existing association or adjust the manual pin.',
+                          'البحث عن نشاط Google غير متاح حالياً. يمكنك مراجعة الارتباط الحالي أو ضبط الدبوس اليدوي.',
+                        ),
+                      ),
+                    TextField(
+                      key: const ValueKey('google-business-query'),
+                      controller: _query,
+                      enabled:
+                          c.repository.capabilities.search &&
+                          !c.busy &&
+                          !c.needsRefresh,
+                      onChanged: c.queryChanged,
+                      decoration: InputDecoration(
+                        labelText: t(
+                          'Clinic or business name',
+                          'اسم العيادة أو النشاط',
+                        ),
+                        hintText: t(
+                          'Search in Arabic or English',
+                          'ابحث بالعربية أو الإنجليزية',
+                        ),
+                        prefixIcon: const Icon(Icons.search),
+                      ),
+                    ),
+                    if (c.searching) const LinearProgressIndicator(),
+                    if (c.repository.capabilities.search &&
+                        c.hasSearched &&
+                        c.suggestions.isEmpty &&
+                        !c.searching &&
+                        !c.loading &&
+                        place == null &&
+                        c.error == null)
+                      Text(
+                        t(
+                          'No matching Google business was returned. Try a different name or use a manual pin.',
+                          'لم يُرجع Google نشاطاً مطابقاً. جرّب اسماً آخر أو استخدم الدبوس اليدوي.',
+                        ),
+                      ),
+                    for (final suggestion in c.suggestions)
+                      ListTile(
+                        title: Text(suggestion.name),
+                        subtitle: Text(suggestion.address),
+                        leading: const Icon(Icons.location_on_outlined),
+                        onTap: () => c.select(suggestion),
+                      ),
+                    if (place != null)
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                place.name,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              Text(place.address),
+                              Text(place.locality),
+                              if (widget.mapBuilder != null)
+                                SizedBox(
+                                  height: 220,
+                                  child: widget.mapBuilder!(context, place),
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  child: Text(
+                                    t(
+                                      'Embedded Google map preview is not configured. Review the exact Place ID in Google Maps before confirming.',
+                                      'معاينة خريطة Google المدمجة غير مهيأة. راجع معرّف المكان الصحيح في خرائط Google قبل التأكيد.',
+                                    ),
+                                  ),
+                                ),
+                              AsyncActionButton(
+                                label: t(
+                                  'Open selected place in Google Maps',
+                                  'فتح المكان المحدد في خرائط Google',
+                                ),
+                                onPressed: (_) => _open(place.placeId),
+                              ),
+                              CheckboxListTile(
+                                key: const ValueKey(
+                                  'google-business-identity-confirm',
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                                value: c.confirmed,
+                                onChanged: c.busy
+                                    ? null
+                                    : (v) => c.confirmIdentity(v ?? false),
+                                title: Text(
+                                  t(
+                                    'I checked the name, address and map location. This is my clinic’s exact business.',
+                                    'راجعت الاسم والعنوان والموقع. هذا هو نشاط عيادتي الصحيح.',
+                                  ),
+                                ),
+                              ),
+                              FilledButton(
+                                onPressed:
+                                    c.busy ||
+                                        c.needsRefresh ||
+                                        !c.confirmed ||
+                                        !c.repository.capabilities.link ||
+                                        place.selectionProof.isEmpty
+                                    ? null
+                                    : () => c.saveLink(),
+                                child: Text(
+                                  c.saving
+                                      ? t(
+                                          'Verifying association…',
+                                          'جارٍ التحقق من الارتباط…',
+                                        )
+                                      : current?.linked == true
+                                      ? t(
+                                          'Verify and replace association',
+                                          'التحقق واستبدال الارتباط',
+                                        )
+                                      : t(
+                                          'Verify and link business',
+                                          'التحقق وربط النشاط',
+                                        ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: c.busy ? null : c.cancelSelection,
+                                child: Text(
+                                  t('Cancel selection', 'إلغاء الاختيار'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (c.error != null)
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          c.error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    const Divider(height: 32),
+                    Text(
+                      t('Manual clinic pin', 'دبوس العيادة اليدوي'),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text(
+                      t(
+                        'Adjust the reception/entrance location independently. This never searches, verifies or replaces a Google Business.',
+                        'اضبط موقع الاستقبال أو المدخل بشكل مستقل. هذا لا يبحث عن نشاط Google ولا يتحقق منه ولا يستبدله.',
+                      ),
+                    ),
+                    if (widget.onEditManualPin != null)
+                      AsyncActionButton(
+                        label: t(
+                          'Edit manual clinic pin',
+                          'تعديل الدبوس اليدوي للعيادة',
+                        ),
+                        icon: Icons.edit_location_alt_outlined,
+                        onPressed: c.busy
+                            ? null
+                            : (action) async {
+                                await action.wait(widget.onEditManualPin!());
+                                await action.wait(c.reload());
+                              },
+                      ),
+                  ],
+                ),
+        ),
+      );
+    },
+  );
+}

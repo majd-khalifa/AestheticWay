@@ -1,3 +1,4 @@
+import '../../../locations/models/uae_location.dart';
 import '../../../locations/presentation/uae_location_picker.dart';
 import '../../../locations/data/uae_location_repository.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +11,15 @@ import 'package:aesthetic_way/core/localization/app_locale.dart';
 class HomeHeader extends StatelessWidget {
   final String selectedCity;
   final ValueChanged<String> onCityChanged;
+  final String? selectedAreaCode;
+  final ValueChanged<UaeLocality>? onLocalityChanged;
 
   const HomeHeader({
     super.key,
     required this.selectedCity,
     required this.onCityChanged,
+    this.selectedAreaCode,
+    this.onLocalityChanged,
   });
 
   String _displayCityLabel(LocaleService loc) =>
@@ -23,8 +28,18 @@ class HomeHeader extends StatelessWidget {
           loc.tr('city_all'));
 
   Future<void> _showCityPicker(BuildContext context) async {
-    final city = await showUaeLocationPicker(context, selected: selectedCity);
-    if (context.mounted && city != null) onCityChanged(city.nameEn);
+    final locality = await showUaeLocalityPicker(
+      context,
+      selected: selectedCity,
+      areaCode: selectedAreaCode,
+    );
+    if (context.mounted && locality != null) {
+      if (onLocalityChanged != null) {
+        onLocalityChanged!(locality);
+      } else {
+        onCityChanged(locality.city.nameEn);
+      }
+    }
   }
 
   @override

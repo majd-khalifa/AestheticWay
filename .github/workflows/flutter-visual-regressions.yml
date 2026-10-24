@@ -85,6 +85,12 @@ jobs:
           flutter test test/uae_location_qa_test.dart test/video_save_qa_preview_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/uae-nearby-qa"
           --reporter expanded
+      - name: Google Business and three-level nearby readiness
+        timeout-minutes: 3
+        run: >-
+          flutter test test/google_business_readiness_test.dart test/nearby_locality_readiness_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/maps-business-readiness"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -118,3 +124,4 @@ jobs:
             ${{ runner.temp }}/admin-media-polish/**
             ${{ runner.temp }}/backend-09-review/**
             ${{ runner.temp }}/uae-nearby-qa/**
+            ${{ runner.temp }}/maps-business-readiness/**

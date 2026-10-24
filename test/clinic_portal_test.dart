@@ -293,9 +293,24 @@ void main() {
           ),
         );
 
+        await tester.scrollUntilVisible(
+          find.text('فتح الدبوس اليدوي في خرائط Google'),
+          250,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text('فتح الدبوس اليدوي في خرائط Google'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('الكادر الطبي والممارسون الصحيون'),
+          250,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(find.text('الكادر الطبي والممارسون الصحيون'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('العلاجات والخدمات المقدمة'),
+          250,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(find.text('العلاجات والخدمات المقدمة'), findsOneWidget);
-        expect(find.text('فتح في خرائط Google'), findsOneWidget);
         await tester.scrollUntilVisible(
           find.text('تسجيل الخروج من لوحة العيادة'),
           500,
