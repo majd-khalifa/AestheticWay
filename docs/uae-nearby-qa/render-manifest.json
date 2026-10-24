@@ -33,13 +33,13 @@
     "file": "after_video_upload_http500_dark.png",
     "width": 430,
     "height": 1000,
-    "sha256": "c6c68d05ea2bd54d3a555fe69571346679b6915374f51d49ab9481e78ac77bd7"
+    "sha256": "6cdf699f3f233e14b4004465363a186deb0e3ace6768e7ec55a419cc29a878b9"
   },
   {
     "file": "after_video_upload_http500_light.png",
     "width": 430,
     "height": 1000,
-    "sha256": "bd0cb3faa93e8000750e6f1b09cb874c9e1dcca5c5586406e336c7de3fc41f43"
+    "sha256": "7adb2787ed3859c5a33de74bc531b1e8c9712c279b570e2e2d370350b4e6168d"
   },
   {
     "file": "before_directory_absent_light_en.png",
@@ -99,7 +99,7 @@
     "file": "comparison_video_upload_http500_light.png",
     "width": 860,
     "height": 1035,
-    "sha256": "796c73a02c7da59520cf612abd241ae95cf3960685861cea50aef6ed5b4d7ef6"
+    "sha256": "eff82463bea3e8630a7ad432185c1bc311451e0cefb2be1b768853d83dafd365"
   },
   {
     "file": "deletion_destination_unknown.png",
@@ -171,6 +171,6 @@
     "file": "video_save_persistence_failure.png",
     "width": 430,
     "height": 1000,
-    "sha256": "72785dad437d1a987f745fa5a8e774d861f1dc5f2fc6f4d4d985225468270f15"
+    "sha256": "d07929fb933f773f41006015aa779111b2b1678d8c9f879676111162a0a14b79"
   }
 ]

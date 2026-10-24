@@ -296,7 +296,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   }
 
   Future<void> _chooseVideo() async {
-    if (_locked) return;
+    if (_locked || _videoUncertain) return;
     if (!await _loadOwnedProfile(forVideo: true) ||
         !_videoAllowed ||
         !mounted) {
@@ -520,7 +520,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   }
 
   Future<void> _savePoster() async {
-    if (_locked || !_posterChanged) return;
+    if (_locked || _videoUncertain || !_posterChanged) return;
     setState(() {
       _busy = true;
       _batchSize = 0;
@@ -836,7 +836,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                           ),
                           if (vip)
                             TextButton.icon(
-                              onPressed: _locked ? null : _chooseVideo,
+                              onPressed: _locked || _videoUncertain
+                                  ? null
+                                  : _chooseVideo,
                               icon: const Icon(Icons.video_library_outlined),
                               label: Text(
                                 ar
@@ -855,7 +857,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                             ),
                           if (clinic.hasVideoAd)
                             TextButton(
-                              onPressed: _locked
+                              onPressed: _locked || _videoUncertain
                                   ? null
                                   : () => _saveVideo(remove: true),
                               child: Text(
@@ -886,7 +888,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                             ? 'غلاف العيادة / صورة عرض الفيديو'
                             : 'Clinic cover / video poster',
                         initialUrl: clinic.coverImageUrl,
-                        enabled: !_locked,
+                        enabled: !_locked && !_videoUncertain,
                         height: 120,
                         onImageSelected: (path) => setState(() {
                           _posterPath = path;
@@ -897,7 +899,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                         SilverButton(
                           label: ar ? 'حفظ صورة الغلاف' : 'Save clinic cover',
                           isLoading: _busy,
-                          onPressed: _locked ? null : _savePoster,
+                          onPressed: _locked || _videoUncertain
+                              ? null
+                              : _savePoster,
                         ),
                     ],
                   ],

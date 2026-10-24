@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/showcase_video_change.dart';
 import 'dart:async';
@@ -390,7 +391,7 @@ void main() {
       );
       final button = find.ancestor(
         of: find.text('Select gallery video'),
-        matching: find.byType(TextButton),
+        matching: find.byWidgetPredicate((w) => w is TextButton),
       );
       expect(tester.widget<TextButton>(button).onPressed, isNotNull);
       await tester.tap(find.text('Select gallery video'));
@@ -678,7 +679,7 @@ void main() {
             .widget<TextButton>(
               find.ancestor(
                 of: find.text('Select gallery video'),
-                matching: find.byType(TextButton),
+                matching: find.byWidgetPredicate((w) => w is TextButton),
               ),
             )
             .onPressed,
@@ -717,7 +718,7 @@ void main() {
             .widget<TextButton>(
               find.ancestor(
                 of: find.text('Select gallery video'),
-                matching: find.byType(TextButton),
+                matching: find.byWidgetPredicate((w) => w is TextButton),
               ),
             )
             .onPressed,
@@ -982,7 +983,9 @@ void main() {
                       .widget<TextButton>(
                         find.ancestor(
                           of: find.text('Select gallery video'),
-                          matching: find.byType(TextButton),
+                          matching: find.byWidgetPredicate(
+                            (w) => w is TextButton,
+                          ),
                         ),
                       )
                       .onPressed !=
@@ -1111,6 +1114,36 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Refresh saved images'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextButton>(
+              find.ancestor(
+                of: find.text('Select gallery video'),
+                matching: find.byWidgetPredicate((w) => w is TextButton),
+              ),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<LuxuryImagePickerField>(
+              find.byType(LuxuryImagePickerField).last,
+            )
+            .enabled,
+        false,
+      );
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.ancestor(
+                of: find.text('Upload and save video'),
+                matching: find.byType(FilledButton),
+              ),
+            )
+            .onPressed,
+        isNull,
+      );
       expect(wire.requests.where((r) => r.method == 'PATCH'), hasLength(1));
       await tester.ensureVisible(
         find.byKey(const ValueKey('video-operation-error')),
