@@ -189,7 +189,7 @@ void main() {
   });
 
   testWidgets(
-    'location preset confirms coordinates and cancel returns no selection',
+    'area preview requires explicit exact-pin confirmation and cancel returns no selection',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -249,6 +249,20 @@ void main() {
       await tester.tap(find.text('Dubai Healthcare City'));
       await tester.pumpAndSettle();
       final confirm = find.text('Use This Location');
+      await scrollLocationToEnd();
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.ancestor(of: confirm, matching: find.byType(FilledButton)),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester.ensureVisible(
+        find.text('Confirm pin is the exact clinic location'),
+      );
+      await tester.tap(find.text('Confirm pin is the exact clinic location'));
+      await tester.pump();
       await scrollLocationToEnd();
       await tester.tap(confirm);
       await tester.pumpAndSettle();

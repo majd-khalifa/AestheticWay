@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -54,7 +55,11 @@ class _Catalog implements ClinicCatalogRepository {
   }
 
   @override
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     if (reject) throw const ApiException(message: 'Failed');
     return ClinicModel.fromJson({
       'id': 'clinic-a',

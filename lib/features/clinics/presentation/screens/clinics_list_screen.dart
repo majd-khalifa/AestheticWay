@@ -1,3 +1,4 @@
+import '../../../locations/presentation/uae_location_picker.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/patient_clinic_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
@@ -336,34 +337,19 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                 },
               ),
               const SizedBox(width: 6),
-              _QuickCityChip(
-                label: loc.isArabic ? "دبي" : "Dubai",
-                isSelected:
-                    _filterOptions.selectedCity == 'دبي' ||
-                    _filterOptions.selectedCity == 'Dubai',
-                onTap: () {
-                  setState(() => _filterOptions.selectedCity = 'دبي');
-                  _paging.search({
-                    'search': _searchQuery,
-                    'city': _filterOptions.selectedCity,
-                    'category': _categoryUuid,
-                  });
-                },
-              ),
-              const SizedBox(width: 6),
-              _QuickCityChip(
-                label: loc.isArabic ? "أبوظبي" : "Abu Dhabi",
-                isSelected:
-                    _filterOptions.selectedCity == 'أبوظبي' ||
-                    _filterOptions.selectedCity == 'Abu Dhabi',
-                onTap: () {
-                  setState(() => _filterOptions.selectedCity = 'أبوظبي');
-                  _paging.search({
-                    'search': _searchQuery,
-                    'city': _filterOptions.selectedCity,
-                    'category': _categoryUuid,
-                  });
-                },
+              SizedBox(
+                width: 210,
+                child: UaeLocationField(
+                  value: _filterOptions.selectedCity,
+                  onChanged: (city) {
+                    setState(() => _filterOptions.selectedCity = city);
+                    _paging.search({
+                      'search': _searchQuery,
+                      'city': city,
+                      'category': _categoryUuid,
+                    });
+                  },
+                ),
               ),
               if (_filterOptions.selectedSpecialtyId != null) ...[
                 const SizedBox(width: 6),

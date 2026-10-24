@@ -1,3 +1,5 @@
+import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/features/clinic_portal/services/showcase_video_change.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -449,11 +451,11 @@ void main() {
           );
           expect(find.text('Upload and save video'), findsNothing);
           await tester.scrollUntilVisible(
-            find.text('Clinic video saved.'),
+            find.text('Saved video change verified.'),
             -250,
           );
           await tester.pumpAndSettle();
-          expect(find.text('Clinic video saved.'), findsOneWidget);
+          expect(find.text('Saved video change verified.'), findsOneWidget);
           await tester.pumpWidget(const SizedBox());
           await tester.pumpAndSettle();
           await openMedia(tester);
@@ -461,10 +463,23 @@ void main() {
           expect(find.text('Remove saved video'), findsOneWidget);
         } else {
           expect(find.text('Upload and save video'), findsOneWidget);
-          expect(find.text('Clinic video saved.'), findsNothing);
+          expect(find.text('Saved video change verified.'), findsNothing);
           expect(saved, isNull);
           failure = null;
           offline = false;
+          if (rejected == -1 || rejected == 200) {
+            final writes = wire.requests
+                .where((r) => r.method == 'PATCH')
+                .length;
+            await tester.ensureVisible(find.text('Check saved video'));
+            await tester.tap(find.text('Check saved video'));
+            await tester.pumpAndSettle();
+            expect(
+              wire.requests.where((r) => r.method == 'PATCH').length,
+              writes,
+            );
+          }
+          await tester.ensureVisible(find.text('Upload and save video'));
           await tester.tap(find.text('Upload and save video'));
           await finishNativeWork(
             tester,
@@ -983,4 +998,231 @@ void main() {
       },
     );
   }
+  for (final outcome in [
+    'reload503',
+    'missing',
+    'oldVideo',
+    'wrongClinic',
+    'coverChanged',
+  ]) {
+    test(
+      'VIP PATCH acknowledgment requires same-clinic remote persistence: $outcome',
+      () async {
+        privateTier = 'vip';
+        await service.refreshClinicProfile();
+        var written = false, failRead = true, writes = 0;
+        use((o) {
+          if (o.method == 'PATCH') {
+            written = true;
+            writes++;
+            saved = 'https://fixture.invalid/media/new.mp4';
+            return f.body(profile());
+          }
+          if (o.path == ApiConfig.clinicProfile && written && failRead) {
+            if (outcome == 'reload503') {
+              return f.body({
+                'error': {'code': 'SERVICE_UNAVAILABLE'},
+              }, 503);
+            }
+            final data = profile();
+            if (outcome == 'missing') data['video_ad_file'] = null;
+            if (outcome == 'oldVideo') {
+              data['video_ad_file'] = 'https://fixture.invalid/media/old.mp4';
+            }
+            if (outcome == 'wrongClinic') data['id'] = 'other-clinic';
+            if (outcome == 'coverChanged') {
+              data['cover_image'] = 'https://fixture.invalid/other.png';
+            }
+            return f.body(data);
+          }
+          return f.body(profile());
+        });
+        Object? error;
+        try {
+          await service.updateShowcaseVideo(
+            File('test/fixtures/clinic_media/short_showcase.mp4').absolute.path,
+          );
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isA<ShowcaseVideoFailure>());
+        final failure = error! as ShowcaseVideoFailure;
+        expect(
+          failure.stage,
+          outcome == 'reload503'
+              ? VideoSaveStage.reload
+              : VideoSaveStage.persistence,
+        );
+        expect(failure.receipt, isNotNull);
+        expect(service.activeClinic.hasVideoAd, false);
+        expect(writes, 1);
+        if (outcome != 'reload503') {
+          failRead = false;
+          await service.verifyShowcaseVideo(failure.receipt!);
+          expect(service.activeClinic.videoUrl, saved);
+          expect(
+            writes,
+            1,
+            reason: 'Recovery is GET-only; never repeat the multipart write',
+          );
+        }
+      },
+    );
+  }
+  testWidgets(
+    'video save reload failure remains beside controls and keeps selection and gallery',
+    (tester) async {
+      privateTier = 'vip';
+      var written = false;
+      use((o) {
+        if (o.method == 'PATCH') {
+          written = true;
+          saved = 'https://fixture.invalid/media/new.mp4';
+          return f.body(profile());
+        }
+        if (written && o.path == ApiConfig.clinicProfile) {
+          return f.body({...profile(), 'video_ad_file': null});
+        }
+        return f.body(profile());
+      });
+      picker.video = File(
+        'test/fixtures/clinic_media/short_showcase.mp4',
+      ).absolute.path;
+      await openMedia(tester);
+      await tester.tap(find.text('Select gallery video'));
+      await finishNativeWork(tester, () => video.probed.isCompleted);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Upload and save video'));
+      await tester.tap(find.text('Upload and save video'));
+      await finishNativeWork(
+        tester,
+        () =>
+            written &&
+            find
+                .textContaining('Video persistence check failed')
+                .evaluate()
+                .isNotEmpty,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Discard selected video'), findsOneWidget);
+      expect(find.text('Saved video change verified.'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('video-operation-error')),
+        findsOneWidget,
+      );
+      expect(find.text('Refresh saved images'), findsOneWidget);
+      expect(wire.requests.where((r) => r.method == 'PATCH'), hasLength(1));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('video-operation-error')),
+      );
+      await f.capture(tester, 'video_save_persistence_failure');
+      await tester.pumpWidget(const SizedBox());
+      await tester.binding.setSurfaceSize(null);
+    },
+  );
+  for (final fault in ['timeout', '503', 'cancel']) {
+    test(
+      'video upload $fault is not replayed or mistaken for a gallery error',
+      () async {
+        privateTier = 'vip';
+        await service.refreshClinicProfile();
+        use((o) {
+          if (fault == 'timeout') {
+            throw DioException(
+              requestOptions: o,
+              type: DioExceptionType.sendTimeout,
+            );
+          }
+          return f.body({
+            'error': {'code': 'SERVICE_UNAVAILABLE'},
+          }, 503);
+        });
+        final token = CancelToken();
+        if (fault == 'cancel') token.cancel();
+        await expectLater(
+          service.updateShowcaseVideo(
+            File('test/fixtures/clinic_media/short_showcase.mp4').absolute.path,
+            cancelToken: token,
+          ),
+          throwsA(
+            isA<ShowcaseVideoFailure>().having(
+              (e) => e.stage,
+              'stage',
+              VideoSaveStage.upload,
+            ),
+          ),
+        );
+        expect(
+          wire.requests.where((r) => r.method == 'PATCH').length,
+          lessThanOrEqualTo(1),
+        );
+        expect(wire.requests.where((r) => r.method == 'GET'), isEmpty);
+        expect(service.activeClinic.hasVideoAd, false);
+      },
+    );
+  }
+  test(
+    'video byte progress is observable; PATCH and fresh GET are distinct operations',
+    () async {
+      privateTier = 'vip';
+      await service.refreshClinicProfile();
+      var lastSent = 0, totalBytes = 0;
+      final start = wire.requests.length;
+      await service.updateShowcaseVideo(
+        File('test/fixtures/clinic_media/short_showcase.mp4').absolute.path,
+        onSendProgress: (sent, total) {
+          lastSent = sent;
+          totalBytes = total;
+        },
+      );
+      expect(lastSent, greaterThan(0));
+      expect(lastSent, totalBytes);
+      expect(wire.requests.skip(start).map((r) => r.method), ['PATCH', 'GET']);
+      expect(service.activeClinic.hasVideoAd, true);
+    },
+  );
+  testWidgets(
+    'save preflight GET failure is video-specific and sends no PATCH',
+    (tester) async {
+      privateTier = 'vip';
+      await openMedia(tester);
+      picker.video = File(
+        'test/fixtures/clinic_media/short_showcase.mp4',
+      ).absolute.path;
+      await tester.tap(find.text('Select gallery video'));
+      await finishNativeWork(tester, () => video.probed.isCompleted);
+      await tester.pumpAndSettle();
+      use(
+        (o) => f.body({
+          'error': {'code': 'SERVICE_UNAVAILABLE'},
+        }, 503),
+      );
+      await tester.ensureVisible(find.text('Upload and save video'));
+      await tester.tap(find.text('Upload and save video'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Video permission refresh failed (HTTP 503)'),
+        findsOneWidget,
+      );
+      expect(wire.requests.where((r) => r.method == 'PATCH'), isEmpty);
+      expect(find.text('Discard selected video'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.binding.setSurfaceSize(null);
+    },
+  );
+  test(
+    'local backpressure is not falsely labeled as an actual HTTP acknowledgment',
+    () {
+      final error = ShowcaseVideoFailure(
+        VideoSaveStage.upload,
+        cause: const ApiException(
+          message: 'local',
+          statusCode: 429,
+          isLocalBackpressure: true,
+        ),
+      );
+      expect(error.isLocalBackpressure, true);
+      expect(error.message, isNot(contains('HTTP')));
+    },
+  );
 }

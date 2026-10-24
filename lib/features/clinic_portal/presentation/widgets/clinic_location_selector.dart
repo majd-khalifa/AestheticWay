@@ -1,3 +1,5 @@
+import '../../../locations/presentation/uae_location_picker.dart';
+import '../../../locations/data/uae_location_repository.dart';
 import '../../../../core/utils/clinic_location.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,11 @@ class ClinicLocationSelection {
     required this.longitude,
   });
   final String city, addressAr, addressEn;
+  String get emirate => compatibilityUaeCatalog.resolve(city) == null
+      ? city
+      : compatibilityUaeCatalog
+            .emirateFor(compatibilityUaeCatalog.resolve(city)!)
+            .nameEn;
   final double latitude, longitude;
   String get googleMapsUrl =>
       'https://www.google.com/maps/search/?api=1&query=${latitude.toStringAsFixed(7)},${longitude.toStringAsFixed(7)}';
@@ -120,12 +127,20 @@ class _LocationSheetState extends State<_LocationSheet> {
   @override
   void initState() {
     super.initState();
-    _city = _emirates.containsKey(widget.city) ? widget.city : 'Dubai';
+    _city =
+        compatibilityUaeCatalog.resolve(widget.city)?.nameEn ??
+        (widget.city.isNotEmpty ? widget.city : 'Dubai');
     _confirmed = ClinicLocationSelection.validCoordinates(
       widget.latitude,
       widget.longitude,
     );
-    final e = _emirates[_city]!;
+    final e =
+        _emirates[compatibilityUaeCatalog.resolve(_city) == null
+            ? _city
+            : compatibilityUaeCatalog
+                  .emirateFor(compatibilityUaeCatalog.resolve(_city)!)
+                  .nameEn] ??
+        _emirates['Dubai']!;
     _point = _confirmed
         ? LatLng(widget.latitude, widget.longitude)
         : LatLng(e.$2, e.$3);
@@ -246,31 +261,21 @@ class _LocationSheetState extends State<_LocationSheet> {
             style: TextStyle(color: AppColors.mutedText(context)),
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            initialValue: _city,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: _ar ? 'الإمارة' : 'Emirate',
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-            ),
-            items: _emirates.entries
-                .map(
-                  (e) => DropdownMenuItem(
-                    value: e.key,
-                    child: Text(_ar ? e.value.$1 : e.key),
-                  ),
-                )
-                .toList(),
+          UaeLocationField(
+            value: _city,
+            allowAll: false,
             onChanged: (value) {
-              if (value == null) return;
-              final e = _emirates[value]!;
+              final city = compatibilityUaeCatalog.resolve(value);
+              if (city == null) return;
+              final e =
+                  _emirates[compatibilityUaeCatalog.emirateFor(city).nameEn]!;
               setState(() {
-                _city = value;
+                _city = city.nameEn;
                 _confirmed = false;
                 _point = LatLng(e.$2, e.$3);
                 _results = [];
               });
-              _map.move(_point, 12);
+              _map.move(_point, 10);
             },
           ),
           const SizedBox(height: 10),
@@ -281,7 +286,13 @@ class _LocationSheetState extends State<_LocationSheet> {
                 .map(
                   (d) => ActionChip(
                     label: Text(_ar ? d.$2 : d.$1),
-                    onPressed: () => _select(LatLng(d.$3, d.$4)),
+                    onPressed: () {
+                      setState(() {
+                        _confirmed = false;
+                        _point = LatLng(d.$3, d.$4);
+                      });
+                      _map.move(_point, 14);
+                    },
                   ),
                 )
                 .toList(),
@@ -349,6 +360,14 @@ class _LocationSheetState extends State<_LocationSheet> {
             onTap: (point) => _select(point, move: false),
           ),
           const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => setState(() => _confirmed = true),
+            child: Text(
+              _ar
+                  ? 'تأكيد أن الدبوس هو موقع العيادة الدقيق'
+                  : 'Confirm pin is the exact clinic location',
+            ),
+          ),
           Text(
             '${_point.latitude.toStringAsFixed(7)}, ${_point.longitude.toStringAsFixed(7)}',
             textDirection: TextDirection.ltr,

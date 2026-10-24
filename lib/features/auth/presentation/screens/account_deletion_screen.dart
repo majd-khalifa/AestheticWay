@@ -24,6 +24,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
   DateTime? _resendAt, _expiresAt;
   bool _busy = false, _requested = false, _consent = false;
   String? _error;
+  bool _soleClinicAdmin = false;
   String _text(String en, String ar) => LocaleService().isArabic ? ar : en;
   bool get _allowed => _session.isCurrent && AuthState().isLoggedIn;
   int get _remaining =>
@@ -44,6 +45,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
       _requested = false;
       _expiresAt = null;
       _resendAt = null;
+      _soleClinicAdmin = false;
     }
     if (mounted) setState(() {});
   }
@@ -61,6 +63,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
     setState(() {
       _busy = true;
       _error = null;
+      _soleClinicAdmin = false;
     });
     try {
       final result = await _repository.requestAccountDeletion();
@@ -84,6 +87,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
       });
     } catch (e) {
       if (mounted && _allowed) {
+        _soleClinicAdmin =
+            e is ApiException && e.errorCode == 'SOLE_CLINIC_ADMIN';
         if (e is ApiException && e.retryAfter != null) {
           _resendAt = DateTime.now().add(e.retryAfter!);
           _timer?.cancel();
@@ -211,8 +216,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
                               'انتهت صلاحية الرمز. اطلب رمزاً جديداً.',
                             )
                           : _text(
-                              'Code sent. Enter the six-digit code before it expires.',
-                              'تم إرسال الرمز. أدخل رمز التحقق المكون من ستة أرقام قبل انتهاء صلاحيته.',
+                              'The server accepted the code request but did not identify its delivery channel or masked destination. Check your registered messages. Enter a received six-digit code; delivery is not verified here.',
+                              'قبل الخادم طلب الرمز لكنه لم يحدد قناة الإرسال أو وجهة مخفية. تحقق من رسائلك المسجلة وأدخل الرمز المستلم المكون من ستة أرقام؛ لم يتم التحقق من وصوله هنا.',
                             ),
                     ),
                   ),
@@ -278,6 +283,20 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
                       ],
                     ),
                   ),
+                if (_soleClinicAdmin) ...[
+                  Text(
+                    _text(
+                      'This account is the only active clinic administrator. Ask platform management to arrange an authorized replacement administrator or reviewed clinic closure, then request deletion again. No code was requested.',
+                      'هذا الحساب هو المشرف النشط الوحيد للعيادة. اطلب من إدارة المنصة تعيين مشرف بديل مخوّل أو مراجعة إغلاق العيادة ثم اطلب الحذف مجدداً. لم يُطلب رمز.',
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () => Navigator.maybePop(context),
+                    child: Text(
+                      _text('Return to your portal', 'العودة إلى بوابتك'),
+                    ),
+                  ),
+                ],
                 if (_error != null)
                   Semantics(
                     liveRegion: true,

@@ -1907,7 +1907,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                   addressAr: selectedLocation?.addressAr,
                                   addressEn: selectedLocation?.addressEn,
                                   city: selectedLocation?.city,
-                                  emirate: selectedLocation?.city,
+                                  emirate: selectedLocation?.emirate,
                                   latitude: selectedLocation?.latitude,
                                   longitude: selectedLocation?.longitude,
                                   googleMapsUrl:
@@ -1990,7 +1990,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
         addressAr: result.addressAr,
         addressEn: result.addressEn,
         city: result.city,
-        emirate: result.city,
+        emirate: result.emirate,
         latitude: result.latitude,
         longitude: result.longitude,
         googleMapsUrl: result.googleMapsUrl,

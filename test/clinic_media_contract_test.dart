@@ -133,7 +133,11 @@ class Profile implements ClinicCatalogRepository {
   @override
   Future<ClinicModel> getClinicProfile() async => current;
   @override
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     patches.add(data);
     current = ClinicModel.fromJson({
       'id': clinicId,

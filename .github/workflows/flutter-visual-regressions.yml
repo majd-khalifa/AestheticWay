@@ -79,6 +79,12 @@ jobs:
           flutter test test/backend_09_integration_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-09-review"
           --reporter expanded
+      - name: Physical-QA video persistence and UAE location boundary
+        timeout-minutes: 3
+        run: >-
+          flutter test test/uae_location_qa_test.dart test/video_save_qa_preview_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/uae-nearby-qa"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -111,3 +117,4 @@ jobs:
             ${{ runner.temp }}/onboarding-review/**
             ${{ runner.temp }}/admin-media-polish/**
             ${{ runner.temp }}/backend-09-review/**
+            ${{ runner.temp }}/uae-nearby-qa/**

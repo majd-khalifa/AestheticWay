@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
+import '../../services/showcase_video_change.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,7 +42,11 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   String? _error, _notice, _videoPath, _posterPath;
   bool _posterChanged = false;
   bool _profileLoading = false, _profileVerified = false;
-  String? _profileError;
+  String? _profileError, _videoError, _videoNotice;
+  ShowcaseVideoReceipt? _videoReceipt;
+  CancelToken? _videoCancel;
+  double? _videoProgress;
+  bool _videoUncertain = false;
   VideoPlayerController? _player;
   bool get ar => LocaleService().isArabic;
   bool get _roleAllowed =>
@@ -84,6 +90,11 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
 
   void _sessionChanged() {
     if (!_session.isCurrent) {
+      _videoCancel?.cancel();
+      _videoReceipt = null;
+      _videoError = null;
+      _videoNotice = null;
+      _videoUncertain = false;
       _gallery.clear();
       _pending.clear();
       _player?.dispose();
@@ -114,12 +125,13 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     AuthState().removeListener(_sessionChanged);
+    _videoCancel?.cancel();
     _gallery.dispose();
     _player?.dispose();
     super.dispose();
   }
 
-  Future<bool> _loadOwnedProfile() async {
+  Future<bool> _loadOwnedProfile({bool forVideo = false}) async {
     if (_profileLoading || !_session.isCurrent || !_roleAllowed) return false;
     setState(() {
       _profileLoading = true;
@@ -139,13 +151,20 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       if (first) await _gallery.refresh();
       if (mounted) setState(() => _profileVerified = true);
       return true;
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _profileVerified = false;
-          _profileError = ar
-              ? 'تعذر التحقق من ملف العيادة الحالي. حدّث البيانات قبل إدارة الوسائط.'
-              : 'Could not verify the current clinic profile. Refresh before managing media.';
+          if (forVideo) {
+            _videoError = ShowcaseVideoFailure(
+              VideoSaveStage.entitlement,
+              cause: e is ApiException ? e : null,
+            ).message;
+          } else {
+            _profileError = ar
+                ? 'تعذر التحقق من ملف العيادة الحالي. حدّث البيانات قبل إدارة الوسائط.'
+                : 'Could not verify the current clinic profile. Refresh before managing media.';
+          }
         });
       }
       return false;
@@ -278,11 +297,16 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
 
   Future<void> _chooseVideo() async {
     if (_locked) return;
-    if (!await _loadOwnedProfile() || !_videoAllowed || !mounted) return;
+    if (!await _loadOwnedProfile(forVideo: true) ||
+        !_videoAllowed ||
+        !mounted) {
+      return;
+    }
     setState(() {
       _busy = true;
       _batchSize = 0;
-      _error = null;
+      _videoError = null;
+      _videoNotice = null;
     });
     VideoPlayerController? probe;
     try {
@@ -309,7 +333,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _player = null;
       if (mounted) setState(() => _videoPath = picked.path);
     } catch (e) {
-      if (mounted) setState(() => _error = _failure(e));
+      if (mounted) setState(() => _videoError = _failure(e));
     } finally {
       await probe?.dispose();
       if (mounted) setState(() => _busy = false);
@@ -317,8 +341,10 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   }
 
   Future<void> _saveVideo({bool remove = false}) async {
-    if (_locked || (!remove && _videoPath == null)) return;
-    if (!await _loadOwnedProfile() || (!remove && !_videoAllowed) || !mounted) {
+    if (_locked || _videoUncertain || (!remove && _videoPath == null)) return;
+    if (!await _loadOwnedProfile(forVideo: true) ||
+        (!remove && !_videoAllowed) ||
+        !mounted) {
       return;
     }
     if (remove) {
@@ -351,35 +377,95 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     setState(() {
       _busy = true;
       _batchSize = 0;
-      _error = null;
+      _videoError = null;
+      _videoNotice = null;
     });
     try {
       _session.ensureCurrent();
-      await _service.updateShowcaseVideo(remove ? null : _videoPath);
+      _videoCancel = CancelToken();
+      await _service.updateShowcaseVideo(
+        remove ? null : _videoPath,
+        cancelToken: _videoCancel,
+        onSendProgress: (sent, total) {
+          if (mounted && _session.isCurrent) {
+            setState(() => _videoProgress = total > 0 ? sent / total : null);
+          }
+        },
+      );
       _session.ensureCurrent();
-      final refreshed = await _refreshProfile();
-      _session.ensureCurrent();
-      if (refreshed &&
-          (remove
-              ? _service.activeClinic.hasVideoAd
-              : !_service.activeClinic.hasVideoAd)) {
-        throw const ApiException(
-          message:
-              'The server did not return the expected saved video state. Refresh before retrying.',
-        );
-      }
       await _player?.dispose();
       _player = null;
       if (mounted) {
         setState(() {
           _videoPath = null;
-          if (refreshed) {
-            _notice = ar ? 'تم حفظ فيديو العيادة.' : 'Clinic video saved.';
-          }
+          _videoUncertain = false;
+          _videoReceipt = null;
+          _videoNotice = ar
+              ? 'تم التحقق من حفظ تغيير الفيديو.'
+              : 'Saved video change verified.';
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _error = _failure(e));
+      if (mounted && _session.isCurrent) {
+        setState(() {
+          _videoError = _failure(e);
+          _videoReceipt = e is ShowcaseVideoFailure ? e.receipt : null;
+          _videoUncertain =
+              e is ShowcaseVideoFailure &&
+              (e.stage != VideoSaveStage.upload ||
+                  e.statusCode == null ||
+                  e.statusCode! >= 500);
+        });
+      }
+    } finally {
+      _videoCancel = null;
+      _videoProgress = null;
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _checkSavedVideo() async {
+    if (_busy || !_session.isCurrent) return;
+    setState(() {
+      _busy = true;
+      _videoError = null;
+    });
+    try {
+      final receipt = _videoReceipt;
+      if (receipt != null) {
+        await _service.verifyShowcaseVideo(receipt);
+        _session.ensureCurrent();
+        await _player?.dispose();
+        _player = null;
+        if (mounted) {
+          setState(() {
+            _videoPath = null;
+            _videoNotice = ar
+                ? 'تم التحقق من حفظ تغيير الفيديو.'
+                : 'Saved video change verified.';
+          });
+        }
+      } else {
+        await _service.refreshClinicProfile();
+        _session.ensureCurrent();
+        if (mounted) {
+          setState(
+            () => _videoNotice = ar
+                ? 'تم تحديث الملف. راجع الفيديو المحفوظ قبل إعادة الرفع؛ نتيجة المحاولة السابقة غير مؤكدة.'
+                : 'Profile refreshed. Inspect the saved video before uploading again; the previous attempt remains unconfirmed.',
+          );
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _videoUncertain = false;
+          _videoReceipt = null;
+        });
+      }
+    } catch (e) {
+      if (mounted && _session.isCurrent) {
+        setState(() => _videoError = _failure(e));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -401,7 +487,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     setState(() {
       _busy = true;
       _batchSize = 0;
-      _error = null;
+      _videoError = null;
     });
     final player = _videoPath != null
         ? VideoPlayerController.file(File(_videoPath!))
@@ -417,7 +503,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       await player.play();
     } catch (e) {
       await player.dispose();
-      if (mounted) setState(() => _error = _failure(e));
+      if (mounted) setState(() => _videoError = _failure(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -630,6 +716,45 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       ar ? 'فيديو عرض العيادة' : 'Clinic showcase video',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    if (_videoError != null)
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _videoError!,
+                          key: const ValueKey('video-operation-error'),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    if (_videoNotice != null)
+                      Semantics(liveRegion: true, child: Text(_videoNotice!)),
+                    if (_videoCancel != null) ...[
+                      LinearProgressIndicator(value: _videoProgress),
+                      Text(
+                        ar
+                            ? 'جارٍ رفع الفيديو والتحقق من حفظه…'
+                            : 'Uploading video and verifying persistence…',
+                      ),
+                      TextButton(
+                        onPressed: () => _videoCancel?.cancel(),
+                        child: Text(
+                          ar
+                              ? 'إيقاف الرفع والتحقق من النتيجة'
+                              : 'Stop upload and check outcome',
+                        ),
+                      ),
+                    ],
+                    if (_videoUncertain)
+                      TextButton.icon(
+                        onPressed: _busy ? null : _checkSavedVideo,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(
+                          ar
+                              ? 'التحقق من الفيديو المحفوظ'
+                              : 'Check saved video',
+                        ),
+                      ),
                     if (_profileLoading)
                       Semantics(
                         liveRegion: true,
@@ -747,7 +872,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                               ? 'رفع وحفظ الفيديو'
                               : 'Upload and save video',
                           isLoading: _busy,
-                          onPressed: _locked || !vip
+                          onPressed: _locked || !vip || _videoUncertain
                               ? null
                               : () => _saveVideo(),
                         ),

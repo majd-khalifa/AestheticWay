@@ -115,6 +115,8 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     return _send<T>(
       'PATCH',
@@ -122,6 +124,8 @@ class ApiClient {
       data: data,
       queryParameters: queryParameters,
       options: _sessionOptions(options),
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
   }
 
@@ -189,6 +193,8 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     required Options options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     final scope = _scope();
     _backpressure.check(scope);
@@ -201,6 +207,8 @@ class ApiClient {
         data: data,
         queryParameters: queryParameters,
         options: options.copyWith(method: method),
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
       _backpressure.succeeded(scope);
       if (isLeadWrite) _leadWriteBackpressure.succeeded(scope);

@@ -1,4 +1,5 @@
-import '../../../core/localization/app_locale.dart';
+import 'package:dio/dio.dart';
+import 'showcase_video_change.dart';
 import '../../../core/network/api_exception.dart';
 import '../../treatments/data/category_repository.dart';
 import '../../../core/services/local_media_cache.dart';
@@ -1478,25 +1479,65 @@ class ClinicPortalService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateShowcaseVideo(String? path) async {
+  Future<void> updateShowcaseVideo(
+    String? path, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     final epoch = _sessionEpoch;
     final clinicId = _activeClinic.id;
-    final profile = await _inSession(
-      _catalogRepository.updateClinicProfile({'video_ad_file': path}),
-      epoch,
-    );
-    final uri = Uri.tryParse(profile.videoUrl ?? '');
-    final saved =
-        uri != null &&
-        uri.host.isNotEmpty &&
-        ['http', 'https'].contains(uri.scheme);
-    if (profile.id != clinicId ||
-        (path == null ? profile.hasVideoAd : !saved)) {
-      throw ApiException(
-        message: LocaleService().isArabic
-            ? 'لم يؤكد الخادم حفظ الفيديو. حدّث ملف العيادة قبل المحاولة مجدداً.'
-            : 'The server did not confirm the video change. Refresh the clinic profile before retrying.',
+    final cover = _activeClinic.coverImageUrl;
+    ClinicModel profile;
+    try {
+      profile = await _inSession(
+        _catalogRepository.updateClinicProfile(
+          {'video_ad_file': path},
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+        ),
+        epoch,
       );
+    } on ApiException catch (e) {
+      throw ShowcaseVideoFailure(VideoSaveStage.upload, cause: e);
+    } catch (_) {
+      if (epoch != _sessionEpoch) rethrow;
+      throw ShowcaseVideoFailure(VideoSaveStage.acknowledgment);
+    }
+    final saved = ShowcaseVideoReceipt.remoteKey(profile.videoUrl) != null;
+    if (profile.id != clinicId ||
+        ShowcaseVideoReceipt.remoteKey(profile.coverImageUrl) !=
+            ShowcaseVideoReceipt.remoteKey(cover) ||
+        (path == null ? profile.hasVideoAd : !saved)) {
+      throw ShowcaseVideoFailure(VideoSaveStage.acknowledgment);
+    }
+    // PATCH acknowledgment alone is insufficient: require a fresh private GET.
+    await verifyShowcaseVideo(
+      ShowcaseVideoReceipt(clinicId, profile.videoUrl, cover),
+    );
+  }
+
+  Future<void> verifyShowcaseVideo(ShowcaseVideoReceipt receipt) async {
+    final epoch = _sessionEpoch;
+    ClinicModel profile;
+    try {
+      profile = await _inSession(_catalogRepository.getClinicProfile(), epoch);
+    } on ApiException catch (e) {
+      throw ShowcaseVideoFailure(
+        VideoSaveStage.reload,
+        cause: e,
+        receipt: receipt,
+      );
+    } catch (_) {
+      if (epoch != _sessionEpoch) rethrow;
+      throw ShowcaseVideoFailure(VideoSaveStage.reload, receipt: receipt);
+    }
+    if (profile.id != receipt.clinicId ||
+        ShowcaseVideoReceipt.remoteKey(profile.coverImageUrl) !=
+            ShowcaseVideoReceipt.remoteKey(receipt.coverUrl) ||
+        ShowcaseVideoReceipt.remoteKey(profile.videoUrl) !=
+            ShowcaseVideoReceipt.remoteKey(receipt.videoUrl) ||
+        (receipt.videoUrl == null && profile.hasVideoAd)) {
+      throw ShowcaseVideoFailure(VideoSaveStage.persistence, receipt: receipt);
     }
     _activeClinic = profile;
     notifyListeners();

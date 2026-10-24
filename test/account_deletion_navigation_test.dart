@@ -86,6 +86,10 @@ void main() {
             .onPressed,
         isNotNull,
       );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('deletion-confirm')),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('deletion-confirm')));
       await tester.pumpAndSettle();
       expect(adapter.paths, [

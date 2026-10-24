@@ -80,6 +80,8 @@
 		<string>http</string>
 		<string>mailto</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Optionally use approximate location while the app is open to find care near you. You can select an emirate and city instead.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Aesthetic Way needs camera access to allow clinics and users to capture and upload photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

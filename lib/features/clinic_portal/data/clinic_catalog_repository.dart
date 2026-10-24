@@ -534,7 +534,11 @@ class ClinicCatalogRepository {
     return profile;
   }
 
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     final session = SessionSnapshot();
     final requestData = await _buildPayload(
       data,
@@ -545,6 +549,8 @@ class ClinicCatalogRepository {
     final response = await _api.patch(
       ApiConfig.clinicProfile,
       data: requestData,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
     session.ensureCurrent();
     return _profileFromResponse(response.data, session);

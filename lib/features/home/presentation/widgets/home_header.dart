@@ -1,3 +1,5 @@
+import '../../../locations/presentation/uae_location_picker.dart';
+import '../../../locations/data/uae_location_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -15,84 +17,14 @@ class HomeHeader extends StatelessWidget {
     required this.onCityChanged,
   });
 
-  String _displayCityLabel(LocaleService loc) {
-    if (selectedCity == 'الكل' || selectedCity == 'All') {
-      return loc.tr('city_all');
-    }
-    if (selectedCity == 'دبي' || selectedCity == 'Dubai') {
-      return loc.isArabic ? 'دبي' : 'Dubai';
-    }
-    if (selectedCity == 'أبوظبي' || selectedCity == 'Abu Dhabi') {
-      return loc.isArabic ? 'أبوظبي' : 'Abu Dhabi';
-    }
-    return selectedCity;
-  }
+  String _displayCityLabel(LocaleService loc) =>
+      compatibilityUaeCatalog.resolve(selectedCity)?.label(loc.isArabic) ??
+      (compatibilityUaeCatalog.legacyCityQuery(selectedCity) ??
+          loc.tr('city_all'));
 
-  void _showCityPicker(BuildContext context) {
-    final loc = LocaleService();
-    final isDark = AppColors.isDark(context);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  loc.tr('select_city'),
-                  style: AppTypography.cardTitle.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.silverPrimary
-                        : AppColors.lightTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _CityOptionTile(
-                  title: loc.tr('city_all'),
-                  isSelected: selectedCity == 'الكل' || selectedCity == 'All',
-                  onTap: () {
-                    onCityChanged('الكل');
-                    Navigator.pop(ctx);
-                  },
-                ),
-                const SizedBox(height: 8),
-                _CityOptionTile(
-                  title: loc.isArabic
-                      ? 'دبي (جميرا، داون تاون، دبي مارينا)'
-                      : 'Dubai (Jumeirah, Downtown, Marina)',
-                  isSelected: selectedCity == 'دبي' || selectedCity == 'Dubai',
-                  onTap: () {
-                    onCityChanged('دبي');
-                    Navigator.pop(ctx);
-                  },
-                ),
-                const SizedBox(height: 8),
-                _CityOptionTile(
-                  title: loc.isArabic
-                      ? 'أبوظبي (البطين، الكورنيش، جزيرة المارية)'
-                      : 'Abu Dhabi (Al Bateen, Corniche, Al Maryah)',
-                  isSelected:
-                      selectedCity == 'أبوظبي' || selectedCity == 'Abu Dhabi',
-                  onTap: () {
-                    onCityChanged('أبوظبي');
-                    Navigator.pop(ctx);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  Future<void> _showCityPicker(BuildContext context) async {
+    final city = await showUaeLocationPicker(context, selected: selectedCity);
+    if (context.mounted && city != null) onCityChanged(city.nameEn);
   }
 
   @override
@@ -176,72 +108,6 @@ class HomeHeader extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _CityOptionTile extends StatelessWidget {
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _CityOptionTile({
-    required this.title,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accentChampagne.withValues(
-                  alpha: isDark ? 0.15 : 0.12,
-                )
-              : (isDark
-                    ? AppColors.cardSurfaceHover
-                    : AppColors.lightCardSurfaceHover),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accentChampagne
-                : AppColors.border(context),
-            width: isSelected ? 1.2 : 0.8,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isSelected
-                      ? AppColors.goldText(context)
-                      : (isDark
-                            ? AppColors.silverPrimary
-                            : AppColors.lightTextPrimary),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.accentChampagne,
-                size: 18,
-              ),
-          ],
-        ),
       ),
     );
   }

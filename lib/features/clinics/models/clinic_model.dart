@@ -298,7 +298,7 @@ class ClinicModel {
       areaEn: json['area_en'] ?? '',
       addressAr: firstSourceText([json['address_ar'], json['address_en']]),
       addressEn: firstSourceText([json['address_en'], json['address_ar']]),
-      distanceKm: double.tryParse(json['distance']?.toString() ?? '') ?? 0.0,
+      distanceKm: double.tryParse(json['distance_km']?.toString() ?? '') ?? 0.0,
       mainPhone: json['phone']?.toString() ?? '',
       receptionPhone: json['phone']?.toString() ?? '',
       whatsapp: json['whatsapp']?.toString() ?? '',
