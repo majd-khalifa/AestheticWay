@@ -19,11 +19,11 @@ class NearbyClinicsScreen extends StatefulWidget {
   const NearbyClinicsScreen({
     super.key,
     this.location,
-    this.repository = const UnavailableNearbyClinicsRepository(),
+    this.repository,
     this.mapBuilder,
   });
   final PatientLocationController? location;
-  final NearbyClinicsRepository repository;
+  final NearbyClinicsRepository? repository;
   final NearbyGoogleMapBuilder? mapBuilder;
   @override
   State<NearbyClinicsScreen> createState() => _NearbyClinicsScreenState();
@@ -32,10 +32,9 @@ class NearbyClinicsScreen extends StatefulWidget {
 class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
     with WidgetsBindingObserver {
   late final _location = widget.location ?? PatientLocationController();
-  late final _discovery = NearbyDiscoveryController(
-    _location,
-    widget.repository,
-  );
+  late final _repository =
+      widget.repository ?? BackendNearbyClinicsRepository();
+  late final _discovery = NearbyDiscoveryController(_location, _repository);
   bool _map = false, _opening = false;
   bool get ar => LocaleService().isArabic;
   String t(String en, String arabic) => ar ? arabic : en;
@@ -87,7 +86,7 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                   children: [
                     HomeLocationPanel(
                       controller: _location,
-                      nearbySupported: widget.repository.supported,
+                      nearbySupported: _repository.supported,
                       showNearbyEntry: false,
                     ),
                     Padding(
@@ -113,14 +112,14 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                 setState(() => _map = s.single),
                           ),
                           const SizedBox(height: 12),
-                          if (!widget.repository.supported)
+                          if (!_repository.supported)
                             Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(16),
                                 child: Text(
                                   t(
-                                    'Nearby search is not available yet. Browse genuine clinic listings by city; these are not distance-ranked results.',
-                                    'البحث عن الأقرب غير متاح حالياً. تصفح العيادات الحقيقية حسب المدينة؛ هذه النتائج ليست مرتبة حسب المسافة.',
+                                    'Nearby search is not available yet. The service must confirm approved clinic visibility before it can be enabled. Browse the city directory instead; no nearest distances are estimated.',
+                                    'البحث عن الأقرب غير متاح حالياً. يجب أن تتحقق الخدمة من ظهور العيادات المعتمدة قبل تفعيله. تصفح دليل المدينة؛ لا نقدّر مسافات الأقرب.',
                                   ),
                                 ),
                               ),
@@ -141,12 +140,12 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                               ),
                             ),
                           ),
-                          if (widget.repository.supported && page.isLoading)
+                          if (_repository.supported && page.isLoading)
                             const Padding(
                               padding: EdgeInsets.all(20),
                               child: LinearProgressIndicator(),
                             ),
-                          if (widget.repository.supported &&
+                          if (_repository.supported &&
                               page.isLoaded &&
                               rows.isEmpty &&
                               page.error == null)
@@ -246,8 +245,7 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                   ],
                                 ),
                               ),
-                          if (widget.repository.supported &&
-                              _discovery.canQuery)
+                          if (_repository.supported && _discovery.canQuery)
                             PaginationFooter(
                               loading: page.isLoading || page.isLoadingMore,
                               hasMore: page.hasMore,

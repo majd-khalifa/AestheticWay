@@ -6,7 +6,7 @@ import '../models/uae_location.dart';
 Future<UaeCity?> showUaeLocationPicker(
   BuildContext context, {
   String? selected,
-  UaeLocationRepository repository = const BundledUaeLocationRepository(),
+  UaeLocationRepository repository = const ServerUaeLocationRepository(),
 }) => showModalBottomSheet<UaeCity>(
   context: context,
   isScrollControlled: true,
@@ -18,7 +18,7 @@ Future<UaeLocality?> showUaeLocalityPicker(
   BuildContext context, {
   String? selected,
   String? areaCode,
-  UaeLocationRepository repository = const BundledUaeLocationRepository(),
+  UaeLocationRepository repository = const ServerUaeLocationRepository(),
 }) => showModalBottomSheet<UaeLocality>(
   context: context,
   isScrollControlled: true,
@@ -37,7 +37,7 @@ class UaeLocationPicker extends StatefulWidget {
     this.selected,
     this.selectedAreaCode,
     this.includeAreas = false,
-    this.repository = const BundledUaeLocationRepository(),
+    this.repository = const ServerUaeLocationRepository(),
   });
   final String? selected;
   final String? selectedAreaCode;
@@ -291,7 +291,7 @@ class UaeLocationField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ar = LocaleService().isArabic;
-    final city = compatibilityUaeCatalog.resolve(value);
+    final city = currentUaeCatalog.resolve(value);
     return Row(
       children: [
         Expanded(
@@ -318,17 +318,17 @@ class UaeLocationField extends StatelessWidget {
                       ? null
                       : UaeLocality(
                           city,
-                          compatibilityUaeCatalog.resolveArea(
+                          currentUaeCatalog.resolveArea(
                             areaCode,
                             cityCode: city.code,
                           ),
                         ).label(ar)) ??
-                  (compatibilityUaeCatalog.legacyCityQuery(value) ??
+                  (currentUaeCatalog.legacyCityQuery(value) ??
                       (ar ? 'كل الإمارات' : 'All Emirates')),
             ),
           ),
         ),
-        if (allowAll && compatibilityUaeCatalog.legacyCityQuery(value) != null)
+        if (allowAll && currentUaeCatalog.legacyCityQuery(value) != null)
           IconButton(
             tooltip: ar ? 'كل الإمارات' : 'All Emirates',
             onPressed: enabled ? () => onChanged('All') : null,

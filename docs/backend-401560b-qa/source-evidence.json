@@ -1,0 +1,150 @@
+{
+  "backend_commit": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
+  "scope": "Isolated source API views; disposable records; mocked Google; no production, device, OTP or R2 verification",
+  "responses": [
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 400
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/autocomplete/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/details/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/link/",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/link/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/link/",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/link/",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/unlink/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PATCH multipart",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "GET new authenticated client",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/unlink/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/unlink/",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/api/v1/clinic-portal/profile/google-business/unlink/",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/locations/emirates/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/locations/cities/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/locations/areas/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinics/nearby/?latitude=25.1&longitude=55.2&page_size=20",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinics/nearby/?city=dubai",
+      "status": 400
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/home/nearby-clinics/?city=Dubai&page_size=20",
+      "status": 200
+    }
+  ],
+  "catalog_counts": {
+    "emirates": 7,
+    "cities": 23,
+    "areas": 50
+  },
+  "autocomplete_key": "suggestions",
+  "direct_place_id_patch_blocked": true,
+  "CAS_and_expired_reused_proof_rejected": true,
+  "manual_pin_preserved": true,
+  "genuine_MP4_bytes_preserved_and_new_authenticated_client_reload": true,
+  "video_removal_preserved_cover_and_gallery": true,
+  "confirmed_gaps": {
+    "clinic_staff_can_mutate_google_association": true,
+    "generic_PUT_bypasses_unverified_place_id_guard": true,
+    "nearby_returns_active_unapproved_draft": true,
+    "nearby_requires_coordinates": true,
+    "manual_home_nearby_queryset_top_ten": true
+  },
+  "source_files_unchanged": 410
+}

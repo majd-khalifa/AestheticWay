@@ -301,7 +301,11 @@ void main() {
         await f.render(
           tester,
           const Scaffold(
-            body: UaeLocationPicker(selected: 'Dubai', includeAreas: true),
+            body: UaeLocationPicker(
+              selected: 'Dubai',
+              includeAreas: true,
+              repository: BundledUaeLocationRepository(),
+            ),
           ),
           dark: dark,
           ar: ar,

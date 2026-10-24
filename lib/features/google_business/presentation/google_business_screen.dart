@@ -91,6 +91,27 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
     }
   }
 
+  // Official compact text-attribution alternative for a narrow mobile result
+  // pane. Untranslated, one line, sans serif400,14sp, accessible contrast.
+  Widget _attribution(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Text(
+      'Google Maps',
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+      softWrap: false,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w400,
+        fontStyle: FontStyle.normal,
+        fontSize: 14,
+        letterSpacing: 0,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : const Color(0xFF1F1F1F),
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([_controller, LocaleService()]),
@@ -174,8 +195,8 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                                   'التحقق من ارتباط النشاط قيد الانتظار. لم يتم تأكيد الملكية.',
                                 ),
                                 GoogleBusinessVerification.verified => t(
-                                  'Association review completed by the platform.',
-                                  'اكتملت مراجعة الارتباط من المنصة.',
+                                  'Selected Google place verified. This does not prove ownership of the Google Business Profile.',
+                                  'تم التحقق من مكان Google المحدد. هذا لا يثبت ملكية الملف التجاري في Google.',
                                 ),
                                 GoogleBusinessVerification.rejected => t(
                                   'Association review was rejected. Refresh to review the current state.',
@@ -249,6 +270,7 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                     TextField(
                       key: const ValueKey('google-business-query'),
                       controller: _query,
+                      maxLength: 120,
                       enabled:
                           c.repository.capabilities.search &&
                           !c.busy &&
@@ -266,6 +288,7 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                         prefixIcon: const Icon(Icons.search),
                       ),
                     ),
+                    if (c.repository.capabilities.search) _attribution(context),
                     if (c.searching) const LinearProgressIndicator(),
                     if (c.repository.capabilities.search &&
                         c.hasSearched &&
@@ -276,8 +299,8 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                         c.error == null)
                       Text(
                         t(
-                          'No matching Google business was returned. Try a different name or use a manual pin.',
-                          'لم يُرجع Google نشاطاً مطابقاً. جرّب اسماً آخر أو استخدم الدبوس اليدوي.',
+                          'No suggestions were returned. Try another name or try later if Google search is unavailable; a manual pin remains separate.',
+                          'لم تُرجع الخدمة اقتراحات. جرّب اسماً آخر أو أعد المحاولة لاحقاً إذا كان البحث غير متاح؛ الدبوس اليدوي مستقل.',
                         ),
                       ),
                     for (final suggestion in c.suggestions)
@@ -300,6 +323,11 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                               ),
                               Text(place.address),
                               Text(place.locality),
+                              _attribution(context),
+                              SelectableText(
+                                place.placeId,
+                                textDirection: TextDirection.ltr,
+                              ),
                               if (widget.mapBuilder != null)
                                 SizedBox(
                                   height: 220,
@@ -346,7 +374,8 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                                         c.needsRefresh ||
                                         !c.confirmed ||
                                         !c.repository.capabilities.link ||
-                                        place.selectionProof.isEmpty
+                                        place.selectionProof.isEmpty ||
+                                        c.proofExpired
                                     ? null
                                     : () => c.saveLink(),
                                 child: Text(

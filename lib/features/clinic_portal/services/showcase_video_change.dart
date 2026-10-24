@@ -31,9 +31,38 @@ class ShowcaseVideoFailure extends ApiException {
     final status = cause?.isLocalBackpressure == true
         ? null
         : cause?.statusCode;
-    return ar
+    final advice = switch (status) {
+      400 =>
+        ar
+            ? 'راجع صيغة الملف وحجمه ومدته وفق الحدود المعروضة.'
+            : 'Check the displayed file format, size and duration limits.',
+      403 =>
+        ar
+            ? 'حدّث الملف للتحقق من صلاحية VIP وصلاحيات المشرف.'
+            : 'Refresh the profile to check VIP eligibility and administrator permissions.',
+      413 =>
+        ar
+            ? 'رفض الخادم حجم الطلب. اختر ملفاً أصغر أو اطلب مراجعة حد رفع الفيديو في الخادم.'
+            : 'The server rejected the upload size. Choose a smaller file or ask platform management to check the upload limit.',
+      429 =>
+        ar
+            ? 'انتظر انتهاء فترة التهدئة قبل المحاولة مجدداً.'
+            : 'Wait for the cooldown before retrying.',
+      int code when code >= 500 =>
+        ar
+            ? 'الخادم غير متاح مؤقتاً. تحقّق من الملف المحفوظ قبل إعادة الرفع.'
+            : 'The server is temporarily unavailable. Check the saved profile before re-uploading.',
+      _ =>
+        cause?.errorCode == 'TIMEOUT'
+            ? (ar
+                  ? 'انتهت مهلة الاتصال؛ قد يكون الخادم أكمل الحفظ. تحقّق أولاً.'
+                  : 'The connection timed out; the server may have completed saving. Verify first.')
+            : '',
+    };
+    final base = ar
         ? 'تعذر $phase${status == null ? '' : ' (HTTP $status)'}. لم يتم تأكيد الحفظ. احتُفظ باختيارك؛ تحقّق من الفيديو المحفوظ قبل إعادة الرفع.'
         : '$phase failed${status == null ? '' : ' (HTTP $status)'}. Saving is not confirmed. Your selection is preserved; check the saved video before uploading again.';
+    return advice.isEmpty ? base : '$base $advice';
   }
 }
 

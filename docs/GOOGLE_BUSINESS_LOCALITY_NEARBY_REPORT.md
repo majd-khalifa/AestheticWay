@@ -1,5 +1,7 @@
 # Google Business, locality hierarchy and nearby frontend readiness
 
+> Historical09f49bb snapshot. Superseded for current contracts by [401560b integration report](BACKEND_401560B_INTEGRATION_REPORT.md) and [remaining verified gaps](BACKEND_401560B_REMAINING_GAPS_FOR_ALI.md),2026-10-25. Earlier missing-endpoint/OTP-destination and tier-order findings below are not claims about the new source.
+
 2026-10-24 · existing PR13 / branch `codex/final-backend-integration-client-preview` · baseline `52dbc041a86a5eda0aa01c938aa410294a37558d`.
 
 ## Audited existing pieces and changes

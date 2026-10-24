@@ -46,7 +46,7 @@ String _cityKey(String value) {
 }
 
 String localizedClinicCity(String value, {required bool arabic}) {
-  final city = compatibilityUaeCatalog.resolve(value);
+  final city = currentUaeCatalog.resolve(value);
   if (city != null) return city.label(arabic);
   final key = _cityKey(value);
   return arabic ? (clinicCities[key] ?? value.trim()) : key;

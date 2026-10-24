@@ -322,7 +322,12 @@ void main() {
       testWidgets('hierarchical city picker dark=$dark ar=$ar', (tester) async {
         await f.render(
           tester,
-          const Scaffold(body: UaeLocationPicker(selected: 'Al Ain')),
+          const Scaffold(
+            body: UaeLocationPicker(
+              selected: 'Al Ain',
+              repository: BundledUaeLocationRepository(),
+            ),
+          ),
           dark: dark,
           ar: ar,
         );
@@ -450,7 +455,10 @@ void main() {
               viewInsets: EdgeInsets.only(bottom: 250),
               textScaler: TextScaler.linear(1.8),
             ),
-            child: UaeLocationPicker(selected: 'Al Ain'),
+            child: UaeLocationPicker(
+              selected: 'Al Ain',
+              repository: BundledUaeLocationRepository(),
+            ),
           ),
         ),
         width: 320,

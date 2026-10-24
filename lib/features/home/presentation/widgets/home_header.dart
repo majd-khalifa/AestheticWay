@@ -23,9 +23,8 @@ class HomeHeader extends StatelessWidget {
   });
 
   String _displayCityLabel(LocaleService loc) =>
-      compatibilityUaeCatalog.resolve(selectedCity)?.label(loc.isArabic) ??
-      (compatibilityUaeCatalog.legacyCityQuery(selectedCity) ??
-          loc.tr('city_all'));
+      currentUaeCatalog.resolve(selectedCity)?.label(loc.isArabic) ??
+      (currentUaeCatalog.legacyCityQuery(selectedCity) ?? loc.tr('city_all'));
 
   Future<void> _showCityPicker(BuildContext context) async {
     final locality = await showUaeLocalityPicker(

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/auth/guest_auth_guard.dart';
 import '../../../core/auth/session_snapshot.dart';
 import '../../../core/localization/app_locale.dart';
+import '../../../core/network/api_exception.dart';
 import '../data/google_business_repository.dart';
 import '../models/google_business.dart';
 
@@ -17,7 +18,18 @@ class GoogleBusinessController extends ChangeNotifier {
   }
   final GoogleBusinessRepository repository;
   final DateTime Function() _now;
-  DateTime? _tokenIssuedAt;
+  DateTime? _tokenIssuedAt, _proofExpiresAt;
+  Timer? _proofTimer;
+  bool _expiredProof = false;
+  bool get proofExpired =>
+      _expiredProof ||
+      _proofExpiresAt != null && !_now().isBefore(_proofExpiresAt!);
+  void _retireProof() {
+    _proofTimer?.cancel();
+    _proofExpiresAt = null;
+    _expiredProof = false;
+  }
+
   String? _tokenLanguage;
   final _session = SessionSnapshot();
   GoogleBusinessAssociation? association;
@@ -56,6 +68,7 @@ class GoogleBusinessController extends ChangeNotifier {
     ++_generation;
     _debounce?.cancel();
     _token = null;
+    _retireProof();
     selected = null;
     suggestions = const [];
     confirmed = false;
@@ -72,6 +85,7 @@ class GoogleBusinessController extends ChangeNotifier {
       ++_generation;
       _token = null;
       association = null;
+      _retireProof();
       selected = null;
       suggestions = const [];
       confirmed = false;
@@ -88,6 +102,7 @@ class GoogleBusinessController extends ChangeNotifier {
     final g = ++_generation;
     _debounce?.cancel();
     _token = null;
+    _retireProof();
     selected = null;
     suggestions = const [];
     confirmed = false;
@@ -120,6 +135,7 @@ class GoogleBusinessController extends ChangeNotifier {
     if (!allowed || busy || needsRefresh) return;
     _debounce?.cancel();
     final g = ++_generation;
+    _retireProof();
     selected = null;
     confirmed = false;
     hasSearched = false;
@@ -127,7 +143,9 @@ class GoogleBusinessController extends ChangeNotifier {
     error = null;
     searching = false;
     final query = value.trim();
-    if (!repository.capabilities.search || query.length < 2) {
+    if (!repository.capabilities.search ||
+        query.length < 2 ||
+        query.length > 120) {
       _token = null;
       notifyListeners();
       return;
@@ -191,6 +209,7 @@ class GoogleBusinessController extends ChangeNotifier {
     loading = true;
     searching = false;
     error = null;
+    _retireProof();
     selected = null;
     confirmed = false;
     suggestions = const [];
@@ -208,6 +227,17 @@ class GoogleBusinessController extends ChangeNotifier {
         throw StateError('Unverified selected place');
       }
       selected = value;
+      _proofExpiresAt = _now().add(value.proofExpiresIn);
+      _proofTimer = Timer(value.proofExpiresIn, () {
+        if (!allowed || _disposed) return;
+        _expiredProof = true;
+        confirmed = false;
+        error = _text(
+          'This selection has expired. Search again to request fresh details.',
+          'انتهت صلاحية الاختيار. ابحث مجدداً لطلب تفاصيل جديدة.',
+        );
+        notifyListeners();
+      });
     } catch (_) {
       if (_current(g)) {
         error = _text(
@@ -225,7 +255,7 @@ class GoogleBusinessController extends ChangeNotifier {
 
   void confirmIdentity(bool value) {
     if (!busy && allowed) {
-      confirmed = value && selected != null;
+      confirmed = value && selected != null && !proofExpired;
       notifyListeners();
     }
   }
@@ -238,6 +268,7 @@ class GoogleBusinessController extends ChangeNotifier {
         !confirmed ||
         place == null ||
         place.selectionProof.isEmpty ||
+        proofExpired ||
         before == null ||
         !repository.capabilities.link) {
       return false;
@@ -295,16 +326,39 @@ class GoogleBusinessController extends ChangeNotifier {
       }
       association = fresh;
       needsRefresh = false;
+      _retireProof();
       selected = null;
       confirmed = false;
       suggestions = const [];
       return true;
-    } catch (_) {
+    } catch (e) {
       if (_current(g)) {
         error = _text(
           'The change was not verified. Refresh the association before retrying; no automatic retry was sent.',
           'لم يتم التحقق من التغيير. حدّث الارتباط قبل إعادة المحاولة؛ لم تُرسل إعادة محاولة تلقائية.',
         );
+        if (e is ApiException &&
+            e.errorCode == 'INVALID_OR_EXPIRED_SELECTION_PROOF') {
+          _retireProof();
+          selected = null;
+          confirmed = false;
+          error = _text(
+            'The selection expired or was already used. Refresh, then search again.',
+            'انتهت صلاحية الاختيار أو استُخدم مسبقاً. حدّث ثم ابحث مجدداً.',
+          );
+        } else if (e is ApiException &&
+            (e.errorCode == 'STALE_GOOGLE_ASSOCIATION' ||
+                e.statusCode == 409)) {
+          error = _text(
+            'The association changed elsewhere. Refresh before choosing again.',
+            'تغيّر الارتباط في مكان آخر. حدّث قبل الاختيار مجدداً.',
+          );
+        } else if (e is ApiException && e.statusCode == 403) {
+          error = _text(
+            'You do not have permission to change this association. Refresh your session.',
+            'لا تملك صلاحية تغيير هذا الارتباط. حدّث جلستك.',
+          );
+        }
       }
       return false;
     } finally {
@@ -320,6 +374,7 @@ class GoogleBusinessController extends ChangeNotifier {
       ++_generation;
       _debounce?.cancel();
       _token = null;
+      _retireProof();
       selected = null;
       suggestions = const [];
       searching = false;
@@ -335,6 +390,7 @@ class GoogleBusinessController extends ChangeNotifier {
     _debounce?.cancel();
     _token = null;
     association = null;
+    _retireProof();
     selected = null;
     AuthState().removeListener(_authChanged);
     LocaleService().removeListener(_languageChanged);

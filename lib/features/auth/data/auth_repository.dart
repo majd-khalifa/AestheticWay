@@ -326,6 +326,38 @@ class AuthRepository {
     return data;
   }
 
+  /// Explicit administrator choices only. Never invoked by deletion automatically.
+  Future<void> resolveClinicDeletion({
+    String? newAdminUserId,
+    bool deactivate = false,
+  }) async {
+    if (!AuthState().isClinicAdmin || (!deactivate && newAdminUserId == null)) {
+      throw const ApiException(
+        message: 'Clinic administrator access required.',
+        statusCode: 403,
+      );
+    }
+    final stamp = _snapshot();
+    final response = await _api.post(
+      'clinic-portal/profile/${deactivate ? 'deactivate-clinic' : 'transfer-ownership'}/',
+      data: deactivate
+          ? <String, dynamic>{}
+          : {'new_admin_user_id': newAdminUserId},
+    );
+    _check(stamp);
+    if (response.data is! Map ||
+        (response.data as Map)['status'] != 'success' ||
+        (deactivate &&
+            (response.data as Map)['clinic_status'] != 'suspended') ||
+        (!deactivate &&
+            (response.data as Map)['new_admin_user_id'] != newAdminUserId)) {
+      throw const ApiException(
+        message:
+            'The administrator change was not confirmed. Refresh before retrying.',
+      );
+    }
+  }
+
   /// Only an acknowledged deletion invalidates this session. No real-account
   /// probes or local "success" substitute for the purpose-bound server OTP.
   Future<void> confirmAccountDeletion(String code) async {

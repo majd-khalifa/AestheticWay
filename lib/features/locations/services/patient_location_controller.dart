@@ -75,12 +75,12 @@ class PatientLocationController extends ChangeNotifier {
   String city = 'All';
   String? areaCode;
   UaeLocality? get locality {
-    final c = compatibilityUaeCatalog.resolve(city);
+    final c = currentUaeCatalog.resolve(city);
     return c == null
         ? null
         : UaeLocality(
             c,
-            compatibilityUaeCatalog.resolveArea(areaCode, cityCode: c.code),
+            currentUaeCatalog.resolveArea(areaCode, cityCode: c.code),
           );
   }
 
@@ -95,7 +95,7 @@ class PatientLocationController extends ChangeNotifier {
   bool get busy => state == PatientLocationState.requesting;
   void selectCity(String value) {
     ++_generation;
-    city = compatibilityUaeCatalog.legacyCityQuery(value) ?? 'All';
+    city = currentUaeCatalog.legacyCityQuery(value) ?? 'All';
     areaCode = null;
     position = null;
     state = PatientLocationState.manual;

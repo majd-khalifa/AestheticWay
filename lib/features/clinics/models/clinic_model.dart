@@ -131,6 +131,7 @@ class ClinicModel {
   final String whatsapp;
   final String? googlePlaceId;
   final String googleSyncStatus;
+  final String googleLinkStatus;
   final DateTime? googleLastSyncedAt;
   final double latitude;
   final double longitude;
@@ -180,6 +181,7 @@ class ClinicModel {
     this.whatsapp = '',
     this.googlePlaceId,
     this.googleSyncStatus = '',
+    this.googleLinkStatus = '',
     this.googleLastSyncedAt,
     this.latitude = 0.0,
     this.longitude = 0.0,
@@ -308,6 +310,7 @@ class ClinicModel {
       whatsapp: json['whatsapp']?.toString() ?? '',
       googlePlaceId: json['google_place_id']?.toString(),
       googleSyncStatus: json['google_sync_status']?.toString() ?? '',
+      googleLinkStatus: json['google_link_status']?.toString() ?? '',
       googleLastSyncedAt: DateTime.tryParse('${json['google_last_synced_at']}'),
       latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
       longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
@@ -441,6 +444,7 @@ class ClinicModel {
       whatsapp: whatsapp ?? this.whatsapp,
       googlePlaceId: googlePlaceId ?? this.googlePlaceId,
       googleSyncStatus: googleSyncStatus,
+      googleLinkStatus: googleLinkStatus,
       googleLastSyncedAt: googleLastSyncedAt,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,

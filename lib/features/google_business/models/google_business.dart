@@ -39,6 +39,7 @@ class GoogleBusinessPlace {
     required this.countryCode,
     required this.selectionProof,
     this.mapsUrl,
+    this.proofExpiresIn = const Duration(seconds: 300),
   }) {
     if (!validPlaceId(placeId) ||
         name.trim().isEmpty ||
@@ -51,6 +52,7 @@ class GoogleBusinessPlace {
 
   /// Opaque server-issued proof of the selected result, not an API key.
   final String selectionProof;
+  final Duration proofExpiresIn;
   final double latitude, longitude;
   final String? mapsUrl;
   static bool validPlaceId(String value) =>

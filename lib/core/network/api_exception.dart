@@ -11,6 +11,7 @@ class ApiException implements Exception {
   final String? originalBackendMessage;
   final dynamic rawData;
   final Duration? retryAfter;
+  final List<String> resolutionOptions;
   final bool isCancelled;
   final bool isLocalBackpressure;
 
@@ -22,6 +23,7 @@ class ApiException implements Exception {
     this.originalBackendMessage,
     this.rawData,
     this.retryAfter,
+    this.resolutionOptions = const [],
     this.isCancelled = false,
     this.isLocalBackpressure = false,
   });
@@ -216,6 +218,10 @@ class ApiException implements Exception {
         ar
             ? 'تمت مراجعة الطلب بالفعل. حدّث القائمة.'
             : 'This request has already been reviewed. Refresh the list.',
+      'NO_VERIFIED_DELIVERY_CHANNEL' =>
+        ar
+            ? 'لا توجد وسيلة تواصل موثقة لإرسال الرمز. تواصل مع دعم المنصة لتحديث حسابك.'
+            : 'No verified delivery channel is available. Contact platform support to update your account.',
       'LAST_SUPER_ADMIN' =>
         ar
             ? 'لا يمكن حذف حساب المشرف العام الوحيد. عيّن مشرفاً عاماً آخر أولاً.'
@@ -232,6 +238,18 @@ class ApiException implements Exception {
     };
 
     return ApiException(
+      resolutionOptions:
+          errorCode == 'SOLE_CLINIC_ADMIN' &&
+              data is Map &&
+              data['resolution_options'] is List
+          ? (data['resolution_options'] as List)
+                .whereType<String>()
+                .where(
+                  (v) =>
+                      ['transfer_ownership', 'deactivate_clinic'].contains(v),
+                )
+                .toList(growable: false)
+          : const [],
       message: message,
       statusCode: statusCode,
       errorCode:
@@ -265,6 +283,12 @@ class ApiException implements Exception {
             'LAST_SUPER_ADMIN',
             'SOLE_CLINIC_ADMIN',
             'ACCOUNT_ALREADY_INACTIVE',
+            'NO_VERIFIED_DELIVERY_CHANNEL',
+            'STALE_GOOGLE_ASSOCIATION',
+            'INVALID_OR_EXPIRED_SELECTION_PROOF',
+            'UNVERIFIED_GOOGLE_PLACE_ID',
+            'TARGET_MEMBER_NOT_FOUND',
+            'NEW_ADMIN_REQUIRED',
           }.contains(errorCode)
           ? errorCode
           : 'REQUEST_REJECTED',

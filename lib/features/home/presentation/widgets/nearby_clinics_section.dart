@@ -36,13 +36,13 @@ class NearbyClinicsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            compatibilityUaeCatalog.legacyCityQuery(city) == null
+            currentUaeCatalog.legacyCityQuery(city) == null
                 ? (loc.isArabic
                       ? 'تصفح العيادات في الإمارات'
                       : 'Browse clinics across the UAE')
                 : (loc.isArabic
-                      ? 'تصفح العيادات في ${compatibilityUaeCatalog.resolve(city)?.label(true) ?? city}'
-                      : 'Browse clinics in ${compatibilityUaeCatalog.resolve(city)?.label(false) ?? city}'),
+                      ? 'تصفح العيادات في ${currentUaeCatalog.resolve(city)?.label(true) ?? city}'
+                      : 'Browse clinics in ${currentUaeCatalog.resolve(city)?.label(false) ?? city}'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           if (onSeeAll != null)

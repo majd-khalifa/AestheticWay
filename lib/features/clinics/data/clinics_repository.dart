@@ -23,7 +23,7 @@ class ClinicsRepository {
     final Map<String, dynamic> queryParams = {};
 
     if (city != null && city.isNotEmpty) {
-      final canonical = compatibilityUaeCatalog.legacyCityQuery(city);
+      final canonical = currentUaeCatalog.legacyCityQuery(city);
       if (canonical != null) queryParams['city'] = canonical;
     }
 

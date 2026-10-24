@@ -33,17 +33,25 @@ class NearbyDiscoveryController extends ChangeNotifier {
             message: 'Distance reference could not be verified.',
           );
         }
-        if (result.reference != NearbyDistanceReference.unknown) {
+        if (result.reference == NearbyDistanceReference.manualLocality &&
+            (query.locality == null ||
+                result.items.any((r) => r.distanceKm != null))) {
+          throw const ApiException(
+            message: 'Manual discovery must not claim distances.',
+          );
+        }
+        if (result.reference != NearbyDistanceReference.unknown &&
+            result.reference != NearbyDistanceReference.manualLocality) {
           double previous = page == 1 || paging.items.isEmpty
               ? -1
-              : paging.items.last.distanceKm;
+              : paging.items.last.distanceKm!;
           for (final row in result.items) {
-            if (row.distanceKm < previous) {
+            if (row.distanceKm == null || row.distanceKm! < previous) {
               throw const ApiException(
                 message: 'Proximity ordering could not be verified.',
               );
             }
-            previous = row.distanceKm;
+            previous = row.distanceKm!;
           }
         }
         if (page == 1) reference = result.reference;
@@ -108,13 +116,14 @@ class NearbyDiscoveryController extends ChangeNotifier {
     return switch (reference) {
       NearbyDistanceReference.device =>
         ar
-            ? 'على بُعد ${row.distanceKm.toStringAsFixed(1)} كم تقريباً'
-            : 'Approximately ${row.distanceKm.toStringAsFixed(1)} km away',
+            ? 'على بُعد ${row.distanceKm?.toStringAsFixed(1)} كم تقريباً'
+            : 'Approximately ${row.distanceKm?.toStringAsFixed(1)} km away',
       NearbyDistanceReference.selectedLocality =>
         ar
-            ? '${row.distanceKm.toStringAsFixed(1)} كم من الموقع المحدد'
-            : '${row.distanceKm.toStringAsFixed(1)} km from the selected locality',
-      NearbyDistanceReference.unknown => '',
+            ? '${row.distanceKm?.toStringAsFixed(1)} كم من الموقع المحدد'
+            : '${row.distanceKm?.toStringAsFixed(1)} km from the selected locality',
+      NearbyDistanceReference.unknown ||
+      NearbyDistanceReference.manualLocality => '',
     };
   }
 

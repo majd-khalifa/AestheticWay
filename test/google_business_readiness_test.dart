@@ -297,12 +297,12 @@ void main() {
     });
   }
   test(
-    'current contract unlink sends only empty Place ID and URL, never manual pin/media',
+    '401560b unlink uses atomic POST with expected identity, never manual pin/media',
     () async {
       final api = ApiClient(), old = ApiClient().dio.httpClientAdapter;
       String id = 'QA-Old-Place';
       final wire = f.Adapter((r) {
-        if (r.method == 'PATCH') id = '';
+        if (r.method == 'POST') id = '';
         return f.body({
           ...f.clinic(),
           'google_place_id': id,
@@ -315,20 +315,14 @@ void main() {
       final repo = CurrentClinicGoogleBusinessRepository(
         catalog: ClinicCatalogRepository(apiClient: api),
       );
-      expect(repo.capabilities.search, false);
-      expect(repo.capabilities.link, false);
+      expect(repo.capabilities.search, true);
+      expect(repo.capabilities.link, true);
       final c = GoogleBusinessController(repo);
       await c.reload();
       expect(await c.unlink(), true);
-      expect(wire.requests.map((r) => r.method), [
-        'GET',
-        'GET',
-        'PATCH',
-        'GET',
-      ]);
-      expect(wire.requests.singleWhere((r) => r.method == 'PATCH').data, {
-        'google_place_id': '',
-        'google_maps_url': '',
+      expect(wire.requests.map((r) => r.method), ['GET', 'GET', 'POST', 'GET']);
+      expect(wire.requests.singleWhere((r) => r.method == 'POST').data, {
+        'expected_current_place_id': 'QA-Old-Place',
       });
       expect(c.association!.linked, false);
       c.dispose();

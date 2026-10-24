@@ -1,5 +1,7 @@
 # Google Business, canonical localities and nearby — handoff for Ali / تسليم لعلي
 
+> Historical09f49bb snapshot. Superseded for current contracts by [401560b integration report](BACKEND_401560B_INTEGRATION_REPORT.md) and [remaining verified gaps](BACKEND_401560B_REMAINING_GAPS_FOR_ALI.md),2026-10-25. Earlier missing-endpoint/OTP-destination and tier-order findings below are not claims about the new source.
+
 2026-10-24 · PR13 `codex/final-backend-integration-client-preview` · supplied source **09f49bbd22131f6dad49a65a5167de5396f03797**. No later committed/deployed contracts were provided. Django is read-only. Items below marked proposed are **not live endpoints or implemented Flutter HTTP adapters**.
 
 ## 1. Verified current contract / العقد الحالي المؤكد من المصدر

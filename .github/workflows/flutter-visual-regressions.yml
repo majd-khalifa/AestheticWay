@@ -91,6 +91,12 @@ jobs:
           flutter test test/google_business_readiness_test.dart test/nearby_locality_readiness_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/maps-business-readiness"
           --reporter expanded
+      - name: Backend401560b Google, canonical catalog and deletion regressions
+        timeout-minutes: 3
+        run: >-
+          flutter test test/backend_401560b_integration_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-401560b"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -125,3 +131,4 @@ jobs:
             ${{ runner.temp }}/backend-09-review/**
             ${{ runner.temp }}/uae-nearby-qa/**
             ${{ runner.temp }}/maps-business-readiness/**
+            ${{ runner.temp }}/backend-401560b/**

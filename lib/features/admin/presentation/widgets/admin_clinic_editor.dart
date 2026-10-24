@@ -171,10 +171,10 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
       'city': _city,
       'emirate': widget.clinic != null && _city == widget.clinic!.city
           ? widget.clinic!.emirate
-          : (compatibilityUaeCatalog.resolve(_city) == null
+          : (currentUaeCatalog.resolve(_city) == null
                 ? _city
-                : compatibilityUaeCatalog
-                      .emirateFor(compatibilityUaeCatalog.resolve(_city)!)
+                : currentUaeCatalog
+                      .emirateFor(currentUaeCatalog.resolve(_city)!)
                       .nameEn),
       'subscription_tier': _tier,
       'is_featured': _featured,

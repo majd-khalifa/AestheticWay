@@ -1,5 +1,7 @@
 # Physical Android QA, VIP video and UAE proximity — handoff for Ali / تسليم لعلي
 
+> Historical09f49bb snapshot. Superseded for current contracts by [401560b integration report](BACKEND_401560B_INTEGRATION_REPORT.md) and [remaining verified gaps](BACKEND_401560B_REMAINING_GAPS_FOR_ALI.md),2026-10-25. Earlier missing-endpoint/OTP-destination and tier-order findings below are not claims about the new source.
+
 2026-10-24. Flutter PR **#13**, branch `codex/final-backend-integration-client-preview`.
 Read-only source: archive commit **09f49bbd22131f6dad49a65a5167de5396f03797**. No later backend source or deployed contract was supplied for this increment. Previous deployment claims are not live verification.
 

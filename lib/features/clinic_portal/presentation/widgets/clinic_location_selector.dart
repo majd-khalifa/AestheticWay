@@ -20,11 +20,9 @@ class ClinicLocationSelection {
     required this.longitude,
   });
   final String city, addressAr, addressEn;
-  String get emirate => compatibilityUaeCatalog.resolve(city) == null
+  String get emirate => currentUaeCatalog.resolve(city) == null
       ? city
-      : compatibilityUaeCatalog
-            .emirateFor(compatibilityUaeCatalog.resolve(city)!)
-            .nameEn;
+      : currentUaeCatalog.emirateFor(currentUaeCatalog.resolve(city)!).nameEn;
   final double latitude, longitude;
   String get googleMapsUrl =>
       'https://www.google.com/maps/search/?api=1&query=${latitude.toStringAsFixed(7)},${longitude.toStringAsFixed(7)}';
@@ -130,17 +128,17 @@ class _LocationSheetState extends State<_LocationSheet> {
   void initState() {
     super.initState();
     _city =
-        compatibilityUaeCatalog.resolve(widget.city)?.nameEn ??
+        currentUaeCatalog.resolve(widget.city)?.nameEn ??
         (widget.city.isNotEmpty ? widget.city : 'Dubai');
     _confirmed = ClinicLocationSelection.validCoordinates(
       widget.latitude,
       widget.longitude,
     );
     final e =
-        _emirates[compatibilityUaeCatalog.resolve(_city) == null
+        _emirates[currentUaeCatalog.resolve(_city) == null
             ? _city
-            : compatibilityUaeCatalog
-                  .emirateFor(compatibilityUaeCatalog.resolve(_city)!)
+            : currentUaeCatalog
+                  .emirateFor(currentUaeCatalog.resolve(_city)!)
                   .nameEn] ??
         _emirates['Dubai']!;
     _point = _confirmed
@@ -171,7 +169,7 @@ class _LocationSheetState extends State<_LocationSheet> {
   }
 
   void _localityChanged(UaeLocality value) {
-    final e = _emirates[compatibilityUaeCatalog.emirateFor(value.city).nameEn]!;
+    final e = _emirates[currentUaeCatalog.emirateFor(value.city).nameEn]!;
     setState(() {
       _city = value.city.nameEn;
       _areaCode = value.area?.code;
@@ -288,10 +286,9 @@ class _LocationSheetState extends State<_LocationSheet> {
             onLocalityChanged: _localityChanged,
             allowAll: false,
             onChanged: (value) {
-              final city = compatibilityUaeCatalog.resolve(value);
+              final city = currentUaeCatalog.resolve(value);
               if (city == null) return;
-              final e =
-                  _emirates[compatibilityUaeCatalog.emirateFor(city).nameEn]!;
+              final e = _emirates[currentUaeCatalog.emirateFor(city).nameEn]!;
               setState(() {
                 _city = city.nameEn;
                 _confirmed = false;
