@@ -40,6 +40,8 @@ class _Api implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     patchBodies.add(data);
     return Response<T>(
@@ -87,7 +89,11 @@ class _Catalog implements ClinicCatalogRepository {
   Map<String, dynamic>? payload;
 
   @override
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) {
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) {
     payload = data;
     return pending.future;
   }

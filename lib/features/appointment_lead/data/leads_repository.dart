@@ -115,6 +115,12 @@ class LeadsRepository {
   /// Retrieves a specific lead request detail by UUID
   Future<AppointmentRequestModel> getMyLeadDetail(String id) async {
     final cleanId = id.trim();
+    if (!isEntityUuid(cleanId)) {
+      throw const ApiException(
+        message: 'A valid request ID is required.',
+        statusCode: 400,
+      );
+    }
     final endpoint = ApiConfig.leadDetail(cleanId);
 
     final response = await _apiClient.get(endpoint);

@@ -50,9 +50,55 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./tool/test_public_clinic_capture.ps1
+      - name: Parse Windows preview helper without building or accessing credentials
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '[scriptblock]::Create((Get-Content -Raw tool/build_android_preview.ps1)) | Out-Null'
       - run: flutter analyze
+      - name: Clinic Portal regressions and render capture
+        timeout-minutes: 3
+        run: >-
+          flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
+          --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
+          --timeout 60s --reporter expanded
+      - name: Onboarding and admin review workflows and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/onboarding_review_workflows_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/onboarding-review"
+          --reporter expanded
+      - name: VIP entitlement and admin media regressions and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/admin_media_polish_test.dart test/admin_media_visual_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/admin-media-polish"
+          --reporter expanded
+      - name: Backend 09f49bb contracts and review renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/backend_09_integration_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-09-review"
+          --reporter expanded
+      - name: Physical-QA video persistence and UAE location boundary
+        timeout-minutes: 3
+        run: >-
+          flutter test test/uae_location_qa_test.dart test/video_save_qa_preview_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/uae-nearby-qa"
+          --reporter expanded
+      - name: Google Business and three-level nearby readiness
+        timeout-minutes: 3
+        run: >-
+          flutter test test/google_business_readiness_test.dart test/nearby_locality_readiness_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/maps-business-readiness"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
+      - name: Final backend integration contracts and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/final_integration_contract_test.dart test/account_deletion_navigation_test.dart
+          --dart-define=FINAL_INTEGRATION_CAPTURE_DIR="${{ runner.temp }}/final-integration"
+          --timeout 60s --reporter expanded
       - name: Capture candidates for review only
         if: always() && !cancelled()
         run: >-
@@ -72,3 +118,10 @@ jobs:
             visual-manifest.json
             test/failures/**
             ${{ runner.temp }}/patient-golden-candidates/**
+            ${{ runner.temp }}/clinic-portal-audit/**
+            ${{ runner.temp }}/final-integration/**
+            ${{ runner.temp }}/onboarding-review/**
+            ${{ runner.temp }}/admin-media-polish/**
+            ${{ runner.temp }}/backend-09-review/**
+            ${{ runner.temp }}/uae-nearby-qa/**
+            ${{ runner.temp }}/maps-business-readiness/**

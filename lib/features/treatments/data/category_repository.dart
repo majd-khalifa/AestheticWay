@@ -1,10 +1,13 @@
 import '../../../core/data/paged_collection.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/auth/guest_auth_guard.dart';
+import '../../../core/auth/session_snapshot.dart';
 import '../models/category_model.dart';
 
-/// Retry only an explicitly missing/unsupported route, never a rejected write.
+/// Public active taxonomy and separate authenticated Super Admin management.
 class CategoryRepository {
   CategoryRepository({ApiClient? apiClient}) : _api = apiClient ?? ApiClient();
   final ApiClient _api;
@@ -30,69 +33,80 @@ class CategoryRepository {
     );
   }
 
-  Future<dynamic> _write(
-    String method,
-    String suffix, {
-    Map<String, dynamic>? data,
-  }) async {
-    Future<dynamic> send(String root) async {
-      final path = '$root$suffix';
-      switch (method) {
-        case 'POST':
-          return (await _api.post(path, data: data)).data;
-        case 'PATCH':
-          return (await _api.patch(path, data: data)).data;
-        case 'DELETE':
-          return (await _api.delete(path)).data;
-      }
-      throw ArgumentError.value(method);
-    }
-
-    try {
-      return await send(ApiConfig.clinicCategories);
-    } on ApiException catch (error) {
-      if (![404, 405, 501].contains(error.statusCode)) rethrow;
-      return send(ApiConfig.categories);
-    }
-  }
-
-  CategoryModel _category(dynamic value) {
-    final body =
-        value is Map<String, dynamic> && value['data'] is Map<String, dynamic>
-        ? value['data']
-        : value;
-    if (body is! Map<String, dynamic> ||
-        body['id'] == null ||
-        body['id'].toString().isEmpty) {
-      throw const ApiException(
-        message: 'The category response is missing its ID.',
-      );
-    }
-    return CategoryModel.fromJson(body);
-  }
+  /// Clinics must request a global category rather than mutate the taxonomy.
+  static ApiException writesUnavailable() => ApiException(
+    statusCode: 405,
+    errorCode: 'CATEGORY_WRITES_UNSUPPORTED',
+    message: LocaleService().isArabic
+        ? 'التصنيفات مشتركة على مستوى المنصة. اختر تصنيفاً موجوداً أو أرسل طلب تصنيف جديد للموافقة عليه.'
+        : 'Categories are shared across the platform. Select an existing category or request a new category for approval.',
+  );
 
   Future<CategoryModel> createCategory({
     required String nameEn,
     required String nameAr,
-  }) async => _category(
-    await _write(
-      'POST',
-      '',
-      data: {'name_en': nameEn.trim(), 'name_ar': nameAr.trim()},
-    ),
-  );
+  }) async => throw writesUnavailable();
   Future<CategoryModel> updateCategory(
     String id, {
     required String nameEn,
     required String nameAr,
-  }) async => _category(
-    await _write(
-      'PATCH',
-      '$id/',
-      data: {'name_en': nameEn.trim(), 'name_ar': nameAr.trim()},
-    ),
-  );
-  Future<void> deleteCategory(String id) async {
-    await _write('DELETE', '$id/');
+  }) async => throw writesUnavailable();
+  Future<void> deleteCategory(String id) async => throw writesUnavailable();
+
+  static const adminPath = 'admin-portal/treatment-categories/';
+  void _requireAdmin() {
+    if (!AuthState().isLoggedIn || !AuthState().isSuperAdmin) {
+      throw const ApiException(
+        message: 'Super Admin access is required.',
+        statusCode: 403,
+      );
+    }
+  }
+
+  Future<List<CategoryModel>> getAdminCategories({int page = 1}) async {
+    _requireAdmin();
+    final session = SessionSnapshot();
+    final response = await _api.get(
+      adminPath,
+      queryParameters: {'page': page, 'page_size': catalogPageSize},
+    );
+    session.ensureCurrent();
+    return PageItems<CategoryModel>.fromResponse(
+      response.data,
+      CategoryModel.fromJson,
+      page: page,
+    );
+  }
+
+  Future<CategoryModel> saveAdminCategory({
+    String? id,
+    required String nameEn,
+    required String nameAr,
+    required int displayOrder,
+    required bool isActive,
+  }) async {
+    _requireAdmin();
+    final session = SessionSnapshot();
+    // Slug and icon are server-owned. Always PATCH edits, preserving other fields.
+    final payload = {
+      'name_en': nameEn.trim(),
+      'name_ar': nameAr.trim(),
+      'display_order': displayOrder,
+      'is_active': isActive,
+    };
+    final response = id == null
+        ? await _api.post(adminPath, data: payload)
+        : await _api.patch('$adminPath$id/', data: payload);
+    session.ensureCurrent();
+    return CategoryModel.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
+  }
+
+  Future<void> deleteAdminCategory(String id) async {
+    _requireAdmin();
+    final session = SessionSnapshot();
+    await _api.delete('$adminPath$id/');
+    session.ensureCurrent();
   }
 }

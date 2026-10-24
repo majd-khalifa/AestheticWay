@@ -1,4 +1,9 @@
+import '../../../../core/widgets/async_action_button.dart';
+import '../../../google_business/presentation/google_business_screen.dart';
+import '../../../../core/auth/session_snapshot.dart';
+import 'clinic_media_screen.dart';
 import '../../../../core/services/local_media_cache.dart';
+import '../../../../core/widgets/account_privacy_actions.dart';
 import '../widgets/clinic_catalog_cards.dart';
 import 'clinic_offers_screen.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
@@ -43,6 +48,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _productsSectionKey = GlobalKey();
   final GlobalKey _articlesSectionKey = GlobalKey();
+  bool _locationBusy = false;
 
   @override
   void dispose() {
@@ -74,6 +80,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     PractitionerModel? existing,
   }) {
     final formKey = GlobalKey<FormState>();
+    final editorSession = SessionSnapshot();
     final isEditing = existing != null;
     final nameEnController = TextEditingController(
       text: existing?.nameEn ?? '',
@@ -511,6 +518,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           : () async {
                               setModalState(() => modalErrorMessage = null);
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
 
                               final data = <String, dynamic>{
                                 'name_en': nameEnController.text.trim(),
@@ -518,16 +533,10 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                     nameArController.text.trim().isNotEmpty
                                     ? nameArController.text.trim()
                                     : nameEnController.text.trim(),
-                                'title_en': 'Certified Practitioner',
-                                'title_ar': 'ممارس طبي معتمد',
-                                'speciality_en':
-                                    specialtyEnController.text.trim().isNotEmpty
-                                    ? specialtyEnController.text.trim()
-                                    : 'Aesthetic Practitioner',
-                                'speciality_ar':
-                                    specialtyArController.text.trim().isNotEmpty
-                                    ? specialtyArController.text.trim()
-                                    : 'ممارس تجميلي معتمد',
+                                'speciality_en': specialtyEnController.text
+                                    .trim(),
+                                'speciality_ar': specialtyArController.text
+                                    .trim(),
                                 'type': selectedType.value,
                                 'bio_en': bioEnController.text.trim(),
                                 'bio_ar': bioArController.text.trim(),
@@ -605,6 +614,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     ProductModel? existing,
   }) {
     final formKey = GlobalKey<FormState>();
+    final editorSession = SessionSnapshot();
     final isEditing = existing != null;
     final nameEnController = TextEditingController(
       text: existing?.nameEn ?? '',
@@ -1050,6 +1060,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           ? null
                           : () async {
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
                               setModalState(() {
                                 modalErrorMessage = null;
                                 isSubmitting = true;
@@ -1139,6 +1157,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     ArticleModel? existing,
   }) {
     final formKey = GlobalKey<FormState>();
+    final editorSession = SessionSnapshot();
     final isEditing = existing != null;
     final titleEnController = TextEditingController(
       text: existing?.titleEn ?? '',
@@ -1510,6 +1529,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           ? null
                           : () async {
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
                               setModalState(() {
                                 modalErrorMessage = null;
                                 isSubmitting = true;
@@ -1593,6 +1620,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     final clinicService = ClinicPortalService();
     final clinic = clinicService.activeClinic;
     final formKey = GlobalKey<FormState>();
+    final editorSession = SessionSnapshot();
     final nameArCtrl = TextEditingController(text: clinic.nameAr);
     final nameEnCtrl = TextEditingController(text: clinic.nameEn);
     final descArCtrl = TextEditingController(text: clinic.descriptionAr);
@@ -1859,6 +1887,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                           : () async {
                               setModalState(() => modalErrorMessage = null);
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
                               setModalState(() => isSubmitting = true);
                               try {
                                 await clinicService.updateClinicProfile(
@@ -1873,11 +1909,9 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                   addressAr: selectedLocation?.addressAr,
                                   addressEn: selectedLocation?.addressEn,
                                   city: selectedLocation?.city,
-                                  emirate: selectedLocation?.city,
+                                  emirate: selectedLocation?.emirate,
                                   latitude: selectedLocation?.latitude,
                                   longitude: selectedLocation?.longitude,
-                                  googleMapsUrl:
-                                      selectedLocation?.googleMapsUrl,
                                   logo: logoPath,
                                   coverImage: coverPath,
                                   clearLogo: logoChanged && logoPath == null,
@@ -1930,18 +1964,22 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
     BuildContext context,
     LocaleService loc,
   ) async {
+    if (_locationBusy) return;
+    final editorSession = SessionSnapshot();
+    setState(() => _locationBusy = true);
     final service = ClinicPortalService();
     final clinic = service.activeClinic;
-    final result = await showClinicLocationSelector(
-      context,
-      city: clinic.city,
-      addressAr: clinic.addressAr,
-      addressEn: clinic.addressEn,
-      latitude: clinic.latitude,
-      longitude: clinic.longitude,
-    );
-    if (result == null || !context.mounted) return;
     try {
+      final result = await showClinicLocationSelector(
+        context,
+        city: clinic.city,
+        addressAr: clinic.addressAr,
+        addressEn: clinic.addressEn,
+        latitude: clinic.latitude,
+        longitude: clinic.longitude,
+      );
+      if (result == null || !context.mounted) return;
+      editorSession.ensureCurrent();
       await service.updateClinicProfile(
         nameAr: clinic.nameAr,
         nameEn: clinic.nameEn,
@@ -1952,10 +1990,9 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
         addressAr: result.addressAr,
         addressEn: result.addressEn,
         city: result.city,
-        emirate: result.city,
+        emirate: result.emirate,
         latitude: result.latitude,
         longitude: result.longitude,
-        googleMapsUrl: result.googleMapsUrl,
       );
       if (context.mounted) {
         showAppSnackBar(
@@ -1976,6 +2013,8 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
           type: AppSnackBarType.error,
         );
       }
+    } finally {
+      if (mounted) setState(() => _locationBusy = false);
     }
   }
 
@@ -2033,6 +2072,7 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
           : (p.brandNameEn ?? p.brandNameAr ?? ''),
       imageUrl: p.imageUrl,
       mediaCacheKey: LocalMediaCache.entity('product', p.id),
+      preserveImageShape: true,
       icon: Icons.auto_awesome_outlined,
       onEdit: () => _showProductFormDialog(context, loc, existing: p),
       onDelete: () => _deleteCatalogItem(
@@ -2096,6 +2136,20 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                   onEdit: () => _showEditClinicProfileDialog(context, loc),
                 ),
               ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ClinicMediaScreen(),
+                  ),
+                ),
+                icon: const Icon(Icons.perm_media_outlined),
+                label: Text(
+                  loc.isArabic
+                      ? 'إدارة معرض الصور والفيديو'
+                      : 'Manage photo gallery and video',
+                ),
+              ),
               const SizedBox(height: 16),
               LuxuryCard(
                 padding: const EdgeInsets.all(16),
@@ -2103,7 +2157,9 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      loc.isArabic ? 'موقع العيادة' : 'Clinic Location',
+                      loc.isArabic
+                          ? 'الموقع ونشاط Google'
+                          : 'Location & Google Business',
                       style: TextStyle(
                         color: AppColors.text(context),
                         fontSize: 16,
@@ -2111,6 +2167,32 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    AsyncActionButton(
+                      icon: Icons.business_outlined,
+                      label: loc.isArabic
+                          ? 'مراجعة ارتباط Google Business'
+                          : 'Review Google Business association',
+                      onPressed: (action) async {
+                        await action.wait(
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => GoogleBusinessScreen(
+                                onEditManualPin: () =>
+                                    _updateClinicLocation(context, loc),
+                              ),
+                            ),
+                          ),
+                        );
+                        await action.wait(
+                          ClinicPortalService().refreshClinicProfile(),
+                        );
+                      },
+                    ),
+                    Text(
+                      loc.isArabic
+                          ? 'الدبوس اليدوي مستقل عن ارتباط نشاط Google.'
+                          : 'The manual pin is separate from Google Business linking.',
+                    ),
                     Text(
                       clinicLocationSummary(
                         clinic.city,
@@ -2155,29 +2237,47 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                       runSpacing: 8,
                       children: [
                         OutlinedButton.icon(
-                          onPressed: () => _updateClinicLocation(context, loc),
-                          icon: const Icon(Icons.edit_location_alt_outlined),
+                          onPressed: _locationBusy
+                              ? null
+                              : () => _updateClinicLocation(context, loc),
+                          icon: _locationBusy
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.edit_location_alt_outlined),
                           label: Text(
-                            loc.isArabic
+                            _locationBusy
+                                ? (loc.isArabic
+                                      ? 'جارٍ تحديث الموقع…'
+                                      : 'Updating location…')
+                                : loc.isArabic
                                 ? 'تحديث موقع العيادة'
                                 : 'Update Location',
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: () => MapsLauncher.openMapLocation(
-                            latitude: clinic.latitude,
-                            longitude: clinic.longitude,
-                            googleMapsUrl: clinic.googleMapsUrl,
-                            placeName: loc.isArabic
-                                ? clinic.nameAr
-                                : clinic.nameEn,
-                          ),
-                          icon: const Icon(Icons.open_in_new),
-                          label: Text(
-                            loc.isArabic
-                                ? 'فتح في خرائط Google'
-                                : 'Open in Google Maps',
-                          ),
+                        AsyncActionButton(
+                          icon: Icons.open_in_new,
+                          label: loc.isArabic
+                              ? 'فتح الدبوس اليدوي في خرائط Google'
+                              : 'Open manual pin in Google Maps',
+                          onPressed:
+                              !ClinicLocationSelection.validCoordinates(
+                                clinic.latitude,
+                                clinic.longitude,
+                              )
+                              ? null
+                              : (_) async {
+                                  if (!await MapsLauncher.openVerifiedLocation(
+                                    latitude: clinic.latitude,
+                                    longitude: clinic.longitude,
+                                  )) {
+                                    throw StateError('Directions unavailable');
+                                  }
+                                },
                         ),
                       ],
                     ),
@@ -2501,6 +2601,8 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
               const SizedBox(height: 20),
 
               // Logout Clinic Portal Button
+              const AccountPrivacyActions(),
+              const SizedBox(height: 12),
               SilverButton(
                 label: loc.tr('clinic_logout'),
                 icon: Icons.logout_rounded,

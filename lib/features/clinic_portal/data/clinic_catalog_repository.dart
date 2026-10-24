@@ -197,28 +197,15 @@ class ClinicCatalogRepository {
 
   Future<TreatmentModel> createTreatment(Map<String, dynamic> data) async {
     final sanitized = Map<String, dynamic>.from(data);
+    sanitized['category'] ??= sanitized.remove('category_id');
     if (sanitized['category'] == null ||
         sanitized['category'].toString().trim().isEmpty) {
-      if (sanitized['category_id'] != null &&
-          sanitized['category_id'].toString().trim().isNotEmpty) {
-        sanitized['category'] = sanitized['category_id'];
-      } else {
-        try {
-          final cats = await getCategories();
-          if (cats.isNotEmpty) {
-            sanitized['category'] = cats.first.id;
-          }
-        } catch (_) {}
-      }
+      throw const ApiException(
+        message: 'Select an existing medical category.',
+        errorCode: 'CATEGORY_REQUIRED',
+      );
     }
-    if (sanitized['category'] != null) {
-      sanitized['category_id'] = sanitized['category'];
-    }
-    if (sanitized['practitioners'] == null ||
-        (sanitized['practitioners'] is List &&
-            (sanitized['practitioners'] as List).isEmpty)) {
-      sanitized['practitioners'] = <String>[];
-    }
+    sanitized.remove('category_id');
     sanitized.remove('duration_minutes');
 
     final response = await _api.post(
@@ -233,14 +220,12 @@ class ClinicCatalogRepository {
     Map<String, dynamic> data,
   ) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized['category'] != null) {
-      sanitized['category_id'] = sanitized['category'];
+    if (!sanitized.containsKey('category') &&
+        sanitized.containsKey('category_id')) {
+      sanitized['category'] = sanitized['category_id'];
     }
-    if (sanitized['practitioners'] == null ||
-        (sanitized['practitioners'] is List &&
-            (sanitized['practitioners'] as List).isEmpty)) {
-      sanitized['practitioners'] = <String>[];
-    }
+    sanitized.remove('category_id');
+    // Omission preserves existing M2M assignments; [] explicitly clears them.
     sanitized.remove('duration_minutes');
 
     final response = await _api.patch(
@@ -354,11 +339,8 @@ class ClinicCatalogRepository {
 
   Future<ProductModel> createProduct(Map<String, dynamic> data) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized.containsKey('price') &&
-        (sanitized['price'] == null ||
-            sanitized['price'].toString().trim().isEmpty)) {
-      sanitized.remove('price');
-    }
+    // Cosmetic brand showcases never send commercial price fields.
+    sanitized.remove('price');
     final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
@@ -378,11 +360,8 @@ class ClinicCatalogRepository {
     Map<String, dynamic> data,
   ) async {
     final sanitized = Map<String, dynamic>.from(data);
-    if (sanitized.containsKey('price') &&
-        (sanitized['price'] == null ||
-            sanitized['price'].toString().trim().isEmpty)) {
-      sanitized.remove('price');
-    }
+    // Cosmetic brand showcases never send commercial price fields.
+    sanitized.remove('price');
     final session = SessionSnapshot();
     final payload = await _resolveMediaAssetPayload(
       sanitized,
@@ -506,15 +485,60 @@ class ClinicCatalogRepository {
   // -------------------------------------------------------------
 
   Future<ClinicModel> getClinicProfile() async {
+    final session = SessionSnapshot();
     final response = await _api.get(ApiConfig.clinicProfile);
-    final body = response.data;
-    final rawData = body is Map<String, dynamic>
-        ? (body['data'] ?? body)
-        : body;
-    return ClinicModel.fromJson(rawData as Map<String, dynamic>);
+    session.ensureCurrent();
+    return _profileFromResponse(response.data, session);
   }
 
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
+  Future<ClinicModel> _profileFromResponse(
+    dynamic body,
+    SessionSnapshot session,
+  ) async {
+    final data = body is Map<String, dynamic> ? (body['data'] ?? body) : body;
+    final raw = Map<String, dynamic>.from(data as Map);
+    final profile = ClinicModel.fromJson(raw);
+    // 1f1e4bf omits subscription_tier from the private serializer. Its existing
+    // public detail exposes that read-only DB field for active clinics. Join
+    // ONLY the current authenticated clinic's matching UUID and ONLY its tier;
+    // never replace portal data, infer from is_featured, use labels or cache it.
+    final reported = raw['subscription_tier']?.toString().trim() ?? '';
+    if (profile.subscriptionTierKnown ||
+        reported.isNotEmpty ||
+        !RegExp(
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+        ).hasMatch(profile.id)) {
+      return profile;
+    }
+    try {
+      final result = await _api.get(ApiConfig.clinicDetail(profile.id));
+      session.ensureCurrent();
+      final public = result.data is Map
+          ? Map<String, dynamic>.from(result.data as Map)
+          : <String, dynamic>{};
+      if (public['id']?.toString() != profile.id) return profile;
+      final tier = ClinicModel.fromJson({
+        'subscription_tier': public['subscription_tier'],
+      });
+      if (tier.subscriptionTierKnown) {
+        return profile.copyWith(
+          subscriptionTier: tier.subscriptionTier,
+          subscriptionTierKnown: true,
+        );
+      }
+    } catch (_) {
+      session.ensureCurrent();
+      // Unpublished/suspended clinics may legitimately be absent publicly.
+      // Keep unknown; Ali must expose the private read-only tier for them.
+    }
+    return profile;
+  }
+
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     final session = SessionSnapshot();
     final requestData = await _buildPayload(
       data,
@@ -525,12 +549,11 @@ class ClinicCatalogRepository {
     final response = await _api.patch(
       ApiConfig.clinicProfile,
       data: requestData,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
-    final body = response.data;
-    final rawData = body is Map<String, dynamic>
-        ? (body['data'] ?? body)
-        : body;
-    return ClinicModel.fromJson(rawData as Map<String, dynamic>);
+    session.ensureCurrent();
+    return _profileFromResponse(response.data, session);
   }
 
   // -------------------------------------------------------------
@@ -594,8 +617,19 @@ class ClinicCatalogRepository {
   }
 
   Future<Map<String, dynamic>> submitProfileForReview() async {
+    final session = SessionSnapshot();
     final response = await _api.post(ApiConfig.clinicSubmitForReview, data: {});
-    return response.data as Map<String, dynamic>? ?? {};
+    session.ensureCurrent();
+    final data = response.data;
+    if (data is! Map ||
+        data['status'] != 'success' ||
+        data['setup_status'] != 'submitted') {
+      throw const ApiException(
+        message:
+            'The server did not confirm submission. Refresh the profile before retrying.',
+      );
+    }
+    return Map<String, dynamic>.from(data);
   }
 
   Future<CategoryModel> createCategory({

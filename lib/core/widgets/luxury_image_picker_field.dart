@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../localization/app_locale.dart';
 import 'luxury_image.dart';
+import 'app_snackbar.dart';
 
 /// Luxury styled native image picker field supporting Camera and Gallery selection
 /// with instant preview, remove/replace actions, and full RTL/LTR bilingual design.
@@ -25,6 +26,10 @@ class LuxuryImagePickerField extends StatefulWidget {
   final String? mediaCacheKey;
   final bool enabled;
 
+  /// Gallery mode selects multiple genuine images; existing single-image fields stay unchanged.
+  final ValueChanged<List<String>>? onImagesSelected;
+  final int maxImages;
+
   const LuxuryImagePickerField({
     super.key,
     required this.label,
@@ -41,6 +46,8 @@ class LuxuryImagePickerField extends StatefulWidget {
     this.compactPlaceholder = false,
     this.mediaCacheKey,
     this.enabled = true,
+    this.onImagesSelected,
+    this.maxImages = 10,
   });
 
   @override
@@ -49,6 +56,8 @@ class LuxuryImagePickerField extends StatefulWidget {
 
 class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
   final ImagePicker _picker = ImagePicker();
+  bool _picking = false;
+  bool _menuOpen = false;
   String? _localPath;
   String? _remoteUrl;
 
@@ -78,7 +87,24 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    if (_picking || !widget.enabled) return;
+    setState(() => _picking = true);
     try {
+      if (source == ImageSource.gallery &&
+          widget.onImagesSelected != null &&
+          widget.maxImages > 1) {
+        final files = await _picker.pickMultiImage(
+          maxWidth: 1600,
+          maxHeight: 1600,
+          imageQuality: 85,
+          requestFullMetadata: false,
+          limit: widget.maxImages,
+        );
+        if (mounted && widget.enabled && files.isNotEmpty) {
+          widget.onImagesSelected!(files.map((f) => f.path).toList());
+        }
+        return;
+      }
       final XFile? file = await _picker.pickImage(
         source: source,
         maxWidth: 1200,
@@ -89,6 +115,10 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
 
       if (!mounted || !widget.enabled) return;
       if (file != null) {
+        if (widget.onImagesSelected != null) {
+          widget.onImagesSelected!([file.path]);
+          return;
+        }
         setState(() {
           _localPath = file.path;
         });
@@ -96,6 +126,17 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
       }
     } catch (e) {
       if (kDebugMode) debugPrint('[image_picker] Selection failed');
+      if (mounted) {
+        showAppSnackBar(
+          context,
+          LocaleService().isArabic
+              ? 'تعذر اختيار الصورة. تحقق من صلاحيات الصور والكاميرا وحاول مجدداً.'
+              : 'Could not select an image. Check photo/camera permissions and try again.',
+          type: AppSnackBarType.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _picking = false);
     }
   }
 
@@ -108,12 +149,13 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
     widget.onImageSelected(null);
   }
 
-  void _showPickerOptions(BuildContext context) {
-    if (!widget.enabled) return;
+  Future<void> _showPickerOptions(BuildContext context) async {
+    if (!widget.enabled || _menuOpen || _picking) return;
+    _menuOpen = true;
     final loc = LocaleService();
     final isDark = AppColors.isDark(context);
 
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? AppColors.cardSurface : Colors.white,
       shape: const RoundedRectangleBorder(
@@ -235,6 +277,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
         ),
       ),
     );
+    _menuOpen = false;
   }
 
   @override

@@ -1,3 +1,7 @@
+import 'package:dio/dio.dart';
+import 'showcase_video_change.dart';
+import '../../../core/network/api_exception.dart';
+import '../../treatments/data/category_repository.dart';
 import '../../../core/services/local_media_cache.dart';
 import 'dart:collection';
 import '../../../core/data/single_flight.dart';
@@ -80,82 +84,19 @@ class ClinicPortalService extends ChangeNotifier {
     return UnmodifiableListView(_categories);
   }
 
-  void _mutateCategories(void Function(List<CategoryModel>) change) {
-    final page = _pages['categories'];
-    if (page == null) {
-      change(_categories);
-    } else {
-      page.mutate((items) {
-        change(_categories);
-      });
-    }
-    notifyListeners();
-  }
-
+  // Guard the service boundary too: test adapters/mock mode must not make an
+  // unsupported category mutation appear to succeed or change local taxonomy.
   Future<CategoryModel> createCategory({
     required String nameEn,
     required String nameAr,
-  }) async {
-    final epoch = _sessionEpoch;
-    final created = _mockMode
-        ? CategoryModel(
-            id: 'test-category-${DateTime.now().microsecondsSinceEpoch}',
-            nameEn: nameEn.trim(),
-            nameAr: nameAr.trim(),
-            slug: 'test-category',
-          )
-        : await _inSession(
-            _catalogRepository.createCategory(nameEn: nameEn, nameAr: nameAr),
-            epoch,
-          );
-    _mutateCategories((items) {
-      items.removeWhere((c) => c.id == created.id);
-      items.insert(0, created);
-    });
-    return created;
-  }
-
+  }) async => throw CategoryRepository.writesUnavailable();
   Future<CategoryModel> updateCategory(
     String id, {
     required String nameEn,
     required String nameAr,
-  }) async {
-    final epoch = _sessionEpoch;
-    final updated = _mockMode
-        ? CategoryModel(
-            id: id,
-            nameEn: nameEn.trim(),
-            nameAr: nameAr.trim(),
-            slug:
-                categories.where((c) => c.id == id).firstOrNull?.slug ??
-                'test-category',
-          )
-        : await _inSession(
-            _catalogRepository.updateCategory(
-              id,
-              nameEn: nameEn,
-              nameAr: nameAr,
-            ),
-            epoch,
-          );
-    _mutateCategories((items) {
-      final index = items.indexWhere((c) => c.id == id);
-      if (index < 0) {
-        items.add(updated);
-      } else {
-        items[index] = updated;
-      }
-    });
-    return updated;
-  }
-
-  Future<void> deleteCategory(String id) async {
-    final epoch = _sessionEpoch;
-    if (!_mockMode) {
-      await _inSession(_catalogRepository.deleteCategory(id), epoch);
-    }
-    _mutateCategories((items) => items.removeWhere((c) => c.id == id));
-  }
+  }) async => throw CategoryRepository.writesUnavailable();
+  Future<void> deleteCategory(String id) async =>
+      throw CategoryRepository.writesUnavailable();
 
   void _initializeDefaultActiveClinic() {
     _activeClinic = const ClinicModel(
@@ -170,6 +111,7 @@ class ClinicPortalService extends ChangeNotifier {
       rating: 0.0,
       reviewCount: 0,
       subscriptionTier: SubscriptionTier.basic,
+      subscriptionTierKnown: false,
       city: '',
       areaAr: '',
       areaEn: '',
@@ -894,6 +836,11 @@ class ClinicPortalService extends ChangeNotifier {
     }
   }
 
+  void _catalogAcknowledged(String collectionKey) {
+    _overviewLoaded = false;
+    _pages[collectionKey]?.mutate((_) {});
+  }
+
   void _rememberMedia(
     Map<String, dynamic> data,
     String field,
@@ -938,6 +885,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createOffer(data),
       sessionEpoch,
     );
+    _catalogAcknowledged('offers');
     _rememberMedia(data, 'image', 'offer', created.id, created.imageUrl);
     _clinicOffers.insert(0, created);
     notifyListeners();
@@ -969,6 +917,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updateOffer(id, data),
       sessionEpoch,
     );
+    _catalogAcknowledged('offers');
     _rememberMedia(data, 'image', 'offer', updated.id, updated.imageUrl);
     final idx = _clinicOffers.indexWhere((o) => o.id == id);
     if (idx != -1) {
@@ -1019,11 +968,15 @@ class ClinicPortalService extends ChangeNotifier {
       try {
         await _inSession(_catalogRepository.deleteOffer(offerId), sessionEpoch);
         LocalMediaCache().remove(LocalMediaCache.entity('offer', offerId));
+        _catalogAcknowledged('offers');
+        _clinicOffers.removeWhere((item) => item.id == offerId);
+        notifyListeners();
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
-          return;
+          rethrow;
         }
-        _clinicOffers.insert(idx, removed);
+        _clinicOffers.removeWhere((item) => item.id == offerId);
+        _clinicOffers.insert(idx.clamp(0, _clinicOffers.length), removed);
         notifyListeners();
         rethrow;
       }
@@ -1053,6 +1006,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createPractitioner(data),
       sessionEpoch,
     );
+    _catalogAcknowledged('practitioners');
     _rememberMedia(
       data,
       'avatar',
@@ -1092,6 +1046,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updatePractitioner(id, data),
       sessionEpoch,
     );
+    _catalogAcknowledged('practitioners');
     _rememberMedia(
       data,
       'avatar',
@@ -1120,11 +1075,18 @@ class ClinicPortalService extends ChangeNotifier {
           sessionEpoch,
         );
         LocalMediaCache().remove(LocalMediaCache.entity('practitioner', id));
+        _catalogAcknowledged('practitioners');
+        _clinicPractitioners.removeWhere((item) => item.id == id);
+        notifyListeners();
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
-          return;
+          rethrow;
         }
-        _clinicPractitioners.insert(idx, removed);
+        _clinicPractitioners.removeWhere((item) => item.id == id);
+        _clinicPractitioners.insert(
+          idx.clamp(0, _clinicPractitioners.length),
+          removed,
+        );
         notifyListeners();
         rethrow;
       }
@@ -1152,6 +1114,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createTreatment(data),
       sessionEpoch,
     );
+    _catalogAcknowledged('treatments');
     _clinicTreatments.add(created);
     notifyListeners();
     return created;
@@ -1184,6 +1147,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updateTreatment(id, data),
       sessionEpoch,
     );
+    _catalogAcknowledged('treatments');
     final idx = _clinicTreatments.indexWhere((t) => t.id == id);
     if (idx != -1) {
       _clinicTreatments[idx] = updated;
@@ -1201,11 +1165,18 @@ class ClinicPortalService extends ChangeNotifier {
       if (_mockMode) return;
       try {
         await _inSession(_catalogRepository.deleteTreatment(id), sessionEpoch);
+        _catalogAcknowledged('treatments');
+        _clinicTreatments.removeWhere((item) => item.id == id);
+        notifyListeners();
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
-          return;
+          rethrow;
         }
-        _clinicTreatments.insert(idx, removed);
+        _clinicTreatments.removeWhere((item) => item.id == id);
+        _clinicTreatments.insert(
+          idx.clamp(0, _clinicTreatments.length),
+          removed,
+        );
         notifyListeners();
         rethrow;
       }
@@ -1233,6 +1204,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.createProduct(data),
       sessionEpoch,
     );
+    _catalogAcknowledged('products');
     _rememberMedia(data, 'image', 'product', created.id, created.imageUrl);
     _clinicProducts.insert(0, created);
     notifyListeners();
@@ -1273,6 +1245,7 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.updateProduct(id, data),
       sessionEpoch,
     );
+    _catalogAcknowledged('products');
     _rememberMedia(data, 'image', 'product', updated.id, updated.imageUrl);
     final idx = _clinicProducts.indexWhere((p) => p.id == id);
     if (idx != -1) {
@@ -1323,11 +1296,15 @@ class ClinicPortalService extends ChangeNotifier {
           sessionEpoch,
         );
         LocalMediaCache().remove(LocalMediaCache.entity('product', productId));
+        _catalogAcknowledged('products');
+        _clinicProducts.removeWhere((item) => item.id == productId);
+        notifyListeners();
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
-          return;
+          rethrow;
         }
-        _clinicProducts.insert(idx, removed);
+        _clinicProducts.removeWhere((item) => item.id == productId);
+        _clinicProducts.insert(idx.clamp(0, _clinicProducts.length), removed);
         notifyListeners();
         rethrow;
       }
@@ -1354,6 +1331,7 @@ class ClinicPortalService extends ChangeNotifier {
     final created = _enrichArticleAuthor(
       await _inSession(_catalogRepository.createArticle(data), sessionEpoch),
     );
+    _catalogAcknowledged('articles');
     _rememberMedia(
       data,
       'cover_image',
@@ -1400,6 +1378,7 @@ class ClinicPortalService extends ChangeNotifier {
         sessionEpoch,
       ),
     );
+    _catalogAcknowledged('articles');
     _rememberMedia(
       data,
       'cover_image',
@@ -1460,15 +1439,108 @@ class ClinicPortalService extends ChangeNotifier {
           sessionEpoch,
         );
         LocalMediaCache().remove(LocalMediaCache.entity('article', articleId));
+        _catalogAcknowledged('articles');
+        _clinicArticles.removeWhere((item) => item.id == articleId);
+        notifyListeners();
       } catch (e) {
         if (sessionEpoch != _sessionEpoch) {
-          return;
+          rethrow;
         }
-        _clinicArticles.insert(idx, removed);
+        _clinicArticles.removeWhere((item) => item.id == articleId);
+        _clinicArticles.insert(idx.clamp(0, _clinicArticles.length), removed);
         notifyListeners();
         rethrow;
       }
     }
+  }
+
+  /// Reload authoritative profile media without issuing a text/profile write.
+  Future<void> refreshClinicProfile() async {
+    final epoch = _sessionEpoch;
+    final profile = await _inSession(
+      _catalogRepository.getClinicProfile(),
+      epoch,
+    );
+    _activeClinic = profile;
+    notifyListeners();
+  }
+
+  Future<void> updateClinicCover(String? path) async {
+    final epoch = _sessionEpoch;
+    final old = _activeClinic.coverImageUrl;
+    final profile = await _inSession(
+      _catalogRepository.updateClinicProfile({'cover_image': path}),
+      epoch,
+    );
+    if (old.isNotEmpty) {
+      PaintingBinding.instance.imageCache.evict(NetworkImage(old));
+    }
+    _activeClinic = profile;
+    notifyListeners();
+  }
+
+  Future<void> updateShowcaseVideo(
+    String? path, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final epoch = _sessionEpoch;
+    final clinicId = _activeClinic.id;
+    final cover = _activeClinic.coverImageUrl;
+    ClinicModel profile;
+    try {
+      profile = await _inSession(
+        _catalogRepository.updateClinicProfile(
+          {'video_ad_file': path},
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+        ),
+        epoch,
+      );
+    } on ApiException catch (e) {
+      throw ShowcaseVideoFailure(VideoSaveStage.upload, cause: e);
+    } catch (_) {
+      if (epoch != _sessionEpoch) rethrow;
+      throw ShowcaseVideoFailure(VideoSaveStage.acknowledgment);
+    }
+    final saved = ShowcaseVideoReceipt.remoteKey(profile.videoUrl) != null;
+    if (profile.id != clinicId ||
+        ShowcaseVideoReceipt.remoteKey(profile.coverImageUrl) !=
+            ShowcaseVideoReceipt.remoteKey(cover) ||
+        (path == null ? profile.hasVideoAd : !saved)) {
+      throw ShowcaseVideoFailure(VideoSaveStage.acknowledgment);
+    }
+    // PATCH acknowledgment alone is insufficient: require a fresh private GET.
+    await verifyShowcaseVideo(
+      ShowcaseVideoReceipt(clinicId, profile.videoUrl, cover),
+    );
+  }
+
+  Future<void> verifyShowcaseVideo(ShowcaseVideoReceipt receipt) async {
+    final epoch = _sessionEpoch;
+    ClinicModel profile;
+    try {
+      profile = await _inSession(_catalogRepository.getClinicProfile(), epoch);
+    } on ApiException catch (e) {
+      throw ShowcaseVideoFailure(
+        VideoSaveStage.reload,
+        cause: e,
+        receipt: receipt,
+      );
+    } catch (_) {
+      if (epoch != _sessionEpoch) rethrow;
+      throw ShowcaseVideoFailure(VideoSaveStage.reload, receipt: receipt);
+    }
+    if (profile.id != receipt.clinicId ||
+        ShowcaseVideoReceipt.remoteKey(profile.coverImageUrl) !=
+            ShowcaseVideoReceipt.remoteKey(receipt.coverUrl) ||
+        ShowcaseVideoReceipt.remoteKey(profile.videoUrl) !=
+            ShowcaseVideoReceipt.remoteKey(receipt.videoUrl) ||
+        (receipt.videoUrl == null && profile.hasVideoAd)) {
+      throw ShowcaseVideoFailure(VideoSaveStage.persistence, receipt: receipt);
+    }
+    _activeClinic = profile;
+    notifyListeners();
   }
 
   /// Update clinic details via live API (PATCH /api/v1/clinic-portal/profile/)
@@ -1671,8 +1743,9 @@ class ClinicPortalService extends ChangeNotifier {
     _setupChecklist = ClinicSetupChecklistModel(
       clinicId: _activeClinic.id,
       setupStatus: _activeClinic.setupStatus,
+      setupRejectionReason: _activeClinic.setupRejectionReason,
       progressPercentage: progress,
-      isReadyForReview: completed == 5,
+      isReadyForReview: _mockMode && completed == 5,
       items: [
         ClinicSetupChecklistItem(
           key: 'branding',
@@ -1697,8 +1770,8 @@ class ClinicPortalService extends ChangeNotifier {
         ),
         ClinicSetupChecklistItem(
           key: 'practitioners',
-          titleEn: 'At least 1 Medical Practitioner',
-          titleAr: 'طبيب أو ممارس مرخص واحد على الأقل',
+          titleEn: 'At Least One Practitioner',
+          titleAr: 'ممارس واحد على الأقل',
           isCompleted: hasPractitioner,
           route: '/clinic/practitioners',
         ),
@@ -1720,8 +1793,16 @@ class ClinicPortalService extends ChangeNotifier {
       _catalogRepository.submitProfileForReview(),
       sessionEpoch,
     );
-    final newStatus = res['setup_status']?.toString() ?? 'submitted';
-    _activeClinic = _activeClinic.copyWith(setupStatus: newStatus);
+    if (res['status'] != 'success' || res['setup_status'] != 'submitted') {
+      throw const ApiException(
+        message:
+            'The server did not confirm submission. Refresh before retrying.',
+      );
+    }
+    _activeClinic = _activeClinic.copyWith(
+      setupStatus: 'submitted',
+      setupRejectionReason: '',
+    );
     try {
       _setupChecklist = await _inSession(
         _catalogRepository.getSetupChecklist(),

@@ -3,7 +3,7 @@ import 'clinic_catalog_cards.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/portal_media_frame.dart';
 import '../../../../core/widgets/tier_badge.dart';
 import '../../../clinics/models/clinic_model.dart';
 import 'clinic_location_selector.dart';
@@ -65,11 +65,11 @@ class ClinicEditorialHeader extends StatelessWidget {
                                 ),
                               ) !=
                               null)
-                        LuxuryImage(
+                        PortalMediaFrame(
                           imageUrl: clinic.coverImageUrl,
                           mediaCacheKey: LocalMediaCache.clinicCover(clinic.id),
-                          customPlaceholder: const SizedBox.expand(),
-                          fit: BoxFit.cover,
+                          height: 140,
+                          radius: 18,
                         ),
                       const DecoratedBox(
                         decoration: BoxDecoration(
@@ -99,6 +99,7 @@ class ClinicEditorialHeader extends StatelessWidget {
                     mediaCacheKey: LocalMediaCache.clinicLogo(clinic.id),
                     icon: Icons.apartment_rounded,
                     size: 72,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -171,29 +172,23 @@ class ClinicCatalogThumbnail extends StatelessWidget {
     required this.imageUrl,
     required this.icon,
     this.size = 48,
+    this.fit = BoxFit.cover,
     this.mediaCacheKey,
   });
   final String imageUrl;
   final String? mediaCacheKey;
   final IconData icon;
   final double size;
+  final BoxFit fit;
   @override
-  Widget build(BuildContext context) => LuxuryImage(
+  Widget build(BuildContext context) => PortalMediaFrame(
     imageUrl: imageUrl,
     mediaCacheKey: mediaCacheKey,
     width: size,
     height: size,
-    fit: BoxFit.cover,
-    borderRadius: BorderRadius.circular(14),
-    customPlaceholder: Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: AppColors.goldText(context).withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Icon(icon, color: AppColors.goldText(context), size: size * .45),
-    ),
+    fit: fit,
+    radius: 14,
+    icon: icon,
   );
 }
 
@@ -208,12 +203,14 @@ class ClinicCatalogMiniRow extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.badge,
+    this.preserveImageShape = false,
     this.mediaCacheKey,
   });
   final String title, subtitle, imageUrl;
   final IconData icon;
   final VoidCallback onEdit, onDelete;
   final String? badge, mediaCacheKey;
+  final bool preserveImageShape;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -236,6 +233,7 @@ class ClinicCatalogMiniRow extends StatelessWidget {
                 imageUrl: imageUrl,
                 mediaCacheKey: mediaCacheKey,
                 icon: icon,
+                fit: preserveImageShape ? BoxFit.contain : BoxFit.cover,
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -84,7 +84,7 @@ void main() {
           },
           {
             'key': 'practitioners',
-            'title_en': 'At least 1 Medical Practitioner',
+            'title_en': 'At Least One Practitioner',
             'title_ar': 'طبيب واحد على الأقل',
             'is_completed': false,
             'route': '/clinic/practitioners',
@@ -233,7 +233,7 @@ void main() {
             ),
             ClinicSetupChecklistItem(
               key: 'practitioners',
-              titleEn: 'At least 1 Medical Practitioner',
+              titleEn: 'At Least One Practitioner',
               titleAr: 'طبيب واحد على الأقل',
               isCompleted: false,
             ),
@@ -276,14 +276,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(
-          find.text('Complete Clinic Setup & Verification'),
-          findsOneWidget,
-        );
+        expect(find.text('Clinic Profile Setup'), findsOneWidget);
         expect(find.text('60%'), findsOneWidget);
         expect(find.text('Clinic Branding (Logo & Cover)'), findsOneWidget);
-        expect(find.text('At least 1 Medical Practitioner'), findsOneWidget);
-        expect(find.text('Submit for Platform Verification'), findsOneWidget);
+        expect(find.text('At Least One Practitioner'), findsOneWidget);
+        expect(find.text('Submit Clinic Profile for Review'), findsOneWidget);
       },
     );
 

@@ -1,0 +1,23 @@
+{
+  "baseline": "e87dc682e2a8eff5d8f2cc3dca926b5848569428",
+  "branch": "codex/final-backend-integration-client-preview",
+  "pr": 13,
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "host": "Linux",
+  "analyze_issues": 0,
+  "full_suite_passed": 1027,
+  "full_suite_failed": 0,
+  "new_regressions_vs_baseline": 52,
+  "format_files": 257,
+  "git_diff_check": "clean",
+  "source_probes": 11,
+  "source_files_unchanged": 405,
+  "screenshots": 26,
+  "side_by_side_contact_sheets": 3,
+  "production_R2_OTP_or_true_proximity_verified": false,
+  "physical_device_tested_by_agent": false,
+  "user_physical_evidence": "Gallery upload/delete and other 10/12 reported cases PASS. Video failure specifically Upload and save video. No independent gallery defect.",
+  "native_builds": "See exact-commit checks and final PR13 description; prior e87dc68 results are historical, not this increment verification.",
+  "source_tool": "tool/audit_geo_video_contracts.py"
+}

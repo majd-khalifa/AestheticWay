@@ -1,0 +1,52 @@
+{
+  "backend_archive_commit": "09f49bbd22131f6dad49a65a5167de5396f03797",
+  "environment": "isolated SQLite / temporary local media / mocked OTP provider; not production",
+  "responses": [
+    {
+      "case": "pending VIP actual multipart MP4",
+      "status": 200
+    },
+    {
+      "case": "fresh authenticated GET",
+      "status": 200
+    },
+    {
+      "case": "invalid MP4 duration returns a field validation error",
+      "status": 400
+    },
+    {
+      "case": "storage failure maps to HTTP500, not a gallery operation",
+      "status": 500
+    },
+    {
+      "case": "remove video via JSON null",
+      "status": 200
+    },
+    {
+      "case": "basic forbidden upload",
+      "status": 400
+    },
+    {
+      "case": "featured forbidden upload",
+      "status": 400
+    },
+    {
+      "case": "/api/v1/clinics/ remains tier-first",
+      "status": 200
+    },
+    {
+      "case": "/api/v1/home/nearby-clinics/ remains tier-first",
+      "status": 200
+    },
+    {
+      "case": "/api/v1/home/feed/ remains tier-first",
+      "status": 200
+    },
+    {
+      "case": "deletion request no destination contract",
+      "status": 200
+    }
+  ],
+  "source_files_unchanged": 405,
+  "source_unchanged": true
+}

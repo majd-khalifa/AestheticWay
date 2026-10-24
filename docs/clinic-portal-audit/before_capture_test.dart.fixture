@@ -1,0 +1,36 @@
+import 'support/patient_visual_harness.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:aesthetic_way/core/theme/app_theme.dart';
+import 'package:aesthetic_way/features/clinic_portal/services/clinic_portal_service.dart';
+import 'package:aesthetic_way/features/clinic_portal/data/clinic_catalog_repository.dart';
+import 'package:aesthetic_way/features/clinic_portal/presentation/widgets/clinic_category_manager.dart';
+import 'package:aesthetic_way/features/treatments/models/category_model.dart';
+class Catalog implements ClinicCatalogRepository {
+ @override Future<List<CategoryModel>> getCategories({int page=1,int pageSize=20,String? search}) async=>[const CategoryModel(id:'11111111-1111-4111-8111-111111111111',nameEn:'Skin care',nameAr:'عناية بالبشرة',slug:'skin-care')];
+ @override dynamic noSuchMethod(Invocation i)=>super.noSuchMethod(i);
+}
+void main(){
+ setUpAll(loadPatientVisualFonts);
+ for(final dark in [false,true]){for(final ar in [false,true]){
+ testWidgets('before category $dark $ar',(tester)async{
+ FlutterSecureStorage.setMockInitialValues({});
+ ClinicPortalService().resetTestingState(); ClinicPortalService().setCatalogRepositoryForTesting(Catalog());
+ LocaleService().setLanguage(ar?AppLanguage.arabic:AppLanguage.english);
+ await tester.binding.setSurfaceSize(const Size(390,844));
+ final key=GlobalKey();
+ await tester.pumpWidget(RepaintBoundary(key:key,child:MaterialApp(debugShowCheckedModeBanner:false,theme:patientVisualTheme(dark: dark),builder:(context,child)=>Directionality(textDirection:ar?TextDirection.rtl:TextDirection.ltr,child:child!),home:Builder(builder:(context)=>Directionality(textDirection:ar?TextDirection.rtl:TextDirection.ltr,child:Scaffold(body:Center(child:TextButton(onPressed:()=>showClinicCategoryManager(context),child:const Text('Open')))))))));
+ await tester.tap(find.text('Open'));await tester.pumpAndSettle();
+ final boundary=key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+ Future<void> capture(String kind)async{await tester.runAsync(()async{final im=await boundary.toImage(pixelRatio:1);final bytes=await im.toByteData(format:ui.ImageByteFormat.png);im.dispose();await File('/workspace/work/clinic-portal-audit/previews/before_${kind}_${dark?'dark':'light'}_${ar?'ar':'en'}.png').writeAsBytes(bytes!.buffer.asUint8List());});}
+ await capture('categories');
+ await tester.tap(find.text(ar?'إضافة تصنيف جديد':'Add New Category'));await tester.pumpAndSettle();
+ await capture('category_dialog');expect(tester.takeException(),isNull);
+ await tester.pumpWidget(const SizedBox());ClinicPortalService().resetTestingState();await tester.binding.setSurfaceSize(null);
+ });}}
+}

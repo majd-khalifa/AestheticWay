@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-24",
+  "frontend_baseline": "c0257182b075ce5834af7e2d4a40903fd70b8d45",
+  "branch": "codex/final-backend-integration-client-preview",
+  "backend_archive_comment_commit": "09f49bbd22131f6dad49a65a5167de5396f03797",
+  "backend_remote_commit_lookup": "404; not independently confirmed",
+  "backend_tests": {
+    "passed": 671,
+    "failed": 0,
+    "duration": "13.75s",
+    "environment": "SQLite, mock providers, local media"
+  },
+  "migration_check": "No changes detected",
+  "backend_source_view_probes": 38,
+  "backend_source_files_unchanged": 405,
+  "additional_backend_ruff": {
+    "version": "0.17.2",
+    "findings": 104,
+    "source_modified": false,
+    "scope": "full tree; not classified as all new runtime regressions"
+  },
+  "local_flutter": {
+    "host": "Linux",
+    "version": "3.41.5",
+    "dart": "3.11.3",
+    "passed": 975,
+    "failed": 0,
+    "duration": "02:19",
+    "analyzer_issues": 0,
+    "format_pending": 0,
+    "diff_check": "clean"
+  },
+  "new_flutter_tests": 52,
+  "focused_workflow_group_passed": 125,
+  "render_capture_tests_passed": 11,
+  "pngs": 23,
+  "native_results": "See PR13 current-head checks and final PR body; prior-head native success is not counted for this update.",
+  "production_deployment_verified": false,
+  "production_r2_verified_here": false,
+  "physical_android_media_qa_performed_here": false,
+  "production_signing_changed": false,
+  "django_source_changed": false
+}

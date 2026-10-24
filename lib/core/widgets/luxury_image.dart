@@ -109,6 +109,9 @@ class LuxuryImage extends StatelessWidget {
   /// Optional patient-only error artwork; legacy portal fallbacks are unchanged.
   final Widget? errorPlaceholder;
 
+  /// Opt-in first-frame skeleton for portal media; patient defaults unchanged.
+  final Widget? loadingPlaceholder;
+
   const LuxuryImage({
     super.key,
     required this.imageUrl,
@@ -122,6 +125,7 @@ class LuxuryImage extends StatelessWidget {
     this.iconSize,
     this.customPlaceholder,
     this.errorPlaceholder,
+    this.loadingPlaceholder,
   });
 
   @override
@@ -219,6 +223,10 @@ class LuxuryImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
+      frameBuilder: loadingPlaceholder == null
+          ? null
+          : (context, child, frame, sync) =>
+                sync || frame != null ? child : loadingPlaceholder!,
       errorBuilder: (context, error, stackTrace) =>
           buildSmartFallback(failed: true),
     );

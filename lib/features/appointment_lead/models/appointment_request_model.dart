@@ -200,7 +200,13 @@ class AppointmentRequestModel {
       isOffer ? 'title_ar' : 'name_ar',
     );
     final submittedService = json['service_name']?.toString().trim() ?? '';
-    final parsed = AppointmentRequestModel.fromJson(json);
+    final parsed = AppointmentRequestModel.fromJson({
+      ...json,
+      // Defence in depth if a misconfigured endpoint includes staff-only data.
+      // Clinic/Admin consumers of fromJson retain their operational fields.
+      'internal_notes': const <Map<String, dynamic>>[],
+      'notes_directory_url': null,
+    });
     return parsed.copyWith(
       referenceCode: reference,
       createdAt: submitted,

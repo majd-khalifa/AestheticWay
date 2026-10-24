@@ -33,14 +33,22 @@ class SupportInfoModel {
 
   factory SupportInfoModel.fromJson(Map<String, dynamic> json) {
     final phone =
-        json['phone']?.toString().trim() ??
+        (json['support_phone'] ?? json['phone'])?.toString().trim() ??
         ContactLauncher.platformSupportPhone;
-    final whatsapp = json['whatsapp']?.toString().trim() ?? phone;
+    final whatsapp =
+        (json['support_whatsapp'] ?? json['whatsapp'])?.toString().trim() ??
+        phone;
     return SupportInfoModel(
       phone: phone.isNotEmpty ? phone : ContactLauncher.platformSupportPhone,
       phoneDisplay:
-          (json['phone_display']?.toString().trim().isNotEmpty ?? false)
-          ? json['phone_display']!.toString().trim()
+          ((json['support_phone_display'] ?? json['phone_display'])
+                  ?.toString()
+                  .trim()
+                  .isNotEmpty ??
+              false)
+          ? (json['support_phone_display'] ?? json['phone_display'])!
+                .toString()
+                .trim()
           : ContactLauncher.platformSupportPhoneDisplay,
       whatsapp: whatsapp.isNotEmpty
           ? whatsapp

@@ -4,6 +4,7 @@ class AdminDashboardModel {
   final int activeClinics;
   final int suspendedClinics;
   final int pendingClinics;
+  final int? submittedSetupCount;
   final int totalPatients;
   final int totalPractitioners;
   final int totalTreatments;
@@ -26,6 +27,7 @@ class AdminDashboardModel {
     this.activeClinics = 0,
     this.suspendedClinics = 0,
     this.pendingClinics = 0,
+    this.submittedSetupCount,
     this.totalPatients = 0,
     this.totalPractitioners = 0,
     this.totalTreatments = 0,
@@ -67,6 +69,11 @@ class AdminDashboardModel {
       activeClinics: (json['active_clinics'] as num?)?.toInt() ?? 0,
       suspendedClinics: (json['suspended_clinics'] as num?)?.toInt() ?? 0,
       pendingClinics: (json['pending_clinics'] as num?)?.toInt() ?? 0,
+      submittedSetupCount:
+          json['submitted_setup_count'] is num &&
+              (json['submitted_setup_count'] as num) >= 0
+          ? (json['submitted_setup_count'] as num).toInt()
+          : null,
       totalPatients: (json['total_patients'] as num?)?.toInt() ?? 0,
       totalPractitioners: (json['total_practitioners'] as num?)?.toInt() ?? 0,
       totalTreatments: (json['total_treatments'] as num?)?.toInt() ?? 0,

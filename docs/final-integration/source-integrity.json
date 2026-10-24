@@ -1,0 +1,11 @@
+{
+  "supplied_backend": "1f1e4bf",
+  "archive_sha256": "48d385acc256ebba450ede43e515f475daf1ae8ed3de80319e68429833f7c1ff",
+  "all_file_hashes_unchanged": 403,
+  "comparison": "d1023b0",
+  "added": 10,
+  "changed": 18,
+  "removed": 0,
+  "source_not_git_authenticated": true,
+  "live_deployment_verified": false
+}

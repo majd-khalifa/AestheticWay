@@ -1,0 +1,143 @@
+{
+  "renderer": "Flutter3.41.5 Linux, DPR1; decoded QA photos; not live production or physical-device evidence",
+  "renders": [
+    {
+      "file": "backend09_content_dark_ar.png",
+      "sha256": "f1f6b92040552a685624a9134ccc7f6b204932bab3d1b3ad44083c02e9e5e847",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_content_dark_en.png",
+      "sha256": "6bc5793e55c8c8b2282a44701b0de6c7ba99a095cd6b87ee0db3432cfd9f4c40",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_content_light_ar.png",
+      "sha256": "d99fb7c0d3358a65714ba23d79315f0dcfa32f3c32dc2589001222453039abd8",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_content_light_en.png",
+      "sha256": "6a9054362054096eb559664a2872a71b996e2924c5f42ec336e94181c542a9cb",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_gallery_dark_ar.png",
+      "sha256": "6d189948f21d04c6b34cee57fd84a9f52e396baf73db2f6cece1abc06ce4738e",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_gallery_dark_en.png",
+      "sha256": "2910519aa62ac6aca960f887de6663a64bdd775fdf561cdaaee335a7c28bb13b",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_gallery_light_ar.png",
+      "sha256": "c68c8b266b92a7a140eb6bf2f5a78384bd1df4d3241d2971d3768a770ba4bd1a",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_gallery_light_en.png",
+      "sha256": "b5ad8e6f396e226b929d81e857df26fe3c0ab0f032ca833a35d50a07c8b82d66",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_narrow_dark_ar.png",
+      "sha256": "5afbb98a4ffd8a93803ef658620095ef05fbfcd570a788832342595bcc9eecca",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "backend09_narrow_dark_en.png",
+      "sha256": "ed359f641748e5016411f243d9dc25097b3c12ac132fe3dfa458655ca5e024bf",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "backend09_narrow_light_ar.png",
+      "sha256": "7aa4cd5ed526916f1384ad20917e2a9f62f51a73f341f0f1e0aedce07f4a3abf",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "backend09_narrow_light_en.png",
+      "sha256": "71b99e86a9f1c5b828b154494c679d93ca895e4d124f0bb99e09534148f967dd",
+      "width": 320,
+      "height": 1000
+    },
+    {
+      "file": "backend09_owner_feedback_dark_ar.png",
+      "sha256": "1b59c23cb6762f2cb7d0e4fec587860906792b5b1993d940c36a40edfc67275c",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_owner_feedback_dark_en.png",
+      "sha256": "ddb075bc840d2fe009650931156e892d8e6ae897d4f8026ea5e017f5ef01da7d",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_owner_feedback_light_ar.png",
+      "sha256": "68cf8196a5b22d8b4ff87e529b61110f586d053e084b00e9717364f18f904365",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_owner_feedback_light_en.png",
+      "sha256": "dde21a6ab804b651325b2e2347f1c2c200374c21abc5abf58f63888f42dcb0e5",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_review_dark_ar.png",
+      "sha256": "514bf95078d31ef63813e429e64966ff59df7b830297723175e89f2cc8f0505e",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_review_dark_en.png",
+      "sha256": "6f7b852766baa32462ea8c00507f2baa62274259238ce9c6c205cde1ad7a69ce",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_review_light_ar.png",
+      "sha256": "2c45c27d965e78941edd90e8df1f04c22c1530a86ca8f42bc2ffebf07f3cbf41",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_review_light_en.png",
+      "sha256": "3012d77f9fd045ba63f24b7c12275c6a875fa1a2272d859621e9dfc5a371d031",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_vip_cold_draft.png",
+      "sha256": "6a32764ce08a6e7876381d6634cfbca06d6b6593dd9d17c11dc5beb6d2c87a53",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_vip_cold_rejected.png",
+      "sha256": "6a32764ce08a6e7876381d6634cfbca06d6b6593dd9d17c11dc5beb6d2c87a53",
+      "width": 430,
+      "height": 1000
+    },
+    {
+      "file": "backend09_vip_cold_submitted.png",
+      "sha256": "6a32764ce08a6e7876381d6634cfbca06d6b6593dd9d17c11dc5beb6d2c87a53",
+      "width": 430,
+      "height": 1000
+    }
+  ]
+}

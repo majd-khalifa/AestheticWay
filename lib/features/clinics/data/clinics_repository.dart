@@ -1,3 +1,4 @@
+import '../../locations/data/uae_location_repository.dart';
 import '../../../core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
 import 'package:aesthetic_way/core/network/api_config.dart';
@@ -22,19 +23,8 @@ class ClinicsRepository {
     final Map<String, dynamic> queryParams = {};
 
     if (city != null && city.isNotEmpty) {
-      final normalizedCity = city.trim().toLowerCase();
-      if (normalizedCity != 'all' && normalizedCity != 'الكل') {
-        if (normalizedCity.contains('dubai') ||
-            normalizedCity.contains('دبي')) {
-          queryParams['city'] = 'dubai';
-        } else if (normalizedCity.contains('abu dhabi') ||
-            normalizedCity.contains('أبوظبي') ||
-            normalizedCity.contains('ابوظبي')) {
-          queryParams['city'] = 'abu dhabi';
-        } else {
-          queryParams['city'] = city.trim();
-        }
-      }
+      final canonical = compatibilityUaeCatalog.legacyCityQuery(city);
+      if (canonical != null) queryParams['city'] = canonical;
     }
 
     if (search != null && search.trim().isNotEmpty) {

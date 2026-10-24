@@ -1,3 +1,5 @@
+import '../../../locations/data/uae_location_repository.dart';
+import '../../../locations/presentation/uae_location_picker.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,7 +7,6 @@ import '../../../../core/localization/app_locale.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/local_media_cache.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/clinic_location.dart';
 import '../../../../core/widgets/luxury_image_picker_field.dart';
 import '../../../../core/widgets/luxury_phone_input_field.dart';
 import '../../models/admin_clinic_model.dart';
@@ -28,6 +29,7 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
   bool _logoChanged = false, _coverChanged = false;
   bool _featured = false;
   String _city = 'Dubai', _tier = 'basic';
+  String? _areaCode;
   String? _logo, _cover, _error;
   bool get _creating => widget.clinic == null;
   TextEditingController _field(String key) => _fields[key]!;
@@ -169,7 +171,11 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
       'city': _city,
       'emirate': widget.clinic != null && _city == widget.clinic!.city
           ? widget.clinic!.emirate
-          : _city,
+          : (compatibilityUaeCatalog.resolve(_city) == null
+                ? _city
+                : compatibilityUaeCatalog
+                      .emirateFor(compatibilityUaeCatalog.resolve(_city)!)
+                      .nameEn),
       'subscription_tier': _tier,
       'is_featured': _featured,
       if (_logoChanged) 'logo': _logo,
@@ -424,35 +430,24 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
                         AdminSectionTitle(
                           adminText('Clinic address', 'عنوان العيادة'),
                         ),
-                        DropdownButtonFormField<String>(
-                          initialValue: _city,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            labelText: adminText(
-                              'City / Emirate',
-                              'المدينة / الإمارة',
-                            ),
-                          ),
-                          items: {...clinicCities.keys, _city}
-                              .map(
-                                (city) => DropdownMenuItem(
-                                  value: city,
-                                  child: Text(
-                                    city.isEmpty
-                                        ? adminText('Not provided', 'غير متوفر')
-                                        : localizedClinicCity(
-                                            city,
-                                            arabic: LocaleService().isArabic,
-                                          ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: _busy
-                              ? null
-                              : (v) {
-                                  if (v != null) setState(() => _city = v);
-                                },
+                        UaeLocationField(
+                          value: _city,
+                          areaCode: _areaCode,
+                          onLocalityChanged: (value) => setState(() {
+                            _city = value.city.nameEn;
+                            _areaCode = value.area?.code;
+                            _field('address_en').text = value.addressWithArea(
+                              _field('address_en').text,
+                              arabic: false,
+                            );
+                            _field('address_ar').text = value.addressWithArea(
+                              _field('address_ar').text,
+                              arabic: true,
+                            );
+                          }),
+                          allowAll: false,
+                          enabled: !_busy,
+                          onChanged: (v) => setState(() => _city = v),
                         ),
                         const SizedBox(height: 14),
                         _textField(

@@ -1,3 +1,4 @@
+import '../../../locations/presentation/uae_location_picker.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
 import '../../../treatments/models/category_model.dart';
@@ -9,13 +10,14 @@ import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 
 class ClinicFilterOptions {
-  String
-  selectedCity; // 'الكل' / 'دبي' / 'أبوظبي' or 'All' / 'Dubai' / 'Abu Dhabi'
+  String selectedCity;
+  String? selectedAreaCode;
   String? selectedSpecialtyId;
   String? specialtyNameAr, specialtyNameEn;
 
   ClinicFilterOptions({
     this.selectedCity = 'الكل',
+    this.selectedAreaCode,
     this.selectedSpecialtyId,
     this.specialtyNameAr,
     this.specialtyNameEn,
@@ -27,6 +29,7 @@ class ClinicFilterOptions {
   }) {
     return ClinicFilterOptions(
       selectedCity: selectedCity ?? this.selectedCity,
+      selectedAreaCode: selectedCity == null ? selectedAreaCode : null,
       selectedSpecialtyId: selectedSpecialtyId ?? this.selectedSpecialtyId,
       specialtyNameAr: specialtyNameAr,
       specialtyNameEn: specialtyNameEn,
@@ -35,6 +38,7 @@ class ClinicFilterOptions {
 
   void reset() {
     selectedCity = 'الكل';
+    selectedAreaCode = null;
     selectedSpecialtyId = null;
     specialtyNameAr = null;
     specialtyNameEn = null;
@@ -171,37 +175,25 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _FilterChipWidget(
-                        label: loc.tr('city_all'),
-                        isSelected:
-                            _filters.selectedCity == 'الكل' ||
-                            _filters.selectedCity == 'All',
-                        onTap: () =>
-                            setState(() => _filters.selectedCity = 'الكل'),
-                      ),
-                      _FilterChipWidget(
-                        label: loc.tr('city_dubai'),
-                        isSelected:
-                            _filters.selectedCity == 'دبي' ||
-                            _filters.selectedCity == 'Dubai',
-                        onTap: () =>
-                            setState(() => _filters.selectedCity = 'دبي'),
-                      ),
-                      _FilterChipWidget(
-                        label: loc.tr('city_abudhabi'),
-                        isSelected:
-                            _filters.selectedCity == 'أبوظبي' ||
-                            _filters.selectedCity == 'Abu Dhabi',
-                        onTap: () =>
-                            setState(() => _filters.selectedCity = 'أبوظبي'),
-                      ),
-                    ],
+                  UaeLocationField(
+                    value: _filters.selectedCity,
+                    areaCode: _filters.selectedAreaCode,
+                    onLocalityChanged: (value) => setState(() {
+                      _filters.selectedCity = value.city.nameEn;
+                      _filters.selectedAreaCode = value.area?.code;
+                    }),
+                    onChanged: (city) => setState(() {
+                      _filters.selectedCity = city;
+                      _filters.selectedAreaCode = null;
+                    }),
                   ),
 
+                  if (_filters.selectedAreaCode != null)
+                    Text(
+                      loc.isArabic
+                          ? 'ستُعرض نتائج المدينة؛ ترشيح المنطقة غير متاح بعد.'
+                          : 'Showing city results; area filtering is not available yet.',
+                    ),
                   const SizedBox(height: 18),
                   // 2. Specialty Filter
                   Text(
@@ -262,59 +254,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FilterChipWidget extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterChipWidget({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.goldText(
-                  context,
-                ).withValues(alpha: isDark ? 0.2 : 0.16)
-              : (isDark
-                    ? AppColors.cardSurfaceHover
-                    : AppColors.lightCardSurfaceHover),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.goldText(context)
-                : AppColors.border(context),
-            width: isSelected ? 1.2 : 0.8,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: isSelected
-                ? AppColors.goldText(context)
-                : (isDark
-                      ? AppColors.silverPrimary
-                      : AppColors.lightTextPrimary),
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            fontSize: 12,
-          ),
-        ),
       ),
     );
   }

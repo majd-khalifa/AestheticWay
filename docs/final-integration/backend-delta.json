@@ -1,0 +1,35 @@
+{
+  "added": [
+    "apps/accounts/services/account_deletion.py",
+    "apps/accounts/tests/test_account_deletion.py",
+    "apps/accounts/views_deletion.py",
+    "apps/leads/tests/test_object_authorization_isolation.py",
+    "apps/media/migrations/0006_alter_mediaasset_media_type.py",
+    "apps/treatments/migrations/0004_alter_treatment_category_categoryrequest.py",
+    "apps/treatments/serializers_category_requests.py",
+    "apps/treatments/tests/test_category_management_and_requests.py",
+    "apps/treatments/urls_category_requests.py",
+    "apps/treatments/views_category_requests.py"
+  ],
+  "removed": [],
+  "changed": [
+    "api/v1/urls.py",
+    "apps/accounts/urls.py",
+    "apps/admin_portal/serializers.py",
+    "apps/admin_portal/urls.py",
+    "apps/admin_portal/views.py",
+    "apps/articles/portal_views.py",
+    "apps/clinics/portal_permissions.py",
+    "apps/clinics/portal_serializers.py",
+    "apps/clinics/portal_views.py",
+    "apps/leads/views/clinic_views.py",
+    "apps/media/models.py",
+    "apps/media/serializers.py",
+    "apps/offers/portal_views.py",
+    "apps/practitioners/portal_views.py",
+    "apps/products/portal_views.py",
+    "apps/treatments/models.py",
+    "apps/treatments/portal_serializers.py",
+    "apps/treatments/portal_views.py"
+  ]
+}

@@ -8,6 +8,11 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Aesthetic Way</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ar</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -73,7 +78,10 @@
 		<string>comgooglemaps</string>
 		<string>https</string>
 		<string>http</string>
+		<string>mailto</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Optionally use approximate location while the app is open to find care near you. You can select an emirate and city instead.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Aesthetic Way needs camera access to allow clinics and users to capture and upload photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

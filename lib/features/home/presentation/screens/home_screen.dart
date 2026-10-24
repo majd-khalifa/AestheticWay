@@ -1,3 +1,6 @@
+import '../../../clinics/presentation/screens/clinics_list_screen.dart';
+import '../../../locations/presentation/home_location_panel.dart';
+import '../../../locations/services/patient_location_controller.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../offers/presentation/offer_actions.dart';
@@ -16,7 +19,6 @@ import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/features/clinics/data/clinics_repository.dart';
 import 'package:aesthetic_way/features/clinics/presentation/screens/clinic_profile_screen.dart';
-import 'package:aesthetic_way/features/clinics/presentation/screens/clinics_list_screen.dart';
 import 'package:aesthetic_way/features/clinics/presentation/widgets/contact_options_sheet.dart';
 import 'package:aesthetic_way/features/clinics/presentation/widgets/filter_bottom_sheet.dart';
 import 'package:aesthetic_way/features/appointment_lead/presentation/screens/appointment_request_screen.dart';
@@ -52,12 +54,29 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  late final PatientLocationController _location = PatientLocationController();
+  int _locationSession = AuthState().sessionEpoch;
+  void _locationChanged() {
+    final epoch = AuthState().sessionEpoch;
+    if (_selectedCity == _location.city && _locationSession == epoch) {
+      if (mounted) setState(() {});
+      return;
+    }
+    _locationSession = epoch;
+    _cityChanged(_location.city);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _location.releasePosition();
+  }
+
   late final HomeRepository _homeRepository =
       widget.repository ?? HomeRepository();
   final ClinicsRepository _clinicsRepository = ClinicsRepository();
 
-  String _selectedCity = 'الكل';
+  String _selectedCity = 'All';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -67,6 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void _cityChanged(String city) {
     _cityDebounce?.cancel();
     ++_feedRequestId;
+    _feedFlights.clear();
+    if (!mounted) return;
     setState(() {
       _selectedCity = city;
       _isLoading = true;
@@ -90,11 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _location.addListener(_locationChanged);
     _loadFeed();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _location.removeListener(_locationChanged);
+    _location.dispose();
     ++_feedRequestId;
     _cityDebounce?.cancel();
     _searchDebounce?.cancel();
@@ -287,7 +313,9 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: HomeHeader(
               selectedCity: _selectedCity,
-              onCityChanged: _cityChanged,
+              onCityChanged: _location.selectCity,
+              selectedAreaCode: _location.areaCode,
+              onLocalityChanged: _location.selectLocality,
             ),
           ),
           SliverToBoxAdapter(child: _buildSearchBar(context, loc)),
@@ -304,7 +332,9 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: HomeHeader(
               selectedCity: _selectedCity,
-              onCityChanged: _cityChanged,
+              onCityChanged: _location.selectCity,
+              selectedAreaCode: _location.areaCode,
+              onLocalityChanged: _location.selectLocality,
             ),
           ),
           SliverFillRemaining(
@@ -331,7 +361,9 @@ class _HomeScreenState extends State<HomeScreen> {
         SliverToBoxAdapter(
           child: HomeHeader(
             selectedCity: _selectedCity,
-            onCityChanged: _cityChanged,
+            onCityChanged: _location.selectCity,
+            selectedAreaCode: _location.areaCode,
+            onLocalityChanged: _location.selectLocality,
           ),
         ),
 
@@ -386,6 +418,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
+        SliverToBoxAdapter(child: HomeLocationPanel(controller: _location)),
+
         // 4. Categories Quick Access Grid (8 Official Categories)
         SliverToBoxAdapter(
           child: CategoryGrid(onCategorySelected: _handleCategoryTap),
@@ -410,6 +444,13 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: NearbyClinicsSection(
               clinics: nearbyList,
+              city: _selectedCity,
+              onSeeAll: () => Navigator.push(
+                context,
+                LuxuryPageRoute(
+                  page: ClinicsListScreen(initialCity: _selectedCity),
+                ),
+              ),
               onClinicTap: _navigateToClinicProfile,
               onRequestAction: _handleAppointmentLeadRequest,
               onContactTap: _handleContact,

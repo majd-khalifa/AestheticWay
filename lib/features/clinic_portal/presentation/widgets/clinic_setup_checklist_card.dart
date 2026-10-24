@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/network/api_exception.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/luxury_card.dart';
@@ -33,6 +34,7 @@ class ClinicSetupChecklistCard extends StatefulWidget {
 class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
   bool _isExpanded = true;
   bool _isSubmitting = false;
+  bool _isRefreshing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +42,17 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
     final isDark = AppColors.isDark(context);
     final clinicService = ClinicPortalService();
 
-    final isSubmitted = widget.clinic.setupStatus == 'submitted';
+    final setupStatus =
+        widget.checklist?.setupStatus ?? widget.clinic.setupStatus;
+    final isSubmitted = setupStatus == 'submitted';
+    final isApproved = setupStatus == 'approved';
+    final isRejected = setupStatus == 'rejected';
     final progress =
         widget.checklist?.progressPercentage ??
         _computeFallbackProgress(clinicService);
     final isReady =
-        progress >= 100 || (widget.checklist?.isReadyForReview == true);
+        (widget.checklist?.isReadyForReview == true) &&
+        (setupStatus == 'draft' || isRejected);
 
     return LuxuryCard(
       padding: const EdgeInsets.all(16),
@@ -83,8 +90,8 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                     children: [
                       Text(
                         loc.isArabic
-                            ? 'إكمال إعداد وتوثيق العيادة'
-                            : 'Complete Clinic Setup & Verification',
+                            ? 'إعداد ملف العيادة'
+                            : 'Clinic Profile Setup',
                         style: AppTypography.cardTitle.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -95,10 +102,18 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        isSubmitted
+                        isApproved
                             ? (loc.isArabic
-                                  ? 'قيد التدقيق الطبي من قبل الإدارة'
-                                  : 'Under medical compliance review')
+                                  ? 'وافقت المنصة على الملف'
+                                  : 'Profile approved by platform')
+                            : isRejected
+                            ? (loc.isArabic
+                                  ? 'يحتاج الملف إلى تعديلات — راجع التفاصيل'
+                                  : 'Profile changes requested — review details')
+                            : isSubmitted
+                            ? (loc.isArabic
+                                  ? 'قيد مراجعة المنصة'
+                                  : 'Under Platform Review')
                             : (loc.isArabic
                                   ? 'أكمل المتطلبات لنشر خدمات العيادة'
                                   : 'Complete items to publish clinic catalog'),
@@ -137,8 +152,12 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                     ),
                   ),
                   child: Text(
-                    isSubmitted
+                    isApproved
+                        ? (loc.isArabic ? 'مقبول' : 'Approved')
+                        : isSubmitted
                         ? (loc.isArabic ? 'قيد المراجعة' : 'Under Review')
+                        : isRejected
+                        ? (loc.isArabic ? 'مرفوض' : 'Rejected')
                         : '$progress%',
                     style: TextStyle(
                       fontSize: 11,
@@ -189,7 +208,54 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
             _buildChecklistRows(context, loc, clinicService),
             const SizedBox(height: 14),
 
-            // Submit Button
+            if (isRejected)
+              _ReviewFeedback(
+                ar: loc.isArabic,
+                reason:
+                    widget.checklist?.setupRejectionReason.isNotEmpty == true
+                    ? widget.checklist!.setupRejectionReason
+                    : widget.clinic.setupRejectionReason,
+              ),
+            if (isApproved)
+              Text(
+                loc.isArabic
+                    ? 'وافقت المنصة على الملف. تفعيل الحساب والظهور العام يخضعان لحالتهما المنفصلة.'
+                    : 'Profile approved by the platform. Account activation and public visibility retain their separate status.',
+              ),
+            TextButton.icon(
+              onPressed: _isSubmitting || _isRefreshing
+                  ? null
+                  : () async {
+                      setState(() => _isRefreshing = true);
+                      try {
+                        await clinicService.refreshClinicProfile();
+                        await clinicService.loadSetupChecklist();
+                      } catch (_) {
+                        if (context.mounted) {
+                          showAppSnackBar(
+                            context,
+                            loc.isArabic
+                                ? 'تعذر تحديث حالة الملف. حاول مجدداً.'
+                                : 'Could not refresh profile status. Try again.',
+                            type: AppSnackBarType.error,
+                          );
+                        }
+                      } finally {
+                        if (mounted) setState(() => _isRefreshing = false);
+                      }
+                    },
+              icon: _isRefreshing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh),
+              label: Text(
+                loc.isArabic ? 'تحديث حالة المراجعة' : 'Refresh review status',
+              ),
+            ),
+            // Already approved/submitted profiles are not resubmitted.
             if (isSubmitted)
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -213,29 +279,31 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                       size: 16,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      loc.isArabic
-                          ? 'تم تقديم الملف — بانتظار اعتماد الإدارة'
-                          : 'Profile Submitted — Awaiting Approval',
-                      style: const TextStyle(
-                        color: Color(0xFF10B981),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                    Expanded(
+                      child: Text(
+                        loc.isArabic
+                            ? 'تم تقديم الملف — بانتظار اعتماد الإدارة'
+                            : 'Profile Submitted — Awaiting Approval',
+                        style: const TextStyle(
+                          color: Color(0xFF10B981),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
               )
-            else
+            else if (!isApproved)
               SilverButton(
                 label: _isSubmitting
                     ? (loc.isArabic ? 'جاري الإرسال...' : 'Submitting...')
                     : (loc.isArabic
-                          ? 'إرسال ملف العيادة للتدقيق والاعتماد'
-                          : 'Submit for Platform Verification'),
+                          ? 'إرسال ملف العيادة للمراجعة'
+                          : 'Submit Clinic Profile for Review'),
                 icon: Icons.send_rounded,
                 height: 42,
-                onPressed: (isReady && !_isSubmitting)
+                onPressed: (isReady && !_isSubmitting && !_isRefreshing)
                     ? () async {
                         setState(() => _isSubmitting = true);
                         try {
@@ -244,8 +312,8 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
                             showAppSnackBar(
                               context,
                               loc.isArabic
-                                  ? 'تم إرسال ملف العيادة للمراجعة والتدقيق الطبي من قبل الإدارة'
-                                  : 'Clinic profile submitted for platform verification',
+                                  ? 'تم إرسال ملف العيادة لمراجعة المنصة'
+                                  : 'Clinic profile submitted for platform review',
                               type: AppSnackBarType.success,
                             );
                           }
@@ -307,7 +375,11 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: _ChecklistTile(
-              title: loc.isArabic ? item.titleAr : item.titleEn,
+              title: item.key == 'practitioners'
+                  ? (loc.isArabic
+                        ? 'إضافة ممارس واحد على الأقل'
+                        : 'At Least One Practitioner')
+                  : (loc.isArabic ? item.titleAr : item.titleEn),
               isDone: item.isCompleted,
               actionLabel: actionLabel,
               onAction: action,
@@ -357,8 +429,8 @@ class _ClinicSetupChecklistCardState extends State<ClinicSetupChecklistCard> {
         const SizedBox(height: 8),
         _ChecklistTile(
           title: loc.isArabic
-              ? 'إضافة طبيب أو ممارس مرخص واحد على الأقل'
-              : 'At least 1 Medical Practitioner',
+              ? 'إضافة ممارس واحد على الأقل'
+              : 'At Least One Practitioner',
           isDone: hasPractitioner,
           actionLabel: loc.isArabic ? '+ إضافة' : '+ Add',
           onAction: () {
@@ -427,93 +499,93 @@ class _ChecklistTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      color: AppColors.surfaceHover(context),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: AppColors.border(context), width: .8),
+    ),
+    child: LayoutBuilder(
+      builder: (context, box) {
+        final titleRow = Row(
+          children: [
+            Icon(
+              isDone
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              semanticLabel: LocaleService().isArabic
+                  ? (isDone ? 'مكتمل' : 'غير مكتمل')
+                  : (isDone ? 'Completed' : 'Incomplete'),
+              size: 20,
+              color: isDone
+                  ? AppColors.positiveText(context)
+                  : AppColors.mutedText(context),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  fontWeight: isDone ? FontWeight.w600 : FontWeight.normal,
+                  color: AppColors.text(context),
+                ),
+              ),
+            ),
+          ],
+        );
+        final action = onAction == null
+            ? const SizedBox.shrink()
+            : TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.goldText(context),
+                  minimumSize: const Size(48, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                onPressed: onAction,
+                child: Text(actionLabel),
+              );
+        if (box.maxWidth < 300 ||
+            MediaQuery.textScalerOf(context).scale(1) > 1.4) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              titleRow,
+              if (onAction != null)
+                Align(alignment: AlignmentDirectional.centerEnd, child: action),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: titleRow),
+            if (onAction != null) ...[const SizedBox(width: 8), action],
+          ],
+        );
+      },
+    ),
+  );
+}
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.cardSurfaceHover
-            : AppColors.lightCardSurfaceHover,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border(context), width: 0.8),
+class _ReviewFeedback extends StatelessWidget {
+  const _ReviewFeedback({required this.ar, required this.reason});
+  final bool ar;
+  final String reason;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12),
+    child: Text(
+      ApiException.sanitizeRegulatoryCompliance(
+        reason.isNotEmpty
+            ? (ar
+                  ? 'ملاحظات المراجعة: $reason\nصحّح البيانات وأعد الإرسال عند اكتمال المتطلبات.'
+                  : 'Review feedback: $reason\nCorrect the profile and resubmit when requirements are complete.')
+            : (ar
+                  ? 'يحتاج الملف إلى تعديلات. لم يُرفق سبب؛ راجع إدارة المنصة.'
+                  : 'Profile changes are required. No reason was supplied; contact the platform team.'),
       ),
-      child: Row(
-        children: [
-          Icon(
-            isDone
-                ? Icons.check_circle_rounded
-                : Icons.radio_button_unchecked_rounded,
-            size: 18,
-            color: isDone
-                ? const Color(0xFF10B981)
-                : AppColors.mutedText(context),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: isDone ? FontWeight.w600 : FontWeight.normal,
-                color: isDone
-                    ? (isDark
-                          ? AppColors.silverPrimary
-                          : AppColors.lightTextPrimary)
-                    : AppColors.mutedText(context),
-              ),
-            ),
-          ),
-          if (isDone) ...[
-            const SizedBox(width: 6),
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  LocaleService().isArabic ? 'مكتمل' : 'Completed ✓',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? const Color(0xFF6EE7B7)
-                        : const Color(0xFF166534),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          if (onAction != null) ...[
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onAction,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.backgroundDeep : Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: AppColors.accentChampagne.withValues(alpha: 0.4),
-                    width: 0.8,
-                  ),
-                ),
-                child: Text(
-                  actionLabel,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.goldText(context),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+    ),
+  );
 }

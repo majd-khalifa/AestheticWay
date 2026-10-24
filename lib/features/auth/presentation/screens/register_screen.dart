@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/account_privacy_actions.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
@@ -644,6 +645,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 14),
 
                     // Terms Checkbox
+                    const AccountPrivacyActions(includeDeletion: false),
                     InkWell(
                       onTap: () {
                         setState(() {
