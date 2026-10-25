@@ -7,6 +7,7 @@ import '../../../../core/localization/app_locale.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../data/auth_repository.dart';
 import '../../models/deletion_delivery.dart';
+import 'verify_registered_email_screen.dart';
 import 'login_screen.dart';
 
 /// Purpose-bound OTP confirmation. No support email or optimistic deletion.
@@ -327,6 +328,32 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
                         : _text('Send verification code', 'إرسال رمز التحقق'),
                   ),
                 ),
+                if (AuthState().userEmail.trim().isNotEmpty &&
+                    !AuthState().isEmailVerified)
+                  TextButton.icon(
+                    key: const ValueKey('deletion-verify-email'),
+                    icon: const Icon(Icons.mark_email_read_outlined),
+                    onPressed: _busy || _requested
+                        ? null
+                        : () async {
+                            setState(() => _busy = true);
+                            try {
+                              await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VerifyRegisteredEmailScreen(
+                                    repository: _repository,
+                                  ),
+                                ),
+                              );
+                            } finally {
+                              if (mounted) setState(() => _busy = false);
+                            }
+                          },
+                    label: Text(
+                      _text('Verify registered email', 'توثيق البريد المسجل'),
+                    ),
+                  ),
                 if (_requested) ...[
                   Semantics(
                     liveRegion: true,

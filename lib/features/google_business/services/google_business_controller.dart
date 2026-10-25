@@ -177,12 +177,15 @@ class GoogleBusinessController extends ChangeNotifier {
               .toList(growable: false);
           hasSearched = true;
         }
-      } catch (_) {
+      } catch (e) {
         if (_current(g)) {
-          error = _text(
-            'Google search could not load. Try again or use a manual pin.',
-            'تعذر تحميل بحث Google. أعد المحاولة أو استخدم الدبوس اليدوي.',
-          );
+          error =
+              e is ApiException && e.errorCode == 'PLACES_PROVIDER_UNAVAILABLE'
+              ? e.message
+              : _text(
+                  'Google search could not load. Try again or use a manual pin.',
+                  'تعذر تحميل بحث Google. أعد المحاولة أو استخدم الدبوس اليدوي.',
+                );
           _token = null;
         }
       } finally {
@@ -238,12 +241,14 @@ class GoogleBusinessController extends ChangeNotifier {
         );
         notifyListeners();
       });
-    } catch (_) {
+    } catch (e) {
       if (_current(g)) {
-        error = _text(
-          'This result could not be verified. Search again and choose the exact UAE business.',
-          'تعذر التحقق من هذه النتيجة. ابحث مجدداً واختر نشاط العيادة الإماراتي الصحيح.',
-        );
+        error = e is ApiException && e.errorCode == 'OUTSIDE_UAE_COVERAGE'
+            ? e.message
+            : _text(
+                'This result could not be verified. Search again and choose the exact UAE business.',
+                'تعذر التحقق من هذه النتيجة. ابحث مجدداً واختر نشاط العيادة الإماراتي الصحيح.',
+              );
       }
     } finally {
       if (_current(g)) {

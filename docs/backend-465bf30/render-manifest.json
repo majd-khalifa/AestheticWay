@@ -1,0 +1,34 @@
+{
+  "nearby_map_choices_light_ar.png": {
+    "sha256": "334dc78dba550d9e994748dec17f57884140bc5c99661d2ed716f5be4ddf59f7",
+    "bytes": 46054
+  },
+  "nearby_map_choices_dark_ar.png": {
+    "sha256": "fa14d8019f6b0ca385f85d6fb93311c502342b786e80d2bcdee934c3f26c9a92",
+    "bytes": 46016
+  },
+  "nearby_enabled_dark_en.png": {
+    "sha256": "cc8ea273bd5808239189dd4114edb3d2a30572bd094815db908f0224f5b6581e",
+    "bytes": 91987
+  },
+  "nearby_enabled_dark_ar.png": {
+    "sha256": "b2cacd2ed0a3b983bbfc45e15c7a99b39ab29f006560dbdeed491e83debe0b51",
+    "bytes": 83100
+  },
+  "nearby_map_choices_dark_en.png": {
+    "sha256": "bcf7a145f0b7953f03f8cbfff6ac0b1d1aa344e2442b88d2c7355c7867dc5635",
+    "bytes": 52767
+  },
+  "nearby_enabled_light_en.png": {
+    "sha256": "bb4dcd2999b89cb559c5ff7edc632e7e0f41512b6daec332173f27dcc684faf7",
+    "bytes": 91428
+  },
+  "nearby_map_choices_light_en.png": {
+    "sha256": "fa6aa867d38a25986e328550e658f9d71ddc3712be960e5f1f11d6d9f20cd5ca",
+    "bytes": 53066
+  },
+  "nearby_enabled_light_ar.png": {
+    "sha256": "82852c4d984d8e89eecec8fc0c3bb85e05383fa1a990291683b555c902c313ab",
+    "bytes": 82048
+  }
+}

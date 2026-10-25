@@ -80,12 +80,31 @@ class ApiException implements Exception {
     // Error bodies may echo patient notes, credentials or server tracebacks.
     // Never retain raw response payloads or expose 5xx/HTML diagnostics.
     if (statusCode != null && statusCode >= 500) {
+      final data = error.response?.data;
+      final code = data is Map && data['error'] is Map
+          ? (data['error'] as Map)['code']
+          : data is Map
+          ? data['code']
+          : null;
+      // Only source-confirmed constants are safe to retain from 5xx bodies.
+      final knownCode =
+          statusCode == 503 &&
+              const {
+                'PLACES_PROVIDER_UNAVAILABLE',
+                'STORAGE_ERROR',
+              }.contains(code)
+          ? code as String
+          : 'SERVER_ERROR';
       return ApiException(
-        message: LocaleService().isArabic
+        message: knownCode == 'PLACES_PROVIDER_UNAVAILABLE'
+            ? (LocaleService().isArabic
+                  ? 'خدمة البحث في Google غير متاحة حالياً. حاول لاحقاً.'
+                  : 'Google Places search is temporarily unavailable. Please try later.')
+            : LocaleService().isArabic
             ? 'تعذر إتمام الطلب حالياً. حاول مجدداً لاحقاً.'
             : 'The service is temporarily unavailable. Please try again.',
         statusCode: statusCode,
-        errorCode: 'SERVER_ERROR',
+        errorCode: knownCode,
         retryAfter: retryAfter,
       );
     }
@@ -233,6 +252,14 @@ class ApiException implements Exception {
         ar
             ? 'لا توجد وسيلة تواصل موثقة لإرسال الرمز. تواصل مع دعم المنصة لتحديث حسابك.'
             : 'No verified delivery channel is available. Contact platform support to update your account.',
+      'OUTSIDE_UAE_COVERAGE' =>
+        ar
+            ? 'اختر نشاطاً تجارياً داخل الإمارات العربية المتحدة.'
+            : 'Choose a business within the United Arab Emirates.',
+      'UNVERIFIED_GOOGLE_MAPS_URL' =>
+        ar
+            ? 'استخدم البحث الموثق لربط نشاط Google. يبقى الدبوس اليدوي مستقلاً.'
+            : 'Use verified search to link a Google business. The manual pin remains separate.',
       'LAST_SUPER_ADMIN' =>
         ar
             ? 'لا يمكن حذف حساب المشرف العام الوحيد. عيّن مشرفاً عاماً آخر أولاً.'
@@ -295,6 +322,8 @@ class ApiException implements Exception {
             'SOLE_CLINIC_ADMIN',
             'ACCOUNT_ALREADY_INACTIVE',
             'NO_VERIFIED_DELIVERY_CHANNEL',
+            'OUTSIDE_UAE_COVERAGE',
+            'UNVERIFIED_GOOGLE_MAPS_URL',
             'STALE_GOOGLE_ASSOCIATION',
             'INVALID_OR_EXPIRED_SELECTION_PROOF',
             'UNVERIFIED_GOOGLE_PLACE_ID',

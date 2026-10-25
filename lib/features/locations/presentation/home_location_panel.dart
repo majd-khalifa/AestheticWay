@@ -57,7 +57,7 @@ class HomeLocationPanel extends StatelessWidget {
                     : t('Use my location', 'استخدام موقعي'),
               ),
             ),
-            if (controller.areaCode != null && !nearbySupported)
+            if (controller.areaCode != null)
               Text(
                 t(
                   'Showing city results; area filtering is not available yet.',

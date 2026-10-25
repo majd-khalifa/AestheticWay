@@ -1,0 +1,32 @@
+{
+  "backend_commit_supplied": "465bf3089dba98a2b0b4145e728daec3c533b0f1",
+  "archive_sha256": "2c5bae54b5cbbd9d3daffe1123b02ea542ea5f195116d947571691d492f151d9",
+  "source_files_unchanged": 413,
+  "commit_provenance": "User-supplied archive and deployment report; archive has no Git object database",
+  "backend_suite": {
+    "passed": 705,
+    "failed": 0,
+    "seconds": 14.86,
+    "python": "3.12",
+    "scope": "Local SQLite/test storage, mocked providers; no production verification"
+  },
+  "large_video": {
+    "bytes": 3147828,
+    "ffmpeg_decode_exit": 0,
+    "layout": "mdat precedes moov, genuine H264 samples intact"
+  },
+  "previous_backend_commit": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
+  "flutter": {
+    "framework": "3.41.5",
+    "dart": "3.11.3",
+    "local_full_passed": 1144,
+    "local_full_failed": 0,
+    "focused_new_passed": 17,
+    "analyzer_issues": 0,
+    "format_files": 272,
+    "source_API_responses": 44,
+    "git_diff_check": "clean"
+  },
+  "native_CI": "Exact pushed-head Actions runs are linked in PR13; results are not inferred from this container.",
+  "remaining_confirmed_backend_gap": "Unassigned Super Admin can unlink implicit fallback clinic; frontend already rejects this role."
+}

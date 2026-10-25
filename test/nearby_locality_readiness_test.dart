@@ -347,7 +347,14 @@ void main() {
       testWidgets('nearby unavailable map/list dark=$dark ar=$ar', (
         tester,
       ) async {
-        await f.render(tester, const NearbyClinicsScreen(), dark: dark, ar: ar);
+        await f.render(
+          tester,
+          const NearbyClinicsScreen(
+            repository: UnavailableNearbyClinicsRepository(),
+          ),
+          dark: dark,
+          ar: ar,
+        );
         expect(
           find.textContaining(
             ar ? 'البحث عن الأقرب غير متاح' : 'Nearby search is not available',

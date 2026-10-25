@@ -6,7 +6,7 @@ import '../../clinic_portal/data/clinic_catalog_repository.dart';
 import '../../clinics/models/clinic_model.dart';
 import '../models/google_business.dart';
 
-/// Authenticated, tenant-bound Places(New) contracts verified in backend401560b.
+/// Authenticated, tenant-bound Places(New) contracts verified in backend465bf30.
 /// No direct Google REST call or server key in Flutter.
 abstract class GoogleBusinessRepository {
   GoogleBusinessCapabilities get capabilities;
@@ -221,9 +221,7 @@ class CurrentClinicGoogleBusinessRepository extends GoogleBusinessRepository {
       data: {
         'place_id': place.placeId, 'selection_proof': place.selectionProof,
         'expected_current_place_id': expectedPlaceId,
-        // Source otherwise retains the OLD maps URL on relink. Send only the
-        // exact Details URL; the backend must bind it to the proof in future.
-        if (place.mapsUrl != null) 'google_maps_url': place.mapsUrl,
+        // Maps URL is owned by the backend's single-use selection proof.
       },
     );
     session.ensureCurrent();

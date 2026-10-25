@@ -12,6 +12,10 @@ class NearbyClinic {
     required this.distanceKm,
     this.branchId,
     this.branchLocation,
+    this.branchNameEn,
+    this.branchNameAr,
+    this.branchAddressEn,
+    this.branchAddressAr,
   }) {
     if (branchLocation != null &&
         ClinicCoordinates.parse(
@@ -33,6 +37,7 @@ class NearbyClinic {
 
   /// Confirmed closest eligible branch, not a default city/map center.
   final ClinicCoordinates? branchLocation;
+  final String? branchNameEn, branchNameAr, branchAddressEn, branchAddressAr;
 }
 
 enum NearbyDistanceReference {
@@ -81,14 +86,14 @@ class UnavailableNearbyClinicsRepository extends NearbyClinicsRepository {
       );
 }
 
-/// Actual401560b transport, held from patient production use because source
-/// probes confirm active draft clinics are returned. Enable only after a supplied
-/// backend revision enforces approved/public eligibility; no client flag bypass.
+/// Backend465bf30 enforces active + approved + not deleted before calculating
+/// branch distance, deduplicating and paginating. Visibility is server-owned;
+/// the public serializer intentionally omits internal approval/plan details.
 class BackendNearbyClinicsRepository extends NearbyClinicsRepository {
   BackendNearbyClinicsRepository({ApiClient? api}) : _api = api ?? ApiClient();
   final ApiClient _api;
   @override
-  bool get supported => false;
+  bool get supported => true;
   @override
   Future<NearbyClinicsPage> search(
     NearbySearchQuery query, {
@@ -109,10 +114,17 @@ class BackendNearbyClinicsRepository extends NearbyClinicsRepository {
         'longitude': gps.longitude,
         'radius_km': 50,
       },
-      if (gps == null) 'city': query.locality!.city.nameEn,
+      if (gps == null) ...{
+        'city': query.locality!.city.nameEn,
+        // Legacy saved city IDs use ae-* presentation codes. They are not API
+        // values; only the real catalog's two-letter emirate codes are sent.
+        if (RegExp(r'^[A-Z]{2}$').hasMatch(query.locality!.city.emirateCode))
+          'emirate': query.locality!.city.emirateCode,
+      },
     };
     // /clinics/nearby requires both coordinates. Home's manual endpoint returns
-    // distance_km:null and a source-limited top10; never fabricate a city center.
+    // distance_km:null with full pagination; never fabricate a city center or
+    // send an area filter the current contract does not support.
     final response = await _api.get(
       gps == null ? 'home/nearby-clinics/' : 'clinics/nearby/',
       queryParameters: params,
@@ -145,16 +157,34 @@ class BackendNearbyClinicsRepository extends NearbyClinicsRepository {
         throw const ApiException(message: 'Missing nearby clinic identity.');
       }
       final branch = d['nearest_branch_id']?.toString();
+      final rawBranch = d['nearest_branch'];
+      final branchData = rawBranch is Map ? rawBranch : null;
+      if (branch != null &&
+          (branchData == null || branchData['id']?.toString() != branch)) {
+        throw const ApiException(
+          message: 'Nearest branch could not be verified.',
+        );
+      }
+      if (branch == null && rawBranch != null) {
+        throw const ApiException(
+          message: 'Unexpected nearest branch identity.',
+        );
+      }
       rows.add(
         NearbyClinic(
           clinic: clinic,
           distanceKm: km,
           branchId: branch,
-          // The list omits nearest-branch coordinates. Do not navigate to HQ
-          // while presenting a branch distance; a confirmed branch detail is needed.
           branchLocation: branch == null
               ? ClinicCoordinates.parse(d['latitude'], d['longitude'])
-              : null,
+              : ClinicCoordinates.parse(
+                  branchData!['latitude'],
+                  branchData['longitude'],
+                ),
+          branchNameEn: branchData?['name_en']?.toString(),
+          branchNameAr: branchData?['name_ar']?.toString(),
+          branchAddressEn: branchData?['address_en']?.toString(),
+          branchAddressAr: branchData?['address_ar']?.toString(),
         ),
       );
     }

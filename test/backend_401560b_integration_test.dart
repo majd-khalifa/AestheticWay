@@ -147,7 +147,6 @@ void main() {
         'place_id': placeId,
         'selection_proof': 'disposable-single-use-proof',
         'expected_current_place_id': '',
-        'google_maps_url': details()['google_maps_url'],
       });
       expect(posts[3].data, {'expected_current_place_id': placeId});
       expect(adapter.requests.where((r) => r.method == 'PATCH'), isEmpty);
@@ -310,6 +309,12 @@ void main() {
               'subscription_tier': 'basic',
               'distance_km': 0.48,
               'nearest_branch_id': 'nearest-branch',
+              'nearest_branch': {
+                'id': 'nearest-branch',
+                'latitude': 25.105,
+                'longitude': 55.205,
+                'name_en': 'Actual closest branch',
+              },
               'latitude': 25.11,
               'longitude': 55.21,
             },
@@ -328,8 +333,8 @@ void main() {
       final repo = BackendNearbyClinicsRepository();
       expect(
         repo.supported,
-        false,
-        reason: '401560b exposes draft profiles; production query stays gated.',
+        true,
+        reason: '465bf30 enforces approved public visibility on the server.',
       );
       final p = await repo.search(
         const NearbySearchQuery(origin: PatientPosition(25.1, 55.2)),
@@ -338,7 +343,7 @@ void main() {
       expect(p.items.map((r) => r.clinic.id), ['near-basic', 'far-vip']);
       expect(p.items.first.distanceKm, .48);
       expect(p.items.first.branchId, 'nearest-branch');
-      expect(p.items.first.branchLocation, isNull);
+      expect(p.items.first.branchLocation!.latitude, 25.105);
       expect(p.items.last.branchLocation, isNotNull);
       expect(p.hasMore, true);
       expect(p.reference, NearbyDistanceReference.device);

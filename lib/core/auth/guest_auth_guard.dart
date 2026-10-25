@@ -23,6 +23,7 @@ class AuthState extends ChangeNotifier {
   String _userEmail = '';
   String _userRole = 'patient';
   bool _isVerified = false;
+  bool _isEmailVerified = false;
   final Set<String> _favoriteClinicIds = {};
 
   bool get isLoggedIn => _isLoggedIn;
@@ -31,6 +32,7 @@ class AuthState extends ChangeNotifier {
   String get userEmail => _userEmail;
   String get userRole => _userRole;
   bool get isVerified => _isVerified;
+  bool get isEmailVerified => _isEmailVerified;
   Set<String> get favoriteClinicIds => _favoriteClinicIds;
 
   bool get isSuperAdmin => _userRole == 'super_admin';
@@ -44,6 +46,7 @@ class AuthState extends ChangeNotifier {
     String email = '',
     String role = 'patient',
     bool isVerified = false,
+    bool isEmailVerified = false,
   }) {
     final changed = !_isLoggedIn || _userPhone != phone || _userRole != role;
     if (_isLoggedIn && changed) {
@@ -60,6 +63,7 @@ class AuthState extends ChangeNotifier {
     _userEmail = email;
     _userRole = role;
     _isVerified = isVerified;
+    _isEmailVerified = isEmailVerified;
     notifyListeners();
   }
 
@@ -68,13 +72,17 @@ class AuthState extends ChangeNotifier {
     required String phone,
     String email = '',
     bool? isVerified,
+    bool? isEmailVerified,
   }) {
+    final sameEmail =
+        email.trim().toLowerCase() == _userEmail.trim().toLowerCase();
     _userName = name;
     _userPhone = phone;
     _userEmail = email;
     if (isVerified != null) {
       _isVerified = isVerified;
     }
+    _isEmailVerified = isEmailVerified ?? (sameEmail && _isEmailVerified);
     notifyListeners();
   }
 
@@ -95,6 +103,7 @@ class AuthState extends ChangeNotifier {
     _userEmail = '';
     _userRole = 'patient';
     _isVerified = false;
+    _isEmailVerified = false;
     _favoriteClinicIds.clear();
     notifyListeners();
   }
@@ -123,6 +132,7 @@ class AuthState extends ChangeNotifier {
       _userEmail = user['email']?.toString() ?? '';
       _userRole = user['role']?.toString() ?? '';
       _isVerified = user['is_verified'] == true;
+      _isEmailVerified = user['is_email_verified'] == true;
       notifyListeners();
     }
   }

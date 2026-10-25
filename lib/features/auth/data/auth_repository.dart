@@ -111,6 +111,7 @@ class AuthRepository {
       email: response.user.email ?? '',
       role: response.user.role,
       isVerified: response.user.isVerified,
+      isEmailVerified: response.user.isEmailVerified,
     );
   }
 
@@ -397,6 +398,7 @@ class AuthRepository {
       email: user.email ?? '',
       role: user.role,
       isVerified: user.isVerified,
+      isEmailVerified: user.isEmailVerified,
     );
     return user;
   }
@@ -431,6 +433,7 @@ class AuthRepository {
       email: user.email ?? '',
       role: user.role,
       isVerified: user.isVerified,
+      isEmailVerified: user.isEmailVerified,
     );
     return user;
   }

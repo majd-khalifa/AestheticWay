@@ -104,7 +104,11 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                               ButtonSegment(
                                 value: true,
                                 icon: const Icon(Icons.map_outlined),
-                                label: Text(t('Map', 'خريطة')),
+                                label: Text(
+                                  widget.mapBuilder == null
+                                      ? t('Map links', 'روابط الخرائط')
+                                      : t('Map', 'خريطة'),
+                                ),
                               ),
                             ],
                             selected: {_map},
@@ -112,6 +116,15 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                 setState(() => _map = s.single),
                           ),
                           const SizedBox(height: 12),
+                          if (_repository.supported &&
+                              _location.position == null &&
+                              _location.locality != null)
+                            Text(
+                              t(
+                                'City results · distances require device location. The selected area is retained but is not a server filter.',
+                                'نتائج المدينة · المسافات تتطلب موقع الجهاز. نحتفظ بالمنطقة المحددة دون ترشيح خادمي بها.',
+                              ),
+                            ),
                           if (!_repository.supported)
                             Card(
                               child: Padding(
@@ -169,28 +182,65 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                             else
                               Text(
                                 t(
-                                  'Embedded Google Maps is not configured. Open a confirmed clinic location in Google Maps below.',
-                                  'خرائط Google المدمجة غير مهيأة. افتح موقع عيادة مؤكد في خرائط Google أدناه.',
+                                  'Choose a confirmed location to open in Google Maps.',
+                                  'اختر موقعاً مؤكداً لفتحه في خرائط Google.',
                                 ),
                               ),
                             for (final row in rows.where(
                               (r) => r.branchLocation != null,
                             ))
-                              AsyncActionButton(
-                                label: t(
-                                  'Directions to ${row.clinic.nameEn}',
-                                  'الاتجاهات إلى ${row.clinic.nameAr}',
+                              Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text(
+                                        ar
+                                            ? row.clinic.nameAr
+                                            : row.clinic.nameEn,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                      ),
+                                      if (_branchLabel(row).isNotEmpty)
+                                        Text(_branchLabel(row)),
+                                      if (_discovery
+                                          .distanceLabel(row)
+                                          .isNotEmpty)
+                                        Text(_discovery.distanceLabel(row)),
+                                      AsyncActionButton(
+                                        label: t(
+                                          'Open location in Google Maps',
+                                          'فتح الموقع في خرائط Google',
+                                        ),
+                                        icon: Icons.directions_outlined,
+                                        onPressed: (_) async {
+                                          final p = row.branchLocation!;
+                                          if (!await MapsLauncher.openVerifiedLocation(
+                                            latitude: p.latitude,
+                                            longitude: p.longitude,
+                                          )) {
+                                            throw StateError(
+                                              t(
+                                                'Directions unavailable',
+                                                'تعذر فتح الاتجاهات',
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                icon: Icons.directions_outlined,
-                                onPressed: (_) async {
-                                  final p = row.branchLocation!;
-                                  if (!await MapsLauncher.openVerifiedLocation(
-                                    latitude: p.latitude,
-                                    longitude: p.longitude,
-                                  )) {
-                                    throw StateError('Directions unavailable');
-                                  }
-                                },
+                              ),
+                            if (rows.any((r) => r.branchLocation == null))
+                              Text(
+                                t(
+                                  'Some returned locations have no confirmed map coordinates. Use the list to view those clinics.',
+                                  'بعض المواقع لا تحتوي إحداثيات مؤكدة. اعرض هذه العيادات في القائمة.',
+                                ),
                               ),
                           ],
                           if (!_map)
@@ -225,6 +275,8 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                         .distanceLabel(row)
                                         .isNotEmpty)
                                       Text(_discovery.distanceLabel(row)),
+                                    if (_branchLabel(row).isNotEmpty)
+                                      Text(_branchLabel(row)),
                                     AsyncActionButton(
                                       label: t(
                                         'Request consultation',
@@ -261,4 +313,14 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
       );
     },
   );
+
+  String _branchLabel(NearbyClinic row) {
+    if (row.branchId == null) return '';
+    final name = ar ? row.branchNameAr : row.branchNameEn;
+    final address = ar ? row.branchAddressAr : row.branchAddressEn;
+    return [
+      name,
+      address,
+    ].whereType<String>().where((v) => v.trim().isNotEmpty).join(' · ');
+  }
 }

@@ -6,6 +6,7 @@ class UserModel {
   final String? email;
   final String role;
   final bool isVerified;
+  final bool isEmailVerified;
   final String? devicePlatform;
   final String? createdAt;
   final String? referralCode;
@@ -18,6 +19,7 @@ class UserModel {
     this.email,
     required this.role,
     this.isVerified = false,
+    this.isEmailVerified = false,
     this.devicePlatform,
     this.createdAt,
     this.referralCode,
@@ -32,6 +34,7 @@ class UserModel {
       email: json['email']?.toString(),
       role: json['role']?.toString() ?? '',
       isVerified: json['is_verified'] == true,
+      isEmailVerified: json['is_email_verified'] == true,
       devicePlatform: json['device_platform']?.toString(),
       createdAt: json['created_at']?.toString(),
       referralCode: json['referral_code']?.toString(),
@@ -47,6 +50,7 @@ class UserModel {
       'email': email,
       'role': role,
       'is_verified': isVerified,
+      'is_email_verified': isEmailVerified,
       'device_platform': devicePlatform,
       'created_at': createdAt,
       'referral_code': referralCode,

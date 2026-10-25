@@ -418,7 +418,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-        SliverToBoxAdapter(child: HomeLocationPanel(controller: _location)),
+        SliverToBoxAdapter(
+          child: HomeLocationPanel(
+            controller: _location,
+            nearbySupported: true,
+          ),
+        ),
 
         // 4. Categories Quick Access Grid (8 Official Categories)
         SliverToBoxAdapter(

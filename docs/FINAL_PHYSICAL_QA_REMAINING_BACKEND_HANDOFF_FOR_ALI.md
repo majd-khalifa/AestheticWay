@@ -1,5 +1,7 @@
 # Final physical-QA handoff / تسليم المتبقي لعلي
 
+> Historical snapshot for401560b. Superseded by [the465bf30 reconciliation and current handoff](BACKEND_465BF30_INTEGRATION_REPORT.md). The large-upload copy failure, public eligibility, Google mutation/proof and persisted-email findings below are resolved in the newer supplied source and are not current missing contracts.
+
 2026-10-25 · PR13 · latest supplied read-only source **401560bdb06bd739f74eb42a88c68fc748e43dbb**. This is the concise current handoff. Earlier resolved/missing-endpoint reports are not repeated as new defects. Django was not edited. No message, production mutation or credential was sent to a third party.
 
 ## P0 — Physical VIP video save still fails / فشل حفظ فيديو VIP على الجهاز
