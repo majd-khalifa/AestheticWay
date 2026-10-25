@@ -24,5 +24,13 @@
   "deletion_uses_confirmed_email": false,
   "deletion_dispatches_only_SMS_when_phone_present": true,
   "no_verified_channel_when_phone_absent_even_after_email_confirmation": true,
+  "SMS_factory_has_real_gateway": false,
+  "SMS_factory_implemented_providers": [
+    "console",
+    "mock"
+  ],
+  "unknown_SMS_provider_falls_back_to_console": true,
+  "console_reports_success_without_SMS_gateway": true,
+  "deployed_provider_configuration_verified": false,
   "source_files_unchanged": 410
 }

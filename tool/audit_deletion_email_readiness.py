@@ -35,9 +35,15 @@ import django
 
 django.setup()
 from apps.accounts.models import User
+from apps.accounts.services.sms import (
+    ConsoleSmsProvider,
+    MockSmsProvider,
+    get_sms_provider,
+)
 from django.conf import settings
 from django.core.cache import cache
 from django.core.management import call_command
+from django.test import override_settings
 from rest_framework.test import APIClient
 
 assert settings.DATABASES["default"]["NAME"] == ":memory:"
@@ -101,6 +107,19 @@ with (
     assert r.status_code == 400 and list(
         map(str, r.data["error"]["fields"]["code"])
     ) == ["NO_VERIFIED_DELIVERY_CHANNEL"]
+# Current factory has no gateway implementation and defaults unknown names to
+# console. Logging is disabled before this test; no code/contact is emitted.
+with override_settings(SMS_PROVIDER="unconfigured-provider"):
+    sms_fallback = get_sms_provider()
+    assert isinstance(sms_fallback, ConsoleSmsProvider)
+    assert (
+        sms_fallback.send_otp(
+            phone="+971500000094", code="654321", purpose="account_deletion"
+        )
+        is True
+    )
+with override_settings(SMS_PROVIDER="mock"):
+    assert isinstance(get_sms_provider(), MockSmsProvider)
 assert inventory() == before
 result = {
     "source_commit": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
@@ -111,6 +130,11 @@ result = {
     "deletion_uses_confirmed_email": False,
     "deletion_dispatches_only_SMS_when_phone_present": True,
     "no_verified_channel_when_phone_absent_even_after_email_confirmation": True,
+    "SMS_factory_has_real_gateway": False,
+    "SMS_factory_implemented_providers": ["console", "mock"],
+    "unknown_SMS_provider_falls_back_to_console": True,
+    "console_reports_success_without_SMS_gateway": True,
+    "deployed_provider_configuration_verified": False,
     "source_files_unchanged": len(before),
 }
 a.output.parent.mkdir(parents=True, exist_ok=True)
