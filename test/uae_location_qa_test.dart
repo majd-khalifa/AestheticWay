@@ -331,7 +331,20 @@ void main() {
           dark: dark,
           ar: ar,
         );
-        expect(find.text(ar ? 'العين' : 'Al Ain'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('locality-city-al-ain')),
+          findsOneWidget,
+        );
+        expect(
+          (tester
+                      .widget<ListTile>(
+                        find.byKey(const ValueKey('locality-city-al-ain')),
+                      )
+                      .title
+                  as Text)
+              .data,
+          ar ? 'العين' : 'Al Ain',
+        );
         expect(find.text(ar ? 'حتا' : 'Hatta'), findsNothing);
         await f.capture(
           tester,

@@ -1,0 +1,5 @@
+<!-- Add only to the approved SDK target after minimum-OS review. -->
+<dict>
+    <key>AWGoogleMapsAPIKey</key>
+    <string>$(AW_IOS_MAPS_SDK_KEY)</string>
+</dict>

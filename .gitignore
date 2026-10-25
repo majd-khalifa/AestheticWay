@@ -64,3 +64,8 @@ key.properties
 .env
 .env.*
 !.env.example
+
+# Future restricted Maps SDK local configuration (templates remain public)
+/android/secrets.properties
+/ios/Flutter/GoogleMaps.local.xcconfig
+/config/maps/*.local.*

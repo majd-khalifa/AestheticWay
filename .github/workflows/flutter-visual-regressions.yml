@@ -97,6 +97,12 @@ jobs:
           flutter test test/backend_401560b_integration_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-401560b"
           --reporter expanded
+      - name: Physical QA request body and locality UX
+        timeout-minutes: 3
+        run: >-
+          flutter test test/physical_qa_wire_test.dart test/physical_qa_location_polish_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/physical-qa-remediation"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -132,3 +138,4 @@ jobs:
             ${{ runner.temp }}/uae-nearby-qa/**
             ${{ runner.temp }}/maps-business-readiness/**
             ${{ runner.temp }}/backend-401560b/**
+            ${{ runner.temp }}/physical-qa-remediation/**

@@ -95,6 +95,17 @@ class ApiException implements Exception {
       if (data['error'] is Map<String, dynamic>) {
         final errObj = data['error'] as Map<String, dynamic>;
         errorCode = errObj['code']?.toString();
+        //401560b wraps this service ValidationError inside fields.code rather
+        // than its top-level code. Promote only this exact known safe sentinel.
+        final serviceCode = errObj['fields'] is Map
+            ? (errObj['fields'] as Map)['code']
+            : null;
+        if (errorCode == 'VALIDATION_ERROR' &&
+            serviceCode is List &&
+            serviceCode.length == 1 &&
+            serviceCode.single == 'NO_VERIFIED_DELIVERY_CHANNEL') {
+          errorCode = 'NO_VERIFIED_DELIVERY_CHANNEL';
+        }
         final bodyWait = errObj['retry_after'];
         if (bodyWait is num && bodyWait.isFinite && bodyWait >= 0) {
           final delay = Duration(

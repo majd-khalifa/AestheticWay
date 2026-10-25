@@ -150,7 +150,9 @@ class CurrentClinicGoogleBusinessRepository extends GoogleBusinessRepository {
             GoogleBusinessPlace.validPlaceId('${raw['place_id'] ?? ''}'))
           GooglePlaceSuggestion(
             placeId: '${raw['place_id']}',
-            name: '${raw['main_text'] ?? raw['formatted_text'] ?? ''}',
+            name: '${raw['main_text'] ?? ''}'.trim().isNotEmpty
+                ? '${raw['main_text']}'
+                : '${raw['formatted_text'] ?? ''}',
             address: '${raw['secondary_text'] ?? ''}',
           ),
     ];

@@ -347,6 +347,14 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
                             ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _text(
+                      'No code received? Check the indicated channel and wait for the resend countdown. If delivery still fails, contact platform support to verify your registered contact details. Signing in again or changing your email does not replace the deletion code.',
+                      'لم تستلم الرمز؟ راجع القناة المعروضة وانتظر انتهاء مهلة إعادة الإرسال. إذا استمر التعذر، راجع دعم المنصة للتحقق من بيانات التواصل المسجلة. تسجيل الدخول مجدداً أو تغيير البريد لا يغني عن رمز الحذف.',
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 16),
                   TextField(
                     key: const ValueKey('deletion-code'),

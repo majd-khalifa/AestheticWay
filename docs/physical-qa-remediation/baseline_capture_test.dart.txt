@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:aesthetic_way/core/auth/token_storage.dart';
+import 'package:aesthetic_way/core/network/api_client.dart';
+import 'package:aesthetic_way/features/locations/data/uae_location_repository.dart';
+import 'package:aesthetic_way/features/locations/models/uae_location.dart';
+import 'package:aesthetic_way/features/locations/presentation/uae_location_picker.dart';
+import 'backend_401560b_integration_test.dart' as source;
+import 'onboarding_review_workflows_test.dart' as f;
+import 'support/patient_visual_harness.dart';
+class Catalog extends UaeLocationRepository {
+ Catalog(this.value);final UaeLocationCatalog value;
+ @override Future<UaeLocationCatalog> load()async=>value;
+}
+void main(){
+ TestWidgetsFlutterBinding.ensureInitialized();late UaeLocationCatalog c;
+ setUpAll(()async{await loadPatientVisualFonts();FlutterSecureStorage.setMockInitialValues({});await TokenStorage().clear();final api=ApiClient(),old=ApiClient().dio.httpClientAdapter;final data=source.catalog;api.dio.httpClientAdapter=f.Adapter((r)=>f.body(data[r.path.split('/')[1]]));try{c=await ServerUaeLocationRepository(api:api).load();}finally{api.dio.httpClientAdapter=old;}});
+ for(final dark in [false,true]){for(final ar in [false,true]){testWidgets('baseline32498e3 locality before dark=$dark ar=$ar',(tester)async{
+  tester.view.physicalSize=const Size(430,1000);tester.view.devicePixelRatio=1;addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
+  await f.render(tester,Scaffold(body:UaeLocationPicker(selected:'Dubai',selectedAreaCode:'jumeirah',includeAreas:true,repository:Catalog(c))),dark:dark,ar:ar);
+  await f.capture(tester,'location_before_city_${dark?'dark':'light'}_${ar?'ar':'en'}');
+  await tester.tap(find.byWidgetPredicate((w)=>w is ListTile && w.title is Text && (w.title as Text).data==(ar?'دبي':'Dubai')));await tester.pumpAndSettle();
+  await f.capture(tester,'location_before_area_${dark?'dark':'light'}_${ar?'ar':'en'}');
+  expect(tester.takeException(),isNull);await tester.pumpWidget(const SizedBox());await tester.binding.setSurfaceSize(null);
+ });}}
+}

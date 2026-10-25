@@ -50,8 +50,8 @@ class ShowcaseVideoFailure extends ApiException {
             : 'Wait for the cooldown before retrying.',
       int code when code >= 500 =>
         ar
-            ? 'الخادم غير متاح مؤقتاً. تحقّق من الملف المحفوظ قبل إعادة الرفع.'
-            : 'The server is temporarily unavailable. Check the saved profile before re-uploading.',
+            ? 'الخادم غير متاح مؤقتاً. زوّد دعم المنصة بوقت المحاولة وحالة HTTP لمراجعة فشل الحفظ. تحقّق من الملف المحفوظ قبل إعادة الرفع.'
+            : 'The server is temporarily unavailable. Give platform support the attempt time and HTTP status to inspect the failed save. Check the saved profile before re-uploading.',
       _ =>
         cause?.errorCode == 'TIMEOUT'
             ? (ar

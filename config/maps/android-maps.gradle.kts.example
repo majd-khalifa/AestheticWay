@@ -1,0 +1,13 @@
+// Future integration fragment only. No signing block is modified.
+// AW_EMBEDDED_MAPS_ENABLED must correspond to an approved, installed SDK build.
+val embeddedMapsEnabled = providers.gradleProperty("AW_EMBEDDED_MAPS_ENABLED")
+    .map(String::toBooleanStrict).orElse(false)
+val restrictedMapsKey = providers.environmentVariable("AW_ANDROID_MAPS_SDK_KEY")
+if (embeddedMapsEnabled.get()) {
+    require(!restrictedMapsKey.orNull.isNullOrBlank()) {
+        "Restricted Android Maps SDK configuration is missing."
+    }
+    android.defaultConfig.manifestPlaceholders["AW_ANDROID_MAPS_SDK_KEY"] = restrictedMapsKey.get()
+}
+// Include the manifest metadata only in the enabled SDK target; never include
+// a blank placeholder in the current production target.

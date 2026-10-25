@@ -869,6 +869,19 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                         ],
                       ),
                       if (_videoPath != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            ar
+                                ? 'معاينة محلية فقط؛ لم يتم تأكيد حفظ الفيديو على الخادم.'
+                                : 'Local preview only; saving on the server has not been confirmed.',
+                            key: const ValueKey(
+                              'video-local-preview-not-saved',
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      if (_videoPath != null)
                         SilverButton(
                           label: ar
                               ? 'رفع وحفظ الفيديو'

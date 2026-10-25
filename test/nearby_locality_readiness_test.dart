@@ -319,6 +319,16 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.byKey(const ValueKey('locality-area-jumeirah')),
+          120,
+          scrollable: find
+              .descendant(
+                of: find.byType(CustomScrollView),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
         expect(find.text(ar ? 'جميرا' : 'Jumeirah'), findsOneWidget);
         await f.capture(
           tester,

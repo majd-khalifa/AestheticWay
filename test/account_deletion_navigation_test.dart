@@ -73,6 +73,16 @@ void main() {
         find.byKey(const ValueKey('deletion-code')),
         '123456',
       );
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('deletion-consent')),
+        180,
+        scrollable: find
+            .descendant(
+              of: find.byType(ListView).first,
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.tap(find.byKey(const ValueKey('deletion-consent')));
       await tester.pump();
       await tester.ensureVisible(

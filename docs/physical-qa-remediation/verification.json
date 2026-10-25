@@ -1,0 +1,32 @@
+{
+  "frontend_baseline": "32498e331f972fa0a036c46d98d39bd78c1207fe",
+  "backend_source": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
+  "local_flutter": "3.41.5",
+  "dart": "3.11.3",
+  "full_tests": {
+    "passed": 1127,
+    "failed": 0
+  },
+  "net_new_tests": 17,
+  "focused_tests": 109,
+  "baseline_capture_tests": 4,
+  "analyzer_issues": 0,
+  "renders": 22,
+  "email_source_responses": 4,
+  "google_video_source_responses": 25,
+  "Django_source_files_unchanged": 410,
+  "format": "dart format . completed; final zero-change pass before commit",
+  "diff_check": "clean",
+  "nativeCI": "Current-commit nativeWindows/Ubuntu, Androidrelease and macOS outcomes are recorded in PR13. Prior32498e3 CI is historical, not new-commit evidence.",
+  "physical_evidence": {
+    "video_HTTP500": "User-reported unresolved",
+    "local_preview": "User-reported works; explicitly not remote save proof",
+    "gallery_multi_upload_delete": "Previously user-reported PASS",
+    "catalog_loading": "User-reported PASS",
+    "new_location_UI": "Automated renders/tests only",
+    "OTP_delivery": "Unconfirmed; accepteddispatch does not prove delivery",
+    "Google_live_provider": "Not independentlyverified",
+    "remote_R2_video_restart_playback": "Not independentlyverified"
+  },
+  "maps_sdk": "Compatible resolution verified in isolated project; SDK absent from app, iOS13 unchanged, keys absent, no nativeMapsbuild claimed"
+}
