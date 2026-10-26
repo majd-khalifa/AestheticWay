@@ -8,6 +8,7 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import '../../../../core/auth/session_snapshot.dart';
 
 class ClinicFilterOptions {
   String selectedCity;
@@ -66,6 +67,7 @@ class FilterBottomSheet extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: isDark
           ? AppColors.backgroundBase
           : AppColors.lightCardSurface,
@@ -84,6 +86,8 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   late ClinicFilterOptions _filters;
   String? _categoryLabel;
+  final _session = SessionSnapshot();
+  bool _applied = false;
 
   @override
   void initState() {
@@ -117,25 +121,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.tune_rounded,
-                    size: 20,
-                    color: AppColors.accentChampagne,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    loc.tr('filter_title'),
-                    style: AppTypography.cardTitle.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: isDark
-                          ? AppColors.silverPrimary
-                          : AppColors.lightTextPrimary,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.tune_rounded,
+                      size: 20,
+                      color: AppColors.accentChampagne,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        loc.tr('filter_title'),
+                        style: AppTypography.cardTitle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -156,6 +164,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           const SizedBox(height: 12),
           const Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              loc.isArabic
+                  ? 'اختر المدينة والمنطقة الاختيارية والتصنيف الطبي المناسب.'
+                  : 'Choose a city, an optional area and a medical category.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.subtext(context),
+              ),
+            ),
+          ),
 
           Flexible(
             fit: FlexFit.loose,
@@ -249,7 +268,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             icon: Icons.check_circle_outline,
             isFullWidth: true,
             onPressed: () {
-              widget.onApply(_filters);
+              if (_applied || !_session.isCurrent) return;
+              _applied = true;
+              widget.onApply(_filters.copyWith());
               Navigator.pop(context);
             },
           ),

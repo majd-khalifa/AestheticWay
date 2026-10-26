@@ -4,7 +4,7 @@ import 'dart:typed_data';
 /// A genuine decodable H.264 fixture with mdat before moov. Add unreferenced
 /// mdat padding after its real samples: chunk offsets and all sample bytes stay
 /// unchanged. Exercises disk-backed multipart uploads without a 3MB binary in Git.
-Uint8List largeShowcaseBytes() {
+Uint8List largeShowcaseBytes({int paddingBytes = 3 * 1024 * 1024}) {
   final input = File(
     'test/fixtures/clinic_media/android_layout_showcase.mp4',
   ).readAsBytesSync();
@@ -17,7 +17,7 @@ Uint8List largeShowcaseBytes() {
       throw StateError('Invalid MP4 fixture');
     }
     if (type == 'mdat') {
-      const padding = 3 * 1024 * 1024;
+      final padding = paddingBytes;
       final output = Uint8List(input.length + padding);
       output.setRange(0, offset + size, input);
       output.setRange(

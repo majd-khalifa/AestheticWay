@@ -333,6 +333,8 @@ void main() {
     final wire = f.Adapter(
       (r) => f.body({
         ...f.clinic(),
+        'city': 'Dubai',
+        'emirate': 'Dubai',
         'google_place_id': 'QA-Changed',
         'google_sync_status': 'pending',
       }),
@@ -441,6 +443,8 @@ void main() {
       final old = api.dio.httpClientAdapter;
       final data = <String, dynamic>{
         ...f.clinic(),
+        'city': 'Dubai',
+        'emirate': 'Dubai',
         'google_place_id': 'QA-Preserved-Place',
         'google_maps_url':
             'https://www.google.com/maps/search/?api=1&query_place_id=QA-Preserved-Place',
@@ -472,23 +476,35 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       final field = find.byWidgetPredicate(
         (w) =>
-            w is TextField &&
-            w.decoration?.labelText == 'Search place or enter coordinates',
+            w is TextField && w.key == const ValueKey('clinic-address-search'),
       );
       await tester.ensureVisible(field);
       await tester.enterText(field, '25.11, 55.21');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
-      await tester.scrollUntilVisible(
-        find.text('Use This Location'),
-        240,
-        scrollable: find
-            .descendant(
-              of: find.byKey(const ValueKey('clinic-location-form')),
-              matching: find.byType(Scrollable),
-            )
-            .first,
+      final scroll = find
+          .descendant(
+            of: find.byKey(const ValueKey('clinic-location-form')),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      final position = tester.state<ScrollableState>(scroll).position;
+      for (var i = 0; i < 4; i++) {
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump();
+      }
+      final pinConfirmation = find.text(
+        'Confirm pin is the exact clinic location',
       );
+      await tester.ensureVisible(pinConfirmation);
+      await tester.tap(pinConfirmation);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.text('Confirm entrance'));
+      await tester.pump(const Duration(milliseconds: 400));
+      for (var i = 0; i < 4; i++) {
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump();
+      }
       await tester.tap(find.text('Use This Location'));
       await tester.pumpAndSettle();
       final patch =

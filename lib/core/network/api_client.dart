@@ -8,6 +8,7 @@ import 'api_config.dart';
 import 'api_exception.dart';
 import 'auth_interceptor.dart';
 import 'request_backpressure.dart';
+import '../services/video_upload_policy.dart';
 
 /// Centralized HTTP API Client powered by Dio
 class ApiClient {
@@ -201,7 +202,10 @@ class ApiClient {
     final isLeadWrite = method == 'POST' && path == ApiConfig.leads;
     if (isLeadWrite) _leadWriteBackpressure.check(scope);
     if (method != 'GET') _reads.clear();
+    final candidate = options.extra?[VideoUploadPolicy.traceKey];
+    final trace = candidate is VideoTransferTrace ? candidate : null;
     try {
+      trace?.start();
       final response = await dio.request<T>(
         path,
         data: data,
@@ -210,10 +214,12 @@ class ApiClient {
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
       );
+      trace?.finish(response.statusCode);
       _backpressure.succeeded(scope);
       if (isLeadWrite) _leadWriteBackpressure.succeeded(scope);
       return response;
     } on DioException catch (error) {
+      trace?.finish(error.response?.statusCode);
       final mapped = ApiException.fromDioError(error);
       // d1023b0 isolates lead creation/duplicate throttles. A rejected POST
       // must not block the patient's recovery GET to My Requests. Global GET

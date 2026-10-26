@@ -5,6 +5,8 @@ import '../../../core/widgets/async_action_button.dart';
 import '../data/google_business_repository.dart';
 import '../models/google_business.dart';
 import '../services/google_business_controller.dart';
+import '../../locations/data/uae_location_repository.dart';
+import '../../locations/models/uae_location.dart';
 
 /// Native Google Maps renderer is injectable only after restricted Android/iOS
 /// keys and an approved SDK are configured. Never render Places content on OSM.
@@ -17,10 +19,13 @@ class GoogleBusinessScreen extends StatefulWidget {
     this.repository,
     this.onEditManualPin,
     this.mapBuilder,
+    this.initialQuery = '',
+    this.searchCity = '',
   });
   final GoogleBusinessRepository? repository;
   final Future<void> Function()? onEditManualPin;
   final GoogleBusinessMapBuilder? mapBuilder;
+  final String initialQuery, searchCity;
   @override
   State<GoogleBusinessScreen> createState() => _GoogleBusinessScreenState();
 }
@@ -31,12 +36,39 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
   );
   final _query = TextEditingController();
   bool _confirming = false;
+  bool _includeCity = true;
   bool get ar => LocaleService().isArabic;
   String t(String en, String arabic) => ar ? arabic : en;
+  void _search(String value) {
+    final query = value
+        .replaceAll(RegExp(r'[\u200e\u200f\u202a-\u202e\u2066-\u2069]'), '')
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ');
+    final cityText = widget.searchCity.trim().isNotEmpty
+        ? widget.searchCity.trim()
+        : _controller.association?.city.trim() ?? '';
+    final city = currentUaeCatalog.resolve(cityText);
+    final label = city?.label(ar) ?? cityText;
+    final normalized = UaeLocationCatalog.normalize(query);
+    final includesCity = [cityText, city?.nameEn ?? '', city?.nameAr ?? '']
+        .where((v) => v.isNotEmpty)
+        .any((v) => normalized.contains(UaeLocationCatalog.normalize(v)));
+    final contextual =
+        query.isNotEmpty && _includeCity && label.isNotEmpty && !includesCity
+        ? '$query, $label'
+        : query;
+    // The endpoint has no locationBias parameter. This is explicit query text,
+    // not a fabricated API field, geocoder result or automatic identity link.
+    _controller.queryChanged(contextual.length <= 120 ? contextual : query);
+  }
+
   @override
   void initState() {
     super.initState();
-    _controller.reload();
+    _query.text = widget.initialQuery;
+    _controller.reload().then((_) {
+      if (mounted && _query.text.trim().isNotEmpty) _search(_query.text);
+    });
   }
 
   @override
@@ -117,6 +149,9 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
     listenable: Listenable.merge([_controller, LocaleService()]),
     builder: (context, _) {
       final c = _controller, current = c.association, place = c.selected;
+      final cityContext = widget.searchCity.trim().isNotEmpty
+          ? widget.searchCity
+          : current?.city ?? '';
       return PopScope(
         canPop: !c.saving,
         child: Scaffold(
@@ -275,7 +310,7 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                           c.repository.capabilities.search &&
                           !c.busy &&
                           !c.needsRefresh,
-                      onChanged: c.queryChanged,
+                      onChanged: _search,
                       decoration: InputDecoration(
                         labelText: t(
                           'Clinic or business name',
@@ -288,6 +323,25 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                         prefixIcon: const Icon(Icons.search),
                       ),
                     ),
+                    if (cityContext.trim().isNotEmpty)
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FilterChip(
+                          label: Text(
+                            t(
+                              'Include $cityContext in search',
+                              'تضمين $cityContext في البحث',
+                            ),
+                          ),
+                          selected: _includeCity,
+                          onSelected: c.busy || c.needsRefresh
+                              ? null
+                              : (value) {
+                                  setState(() => _includeCity = value);
+                                  _search(_query.text);
+                                },
+                        ),
+                      ),
                     if (c.repository.capabilities.search) _attribution(context),
                     if (c.searching) const LinearProgressIndicator(),
                     if (c.repository.capabilities.search &&
@@ -323,6 +377,10 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                               ),
                               Text(place.address),
                               Text(place.locality),
+                              SelectableText(
+                                '${place.latitude.toStringAsFixed(7)}, ${place.longitude.toStringAsFixed(7)}',
+                                textDirection: TextDirection.ltr,
+                              ),
                               _attribution(context),
                               SelectableText(
                                 place.placeId,
@@ -340,8 +398,8 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                                   ),
                                   child: Text(
                                     t(
-                                      'Embedded Google map preview is not configured. Review the exact Place ID in Google Maps before confirming.',
-                                      'معاينة خريطة Google المدمجة غير مهيأة. راجع معرّف المكان الصحيح في خرائط Google قبل التأكيد.',
+                                      'Inspect this exact business and its entrance in Google Maps before confirming. Linking does not move your independent clinic pin.',
+                                      'راجع هذا النشاط ومدخله في خرائط Google قبل التأكيد. الربط لا يغيّر دبوس العيادة المستقل.',
                                     ),
                                   ),
                                 ),

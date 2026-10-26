@@ -129,39 +129,45 @@ void main() {
       expect(fake.calls, contains('play:0'));
       await tester.tap(find.byIcon(Icons.pause));
       await tester.pumpAndSettle();
-      // video_player releases the platform player after its event subscription.
+      // A user pause keeps the decoded frame/position without slide advancement.
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 10)),
       );
       await tester.pump();
-      expect(fake.calls, containsAll(['pause:0', 'dispose:0']));
+      expect(fake.calls, contains('pause:0'));
+      expect(fake.calls, isNot(contains('dispose:0')));
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
     },
   );
-  testWidgets('playback seeks to zero at the 15-second policy boundary', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          children: const [
-            FeaturedAdSlideMedia(
-              imageUrl: null,
-              videoUrl: 'https://test.invalid/a.mp4',
-            ),
-          ],
+  testWidgets(
+    'playback stops once at the 15-second policy boundary; replay is explicit',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ListView(
+            children: const [
+              FeaturedAdSlideMedia(
+                imageUrl: null,
+                videoUrl: 'https://test.invalid/a.mp4',
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    fake.position = const Duration(seconds: 15);
-    await tester.pump(const Duration(milliseconds: 600));
-    await tester.pump();
-    expect(fake.calls, contains('seek:0:0'));
-    await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
-  });
+      );
+      await tester.pumpAndSettle();
+      fake.position = const Duration(seconds: 15);
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump();
+      expect(fake.calls, contains('pause:0'));
+      expect(fake.calls, isNot(contains('seek:0:0')));
+      await tester.tap(find.byIcon(Icons.play_arrow));
+      await tester.pump();
+      expect(fake.calls, contains('seek:0:0'));
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+    },
+  );
   testWidgets(
     'inactive slides allocate no codec, active slide pauses and disposes when tab hides',
     (tester) async {

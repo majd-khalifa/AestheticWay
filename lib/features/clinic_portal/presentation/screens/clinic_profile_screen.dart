@@ -1809,10 +1809,10 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                 city: selectedLocation?.city ?? clinic.city,
                                 addressAr:
                                     selectedLocation?.addressAr ??
-                                    clinic.addressAr,
+                                    clinic.editableAddressAr,
                                 addressEn:
                                     selectedLocation?.addressEn ??
-                                    clinic.addressEn,
+                                    clinic.editableAddressEn,
                                 latitude:
                                     selectedLocation?.latitude ??
                                     clinic.latitude,
@@ -1973,20 +1973,14 @@ class ClinicProfileScreenState extends State<ClinicProfileScreen> {
       final result = await showClinicLocationSelector(
         context,
         city: clinic.city,
-        addressAr: clinic.addressAr,
-        addressEn: clinic.addressEn,
+        addressAr: clinic.editableAddressAr,
+        addressEn: clinic.editableAddressEn,
         latitude: clinic.latitude,
         longitude: clinic.longitude,
       );
       if (result == null || !context.mounted) return;
       editorSession.ensureCurrent();
-      await service.updateClinicProfile(
-        nameAr: clinic.nameAr,
-        nameEn: clinic.nameEn,
-        descriptionAr: clinic.descriptionAr,
-        descriptionEn: clinic.descriptionEn,
-        phone: clinic.mainPhone,
-        whatsapp: clinic.whatsapp,
+      await service.updateClinicCoordinates(
         addressAr: result.addressAr,
         addressEn: result.addressEn,
         city: result.city,

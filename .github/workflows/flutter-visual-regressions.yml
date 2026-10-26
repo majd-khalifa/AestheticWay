@@ -109,6 +109,13 @@ jobs:
           flutter test test/backend_465bf30_integration_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-465bf30"
           --reporter expanded
+      - name: Final physical UX regressions and bilingual renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/final_physical_video_ux_test.dart test/final_physical_upload_test.dart
+          test/final_physical_location_test.dart test/final_physical_ui_preview_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/final-physical-ux"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -146,3 +153,4 @@ jobs:
             ${{ runner.temp }}/backend-401560b/**
             ${{ runner.temp }}/physical-qa-remediation/**
             ${{ runner.temp }}/backend-465bf30/**
+            ${{ runner.temp }}/final-physical-ux/**

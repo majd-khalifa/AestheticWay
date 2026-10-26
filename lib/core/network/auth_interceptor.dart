@@ -5,6 +5,7 @@ import '../auth/guest_auth_guard.dart';
 import '../auth/token_storage.dart';
 import '../localization/app_locale.dart';
 import 'api_config.dart';
+import '../services/video_upload_policy.dart';
 
 /// A single refresh Future is shared by all requests for the same session.
 /// Retries leave the refresh critical section before re-entering Dio.
@@ -247,6 +248,11 @@ class AuthInterceptor extends Interceptor {
     }
     if (epoch != _tokenStorage.sessionEpoch ||
         request.cancelToken?.isCancelled == true) {
+      handler.next(error);
+      return;
+    }
+    if (request.extra[VideoUploadPolicy.noReplayKey] == true) {
+      // Credentials may be refreshed, but a video body is never replayed.
       handler.next(error);
       return;
     }

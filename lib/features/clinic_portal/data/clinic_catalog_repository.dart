@@ -8,6 +8,7 @@ import '../../../core/network/api_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/services/media_upload_service.dart';
 import '../../../core/services/media_payload_builder.dart';
+import '../../../core/services/video_upload_policy.dart';
 import '../../articles/models/article_model.dart';
 import '../../clinics/models/clinic_model.dart';
 import '../../offers/models/offer_model.dart';
@@ -546,12 +547,23 @@ class ClinicCatalogRepository {
     );
 
     session.ensureCurrent();
-    final response = await _api.patch(
-      ApiConfig.clinicProfile,
-      data: requestData,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
+    final video = requestData is FormData
+        ? requestData.files.where((f) => f.key == 'video_ad_file').firstOrNull
+        : null;
+    final trace = video == null ? null : VideoTransferTrace(video.value.length);
+    late final Response response;
+    try {
+      response = await _api.patch(
+        ApiConfig.clinicProfile,
+        data: requestData,
+        options: trace == null ? null : VideoUploadPolicy.options(trace),
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+    } on ApiException catch (e) {
+      if (trace != null) throw VideoTransferException(e, trace.snapshot());
+      rethrow;
+    }
     session.ensureCurrent();
     return _profileFromResponse(response.data, session);
   }

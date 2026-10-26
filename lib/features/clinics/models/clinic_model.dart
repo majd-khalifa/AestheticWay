@@ -121,10 +121,17 @@ class ClinicModel {
   final String licenseAuthority; // DHA, DOH, MOHAP
   final String licenseNumber;
   final String city; // Dubai, Abu Dhabi
+  final String emirate;
   final String areaAr;
   final String areaEn;
   final String addressAr;
   final String addressEn;
+
+  /// Display fallbacks are useful to patients, but never prefill an editor's
+  /// missing language with the other language as if it were a translation.
+  final String? rawAddressAr, rawAddressEn;
+  String get editableAddressAr => rawAddressAr ?? addressAr;
+  String get editableAddressEn => rawAddressEn ?? addressEn;
   final double distanceKm;
   final String mainPhone;
   final String receptionPhone;
@@ -171,10 +178,13 @@ class ClinicModel {
     this.licenseAuthority = 'DHA',
     this.licenseNumber = '',
     required this.city,
+    this.emirate = '',
     required this.areaAr,
     this.areaEn = '',
     required this.addressAr,
     this.addressEn = '',
+    this.rawAddressAr,
+    this.rawAddressEn,
     this.distanceKm = 0.0,
     this.mainPhone = '',
     this.receptionPhone = '',
@@ -300,10 +310,17 @@ class ClinicModel {
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       licenseNumber: json['license_number']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
+      emirate: json['emirate']?.toString() ?? '',
       areaAr: json['area_ar'] ?? '',
       areaEn: json['area_en'] ?? '',
       addressAr: firstSourceText([json['address_ar'], json['address_en']]),
       addressEn: firstSourceText([json['address_en'], json['address_ar']]),
+      rawAddressAr: json['address_ar'] is String
+          ? (json['address_ar'] as String).trim()
+          : '',
+      rawAddressEn: json['address_en'] is String
+          ? (json['address_en'] as String).trim()
+          : '',
       distanceKm: double.tryParse(json['distance_km']?.toString() ?? '') ?? 0.0,
       mainPhone: json['phone']?.toString() ?? '',
       receptionPhone: json['phone']?.toString() ?? '',
@@ -388,6 +405,7 @@ class ClinicModel {
     String? licenseAuthority,
     String? licenseNumber,
     String? city,
+    String? emirate,
     String? areaAr,
     String? areaEn,
     String? addressAr,
@@ -434,10 +452,13 @@ class ClinicModel {
       licenseAuthority: licenseAuthority ?? this.licenseAuthority,
       licenseNumber: licenseNumber ?? this.licenseNumber,
       city: city ?? this.city,
+      emirate: emirate ?? this.emirate,
       areaAr: areaAr ?? this.areaAr,
       areaEn: areaEn ?? this.areaEn,
       addressAr: addressAr ?? this.addressAr,
       addressEn: addressEn ?? this.addressEn,
+      rawAddressAr: addressAr ?? rawAddressAr,
+      rawAddressEn: addressEn ?? rawAddressEn,
       distanceKm: distanceKm ?? this.distanceKm,
       mainPhone: mainPhone ?? this.mainPhone,
       receptionPhone: receptionPhone ?? this.receptionPhone,

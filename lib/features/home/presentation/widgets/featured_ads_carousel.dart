@@ -5,12 +5,11 @@ import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:aesthetic_way/core/widgets/viewport_activity.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import '../../../../core/widgets/content_sized_page_view.dart';
 import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/widgets/async_action_button.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
+import 'package:aesthetic_way/core/widgets/patient_video.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
@@ -50,6 +49,8 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
   bool _tabActive = true;
   bool _foreground = true;
   bool _reduceMotion = false;
+  PatientVideoPhase _videoPhase = PatientVideoPhase.poster;
+  bool _advancing = false;
 
   @override
   void initState() {
@@ -67,12 +68,26 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
   @override
   void didUpdateWidget(covariant FeaturedAdsCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
+    String? signature(FeaturedAdsCarousel value) {
+      if (_currentIndex >= value.ads.length) return null;
+      final c = value.ads[_currentIndex];
+      final placement = _currentIndex < (value.placements?.length ?? 0)
+          ? value.placements![_currentIndex]
+          : null;
+      return '${c.id}:${placement?.videoUrl ?? c.videoUrl}:${c.subscriptionTier}';
+    }
+
+    if (signature(oldWidget) != signature(widget)) {
+      _videoPhase = PatientVideoPhase.poster;
+    }
     if ((oldWidget.ads.length == 1) != (widget.ads.length == 1)) {
       final previous = _pageController;
       _pageController = PageController(
         viewportFraction: widget.ads.length == 1 ? 1 : .72,
       );
       _currentIndex = 0;
+      _advancing = false;
+      _videoPhase = PatientVideoPhase.poster;
       WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
     }
     if (widget.ads.isNotEmpty && _currentIndex >= widget.ads.length) {
@@ -108,26 +123,79 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
         !_tabActive ||
         !_foreground ||
         !_inViewport ||
-        _reduceMotion) {
+        _reduceMotion ||
+        _isUserInteracting ||
+        _advancing ||
+        const {
+          PatientVideoPhase.initializing,
+          PatientVideoPhase.buffering,
+          PatientVideoPhase.playing,
+          PatientVideoPhase.paused,
+        }.contains(_videoPhase)) {
       return;
     }
 
-    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 4000), (
-      timer,
-    ) {
-      if (!_isUserInteracting && mounted && _pageController.hasClients) {
-        final nextPage = (_currentIndex + 1) % widget.ads.length;
-        _pageController.animateToPage(
-          nextPage,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOutCubic,
-        );
+    _autoScrollTimer = Timer(const Duration(seconds: 4), _advance);
+  }
+
+  Future<void> _advance() async {
+    if (!mounted ||
+        widget.ads.length < 2 ||
+        _advancing ||
+        _isUserInteracting ||
+        !_tabActive ||
+        !_foreground ||
+        !_inViewport ||
+        _reduceMotion ||
+        !_pageController.hasClients) {
+      return;
+    }
+    _autoScrollTimer?.cancel();
+    final controller = _pageController;
+    _advancing = true;
+    try {
+      await controller.animateToPage(
+        (_currentIndex + 1) % widget.ads.length,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+      );
+    } finally {
+      if (mounted && identical(controller, _pageController)) {
+        _advancing = false;
+        _startAutoScroll();
       }
+    }
+  }
+
+  void _videoChanged(int index, String clinicId, PatientVideoPhase phase) {
+    if (!mounted ||
+        index != _currentIndex ||
+        index >= widget.ads.length ||
+        widget.ads[index].id != clinicId) {
+      return;
+    }
+    _videoPhase = phase;
+    _autoScrollTimer?.cancel();
+    if (phase == PatientVideoPhase.completed) {
+      // Completion advances exactly once. Reduced motion/manual interaction
+      // retains the slide; no independent video or competing scroll timer.
+      if (!_isUserInteracting) unawaited(_advance());
+    } else {
+      _startAutoScroll();
+    }
+  }
+
+  void _pageChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+      _videoPhase = PatientVideoPhase.poster;
     });
+    _startAutoScroll();
   }
 
   void _onUserTouchDown() {
     _isUserInteracting = true;
+    _autoScrollTimer?.cancel();
     _resumeTimer?.cancel();
   }
 
@@ -138,6 +206,7 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
         setState(() {
           _isUserInteracting = false;
         });
+        _startAutoScroll();
       }
     });
   }
@@ -197,9 +266,11 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
               // Carousel Container with Touch Listener
               NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
-                  if (notification is ScrollStartNotification) {
+                  if (notification is ScrollStartNotification &&
+                      notification.dragDetails != null) {
                     _onUserTouchDown();
-                  } else if (notification is ScrollEndNotification) {
+                  } else if (notification is ScrollEndNotification &&
+                      _isUserInteracting) {
                     _onUserTouchUp();
                   }
                   return false;
@@ -208,12 +279,15 @@ class _FeaturedAdsCarouselState extends State<FeaturedAdsCarousel>
                   controller: _pageController,
                   padEnds: false,
                   itemCount: widget.ads.length,
-                  onPageChanged: (index) =>
-                      setState(() => _currentIndex = index),
+                  onPageChanged: _pageChanged,
                   itemBuilder: (context, index) => _FeaturedAdCard(
                     clinic: widget.ads[index],
                     mediaAspectRatio: widget.ads.length == 1 ? 2.5 : 16 / 9,
-                    placement: widget.placements?[index],
+                    placement: index < (widget.placements?.length ?? 0)
+                        ? widget.placements![index]
+                        : null,
+                    onVideoPhase: (phase) =>
+                        _videoChanged(index, widget.ads[index].id, phase),
                     loc: loc,
                     sheenAnimation: _sheenController,
                     isActive: _currentIndex == index,
@@ -290,6 +364,7 @@ class _FeaturedAdCard extends StatefulWidget {
   final VoidCallback? onRequestTap;
   final VoidCallback onContactTap;
   final AsyncPatientAction? onRequestAction;
+  final ValueChanged<PatientVideoPhase> onVideoPhase;
 
   const _FeaturedAdCard({
     required this.clinic,
@@ -302,6 +377,7 @@ class _FeaturedAdCard extends StatefulWidget {
     required this.onRequestTap,
     required this.onContactTap,
     this.onRequestAction,
+    required this.onVideoPhase,
   });
 
   @override
@@ -336,6 +412,7 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
               videoUrl: _video,
               fallbackLogoUrl: widget.clinic.logoUrl,
               isActive: widget.isActive,
+              onPhase: widget.onVideoPhase,
             ),
             if (_video?.isNotEmpty == true)
               PositionedDirectional(
@@ -351,7 +428,7 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    widget.loc.isArabic ? 'فيديو 15 ثانية' : '15s Video',
+                    widget.loc.isArabic ? 'فيديو العيادة' : 'Clinic video',
                     style: const TextStyle(color: Colors.white, fontSize: 11),
                   ),
                 ),
@@ -363,15 +440,8 @@ class _FeaturedAdCardState extends State<_FeaturedAdCard> {
   }
 }
 
-class FeaturedAdSlideMedia extends StatefulWidget {
-  static const Duration maxVideoDuration = Duration(seconds: 15);
-
-  final String? imageUrl;
-  final double aspectRatio;
-  final String? fallbackLogoUrl;
-  final String? videoUrl;
-  final bool isActive;
-
+class FeaturedAdSlideMedia extends StatelessWidget {
+  static const Duration maxVideoDuration = PatientVideo.maximum;
   const FeaturedAdSlideMedia({
     super.key,
     required this.imageUrl,
@@ -379,271 +449,26 @@ class FeaturedAdSlideMedia extends StatefulWidget {
     this.fallbackLogoUrl,
     this.videoUrl,
     this.isActive = true,
+    this.onPhase,
   });
-
+  final String? imageUrl, fallbackLogoUrl, videoUrl;
+  final double aspectRatio;
+  final bool isActive;
+  final ValueChanged<PatientVideoPhase>? onPhase;
   @override
-  State<FeaturedAdSlideMedia> createState() => _FeaturedAdSlideMediaState();
-}
-
-class _FeaturedAdSlideMediaState extends State<FeaturedAdSlideMedia>
-    with WidgetsBindingObserver {
-  VideoPlayerController? _controller;
-  bool _isVideoInitialized = false;
-  bool _hasVideoError = false;
-  bool _visible = false;
-  bool _tabActive = true;
-  bool _foreground = true;
-  bool _seeking = false;
-  bool _reduceMotion = false;
-  bool _requestedPlayback = false;
-  bool _userPaused = false;
-  bool get _canPlay =>
-      mounted &&
-      widget.isActive &&
-      _visible &&
-      _tabActive &&
-      _foreground &&
-      !_userPaused &&
-      (!_reduceMotion || _requestedPlayback);
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _foreground =
-        WidgetsBinding.instance.lifecycleState == null ||
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _reduceMotion = MediaQuery.disableAnimationsOf(context);
-    _tabActive =
-        TabActivity.isActive(context) &&
-        (ModalRoute.isCurrentOf(context) ?? true);
-    _syncPlayback();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    _foreground = state == AppLifecycleState.resumed;
-    _syncPlayback();
-  }
-
-  @override
-  void didUpdateWidget(covariant FeaturedAdSlideMedia oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.videoUrl != widget.videoUrl) {
-      _disposeController();
-      _requestedPlayback = false;
-      _userPaused = false;
-    }
-    _syncPlayback();
-  }
-
-  void _syncPlayback() {
-    if (!_canPlay) {
-      if (_controller != null) {
-        _disposeController();
-        if (mounted) setState(() {});
-      }
-      return;
-    }
-    if (_controller == null && !_hasVideoError) {
-      _initVideoIfNeeded();
-    }
-  }
-
-  Future<void> _initVideoIfNeeded() async {
-    final resolved = resolveNetworkImageUrl(widget.videoUrl);
-    if (resolved == null || !_canPlay || _controller != null) return;
-    final controller = VideoPlayerController.networkUrl(
-      Uri.parse(resolved),
-      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false),
-    );
-    setState(() => _controller = controller);
-    controller.addListener(_onVideoTick);
-    try {
-      await controller.initialize();
-      if (!mounted || !identical(_controller, controller)) return;
-      await controller.setVolume(0);
-      await controller.setLooping(true);
-      if (!_canPlay || !identical(_controller, controller)) return;
-      await controller.play();
-      if (mounted && identical(_controller, controller)) {
-        setState(() {
-          _isVideoInitialized = true;
-          _hasVideoError = false;
-        });
-      }
-    } catch (_) {
-      if (mounted && identical(_controller, controller)) {
-        _disposeController();
-        setState(() => _hasVideoError = true);
-      }
-    }
-  }
-
-  void _onVideoTick() {
-    final controller = _controller;
-    if (controller == null || !mounted) return;
-    if (controller.value.hasError && !_hasVideoError) {
-      _disposeController();
-      setState(() => _hasVideoError = true);
-      return;
-    }
-    if (_canPlay &&
-        controller.value.isInitialized &&
-        !_seeking &&
-        controller.value.position >= FeaturedAdSlideMedia.maxVideoDuration) {
-      _seeking = true;
-      controller
-          .seekTo(Duration.zero)
-          .catchError((_) {})
-          .whenComplete(() => _seeking = false);
-    }
-  }
-
-  void _disposeController() {
-    final controller = _controller;
-    _controller = null;
-    _isVideoInitialized = false;
-    _hasVideoError = false;
-    if (controller != null) {
-      controller.removeListener(_onVideoTick);
-      // Stop first, then release the codec. Late initialize completions are ignored.
-      unawaited(controller.pause().catchError((_) {}));
-      unawaited(controller.dispose().catchError((_) {}));
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _disposeController();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = LocaleService();
-    final hasVideo = resolveNetworkImageUrl(widget.videoUrl) != null;
-    Widget media = PatientMediaBanner(
-      category: PatientMediaCategory.clinicCover,
-      source: widget.imageUrl,
-      aspectRatio: widget.aspectRatio,
-    );
-    // A video without a poster still needs measurable bounds: otherwise the
-    // visibility observer sees zero height and can never initialize playback.
-    if (hasVideo) {
-      media = AspectRatio(
-        aspectRatio: widget.aspectRatio,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ColoredBox(color: AppColors.surfaceSubtle(context)),
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.smart_display_outlined,
-                    color: AppColors.goldText(context),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    loc.isArabic
-                        ? 'فيديو ترويجي · 15 ثانية'
-                        : 'Promotional video · 15s',
-                    style: TextStyle(
-                      color: AppColors.subtext(context),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            media,
-          ],
-        ),
-      );
-    }
-    if (_isVideoInitialized && !_hasVideoError && _controller != null) {
-      final size = _controller!.value.size;
-      media = AspectRatio(
-        aspectRatio: widget.aspectRatio,
-        child: ClipRect(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            clipBehavior: Clip.hardEdge,
-            child: SizedBox(
-              width: size.width > 0 ? size.width : 16,
-              height: size.height > 0 ? size.height : 9,
-              child: VideoPlayer(_controller!),
-            ),
-          ),
-        ),
-      );
-    }
-    if (hasVideo) {
-      final paused = _userPaused || (_reduceMotion && !_requestedPlayback);
-      final initializing = _controller != null && !_isVideoInitialized;
-      final label = initializing
-          ? (loc.isArabic ? 'جارٍ تحميل الفيديو' : 'Loading video')
-          : _hasVideoError
-          ? (loc.isArabic ? 'إعادة تشغيل الفيديو' : 'Retry video')
-          : paused
-          ? (loc.isArabic ? 'تشغيل الفيديو' : 'Play video')
-          : (loc.isArabic ? 'إيقاف الفيديو مؤقتاً' : 'Pause video');
-      media = Stack(
-        children: [
-          media,
-          PositionedDirectional(
-            end: 8,
-            bottom: 8,
-            child: IconButton.filled(
-              tooltip: label,
-              onPressed: initializing
-                  ? null
-                  : () {
-                      setState(() {
-                        if (_hasVideoError) {
-                          _hasVideoError = false;
-                          _userPaused = false;
-                        } else {
-                          _userPaused = !paused;
-                        }
-                        _requestedPlayback = true;
-                      });
-                      _syncPlayback();
-                    },
-              icon: initializing
-                  ? SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        semanticsLabel: label,
-                      ),
-                    )
-                  : Icon(
-                      _hasVideoError
-                          ? Icons.refresh
-                          : paused
-                          ? Icons.play_arrow
-                          : Icons.pause,
-                    ),
-            ),
-          ),
-        ],
-      );
-    }
-    return ViewportActivity(
-      onChanged: (visible) {
-        _visible = visible;
-        _syncPlayback();
-      },
-      child: media,
-    );
-  }
+  Widget build(BuildContext context) => PatientVideo.publicUrl(videoUrl) == null
+      ? PatientMediaBanner(
+          category: PatientMediaCategory.clinicCover,
+          source: imageUrl,
+          aspectRatio: aspectRatio,
+        )
+      : PatientVideo(
+          videoUrl: videoUrl!,
+          posterUrl: imageUrl,
+          autoplay: true,
+          isActive: isActive,
+          aspectRatio: aspectRatio,
+          allowFullscreen: false,
+          onPhase: onPhase,
+        );
 }

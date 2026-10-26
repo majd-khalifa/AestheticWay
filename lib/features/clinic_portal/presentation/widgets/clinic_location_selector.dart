@@ -1,4 +1,8 @@
 import '../../../locations/models/uae_location.dart';
+import '../../data/clinic_address_search.dart';
+import '../../../google_business/presentation/google_business_screen.dart';
+import '../../../google_business/data/google_business_repository.dart';
+import '../../../../core/auth/session_snapshot.dart';
 import '../../../locations/presentation/uae_location_picker.dart';
 import '../../../locations/data/uae_location_repository.dart';
 import '../../../../core/utils/clinic_location.dart';
@@ -29,10 +33,10 @@ class ClinicLocationSelection {
   static bool validCoordinates(double lat, double lng) =>
       lat.isFinite &&
       lng.isFinite &&
-      lat >= -90 &&
-      lat <= 90 &&
-      lng >= -180 &&
-      lng <= 180 &&
+      lat >= 22 &&
+      lat <= 26.5 &&
+      lng >= 51 &&
+      lng <= 57 &&
       (lat != 0 || lng != 0);
 }
 
@@ -51,23 +55,6 @@ const _emirates = <String, (String, double, double)>{
   'Fujairah': ('الفجيرة', 25.1288, 56.3265),
   'Umm Al Quwain': ('أم القيوين', 25.5647, 55.5552),
 };
-const _districts = <String, List<(String, String, double, double)>>{
-  'Dubai': [
-    ('Dubai Healthcare City', 'مدينة دبي الطبية', 25.2315, 55.3242),
-    ('Jumeirah', 'جميرا', 25.2105, 55.2531),
-    ('Al Barsha', 'البرشاء', 25.1124, 55.2006),
-  ],
-  'Abu Dhabi': [
-    ('Al Bateen', 'البطين', 24.4516, 54.3531),
-    ('Khalifa City', 'مدينة خليفة', 24.4257, 54.6056),
-  ],
-  'Sharjah': [('Al Majaz', 'المجاز', 25.3248, 55.3937)],
-  'Ajman': [('Al Nuaimiya', 'النعيمية', 25.3901, 55.4532)],
-  'Ras Al Khaimah': [('Al Nakheel', 'النخيل', 25.7919, 55.9638)],
-  'Fujairah': [('City Centre', 'وسط المدينة', 25.1288, 56.3265)],
-  'Umm Al Quwain': [('Al Salamah', 'السلامة', 25.5398, 55.5513)],
-};
-
 Future<ClinicLocationSelection?> showClinicLocationSelector(
   BuildContext context, {
   required String city,
@@ -75,6 +62,8 @@ Future<ClinicLocationSelection?> showClinicLocationSelector(
   required String addressEn,
   required double latitude,
   required double longitude,
+  ClinicAddressSearch? addressSearch,
+  GoogleBusinessRepository? googleRepository,
 }) => showModalBottomSheet<ClinicLocationSelection>(
   context: context,
   isScrollControlled: true,
@@ -86,6 +75,8 @@ Future<ClinicLocationSelection?> showClinicLocationSelector(
     addressEn: addressEn,
     latitude: latitude,
     longitude: longitude,
+    addressSearch: addressSearch,
+    googleRepository: googleRepository,
   ),
 );
 
@@ -96,7 +87,11 @@ class _LocationSheet extends StatefulWidget {
     required this.addressEn,
     required this.latitude,
     required this.longitude,
+    this.addressSearch,
+    this.googleRepository,
   });
+  final ClinicAddressSearch? addressSearch;
+  final GoogleBusinessRepository? googleRepository;
   final String city, addressAr, addressEn;
   final double latitude, longitude;
   @override
@@ -105,14 +100,13 @@ class _LocationSheet extends StatefulWidget {
 
 class _LocationSheetState extends State<_LocationSheet> {
   final _map = MapController();
-  // A separate public client deliberately avoids the app's authentication interceptor.
-  final _searchClient = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      headers: {'User-Agent': 'AestheticWay/1.0 (https://aestheticway.ae)'},
-    ),
-  );
+  late final _addresses = widget.addressSearch ?? ClinicAddressSearch();
+  final _session = SessionSnapshot();
+  final _latitude = TextEditingController(),
+      _longitude = TextEditingController();
+  bool _pointSelected = false;
+  String? _notice;
+  bool _missingEnglish = false, _missingArabic = false;
   final _query = TextEditingController();
   late final TextEditingController _addressAr, _addressEn;
   late String _city;
@@ -120,16 +114,14 @@ class _LocationSheetState extends State<_LocationSheet> {
   late LatLng _point;
   bool _confirmed = false, _searching = false;
   String? _error;
-  List<Map<String, dynamic>> _results = [];
+  List<ClinicAddressResult> _results = [];
   final _cancel = CancelToken();
   DateTime? _lastSearch;
   bool get _ar => LocaleService().isArabic;
   @override
   void initState() {
     super.initState();
-    _city =
-        currentUaeCatalog.resolve(widget.city)?.nameEn ??
-        (widget.city.isNotEmpty ? widget.city : 'Dubai');
+    _city = currentUaeCatalog.resolve(widget.city)?.nameEn ?? widget.city;
     _confirmed = ClinicLocationSelection.validCoordinates(
       widget.latitude,
       widget.longitude,
@@ -144,6 +136,9 @@ class _LocationSheetState extends State<_LocationSheet> {
     _point = _confirmed
         ? LatLng(widget.latitude, widget.longitude)
         : LatLng(e.$2, e.$3);
+    _pointSelected = _confirmed;
+    _latitude.text = _point.latitude.toStringAsFixed(7);
+    _longitude.text = _point.longitude.toStringAsFixed(7);
     _addressAr = TextEditingController(text: widget.addressAr);
     _addressEn = TextEditingController(text: widget.addressEn);
   }
@@ -151,7 +146,9 @@ class _LocationSheetState extends State<_LocationSheet> {
   @override
   void dispose() {
     _cancel.cancel();
-    _searchClient.close(force: true);
+    if (widget.addressSearch == null) _addresses.close();
+    _latitude.dispose();
+    _longitude.dispose();
     _map.dispose();
     _query.dispose();
     _addressAr.dispose();
@@ -160,9 +157,20 @@ class _LocationSheetState extends State<_LocationSheet> {
   }
 
   void _select(LatLng point, {bool move = true}) {
+    if (!ClinicAddressResult.withinUae(point.latitude, point.longitude)) {
+      setState(
+        () => _error = _ar
+            ? 'اختر إحداثيات داخل الإمارات بترتيب خط العرض ثم خط الطول.'
+            : 'Choose UAE coordinates in latitude, longitude order.',
+      );
+      return;
+    }
     setState(() {
       _point = point;
-      _confirmed = true;
+      _confirmed = false;
+      _pointSelected = true;
+      _latitude.text = point.latitude.toStringAsFixed(7);
+      _longitude.text = point.longitude.toStringAsFixed(7);
       _error = null;
     });
     if (move) _map.move(point, 15);
@@ -176,8 +184,12 @@ class _LocationSheetState extends State<_LocationSheet> {
       _confirmed = false;
       _point = LatLng(e.$2, e.$3);
       _results = [];
-      _addressEn.text = value.addressWithArea(_addressEn.text, arabic: false);
-      _addressAr.text = value.addressWithArea(_addressAr.text, arabic: true);
+      _pointSelected = false;
+      _latitude.text = _point.latitude.toStringAsFixed(7);
+      _longitude.text = _point.longitude.toStringAsFixed(7);
+      _notice = _ar
+          ? 'راجع العنوان بعد تغيير المنطقة؛ احتُفظ بالنص السابق.'
+          : 'Review the address after changing locality; your existing text was retained.';
     });
     _map.move(_point, 10);
   }
@@ -198,6 +210,14 @@ class _LocationSheetState extends State<_LocationSheet> {
       _select(LatLng(coordinates[0]!, coordinates[1]!));
       return;
     }
+    if (coordinates.length == 2 && coordinates.every((n) => n != null)) {
+      setState(
+        () => _error = _ar
+            ? 'الإحداثيات خارج الإمارات أو معكوسة.'
+            : 'Coordinates are outside UAE or reversed.',
+      );
+      return;
+    }
     // Explicit searches only; no autocomplete or background address uploads.
     if (_lastSearch != null &&
         DateTime.now().difference(_lastSearch!) < const Duration(seconds: 1)) {
@@ -210,27 +230,18 @@ class _LocationSheetState extends State<_LocationSheet> {
       _results = [];
     });
     try {
-      final response = await _searchClient.get<List<dynamic>>(
-        'https://nominatim.openstreetmap.org/search',
-        queryParameters: {
-          'q': q,
-          'format': 'jsonv2',
-          'countrycodes': 'ae',
-          'limit': 4,
-          'accept-language': _ar ? 'ar' : 'en',
-          'addressdetails': 1,
-        },
+      final rows = await _addresses.search(
+        q,
+        language: _ar ? 'ar' : 'en',
         cancelToken: _cancel,
       );
-      if (!mounted) return;
+      if (!mounted || !_session.isCurrent || q != _query.text.trim()) return;
       setState(() {
-        _results = (response.data ?? [])
-            .map((v) => Map<String, dynamic>.from(v as Map))
-            .toList();
+        _results = rows;
         if (_results.isEmpty) {
           _error = _ar
-              ? 'لم نجد المكان. اختر المنطقة واضبط الدبوس.'
-              : 'No place found. Choose an area and adjust the pin.';
+              ? 'لم نجد عنواناً. ابحث عن اسم العيادة عبر Google Business أو اضبط المدخل يدوياً.'
+              : 'No address found. Search clinic names through Google Business, or choose the entrance manually.';
         }
       });
     } catch (_) {
@@ -244,6 +255,131 @@ class _LocationSheetState extends State<_LocationSheet> {
     } finally {
       if (mounted) setState(() => _searching = false);
     }
+  }
+
+  Future<void> _applyAddress(ClinicAddressResult result) async {
+    if (!_session.isCurrent) return;
+    final catalog = currentUaeCatalog;
+    final city = catalog.resolve(result.city);
+    final selected = catalog.resolve(_city);
+    final emirate = catalog.emirates
+        .where(
+          (e) => [e.code, e.nameEn, e.nameAr].any(
+            (v) =>
+                UaeLocationCatalog.normalize(v) ==
+                UaeLocationCatalog.normalize(result.emirate),
+          ),
+        )
+        .firstOrNull;
+    if (emirate != null &&
+        ((city != null && city.emirateCode != emirate.code) ||
+            (city == null && selected?.emirateCode != emirate.code))) {
+      setState(
+        () => _error = _ar
+            ? 'عنوان النتيجة لا يطابق الإمارة المختارة. راجع الإمارة والمدينة أولاً.'
+            : 'The result does not match the selected emirate. Review the emirate and city first.',
+      );
+      return;
+    }
+    final replace =
+        (_addressEn.text.trim().isNotEmpty &&
+            result.addressEn.isNotEmpty &&
+            _addressEn.text.trim() != result.addressEn) ||
+        (_addressAr.text.trim().isNotEmpty &&
+            result.addressAr.isNotEmpty &&
+            _addressAr.text.trim() != result.addressAr) ||
+        (city != null && city.code != selected?.code);
+    if (replace) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          scrollable: true,
+          title: Text(
+            _ar ? 'مراجعة العنوان المقترح' : 'Review proposed address',
+          ),
+          content: Text(
+            '${result.title}\n\n${_ar ? 'هل تريد استبدال النص المتوفر وتحديث المدينة المطابقة؟ ستبقى اللغة غير المتوفرة كما هي للمراجعة.' : 'Replace available address text and update a matching catalog city? Unavailable language text is retained for review.'}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(_ar ? 'إلغاء' : 'Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(_ar ? 'استخدام العنوان' : 'Use address'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted || !_session.isCurrent) return;
+    }
+    _select(LatLng(result.latitude, result.longitude));
+    setState(() {
+      if (city != null && city.code != selected?.code) {
+        _city = city.nameEn;
+        _areaCode = null;
+      }
+      if (result.addressEn.isNotEmpty) _addressEn.text = result.addressEn;
+      if (result.addressAr.isNotEmpty) _addressAr.text = result.addressAr;
+      _missingEnglish = result.addressEn.isEmpty;
+      _missingArabic = result.addressAr.isEmpty;
+      _notice = _ar
+          ? 'العنوان من OpenStreetMap. راجع المدينة والنص باللغتين، ثم أكّد المدخل.'
+          : 'Address from OpenStreetMap. Review the city and both language fields, then confirm the entrance.';
+      _results = [];
+    });
+  }
+
+  Future<void> _confirmPin() async {
+    final city = currentUaeCatalog.resolve(_city);
+    if (!_pointSelected || city == null || !_session.isCurrent) {
+      setState(
+        () => _error = _ar
+            ? 'اختر المدينة من القائمة واضبط المدخل أولاً.'
+            : 'Choose a catalog city and select the entrance first.',
+      );
+      return;
+    }
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        scrollable: true,
+        title: Text(_ar ? 'تأكيد المدخل الدقيق' : 'Confirm exact entrance'),
+        content: Text(
+          '${city.label(_ar)} · ${currentUaeCatalog.emirateFor(city).label(_ar)}\n${_point.latitude.toStringAsFixed(7)}, ${_point.longitude.toStringAsFixed(7)}\n\n${_ar ? 'أكّد أن هذا المدخل يقع في المدينة والإمارة المختارتين. لا يغيّر هذا تأكيد نشاط Google.' : 'Confirm this entrance belongs to the selected city and emirate. This does not change or verify Google Business identity.'}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(_ar ? 'إلغاء' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(_ar ? 'تأكيد المدخل' : 'Confirm entrance'),
+          ),
+        ],
+      ),
+    );
+    if (mounted && _session.isCurrent && ok == true) {
+      setState(() => _confirmed = true);
+    }
+  }
+
+  void _previewCoordinates() {
+    final lat = double.tryParse(_latitude.text.trim()),
+        lng = double.tryParse(_longitude.text.trim());
+    if (lat == null ||
+        lng == null ||
+        !ClinicAddressResult.withinUae(lat, lng)) {
+      setState(
+        () => _error = _ar
+            ? 'أدخل خط العرض ثم خط الطول داخل الإمارات.'
+            : 'Enter valid UAE latitude, then longitude.',
+      );
+      return;
+    }
+    _select(LatLng(lat, lng));
   }
 
   @override
@@ -280,6 +416,55 @@ class _LocationSheetState extends State<_LocationSheet> {
                 : 'Manual OpenStreetMap map; this does not link or verify a Google Business.',
           ),
           const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    _ar ? 'هوية النشاط التجاري' : 'Business identity',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    _ar
+                        ? 'لأسماء العيادات المنسوخة من خرائط Google استخدم البحث الموثق. لا يغيّر الربط دبوس المدخل.'
+                        : 'For clinic names copied from Google Maps, use verified business search. Linking does not move the entrance pin.',
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.business_outlined),
+                    label: Text(
+                      _ar
+                          ? 'البحث في Google Business'
+                          : 'Search Google Business',
+                    ),
+                    onPressed: _searching
+                        ? null
+                        : () async {
+                            await Navigator.push<void>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => GoogleBusinessScreen(
+                                  repository: widget.googleRepository,
+                                  initialQuery: _query.text,
+                                  searchCity: _city,
+                                ),
+                              ),
+                            );
+                            if (mounted && _session.isCurrent) {
+                              setState(
+                                () => _notice = _ar
+                                    ? 'احتُفظ بمسودة المدخل؛ ارتباط Google مستقل.'
+                                    : 'Your entrance draft is preserved; Google linking is separate.',
+                              );
+                            }
+                          },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           UaeLocationField(
             value: _city,
             areaCode: _areaCode,
@@ -288,44 +473,19 @@ class _LocationSheetState extends State<_LocationSheet> {
             onChanged: (value) {
               final city = currentUaeCatalog.resolve(value);
               if (city == null) return;
-              final e = _emirates[currentUaeCatalog.emirateFor(city).nameEn]!;
-              setState(() {
-                _city = city.nameEn;
-                _confirmed = false;
-                _point = LatLng(e.$2, e.$3);
-                _results = [];
-              });
-              _map.move(_point, 10);
+              _localityChanged(UaeLocality(city));
             },
           ),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: (_districts[_city] ?? [])
-                .map(
-                  (d) => ActionChip(
-                    label: Text(_ar ? d.$2 : d.$1),
-                    onPressed: () {
-                      setState(() {
-                        _confirmed = false;
-                        _point = LatLng(d.$3, d.$4);
-                      });
-                      _map.move(_point, 14);
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: 10),
           TextField(
+            key: const ValueKey('clinic-address-search'),
             controller: _query,
             onSubmitted: (_) => _search(),
             decoration: InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.always,
               labelText: _ar
-                  ? 'ابحث عن مكان أو أدخل إحداثيات'
-                  : 'Search place or enter coordinates',
+                  ? 'بحث عنوان مستقل · OpenStreetMap'
+                  : 'Independent address search · OpenStreetMap',
               hintText: _ar
                   ? 'مدينة دبي الطبية أو 25.2315, 55.3242'
                   : 'Dubai Healthcare City or 25.2315, 55.3242',
@@ -344,24 +504,15 @@ class _LocationSheetState extends State<_LocationSheet> {
           ),
           for (final result in _results)
             ListTile(
+              key: ValueKey('clinic-address-result-${result.title}'),
               contentPadding: EdgeInsets.zero,
               title: Text(
-                result['display_name']?.toString() ?? '',
+                result.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               leading: const Icon(Icons.place_outlined),
-              onTap: () {
-                final lat = double.tryParse('${result['lat']}'),
-                    lng = double.tryParse('${result['lon']}');
-                if (lat == null ||
-                    lng == null ||
-                    !ClinicLocationSelection.validCoordinates(lat, lng)) {
-                  return;
-                }
-                _select(LatLng(lat, lng));
-                setState(() => _results = []);
-              },
+              onTap: () => _applyAddress(result),
             ),
           if (_error != null)
             Padding(
@@ -373,15 +524,67 @@ class _LocationSheetState extends State<_LocationSheet> {
             ),
           const SizedBox(height: 12),
           ClinicMapPreview(
+            key: const ValueKey('clinic-entrance-map'),
             latitude: _point.latitude,
             longitude: _point.longitude,
             height: 240,
             controller: _map,
             onTap: (point) => _select(point, move: false),
           ),
+          const SizedBox(height: 12),
+          Text(
+            _ar ? 'تصحيح المدخل يدوياً' : 'Correct the entrance manually',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('clinic-pin-latitude'),
+                  controller: _latitude,
+                  textDirection: TextDirection.ltr,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                  onChanged: (_) => setState(() {
+                    _confirmed = false;
+                    _pointSelected = false;
+                  }),
+                  decoration: InputDecoration(
+                    labelText: _ar ? 'خط العرض' : 'Latitude',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('clinic-pin-longitude'),
+                  controller: _longitude,
+                  textDirection: TextDirection.ltr,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                  onChanged: (_) => setState(() {
+                    _confirmed = false;
+                    _pointSelected = false;
+                  }),
+                  decoration: InputDecoration(
+                    labelText: _ar ? 'خط الطول' : 'Longitude',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          TextButton.icon(
+            onPressed: _previewCoordinates,
+            icon: const Icon(Icons.location_on_outlined),
+            label: Text(_ar ? 'مراجعة الإحداثيات' : 'Review coordinates'),
+          ),
           const SizedBox(height: 8),
           OutlinedButton(
-            onPressed: () => setState(() => _confirmed = true),
+            onPressed: !_pointSelected ? null : _confirmPin,
             child: Text(
               _ar
                   ? 'تأكيد أن الدبوس هو موقع العيادة الدقيق'
@@ -395,7 +598,9 @@ class _LocationSheetState extends State<_LocationSheet> {
           ),
           const SizedBox(height: 12),
           TextField(
+            key: const ValueKey('clinic-address-ar'),
             controller: _addressAr,
+            onChanged: (_) => setState(() => _missingArabic = false),
             textDirection: TextDirection.rtl,
             decoration: const InputDecoration(
               labelText: 'العنوان بالعربية',
@@ -403,9 +608,17 @@ class _LocationSheetState extends State<_LocationSheet> {
               floatingLabelBehavior: FloatingLabelBehavior.always,
             ),
           ),
+          if (_missingArabic)
+            Text(
+              _ar
+                  ? 'العنوان العربي غير متوفر في النتيجة؛ أدخله أو راجع النص الحالي.'
+                  : 'Arabic address was not provided; enter it or review existing text.',
+            ),
           const SizedBox(height: 12),
           TextField(
+            key: const ValueKey('clinic-address-en'),
             controller: _addressEn,
+            onChanged: (_) => setState(() => _missingEnglish = false),
             textDirection: TextDirection.ltr,
             decoration: const InputDecoration(
               labelText: 'Address (English)',
@@ -413,9 +626,20 @@ class _LocationSheetState extends State<_LocationSheet> {
               floatingLabelBehavior: FloatingLabelBehavior.always,
             ),
           ),
+          if (_missingEnglish)
+            Text(
+              _ar
+                  ? 'العنوان الإنجليزي غير متوفر في النتيجة؛ أدخله أو راجع النص الحالي.'
+                  : 'English address was not provided; enter it or review existing text.',
+            ),
+          if (_notice != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Semantics(liveRegion: true, child: Text(_notice!)),
+            ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: !_confirmed
+            onPressed: !_confirmed || !_session.isCurrent
                 ? null
                 : () => Navigator.pop(
                     context,
@@ -461,6 +685,9 @@ class ClinicMapPreview extends StatelessWidget {
       child: FlutterMap(
         mapController: controller,
         options: MapOptions(
+          // The editor owns this controller for its entire draft. Retain the
+          // map while address fields scroll offscreen; dispose with the sheet.
+          keepAlive: controller != null,
           initialCenter: LatLng(latitude, longitude),
           initialZoom: 14,
           interactionOptions: InteractionOptions(

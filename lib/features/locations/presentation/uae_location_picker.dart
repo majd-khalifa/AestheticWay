@@ -4,6 +4,7 @@ import '../../../core/auth/session_snapshot.dart';
 import '../../../core/localization/app_locale.dart';
 import '../data/uae_location_repository.dart';
 import '../models/uae_location.dart';
+import '../../../core/theme/app_colors.dart';
 
 Future<UaeCity?> showUaeLocationPicker(
   BuildContext context, {
@@ -141,13 +142,18 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: selected ? colors.primaryContainer : colors.surfaceContainerLow,
+        color: selected
+            ? AppColors.accentChampagne.withValues(
+                alpha: AppColors.isDark(context) ? .16 : .12,
+              )
+            : AppColors.surface(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(
             color: selected
-                ? colors.primary
-                : colors.outlineVariant.withValues(alpha: .5),
+                ? AppColors.goldText(context)
+                : AppColors.border(context),
+            width: selected ? 1.4 : .8,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -156,19 +162,19 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
           selected: selected,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 6,
+            vertical: 2,
           ),
           leading: Icon(
             icon,
             color: selected
-                ? colors.onPrimaryContainer
+                ? AppColors.goldText(context)
                 : colors.onSurfaceVariant,
           ),
           title: Text(
             title,
             style: TextStyle(
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? colors.onPrimaryContainer : colors.onSurface,
+              color: AppColors.text(context),
             ),
           ),
           subtitle: subtitle == null
@@ -177,14 +183,14 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                   subtitle,
                   style: TextStyle(
                     color: selected
-                        ? colors.onPrimaryContainer
+                        ? AppColors.text(context)
                         : colors.onSurfaceVariant,
                   ),
                 ),
           trailing: Icon(
             selected ? Icons.check_circle : Icons.chevron_right,
             color: selected
-                ? colors.onPrimaryContainer
+                ? AppColors.goldText(context)
                 : colors.onSurfaceVariant,
           ),
           onTap: onTap,
@@ -205,6 +211,7 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
     return Expanded(
       child: Semantics(
         selected: active,
+        button: enabled,
         child: InkWell(
           key: ValueKey('locality-step-${step.name}'),
           borderRadius: BorderRadius.circular(14),
@@ -223,7 +230,9 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                           ? Icons.check_circle_outline
                           : Icons.radio_button_unchecked,
                       size: 17,
-                      color: active ? colors.primary : colors.onSurfaceVariant,
+                      color: active
+                          ? AppColors.goldText(context)
+                          : colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 5),
                     Flexible(
@@ -376,6 +385,17 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                                   icon: const Icon(Icons.close),
                                   onPressed: () => Navigator.pop(context),
                                 ),
+                                TextButton(
+                                  onPressed: c == null
+                                      ? null
+                                      : () {
+                                          _city = null;
+                                          _area = null;
+                                          _emirate = null;
+                                          _go(_LocationStep.emirate);
+                                        },
+                                  child: Text(t('Reset', 'إعادة ضبط')),
+                                ),
                               ],
                             ),
                             if (c != null) ...[
@@ -445,6 +465,8 @@ class _UaeLocationPickerState extends State<UaeLocationPicker> {
                                     ),
                                   },
                                   prefixIcon: const Icon(Icons.search),
+                                  filled: true,
+                                  fillColor: AppColors.surfaceSubtle(context),
                                   suffixIcon: _query.isEmpty
                                       ? null
                                       : IconButton(

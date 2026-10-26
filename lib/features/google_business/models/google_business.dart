@@ -10,8 +10,10 @@ class GoogleBusinessAssociation {
     this.syncStatus = '',
     this.lastSyncedAt,
     this.verification = GoogleBusinessVerification.notProvided,
+    this.city = '',
   });
   final String clinicId, placeId, syncStatus;
+  final String city;
   final String? mapsUrl;
   final DateTime? lastSyncedAt;
   final GoogleBusinessVerification verification;
@@ -40,6 +42,8 @@ class GoogleBusinessPlace {
     required this.selectionProof,
     this.mapsUrl,
     this.proofExpiresIn = const Duration(seconds: 300),
+    this.addressLanguage = '',
+    this.emirateCode,
   }) {
     if (!validPlaceId(placeId) ||
         name.trim().isEmpty ||
@@ -49,6 +53,8 @@ class GoogleBusinessPlace {
     }
   }
   final String placeId, name, address, locality, countryCode;
+  final String addressLanguage;
+  final String? emirateCode;
 
   /// Opaque server-issued proof of the selected result, not an API key.
   final String selectionProof;

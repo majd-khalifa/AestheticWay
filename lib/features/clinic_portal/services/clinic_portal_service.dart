@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'showcase_video_change.dart';
+import '../../locations/data/uae_location_repository.dart';
+import '../../locations/models/uae_location.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../../core/network/api_exception.dart';
 import '../../treatments/data/category_repository.dart';
 import '../../../core/services/local_media_cache.dart';
@@ -1476,6 +1479,84 @@ class ClinicPortalService extends ChangeNotifier {
       PaintingBinding.instance.imageCache.evict(NetworkImage(old));
     }
     _activeClinic = profile;
+    notifyListeners();
+  }
+
+  /// A location edit never replays stale profile text or writes Google identity.
+  /// Keep the previous local profile until ACK plus fresh private GET agree.
+  Future<void> updateClinicCoordinates({
+    required String city,
+    required String emirate,
+    required String addressAr,
+    required String addressEn,
+    required double latitude,
+    required double longitude,
+  }) async {
+    final epoch = _sessionEpoch, clinicId = _activeClinic.id;
+    final ar = LocaleService().isArabic;
+    final catalogCity = currentUaeCatalog.resolve(city);
+    final catalogEmirate = catalogCity == null
+        ? null
+        : currentUaeCatalog.emirateFor(catalogCity);
+    if (!latitude.isFinite ||
+        !longitude.isFinite ||
+        latitude < 22 ||
+        latitude > 26.5 ||
+        longitude < 51 ||
+        longitude > 57 ||
+        catalogEmirate == null ||
+        ![
+          catalogEmirate.code,
+          catalogEmirate.nameEn,
+          catalogEmirate.nameAr,
+        ].any(
+          (v) =>
+              UaeLocationCatalog.normalize(v) ==
+              UaeLocationCatalog.normalize(emirate),
+        )) {
+      throw ApiException(
+        message: ar
+            ? 'راجع المدينة والإمارة والإحداثيات الإماراتية.'
+            : 'Review the city, emirate and UAE coordinates.',
+      );
+    }
+    final ack = await _inSession(
+      _catalogRepository.updateClinicProfile({
+        'city': city,
+        'emirate': emirate,
+        'address_ar': addressAr,
+        'address_en': addressEn,
+        'latitude': latitude.toStringAsFixed(7),
+        'longitude': longitude.toStringAsFixed(7),
+      }),
+      epoch,
+    );
+    if (ack.id != clinicId) {
+      throw ApiException(
+        message: ar
+            ? 'لم يؤكد الخادم هوية العيادة.'
+            : 'The clinic identity was not acknowledged.',
+      );
+    }
+    final fresh = await _inSession(
+      _catalogRepository.getClinicProfile(),
+      epoch,
+    );
+    if (fresh.id != clinicId ||
+        (fresh.latitude - latitude).abs() > .000001 ||
+        (fresh.longitude - longitude).abs() > .000001 ||
+        fresh.city.trim() != city.trim() ||
+        UaeLocationCatalog.normalize(fresh.emirate) !=
+            UaeLocationCatalog.normalize(emirate) ||
+        fresh.editableAddressAr.trim() != addressAr.trim() ||
+        fresh.editableAddressEn.trim() != addressEn.trim()) {
+      throw ApiException(
+        message: ar
+            ? 'لم يتم تأكيد حفظ الموقع. حدّث الملف قبل المحاولة مجدداً.'
+            : 'Location persistence was not confirmed. Refresh the profile before retrying.',
+      );
+    }
+    _activeClinic = fresh;
     notifyListeners();
   }
 

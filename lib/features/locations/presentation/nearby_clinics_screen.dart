@@ -11,6 +11,7 @@ import '../data/nearby_clinics_repository.dart';
 import '../services/nearby_discovery_controller.dart';
 import '../services/patient_location_controller.dart';
 import 'home_location_panel.dart';
+import '../../../core/theme/app_colors.dart';
 
 typedef NearbyGoogleMapBuilder =
     Widget Function(BuildContext, List<NearbyClinic>);
@@ -82,7 +83,10 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
             : RefreshIndicator(
                 onRefresh: _discovery.refresh,
                 child: ListView(
-                  padding: const EdgeInsets.only(bottom: 28),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.only(
+                    bottom: 28 + MediaQuery.viewPaddingOf(context).bottom,
+                  ),
                   children: [
                     HomeLocationPanel(
                       controller: _location,
@@ -94,6 +98,29 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          Semantics(
+                            liveRegion: true,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Text(
+                                _location.position != null
+                                    ? t(
+                                        'Near my current location',
+                                        'بالقرب من موقعي الحالي',
+                                      )
+                                    : _location.locality != null
+                                    ? t(
+                                        'Browsing clinics in ${_location.locality!.city.nameEn}',
+                                        'تصفح عيادات ${_location.locality!.city.nameAr}',
+                                      )
+                                    : t(
+                                        'Choose where to explore',
+                                        'اختر مكان البحث',
+                                      ),
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ),
+                          ),
                           SegmentedButton<bool>(
                             segments: [
                               ButtonSegment(
@@ -209,7 +236,7 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                       if (_discovery
                                           .distanceLabel(row)
                                           .isNotEmpty)
-                                        Text(_discovery.distanceLabel(row)),
+                                        _distanceBadge(row),
                                       AsyncActionButton(
                                         label: t(
                                           'Open location in Google Maps',
@@ -274,7 +301,7 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                     if (_discovery
                                         .distanceLabel(row)
                                         .isNotEmpty)
-                                      Text(_discovery.distanceLabel(row)),
+                                      _distanceBadge(row),
                                     if (_branchLabel(row).isNotEmpty)
                                       Text(_branchLabel(row)),
                                     AsyncActionButton(
@@ -323,4 +350,41 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
       address,
     ].whereType<String>().where((v) => v.trim().isNotEmpty).join(' · ');
   }
+
+  Widget _distanceBadge(NearbyClinic row) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.accentChampagne.withValues(alpha: .14),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AppColors.goldText(context).withValues(alpha: .5),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.near_me_outlined,
+              size: 17,
+              color: AppColors.goldText(context),
+            ),
+            const SizedBox(width: 7),
+            Flexible(
+              child: Text(
+                _discovery.distanceLabel(row),
+                style: TextStyle(
+                  color: AppColors.text(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

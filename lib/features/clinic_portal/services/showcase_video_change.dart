@@ -1,20 +1,24 @@
 import '../../../core/localization/app_locale.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/services/video_upload_policy.dart';
 
 enum VideoSaveStage { entitlement, upload, acknowledgment, reload, persistence }
 
 /// Contains no file paths, response bodies, tokens or signed URLs in diagnostics.
 class ShowcaseVideoFailure extends ApiException {
   ShowcaseVideoFailure(this.stage, {ApiException? cause, this.receipt})
-    : super(
+    : diagnostic = cause is VideoTransferException ? cause.diagnostic : null,
+      super(
         message: _message(stage, cause),
         statusCode: cause?.statusCode,
         retryAfter: cause?.retryAfter,
         isLocalBackpressure: cause?.isLocalBackpressure ?? false,
+        isCancelled: cause?.isCancelled ?? false,
         errorCode: 'VIDEO_${stage.name.toUpperCase()}',
       );
   final VideoSaveStage stage;
   final ShowcaseVideoReceipt? receipt;
+  final VideoTransferDiagnostic? diagnostic;
   static String _message(VideoSaveStage stage, ApiException? cause) {
     final ar = LocaleService().isArabic;
     final phase = switch (stage) {
@@ -48,12 +52,28 @@ class ShowcaseVideoFailure extends ApiException {
         ar
             ? 'انتظر انتهاء فترة التهدئة قبل المحاولة مجدداً.'
             : 'Wait for the cooldown before retrying.',
+      401 =>
+        ar
+            ? 'حدّث الجلسة والملف قبل إعادة الرفع يدوياً.'
+            : 'Refresh your session and profile before uploading again manually.',
+      502 || 504 =>
+        ar
+            ? 'انقطع إقرار الحفظ عند بوابة الخادم. قد يكون الفيديو محفوظاً؛ تحقّق أولاً دون إعادة الرفع.'
+            : 'The gateway did not acknowledge the save. The video may be stored; verify first without re-uploading.',
       int code when code >= 500 =>
         ar
             ? 'الخادم غير متاح مؤقتاً. زوّد دعم المنصة بوقت المحاولة وحالة HTTP لمراجعة فشل الحفظ. تحقّق من الملف المحفوظ قبل إعادة الرفع.'
             : 'The server is temporarily unavailable. Give platform support the attempt time and HTTP status to inspect the failed save. Check the saved profile before re-uploading.',
       _ =>
-        cause?.errorCode == 'TIMEOUT'
+        cause?.isCancelled == true
+            ? (ar
+                  ? 'أُلغي النقل؛ قد يكون الخادم استلم الملف. تحقّق من الملف المحفوظ أولاً.'
+                  : 'Transfer cancelled; the server may have received the file. Check the saved profile first.')
+            : cause?.errorCode == 'CONNECTION_ERROR'
+            ? (ar
+                  ? 'انقطع الاتصال. تحقّق من الملف المحفوظ قبل إعادة الرفع.'
+                  : 'The connection was lost. Check the saved profile before uploading again.')
+            : cause?.errorCode == 'TIMEOUT'
             ? (ar
                   ? 'انتهت مهلة الاتصال؛ قد يكون الخادم أكمل الحفظ. تحقّق أولاً.'
                   : 'The connection timed out; the server may have completed saving. Verify first.')

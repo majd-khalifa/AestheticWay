@@ -57,6 +57,7 @@ class CurrentClinicGoogleBusinessRepository extends GoogleBusinessRepository {
   GoogleBusinessAssociation _association(ClinicModel c) =>
       GoogleBusinessAssociation(
         clinicId: c.id,
+        city: c.city,
         placeId: c.googlePlaceId?.trim() ?? '',
         mapsUrl: c.googleMapsUrl,
         syncStatus: c.googleSyncStatus,
@@ -193,6 +194,8 @@ class CurrentClinicGoogleBusinessRepository extends GoogleBusinessRepository {
       latitude: double.parse('${d['latitude']}'),
       longitude: double.parse('${d['longitude']}'),
       countryCode: '${d['country_code'] ?? ''}',
+      addressLanguage: languageCode,
+      emirateCode: d['emirate_code']?.toString(),
       selectionProof: '${d['selection_proof']}',
       mapsUrl: d['google_maps_url']?.toString(),
       proofExpiresIn: Duration(seconds: ttl),

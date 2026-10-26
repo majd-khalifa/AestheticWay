@@ -43,6 +43,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   bool _posterChanged = false;
   bool _profileLoading = false, _profileVerified = false;
   String? _profileError, _videoError, _videoNotice;
+  String? _videoDiagnostic;
   ShowcaseVideoReceipt? _videoReceipt;
   CancelToken? _videoCancel;
   double? _videoProgress;
@@ -93,6 +94,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _videoCancel?.cancel();
       _videoReceipt = null;
       _videoError = null;
+      _videoDiagnostic = null;
       _videoNotice = null;
       _videoUncertain = false;
       _gallery.clear();
@@ -307,6 +309,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _batchSize = 0;
       _videoError = null;
       _videoNotice = null;
+      _videoDiagnostic = null;
     });
     VideoPlayerController? probe;
     try {
@@ -409,6 +412,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       if (mounted && _session.isCurrent) {
         setState(() {
           _videoError = _failure(e);
+          _videoDiagnostic = e is ShowcaseVideoFailure
+              ? e.diagnostic?.safeText(e.stage.name)
+              : null;
           _videoReceipt = e is ShowcaseVideoFailure ? e.receipt : null;
           _videoUncertain =
               e is ShowcaseVideoFailure &&
@@ -729,6 +735,19 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       ),
                     if (_videoNotice != null)
                       Semantics(liveRegion: true, child: Text(_videoNotice!)),
+                    if (_videoError != null && _videoDiagnostic != null)
+                      ExpansionTile(
+                        tilePadding: EdgeInsets.zero,
+                        title: Text(
+                          ar ? 'تفاصيل آمنة للدعم' : 'Safe support details',
+                        ),
+                        children: [
+                          SelectableText(
+                            _videoDiagnostic!,
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
                     if (_videoCancel != null) ...[
                       LinearProgressIndicator(value: _videoProgress),
                       Text(

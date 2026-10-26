@@ -32,6 +32,7 @@ import '../../data/clinics_repository.dart';
 import '../../models/clinic_model.dart';
 import '../widgets/contact_options_sheet.dart';
 import '../widgets/google_clinic_rating.dart';
+import '../../../../core/widgets/patient_video.dart';
 
 /// Single natural-height document: switching tabs never reserves an empty viewport.
 class ClinicProfileScreen extends StatefulWidget {
@@ -62,6 +63,7 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
   int _tab = 0;
   bool _loading = false;
   bool _detailFailed = false;
+  bool _publicDetailVerified = false;
   @override
   void initState() {
     super.initState();
@@ -109,7 +111,14 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
     try {
       final detail = await _repo.getClinicDetail(widget.clinic.id);
       if (!mounted) return;
+      if (detail.id != widget.clinic.id) {
+        throw StateError('Unexpected public clinic identity');
+      }
+      if (['draft', 'submitted', 'rejected'].contains(detail.setupStatus)) {
+        throw StateError('Clinic is not public');
+      }
       setState(() {
+        _publicDetailVerified = true;
         _clinic = detail;
         _branches.items
           ..clear()
@@ -117,7 +126,12 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
       });
       if (detail.hasBranchDirectory) await _branches.refresh();
     } catch (_) {
-      if (mounted) setState(() => _detailFailed = true);
+      if (mounted) {
+        setState(() {
+          _detailFailed = true;
+          _publicDetailVerified = false;
+        });
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -220,7 +234,12 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            PatientClinicGallery(images: images),
+            PatientClinicGallery(
+              images: images,
+              videoUrl: _publicDetailVerified
+                  ? PatientVideo.publicUrl(clinic.videoUrl)
+                  : null,
+            ),
             const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
