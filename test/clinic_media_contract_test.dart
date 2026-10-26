@@ -78,7 +78,12 @@ class Gallery extends ClinicMediaRepository {
     int page = 1,
   }) async => List.of(saved);
   @override
-  Future<ClinicGalleryAsset> uploadGallery(String clinicId, String path) async {
+  Future<ClinicGalleryAsset> uploadGallery(
+    String clinicId,
+    String path, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     uploaded.add(path);
     if (reject || rejectPath == path) {
       throw const ApiException(message: 'Upload rejected', statusCode: 400);

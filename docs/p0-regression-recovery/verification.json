@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-26",
+  "starting_head": "bb9a6762354b06e9f7392234a037ed5497d3154f",
+  "branch": "codex/final-backend-integration-client-preview",
+  "backend_supplied_commit": "465bf3089dba98a2b0b4145e728daec3c533b0f1",
+  "backend_source_unchanged_files": 413,
+  "source_API_observations": 21,
+  "source_scope": "SQLite/local test storage, APIClient; not production/R2/device evidence",
+  "source_probe_sha256": "d51101b79a228f6b474a9ca5d8ee1c2bcd8be6e284af6b3225c462bab24f8b4e",
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "local_host": "Linux/Ubuntu",
+  "analyzer_issues": 0,
+  "full_tests_passed": 1206,
+  "full_tests_failed": 0,
+  "new_tests": 23,
+  "preview_test_runs": {
+    "before": {
+      "passed": 4,
+      "raw_pngs": 28
+    },
+    "after": {
+      "passed": 4,
+      "raw_pngs": 28
+    }
+  },
+  "side_by_side_pngs": 7,
+  "old_golden_changes": 0,
+  "format": "dart format .; final no changes",
+  "diff_check": "clean",
+  "native_CI_evidence": "Exact final-head Windows/Ubuntu and Android/macOS run/job links and outcomes are recorded in PR13 after push; do not substitute bb9a676 results.",
+  "physical_device_testing": "Not performed here. Owner-reported existing video successes retained; new Nurse/gallery/GPS/overlay behavior requires physical QA.",
+  "physical_gallery_failure": "Exact request/HTTP cause unverified. Active source flow succeeds; pending-clinic media403 is conditional, not assigned to owner.",
+  "patient_UX_and_signing": "Preserved; no Django/native signing or production dependency version changes."
+}

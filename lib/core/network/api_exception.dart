@@ -382,6 +382,7 @@ class ApiException implements Exception {
 
   static String _fieldDisplayName(String key) {
     final isArabic = LocaleService().isArabic;
+
     switch (key.toLowerCase()) {
       case 'non_field_errors':
         return isArabic ? 'الطلب' : 'Request';
@@ -450,6 +451,16 @@ class ApiException implements Exception {
         return isArabic ? 'تاريخ انتهاء العرض' : 'End Date';
       case 'avatar':
         return isArabic ? 'الصورة الشخصية' : 'Avatar';
+      case 'type':
+        return isArabic ? 'النوع' : 'Type';
+      case 'status':
+        return isArabic ? 'الحالة' : 'Status';
+      case 'file':
+        return isArabic ? 'ملف الوسائط' : 'Media file';
+      case 'media_asset':
+        return isArabic ? 'مرجع الصورة' : 'Image asset';
+      case 'media_type':
+        return isArabic ? 'فئة الوسائط' : 'Media category';
       case 'video_ad_file':
         return isArabic ? 'فيديو عرض العيادة' : 'Clinic showcase video';
       case 'cover_image':
@@ -518,6 +529,36 @@ class ApiException implements Exception {
   static String _localizeBackendMessage(String msg) {
     final lower = msg.toLowerCase();
     final isArabic = LocaleService().isArabic;
+    if (lower.contains('not a valid image') ||
+        lower.contains('image is corrupted')) {
+      return isArabic
+          ? 'تعذر قراءة الصورة. اختر صورة JPG أو PNG أو WebP سليمة.'
+          : 'The image could not be decoded. Choose a valid JPG, PNG or WebP image.';
+    }
+    if (lower.startsWith('unsupported mime type') ||
+        lower.contains('does not match detected format')) {
+      return isArabic
+          ? 'اختر صيغة وسائط مدعومة وفق الخيارات المعروضة في النموذج.'
+          : 'Choose a supported media format shown in this form.';
+    }
+    if (lower.contains('is not a valid choice') ||
+        lower.startsWith('invalid practitioner type')) {
+      return isArabic
+          ? 'اختر نوعاً مدعوماً من القائمة.'
+          : 'Select a supported value from the list.';
+    }
+    final length = RegExp(
+      r'^ensure this field has no more than (\d{1,6}) characters\.?$',
+    ).firstMatch(lower);
+    if (length != null) {
+      final n = length.group(1)!;
+      return isArabic ? 'الحد الأقصى $n حرفاً.' : 'Use at most $n characters.';
+    }
+    if (lower == 'clinic is suspended or inactive.') {
+      return isArabic
+          ? 'العيادة غير مفعّلة أو موقوفة؛ راجع إدارة المنصة قبل رفع الصور.'
+          : 'The clinic is inactive or suspended. Contact platform support before uploading images.';
+    }
 
     if (lower.contains('vip') && lower.contains('video')) {
       return isArabic

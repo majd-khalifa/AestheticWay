@@ -1,4 +1,5 @@
 import '../../../locations/models/uae_location.dart';
+import '../../../locations/services/clinic_location_integrity.dart';
 import '../../data/clinic_address_search.dart';
 import '../../../google_business/presentation/google_business_screen.dart';
 import '../../../google_business/data/google_business_repository.dart';
@@ -141,6 +142,11 @@ class _LocationSheetState extends State<_LocationSheet> {
     _longitude.text = _point.longitude.toStringAsFixed(7);
     _addressAr = TextEditingController(text: widget.addressAr);
     _addressEn = TextEditingController(text: widget.addressEn);
+    final issue = _locationIssue();
+    if (issue != null) {
+      _error = issue;
+      _confirmed = false;
+    }
   }
 
   @override
@@ -332,6 +338,14 @@ class _LocationSheetState extends State<_LocationSheet> {
   }
 
   Future<void> _confirmPin() async {
+    final issue = _locationIssue();
+    if (issue != null) {
+      setState(() {
+        _error = issue;
+        _confirmed = false;
+      });
+      return;
+    }
     final city = currentUaeCatalog.resolve(_city);
     if (!_pointSelected || city == null || !_session.isCurrent) {
       setState(
@@ -381,6 +395,14 @@ class _LocationSheetState extends State<_LocationSheet> {
     }
     _select(LatLng(lat, lng));
   }
+
+  String? _locationIssue() => ClinicLocationIntegrity.issue(
+    city: _city,
+    emirate: '',
+    addressEn: _addressEn.text.trim(),
+    addressAr: _addressAr.text.trim(),
+    arabic: _ar,
+  );
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -600,7 +622,11 @@ class _LocationSheetState extends State<_LocationSheet> {
           TextField(
             key: const ValueKey('clinic-address-ar'),
             controller: _addressAr,
-            onChanged: (_) => setState(() => _missingArabic = false),
+            onChanged: (_) => setState(() {
+              _missingArabic = false;
+              _confirmed = false;
+              _error = _locationIssue();
+            }),
             textDirection: TextDirection.rtl,
             decoration: const InputDecoration(
               labelText: 'العنوان بالعربية',
@@ -618,7 +644,11 @@ class _LocationSheetState extends State<_LocationSheet> {
           TextField(
             key: const ValueKey('clinic-address-en'),
             controller: _addressEn,
-            onChanged: (_) => setState(() => _missingEnglish = false),
+            onChanged: (_) => setState(() {
+              _missingEnglish = false;
+              _confirmed = false;
+              _error = _locationIssue();
+            }),
             textDirection: TextDirection.ltr,
             decoration: const InputDecoration(
               labelText: 'Address (English)',
@@ -639,7 +669,8 @@ class _LocationSheetState extends State<_LocationSheet> {
             ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: !_confirmed || !_session.isCurrent
+            onPressed:
+                !_confirmed || _locationIssue() != null || !_session.isCurrent
                 ? null
                 : () => Navigator.pop(
                     context,

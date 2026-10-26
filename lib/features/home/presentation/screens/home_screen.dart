@@ -1,5 +1,6 @@
 import '../../../clinics/presentation/screens/clinics_list_screen.dart';
 import '../../../locations/presentation/home_location_panel.dart';
+import '../../../locations/presentation/home_gps_nearby_section.dart';
 import '../../../locations/services/patient_location_controller.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../../../../core/widgets/async_action_button.dart';
@@ -445,7 +446,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         // 6. Nearby Verified Clinics Section
-        if (nearbyList.isNotEmpty)
+        if (_location.position != null)
+          SliverToBoxAdapter(
+            child: HomeGpsNearbySection(
+              location: _location,
+              onClinicTap: _navigateToClinicProfile,
+            ),
+          )
+        else if (nearbyList.isNotEmpty)
           SliverToBoxAdapter(
             child: NearbyClinicsSection(
               clinics: nearbyList,

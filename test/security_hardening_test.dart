@@ -80,6 +80,8 @@ class _Api implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     posts.add(path);
     return Response<T>(
@@ -99,6 +101,8 @@ class _Upload implements MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) => gate.future;
 }
 

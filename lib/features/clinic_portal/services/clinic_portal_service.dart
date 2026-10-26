@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'showcase_video_change.dart';
 import '../../locations/data/uae_location_repository.dart';
-import '../../locations/models/uae_location.dart';
+import '../../locations/services/clinic_location_integrity.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/network/api_exception.dart';
 import '../../treatments/data/category_repository.dart';
@@ -1495,6 +1495,14 @@ class ClinicPortalService extends ChangeNotifier {
     final epoch = _sessionEpoch, clinicId = _activeClinic.id;
     final ar = LocaleService().isArabic;
     final catalogCity = currentUaeCatalog.resolve(city);
+    final conflict = ClinicLocationIntegrity.issue(
+      city: city,
+      emirate: emirate,
+      addressEn: addressEn,
+      addressAr: addressAr,
+      arabic: ar,
+    );
+    if (conflict != null) throw ApiException(message: conflict);
     final catalogEmirate = catalogCity == null
         ? null
         : currentUaeCatalog.emirateFor(catalogCity);
@@ -1505,15 +1513,7 @@ class ClinicPortalService extends ChangeNotifier {
         longitude < 51 ||
         longitude > 57 ||
         catalogEmirate == null ||
-        ![
-          catalogEmirate.code,
-          catalogEmirate.nameEn,
-          catalogEmirate.nameAr,
-        ].any(
-          (v) =>
-              UaeLocationCatalog.normalize(v) ==
-              UaeLocationCatalog.normalize(emirate),
-        )) {
+        !ClinicLocationIntegrity.emirateMatches(city, emirate)) {
       throw ApiException(
         message: ar
             ? 'راجع المدينة والإمارة والإحداثيات الإماراتية.'
@@ -1545,9 +1545,9 @@ class ClinicPortalService extends ChangeNotifier {
     if (fresh.id != clinicId ||
         (fresh.latitude - latitude).abs() > .000001 ||
         (fresh.longitude - longitude).abs() > .000001 ||
-        fresh.city.trim() != city.trim() ||
-        UaeLocationCatalog.normalize(fresh.emirate) !=
-            UaeLocationCatalog.normalize(emirate) ||
+        currentUaeCatalog.resolve(fresh.city)?.code !=
+            currentUaeCatalog.resolve(city)?.code ||
+        !ClinicLocationIntegrity.emirateMatches(fresh.city, fresh.emirate) ||
         fresh.editableAddressAr.trim() != addressAr.trim() ||
         fresh.editableAddressEn.trim() != addressEn.trim()) {
       throw ApiException(
@@ -1646,6 +1646,36 @@ class ClinicPortalService extends ChangeNotifier {
   }) async {
     final sessionEpoch = _sessionEpoch;
     final old = _activeClinic;
+    if (city != null ||
+        emirate != null ||
+        addressAr != null ||
+        addressEn != null ||
+        latitude != null ||
+        longitude != null) {
+      final conflict = ClinicLocationIntegrity.issue(
+        city: city ?? old.city,
+        emirate: emirate ?? old.emirate,
+        addressEn: addressEn ?? old.editableAddressEn,
+        addressAr: addressAr ?? old.editableAddressAr,
+        arabic: LocaleService().isArabic,
+      );
+      if (conflict != null) throw ApiException(message: conflict);
+      if (latitude != null || longitude != null) {
+        final lat = latitude ?? old.latitude, lng = longitude ?? old.longitude;
+        if (!lat.isFinite ||
+            !lng.isFinite ||
+            lat < 22 ||
+            lat > 26.5 ||
+            lng < 51 ||
+            lng > 57) {
+          throw ApiException(
+            message: LocaleService().isArabic
+                ? 'اختر إحداثيات صحيحة داخل الإمارات.'
+                : 'Choose valid UAE coordinates.',
+          );
+        }
+      }
+    }
     final payload = <String, dynamic>{
       'name_ar': nameAr,
       'name_en': nameEn,

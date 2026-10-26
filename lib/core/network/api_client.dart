@@ -100,6 +100,8 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     return _send<T>(
       'POST',
@@ -107,6 +109,8 @@ class ApiClient {
       data: data,
       queryParameters: queryParameters,
       options: _sessionOptions(options),
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
   }
 

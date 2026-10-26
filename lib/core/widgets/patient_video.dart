@@ -64,6 +64,8 @@ class _PatientVideoState extends State<PatientVideo>
   final _session = SessionSnapshot();
   VideoPlayerController? _player;
   Timer? _initializationDeadline;
+  Timer? _hideControls;
+  bool _controlsVisible = true, _accessibleControls = false;
   PatientVideoPhase _phase = PatientVideoPhase.poster;
   bool _visible = false, _routeActive = true, _foreground = true;
   bool _reduced = false, _requested = false, _paused = false;
@@ -101,6 +103,11 @@ class _PatientVideoState extends State<PatientVideo>
         TabActivity.isActive(context) &&
         (ModalRoute.isCurrentOf(context) ?? true);
     _reduced = MediaQuery.disableAnimationsOf(context);
+    _accessibleControls = MediaQuery.accessibleNavigationOf(context);
+    if (_accessibleControls) {
+      _controlsVisible = true;
+      _hideControls?.cancel();
+    }
     _sync();
   }
 
@@ -126,10 +133,35 @@ class _PatientVideoState extends State<PatientVideo>
   void _emit(PatientVideoPhase phase) {
     if (_phase == phase) return;
     _phase = phase;
+    _controlsVisible = true;
+    _armControls();
     // A dependency/visibility edge can occur during another widget's build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _phase == phase) widget.onPhase?.call(phase);
     });
+  }
+
+  void _armControls() {
+    _hideControls?.cancel();
+    if (_phase != PatientVideoPhase.playing ||
+        _accessibleControls ||
+        !_present) {
+      return;
+    }
+    _hideControls = Timer(const Duration(seconds: 3), () {
+      if (_present &&
+          _phase == PatientVideoPhase.playing &&
+          !_paused &&
+          !_accessibleControls) {
+        setState(() => _controlsVisible = false);
+      }
+    });
+  }
+
+  void _showControls() {
+    if (!mounted) return;
+    setState(() => _controlsVisible = true);
+    _armControls();
   }
 
   void _sync() {
@@ -230,6 +262,7 @@ class _PatientVideoState extends State<PatientVideo>
 
   Future<void> _toggle() async {
     if (!_present || _controlling) return;
+    _showControls();
     final p = _player;
     _controlling = true;
     try {
@@ -273,6 +306,7 @@ class _PatientVideoState extends State<PatientVideo>
   }
 
   Future<void> _volume() async {
+    _showControls();
     final p = _player;
     setState(() => _muted = !_muted);
     try {
@@ -316,6 +350,7 @@ class _PatientVideoState extends State<PatientVideo>
   }
 
   void _release() {
+    _hideControls?.cancel();
     _initializationDeadline?.cancel();
     _initializationDeadline = null;
     final p = _player;
@@ -365,104 +400,143 @@ class _PatientVideoState extends State<PatientVideo>
         aspectRatio: ratio > 0 && ratio.isFinite ? ratio : 16 / 9,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(widget.fullscreen ? 0 : 16),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (initialized)
-                ColoredBox(
-                  color: Colors.black,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: p.value.size.width,
-                      height: p.value.size.height,
-                      child: VideoPlayer(p),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _showControls,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (initialized)
+                  ColoredBox(
+                    color: Colors.black,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: SizedBox(
+                        width: p.value.size.width,
+                        height: p.value.size.height,
+                        child: VideoPlayer(p),
+                      ),
+                    ),
+                  )
+                else
+                  PatientMediaBanner(
+                    category: PatientMediaCategory.clinicCover,
+                    source: widget.posterUrl,
+                    aspectRatio: widget.aspectRatio,
+                  ),
+                if (waiting)
+                  Center(
+                    child: CircularProgressIndicator(
+                      semanticsLabel: t('Loading video', 'جارٍ تحميل الفيديو'),
                     ),
                   ),
-                )
-              else
-                PatientMediaBanner(
-                  category: PatientMediaCategory.clinicCover,
-                  source: widget.posterUrl,
-                  aspectRatio: widget.aspectRatio,
-                ),
-              if (waiting)
-                Center(
-                  child: CircularProgressIndicator(
-                    semanticsLabel: t('Loading video', 'جارٍ تحميل الفيديو'),
+                if (_failed)
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Material(
+                      color: Colors.black87,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          t(
+                            'Video could not load. You can retry.',
+                            'تعذر تحميل الفيديو. يمكنك المحاولة مجدداً.',
+                          ),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              if (_failed)
                 Align(
-                  alignment: Alignment.topCenter,
-                  child: Material(
-                    color: Colors.black87,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        t(
-                          'Video could not load. You can retry.',
-                          'تعذر تحميل الفيديو. يمكنك المحاولة مجدداً.',
+                  alignment: Alignment.bottomCenter,
+                  child: IgnorePointer(
+                    ignoring: !_controlsVisible,
+                    child: AnimatedOpacity(
+                      key: const ValueKey('patient-video-controls'),
+                      opacity: _controlsVisible ? 1 : 0,
+                      duration: _reduced
+                          ? Duration.zero
+                          : const Duration(milliseconds: 150),
+                      child: Container(
+                        padding: const EdgeInsets.only(bottom: 3),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.transparent, Color(0x99000000)],
+                          ),
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: _controlling ? null : _toggle,
+                              tooltip: label,
+                              icon: Icon(
+                                _failed
+                                    ? Icons.refresh
+                                    : stopped
+                                    ? Icons.play_arrow
+                                    : Icons.pause,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              tooltip: _muted
+                                  ? t('Unmute video', 'تشغيل صوت الفيديو')
+                                  : t('Mute video', 'كتم صوت الفيديو'),
+                              onPressed: _volume,
+                              icon: Icon(
+                                _muted ? Icons.volume_off : Icons.volume_up,
+                                color: Colors.white,
+                              ),
+                            ),
+                            if (widget.allowFullscreen)
+                              IconButton(
+                                onPressed: _opening ? null : _fullscreen,
+                                tooltip: t('Full screen', 'ملء الشاشة'),
+                                icon: const Icon(
+                                  Icons.fullscreen,
+                                  color: Colors.white,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Material(
-                  color: Colors.black.withValues(alpha: .72),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: _controlling ? null : _toggle,
-                        tooltip: label,
-                        icon: Icon(
-                          _failed
-                              ? Icons.refresh
-                              : stopped
-                              ? Icons.play_arrow
-                              : Icons.pause,
-                          color: Colors.white,
+                if (initialized)
+                  PositionedDirectional(
+                    start: 0,
+                    end: 0,
+                    bottom: 0,
+                    child: SizedBox(
+                      height: 2,
+                      child: VideoProgressIndicator(
+                        p,
+                        allowScrubbing: false,
+                        colors: const VideoProgressColors(
+                          playedColor: Color(0xFFD4B885),
+                          backgroundColor: Colors.transparent,
                         ),
                       ),
-                      if (initialized)
-                        Expanded(
-                          child: VideoProgressIndicator(
-                            p,
-                            allowScrubbing: false,
-                            colors: const VideoProgressColors(
-                              playedColor: Color(0xFFD4B885),
-                            ),
-                          ),
-                        )
-                      else
-                        const Spacer(),
-                      IconButton(
-                        tooltip: _muted
-                            ? t('Unmute video', 'تشغيل صوت الفيديو')
-                            : t('Mute video', 'كتم صوت الفيديو'),
-                        onPressed: _volume,
-                        icon: Icon(
-                          _muted ? Icons.volume_off : Icons.volume_up,
-                          color: Colors.white,
-                        ),
-                      ),
-                      if (widget.allowFullscreen)
-                        IconButton(
-                          onPressed: _opening ? null : _fullscreen,
-                          tooltip: t('Full screen', 'ملء الشاشة'),
-                          icon: const Icon(
-                            Icons.fullscreen,
-                            color: Colors.white,
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                if (!_controlsVisible)
+                  Positioned.fill(
+                    child: Semantics(
+                      button: true,
+                      label: t(
+                        'Show video controls',
+                        'إظهار عناصر التحكم بالفيديو',
+                      ),
+                      onTap: _showControls,
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

@@ -34,6 +34,8 @@ class MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     final cacheEpoch = LocalMediaCache().epoch;
     final session = SessionSnapshot();
@@ -54,6 +56,8 @@ class MediaUploadService {
       final response = await _client.post(
         ApiConfig.mediaUpload,
         data: formData,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
 
       final data = response.data;

@@ -11,6 +11,7 @@ import '../../../../core/widgets/patient_media_banner.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../models/clinic_model.dart';
 import 'google_clinic_rating.dart';
+import '../../../locations/data/uae_location_repository.dart';
 
 /// Photo, identity and actions form one composition. Compact placements retain
 /// photography and identity without repeating every directory action.
@@ -25,9 +26,12 @@ class PatientClinicCard extends StatelessWidget {
     this.showCover = true,
     this.media,
     this.compact = false,
+    this.distanceLabel,
+    this.filterCity,
   });
   final ClinicModel clinic;
   final bool showCover, compact;
+  final String? distanceLabel, filterCity;
   final Widget? media;
   final VoidCallback onTap;
   final VoidCallback? onRequest, onContact;
@@ -35,6 +39,8 @@ class PatientClinicCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = LocaleService();
+    final selectedCity = currentUaeCatalog.resolve(filterCity);
+    final primaryCity = currentUaeCatalog.resolve(clinic.city);
     final location = formatClinicLocation(
       clinic.city,
       loc.isArabic ? clinic.areaAr : clinic.areaEn,
@@ -80,6 +86,33 @@ class PatientClinicCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       height: 1.4,
+                      color: AppColors.subtext(context),
+                    ),
+                  ),
+                ),
+              if (distanceLabel?.isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    distanceLabel!,
+                    style: TextStyle(
+                      color: AppColors.goldText(context),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              if (selectedCity != null &&
+                  primaryCity?.code != selectedCity.code &&
+                  clinic.city.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    loc.isArabic
+                        ? 'المدينة الرئيسية: ${clinic.city}. تحقّق من الفرع في ملف العيادة.'
+                        : 'Primary city: ${clinic.city}. Check the branch in the clinic profile.',
+                    style: TextStyle(
+                      fontSize: 11,
                       color: AppColors.subtext(context),
                     ),
                   ),

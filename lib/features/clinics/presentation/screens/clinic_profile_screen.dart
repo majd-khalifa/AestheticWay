@@ -33,6 +33,7 @@ import '../../models/clinic_model.dart';
 import '../widgets/contact_options_sheet.dart';
 import '../widgets/google_clinic_rating.dart';
 import '../../../../core/widgets/patient_video.dart';
+import '../../../locations/services/clinic_location_integrity.dart';
 
 /// Single natural-height document: switching tabs never reserves an empty viewport.
 class ClinicProfileScreen extends StatefulWidget {
@@ -458,6 +459,24 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                         leading: const Icon(Icons.access_time),
                         title: Text(loc.tr('working_hours')),
                         subtitle: Text(hours),
+                      ),
+                    if (ClinicLocationIntegrity.issue(
+                          city: clinic.city,
+                          emirate: clinic.emirate,
+                          addressEn: clinic.editableAddressEn,
+                          addressAr: clinic.editableAddressAr,
+                          arabic: loc.isArabic,
+                          requireKnownCity: false,
+                        ) !=
+                        null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Text(
+                          loc.isArabic
+                              ? 'راجع عنوان الفرع مع العيادة قبل التوجه؛ تفاصيل الموقع تحتاج إلى تأكيد.'
+                              : 'Confirm the branch address with the clinic before travelling; its location details need review.',
+                          style: TextStyle(color: AppColors.text(context)),
+                        ),
                       ),
                     if (clinic.addressAr.isNotEmpty ||
                         clinic.addressEn.isNotEmpty ||

@@ -281,6 +281,7 @@ void main() {
           phone: '+971509998877',
           whatsapp: '+971509998877',
           addressAr: 'وسط مدينة دبي',
+          city: 'Dubai',
           googleMapsUrl: 'https://maps.google.com/?q=Updated+Elite',
         );
 

@@ -37,6 +37,16 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   late final ClinicMediaRepository _repository;
   late final PagedCollection<ClinicGalleryAsset> _gallery;
   final _pending = <String>[];
+  final _galleryReceipts = <String, ClinicGalleryAsset>{};
+  CancelToken? _galleryCancel;
+  double? _galleryProgress;
+  bool _galleryUncertain = false, _galleryRetryConfirmation = false;
+  List<ClinicGalleryAsset> get _displayGallery => [
+    ..._gallery.items,
+    ..._galleryReceipts.values.where(
+      (a) => !_gallery.items.any((r) => r.id == a.id),
+    ),
+  ];
   bool _busy = false, _confirming = false;
   int _completed = 0, _batchSize = 0;
   String? _error, _notice, _videoPath, _posterPath;
@@ -68,7 +78,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       .max(
         0,
         10 -
-            math.max(_gallery.total ?? 0, _gallery.items.length) -
+            math.max(_gallery.total ?? 0, _displayGallery.length) -
             _pending.length,
       )
       .toInt();
@@ -79,7 +89,13 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     _repository = widget.repository ?? ClinicMediaRepository();
     _gallery = PagedCollection<ClinicGalleryAsset>(
       keyOf: (a) => a.id,
-      loader: (page, _) => _repository.getGallery(_clinicId, page: page),
+      loader: (page, _) async {
+        final rows = await _repository.getGallery(_clinicId, page: page);
+        if (mounted && _session.isCurrent) {
+          _galleryReceipts.removeWhere((id, _) => rows.any((r) => r.id == id));
+        }
+        return rows;
+      },
     );
     WidgetsBinding.instance.addObserver(this);
     AuthState().addListener(_sessionChanged);
@@ -92,12 +108,14 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   void _sessionChanged() {
     if (!_session.isCurrent) {
       _videoCancel?.cancel();
+      _galleryCancel?.cancel();
       _videoReceipt = null;
       _videoError = null;
       _videoDiagnostic = null;
       _videoNotice = null;
       _videoUncertain = false;
       _gallery.clear();
+      _galleryReceipts.clear();
       _pending.clear();
       _player?.dispose();
       _player = null;
@@ -128,6 +146,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     WidgetsBinding.instance.removeObserver(this);
     AuthState().removeListener(_sessionChanged);
     _videoCancel?.cancel();
+    _galleryCancel?.cancel();
     _gallery.dispose();
     _player?.dispose();
     super.dispose();
@@ -190,7 +209,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
             ? 'تغيرت الجلسة. أغلق الشاشة وأعد فتحها.'
             : 'Your session changed. Close and reopen this screen.')
       : e is ApiException
-      ? e.message
+      ? (e.isCancelled && e.message.isEmpty
+            ? (ar ? 'أُلغي رفع الصورة.' : 'Image upload cancelled.')
+            : e.message)
       : (ar
             ? 'تعذر إتمام العملية. تحقق من الملف والاتصال والصلاحيات وحاول مجدداً.'
             : 'Could not complete this operation. Check the file, connection and permissions, then try again.');
@@ -212,7 +233,40 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   }
 
   Future<void> _upload() async {
-    if (_locked || _pending.isEmpty) return;
+    if (_locked || _galleryUncertain || _pending.isEmpty) return;
+    if (_galleryRetryConfirmation) {
+      setState(() => _confirming = true);
+      final retry = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(
+            ar
+                ? 'مراجعة الصور قبل إعادة الرفع'
+                : 'Review photos before retrying',
+          ),
+          content: Text(
+            ar
+                ? 'قد يكون الخادم حفظ آخر صورة رغم انقطاع الرد. احذف أي ملف ظاهر في الصور المحفوظة من قائمة الرفع لتجنب التكرار.'
+                : 'The server may have stored the last photo despite the lost response. Remove any file already visible in saved images from the upload queue to avoid duplicates.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(ar ? 'إلغاء' : 'Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(
+                ar ? 'راجعت الصور، أعد الباقي' : 'Reviewed; retry remaining',
+              ),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _confirming = false);
+      if (retry != true || !_session.isCurrent) return;
+    }
     setState(() {
       _busy = true;
       _batchSize = 0;
@@ -220,11 +274,24 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _notice = null;
       _completed = 0;
       _batchSize = _pending.length;
+      _galleryProgress = null;
     });
+    _galleryCancel = CancelToken();
     try {
       for (final path in List<String>.of(_pending)) {
         _session.ensureCurrent();
-        final asset = await _repository.uploadGallery(_clinicId, path);
+        final asset = await _repository.uploadGallery(
+          _clinicId,
+          path,
+          cancelToken: _galleryCancel,
+          onSendProgress: (sent, total) {
+            if (mounted && _session.isCurrent) {
+              setState(
+                () => _galleryProgress = total > 0 ? sent / total : null,
+              );
+            }
+          },
+        );
         _session.ensureCurrent();
         if (!mounted) return;
         _gallery.mutate((items) {
@@ -232,22 +299,67 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
           items.add(asset);
         });
         setState(() {
+          _galleryReceipts[asset.id] = asset;
           _pending.remove(path);
           _completed++;
+          _galleryProgress = null;
         });
       }
       await _refreshProfile();
-      await _gallery.refresh();
+      await _reviewGallery();
     } catch (e) {
       if (mounted) {
-        setState(
-          () => _error =
-              '${_failure(e)} ${ar ? 'راجع الصور المحفوظة قبل إعادة محاولة الملفات المتبقية؛ لم تتم إعادة إرسال الصور المؤكدة.' : 'Review saved images before retrying remaining files; acknowledged uploads are not resent.'}',
-        );
+        final localValidation =
+            e is ApiException &&
+            (e.errorCode?.startsWith('LOCAL_MEDIA_') ?? false);
+        final uncertain =
+            !localValidation &&
+            (e is! ApiException ||
+                e.isCancelled ||
+                e.statusCode == null ||
+                e.statusCode! >= 500);
+        setState(() {
+          _galleryUncertain = uncertain;
+          _galleryRetryConfirmation = uncertain;
+          _error =
+              '${_failure(e)}${e is ApiException && e.statusCode != null ? ' (HTTP ${e.statusCode})' : ''} ${ar ? 'راجع الصور المحفوظة قبل إعادة محاولة الملفات المتبقية؛ لم تتم إعادة إرسال الصور المؤكدة.' : 'Review saved images before retrying remaining files; acknowledged uploads are not resent.'}';
+        });
+        if (_completed > 0) await _refreshProfile();
       }
     } finally {
+      _galleryCancel = null;
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _reviewGallery() async {
+    final hadUnverified = _galleryReceipts.isNotEmpty;
+    await _gallery.refresh();
+    if (!mounted ||
+        !_session.isCurrent ||
+        _gallery.error != null ||
+        !_gallery.isLoaded) {
+      return;
+    }
+    setState(() {
+      _galleryReceipts.removeWhere(
+        (id, _) => _gallery.items.any((r) => r.id == id),
+      );
+      _galleryUncertain = false;
+      if (_galleryReceipts.isNotEmpty) {
+        _notice = ar
+            ? 'وصل تأكيد الرفع؛ ظهور بعض الصور في قراءة المعرض الجديدة غير مؤكد. حدّث الصور، ولا تعد رفع الصور المؤكدة.'
+            : 'Upload acknowledged; some images are not yet confirmed in the fresh gallery. Refresh saved images; do not upload acknowledged files again.';
+      } else if (_galleryRetryConfirmation) {
+        _notice = ar
+            ? 'تم تحديث الصور المحفوظة. راجعها قبل إعادة رفع الملفات المتبقية.'
+            : 'Saved images refreshed. Review them before retrying remaining files.';
+      } else if (hadUnverified) {
+        _notice = ar
+            ? 'تم التحقق من سجلات الصور المحفوظة.'
+            : 'Saved gallery records verified.';
+      }
+    });
   }
 
   Future<void> _remove(ClinicGalleryAsset asset) async {
@@ -288,6 +400,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       await _repository.deleteGallery(_clinicId, asset);
       _session.ensureCurrent();
       _gallery.mutate((items) => items.removeWhere((a) => a.id == asset.id));
+      _galleryReceipts.remove(asset.id);
       await _gallery.refresh();
       await _refreshProfile();
     } catch (e) {
@@ -554,6 +667,40 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: Scaffold(
+      bottomNavigationBar:
+          _pending.isEmpty || !_session.isCurrent || !_roleAllowed
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      ar
+                          ? '${_pending.length} صورة محددة. اضغط الرفع للحفظ.'
+                          : '${_pending.length} ${_pending.length == 1 ? 'photo' : 'photos'} selected. Upload to save.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+                    SilverButton(
+                      label: ar
+                          ? 'رفع الصور المحددة'
+                          : 'Upload selected photos',
+                      isLoading: _busy,
+                      onPressed: _locked || _galleryUncertain ? null : _upload,
+                    ),
+                    if (_galleryUncertain)
+                      TextButton(
+                        onPressed: _locked ? null : _reviewGallery,
+                        child: Text(
+                          ar ? 'مراجعة الصور المحفوظة' : 'Review saved images',
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
       appBar: AppBar(
         title: Text(ar ? 'وسائط العيادة' : 'Clinic Media'),
         actions: [
@@ -613,7 +760,16 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                     if (_notice != null)
                       Semantics(liveRegion: true, child: Text(_notice!)),
                     if (_busy) ...[
-                      const LinearProgressIndicator(),
+                      LinearProgressIndicator(
+                        value: _batchSize > 0 ? _galleryProgress : null,
+                      ),
+                      if (_galleryCancel != null)
+                        TextButton(
+                          onPressed: () => _galleryCancel?.cancel(),
+                          child: Text(
+                            ar ? 'إلغاء رفع الصور' : 'Cancel image upload',
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       Text(
                         _batchSize > 0
@@ -636,7 +792,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                           : 'Uploads are saved and published immediately. Deletion permanently removes one photo. The public gallery shows the first 10 images in server order; reordering is unavailable.',
                     ),
                     const SizedBox(height: 12),
-                    for (final asset in _gallery.items)
+                    for (final asset in _displayGallery)
                       Card(
                         child: Column(
                           children: [
@@ -654,6 +810,12 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                                 ar ? 'حذف هذه الصورة' : 'Delete this photo',
                               ),
                             ),
+                            if (_galleryReceipts.containsKey(asset.id))
+                              Text(
+                                ar
+                                    ? 'بانتظار تأكيد القراءة المحفوظة'
+                                    : 'Awaiting saved-gallery verification',
+                              ),
                           ],
                         ),
                       ),
@@ -664,7 +826,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       onLoadMore: _gallery.loadMore,
                     ),
                     TextButton.icon(
-                      onPressed: _locked ? null : () => _gallery.refresh(),
+                      onPressed: _locked ? null : _reviewGallery,
                       icon: const Icon(Icons.refresh),
                       label: Text(
                         ar ? 'تحديث الصور المحفوظة' : 'Refresh saved images',
@@ -684,7 +846,13 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                             TextButton(
                               onPressed: _locked
                                   ? null
-                                  : () => setState(() => _pending.remove(path)),
+                                  : () => setState(() {
+                                      _pending.remove(path);
+                                      if (_pending.isEmpty) {
+                                        _galleryUncertain = false;
+                                        _galleryRetryConfirmation = false;
+                                      }
+                                    }),
                               child: Text(
                                 ar
                                     ? 'إزالة من قائمة الرفع'
@@ -709,14 +877,6 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                           ? 'JPG / PNG / WebP، حتى 5 MB للصورة، دون 25 MP.'
                           : 'JPG / PNG / WebP, up to 5 MB per image, at most 25 MP.',
                     ),
-                    if (_pending.isNotEmpty)
-                      SilverButton(
-                        label: ar
-                            ? 'رفع الصور المحددة'
-                            : 'Upload selected photos',
-                        isLoading: _busy,
-                        onPressed: _locked ? null : _upload,
-                      ),
                     const SizedBox(height: 24),
                     Text(
                       ar ? 'فيديو عرض العيادة' : 'Clinic showcase video',

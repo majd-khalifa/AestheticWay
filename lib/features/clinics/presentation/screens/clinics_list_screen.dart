@@ -526,6 +526,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                     final clinic = clinicList[index];
                     return PatientClinicCard(
                       clinic: clinic,
+                      filterCity: _filterOptions.selectedCity,
                       onTap: () => Navigator.push(
                         context,
                         LuxuryPageRoute(

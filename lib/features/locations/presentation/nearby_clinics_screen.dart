@@ -280,6 +280,9 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                   children: [
                                     PatientClinicCard(
                                       clinic: row.clinic,
+                                      distanceLabel: _discovery.distanceLabel(
+                                        row,
+                                      ),
                                       onTap: () async {
                                         if (_opening) return;
                                         _opening = true;
@@ -298,10 +301,6 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                         }
                                       },
                                     ),
-                                    if (_discovery
-                                        .distanceLabel(row)
-                                        .isNotEmpty)
-                                      _distanceBadge(row),
                                     if (_branchLabel(row).isNotEmpty)
                                       Text(_branchLabel(row)),
                                     AsyncActionButton(

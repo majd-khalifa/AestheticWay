@@ -9,6 +9,7 @@ abstract class MediaFilePolicy {
     final file = File(path);
     if (!await file.exists()) {
       throw ApiException(
+        errorCode: 'LOCAL_MEDIA_MISSING',
         message: LocaleService().isArabic
             ? 'يرجى اختيار ملف الوسائط مجدداً.'
             : 'Please select the media file again.',
@@ -17,6 +18,7 @@ abstract class MediaFilePolicy {
     final size = await file.length();
     if (size <= 0 || size > (video ? 25 : 5) * 1024 * 1024) {
       throw ApiException(
+        errorCode: 'LOCAL_MEDIA_SIZE',
         message: LocaleService().isArabic
             ? (video
                   ? 'اختر فيديو لا يتجاوز حجمه 25 MB.'
@@ -66,6 +68,7 @@ abstract class MediaFilePolicy {
       }
     }
     throw ApiException(
+      errorCode: 'LOCAL_MEDIA_FORMAT',
       message: LocaleService().isArabic
           ? 'تنسيق الملف المحدد غير مدعوم أو محتواه غير صالح.'
           : 'The selected media format is not supported or its content is invalid.',

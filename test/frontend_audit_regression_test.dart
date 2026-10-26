@@ -56,6 +56,8 @@ class _Api implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     postBodies.add(data);
     return Response<T>(
@@ -78,6 +80,8 @@ class _Uploader implements MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     if (failure != null) throw failure!;
     return {'id': 'asset-new', 'url': signedUrl};

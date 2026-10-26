@@ -5,6 +5,7 @@ import '../../../core/network/api_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/services/media_upload_service.dart';
 import '../../../core/utils/entity_id.dart';
+import 'package:dio/dio.dart';
 
 class ClinicGalleryAsset {
   const ClinicGalleryAsset({
@@ -72,7 +73,12 @@ class ClinicMediaRepository {
     return result;
   }
 
-  Future<ClinicGalleryAsset> uploadGallery(String clinicId, String path) async {
+  Future<ClinicGalleryAsset> uploadGallery(
+    String clinicId,
+    String path, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     if (!isEntityUuid(clinicId)) {
       throw const ApiException(
         message: 'Reload the clinic profile before managing media.',
@@ -83,6 +89,8 @@ class ClinicMediaRepository {
       filePath: path,
       mediaType: 'clinic_gallery',
       clinicId: clinicId,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
     session.ensureCurrent();
     final asset = ClinicGalleryAsset.fromJson(data);

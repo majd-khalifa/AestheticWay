@@ -116,6 +116,13 @@ jobs:
           test/final_physical_location_test.dart test/final_physical_ui_preview_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/final-physical-ux"
           --reporter expanded
+      - name: P0 practitioner, gallery, geography, GPS and video recovery
+        timeout-minutes: 3
+        run: >-
+          flutter test test/p0_practitioner_recovery_test.dart test/p0_gallery_recovery_test.dart
+          test/p0_geo_video_recovery_test.dart test/p0_recovery_previews_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/p0-regression-recovery"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -154,3 +161,4 @@ jobs:
             ${{ runner.temp }}/physical-qa-remediation/**
             ${{ runner.temp }}/backend-465bf30/**
             ${{ runner.temp }}/final-physical-ux/**
+            ${{ runner.temp }}/p0-regression-recovery/**

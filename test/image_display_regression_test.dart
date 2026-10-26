@@ -33,6 +33,8 @@ class _Upload implements MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     types.add(mediaType);
     clinicIds.add(clinicId);

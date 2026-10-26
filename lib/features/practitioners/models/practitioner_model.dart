@@ -71,6 +71,11 @@ class PractitionerModel {
   final String? aboutEn;
   final String status;
 
+  /// Preserve API text independently from patient display fallbacks.
+  final Map<String, String>? sourceTextFields;
+  String editableText(String field, String fallback) =>
+      sourceTextFields?[field] ?? fallback;
+
   const PractitionerModel({
     required this.id,
     required this.nameAr,
@@ -97,6 +102,7 @@ class PractitionerModel {
     required this.aboutAr,
     this.aboutEn,
     this.status = 'active',
+    this.sourceTextFields,
   });
 
   PractitionerModel copyWith({
@@ -151,20 +157,33 @@ class PractitionerModel {
       aboutAr: aboutAr ?? this.aboutAr,
       aboutEn: aboutEn ?? this.aboutEn,
       status: status ?? this.status,
+      sourceTextFields: sourceTextFields == null
+          ? null
+          : Map.unmodifiable({
+              ...sourceTextFields!,
+              'name_en': ?nameEn,
+              'name_ar': ?nameAr,
+              'title_en': ?classificationEn,
+              'title_ar': ?classificationAr,
+              'speciality_en': ?specialtyEn,
+              'speciality_ar': ?specialtyAr,
+              'bio_en': ?aboutEn,
+              'bio_ar': ?aboutAr,
+            }),
     );
   }
 
   Map<String, dynamic> toPortalJson() {
     return {
-      'name_en': nameEn,
-      'name_ar': nameAr,
-      'title_en': classificationEn ?? specialtyEn,
-      'title_ar': classificationAr,
-      'speciality_en': specialtyEn,
-      'speciality_ar': specialtyAr,
+      'name_en': editableText('name_en', nameEn),
+      'name_ar': editableText('name_ar', nameAr),
+      'title_en': editableText('title_en', classificationEn ?? ''),
+      'title_ar': editableText('title_ar', classificationAr),
+      'speciality_en': editableText('speciality_en', specialtyEn),
+      'speciality_ar': editableText('speciality_ar', specialtyAr),
       'type': type.value,
-      'bio_en': aboutEn ?? '',
-      'bio_ar': aboutAr,
+      'bio_en': editableText('bio_en', aboutEn ?? ''),
+      'bio_ar': editableText('bio_ar', aboutAr),
       'status': status,
     };
   }
@@ -278,6 +297,19 @@ class PractitionerModel {
         json['speciality_en'],
         json['speciality_ar'],
       ]),
+      sourceTextFields: Map.unmodifiable({
+        for (final key in [
+          'name_en',
+          'name_ar',
+          'title_en',
+          'title_ar',
+          'speciality_en',
+          'speciality_ar',
+          'bio_en',
+          'bio_ar',
+        ])
+          key: json[key] is String ? json[key] as String : '',
+      }),
       licenseAuthority: json['license_authority']?.toString() ?? '',
       licenseNumber: json['license_number']?.toString() ?? '',
       avatarUrl: ApiConfig.firstMediaUrl([

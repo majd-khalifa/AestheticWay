@@ -69,6 +69,7 @@ class NearbyClinicsSection extends StatelessWidget {
                       ),
                       child: PatientClinicCard(
                         clinic: clinic,
+                        filterCity: city,
                         compact: true,
                         onTap: () => onClinicTap(clinic),
                       ),
