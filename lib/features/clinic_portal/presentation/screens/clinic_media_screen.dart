@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../services/showcase_video_change.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../../../../core/auth/guest_auth_guard.dart';
@@ -14,6 +15,8 @@ import '../../../../core/services/media_file_policy.dart';
 import '../../../../core/widgets/portal_media_frame.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_image_picker_field.dart';
+import '../../../../core/services/media_operation_trace.dart';
+import '../../../../core/network/api_config.dart';
 import '../../../../core/widgets/pagination_footer.dart';
 import '../../../../core/widgets/silver_button.dart';
 import '../../../clinics/models/clinic_model.dart';
@@ -38,9 +41,14 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   late final PagedCollection<ClinicGalleryAsset> _gallery;
   final _pending = <String>[];
   final _galleryReceipts = <String, ClinicGalleryAsset>{};
+  final _galleryProfilePending = <String, ClinicGalleryAsset>{};
+  MediaOperationTrace? _galleryTrace;
+  Object? _galleryReadFailure;
   CancelToken? _galleryCancel;
   double? _galleryProgress;
   bool _galleryUncertain = false, _galleryRetryConfirmation = false;
+  bool _galleryPicking = false;
+  bool _galleryReviewing = false;
   List<ClinicGalleryAsset> get _displayGallery => [
     ..._gallery.items,
     ..._galleryReceipts.values.where(
@@ -66,6 +74,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   bool get _locked =>
       _busy ||
       _confirming ||
+      _galleryReviewing ||
       _profileLoading ||
       !_profileVerified ||
       !_roleAllowed ||
@@ -90,11 +99,14 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     _gallery = PagedCollection<ClinicGalleryAsset>(
       keyOf: (a) => a.id,
       loader: (page, _) async {
-        final rows = await _repository.getGallery(_clinicId, page: page);
-        if (mounted && _session.isCurrent) {
-          _galleryReceipts.removeWhere((id, _) => rows.any((r) => r.id == id));
+        try {
+          final rows = await _repository.getGallery(_clinicId, page: page);
+          _galleryReadFailure = null;
+          return rows;
+        } catch (e) {
+          _galleryReadFailure = e;
+          rethrow;
         }
-        return rows;
       },
     );
     WidgetsBinding.instance.addObserver(this);
@@ -116,6 +128,8 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _videoUncertain = false;
       _gallery.clear();
       _galleryReceipts.clear();
+      _galleryProfilePending.clear();
+      _galleryTrace = null;
       _pending.clear();
       _player?.dispose();
       _player = null;
@@ -136,7 +150,11 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) {
       _player?.pause();
-    } else if (!_busy && !_confirming && _session.isCurrent && _roleAllowed) {
+    } else if (!_busy &&
+        !_confirming &&
+        !_galleryPicking &&
+        _session.isCurrent &&
+        _roleAllowed) {
       _loadOwnedProfile();
     }
   }
@@ -209,7 +227,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
             ? 'تغيرت الجلسة. أغلق الشاشة وأعد فتحها.'
             : 'Your session changed. Close and reopen this screen.')
       : e is ApiException
-      ? (e.isCancelled && e.message.isEmpty
+      ? (e.errorCode == 'INVALID_MEDIA_ACK' && ar
+            ? 'لم يُؤكد رد الخادم سجل الصورة بشكل صالح. راجع الصور المحفوظة قبل إعادة الرفع.'
+            : e.isCancelled && e.message.isEmpty
             ? (ar ? 'أُلغي رفع الصورة.' : 'Image upload cancelled.')
             : e.message)
       : (ar
@@ -224,8 +244,8 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       if (mounted) {
         setState(
           () => _notice = ar
-              ? 'تم حفظ تغييرات الوسائط. أعد تحميل ملف العيادة للتحقق من العرض.'
-              : 'Media changes were saved. Reload the clinic profile to verify its display.',
+              ? 'تعذر تحديث ملف العيادة. أعد تحميله للتحقق من تغييرات الوسائط.'
+              : 'Could not refresh the clinic profile. Reload it to verify media changes.',
         );
       }
     }
@@ -280,10 +300,13 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
     try {
       for (final path in List<String>.of(_pending)) {
         _session.ensureCurrent();
+        final trace = MediaOperationTrace();
+        setState(() => _galleryTrace = trace);
         final asset = await _repository.uploadGallery(
           _clinicId,
           path,
           cancelToken: _galleryCancel,
+          trace: trace,
           onSendProgress: (sent, total) {
             if (mounted && _session.isCurrent) {
               setState(
@@ -300,12 +323,12 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
         });
         setState(() {
           _galleryReceipts[asset.id] = asset;
+          _galleryProfilePending[asset.id] = asset;
           _pending.remove(path);
           _completed++;
           _galleryProgress = null;
         });
       }
-      await _refreshProfile();
       await _reviewGallery();
     } catch (e) {
       if (mounted) {
@@ -315,15 +338,19 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
         final uncertain =
             !localValidation &&
             (e is! ApiException ||
+                e.errorCode == 'INVALID_MEDIA_ACK' ||
                 e.isCancelled ||
                 e.statusCode == null ||
                 e.statusCode! >= 500);
         setState(() {
+          _galleryTrace?.failed(e);
           _galleryUncertain = uncertain;
           _galleryRetryConfirmation = uncertain;
           _error =
               '${_failure(e)}${e is ApiException && e.statusCode != null ? ' (HTTP ${e.statusCode})' : ''} ${ar ? 'راجع الصور المحفوظة قبل إعادة محاولة الملفات المتبقية؛ لم تتم إعادة إرسال الصور المؤكدة.' : 'Review saved images before retrying remaining files; acknowledged uploads are not resent.'}';
         });
+        // Refresh acknowledged partial success without overwriting the failing
+        // upload's diagnostic or automatically replaying a mutation.
         if (_completed > 0) await _refreshProfile();
       }
     } finally {
@@ -333,18 +360,46 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   }
 
   Future<void> _reviewGallery() async {
+    if (_galleryReviewing || !mounted || !_session.isCurrent) return;
+    setState(() => _galleryReviewing = true);
+    try {
+      await _readGalleryAndProfile();
+    } finally {
+      if (mounted) setState(() => _galleryReviewing = false);
+    }
+  }
+
+  Future<void> _readGalleryAndProfile() async {
     final hadUnverified = _galleryReceipts.isNotEmpty;
+    final trace = _galleryTrace ?? MediaOperationTrace();
+    setState(() {
+      _galleryTrace = trace;
+      trace.begin(MediaOperationStage.galleryRead);
+    });
     await _gallery.refresh();
     if (!mounted ||
         !_session.isCurrent ||
         _gallery.error != null ||
         !_gallery.isLoaded) {
+      if (mounted && _session.isCurrent) {
+        setState(
+          () => trace.failed(
+            _galleryReadFailure ??
+                const ApiException(
+                  message: 'Saved gallery could not be verified.',
+                  errorCode: 'GALLERY_READ_UNCONFIRMED',
+                ),
+          ),
+        );
+      }
       return;
     }
     setState(() {
       _galleryReceipts.removeWhere(
         (id, _) => _gallery.items.any((r) => r.id == id),
       );
+      trace.galleryVerified = _galleryReceipts.isEmpty;
+      if (!trace.galleryVerified) trace.code = 'GALLERY_READ_UNCONFIRMED';
       _galleryUncertain = false;
       if (_galleryReceipts.isNotEmpty) {
         _notice = ar
@@ -360,6 +415,77 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
             : 'Saved gallery records verified.';
       }
     });
+    await _verifyGalleryProfile(trace);
+  }
+
+  Future<void> _verifyGalleryProfile(MediaOperationTrace trace) async {
+    final unverifiedGallery = !trace.galleryVerified;
+    trace.begin(MediaOperationStage.profileRead);
+    try {
+      await _service.refreshClinicProfile();
+      _session.ensureCurrent();
+      if (!mounted) return;
+      final clinic = _service.activeClinic;
+      if (clinic.id != _clinicId) {
+        throw const ApiException(message: 'Clinic identity changed.');
+      }
+      bool matches(String a, String b) {
+        final left = Uri.tryParse(ApiConfig.resolveUrl(a));
+        final right = Uri.tryParse(ApiConfig.resolveUrl(b));
+        if (left == right) return true;
+        if (left == null ||
+            right == null ||
+            left.scheme != right.scheme ||
+            left.authority != right.authority ||
+            left.path != right.path) {
+          return false;
+        }
+        // R2 may sign the same object again. Never remove arbitrary query data.
+        Map<String, List<String>> identity(Uri uri) =>
+            Map.of(uri.queryParametersAll)
+              ..removeWhere((key, _) => key.toLowerCase().startsWith('x-amz-'));
+        final x = identity(left), y = identity(right);
+        return left.queryParameters.keys.any(
+              (key) => key.toLowerCase() == 'x-amz-signature',
+            ) &&
+            right.queryParameters.keys.any(
+              (key) => key.toLowerCase() == 'x-amz-signature',
+            ) &&
+            x.length == y.length &&
+            x.entries.every((entry) => listEquals(entry.value, y[entry.key]));
+      }
+
+      setState(() {
+        final hadPendingProfile = _galleryProfilePending.isNotEmpty;
+        _galleryProfilePending.removeWhere(
+          (_, asset) =>
+              clinic.galleryImages.any((url) => matches(asset.url, url)),
+        );
+        trace.profileVerified = _galleryProfilePending.isEmpty;
+        if (!trace.profileVerified) {
+          trace.code = 'PROFILE_GALLERY_UNCONFIRMED';
+          _notice = ar
+              ? 'وصل تأكيد الرفع؛ ظهور الصورة في ملف العيادة الجديد غير مؤكد. حدّث للتحقق ولا ترفعها مجدداً.'
+              : 'Upload acknowledged; the fresh clinic profile has not confirmed this image. Refresh to verify; do not upload it again.';
+        } else if (unverifiedGallery) {
+          trace.stage = MediaOperationStage.galleryRead;
+          trace.code = 'GALLERY_READ_UNCONFIRMED';
+        } else if (hadPendingProfile) {
+          _notice = ar
+              ? 'تم التحقق من سجلات المعرض وملف العيادة.'
+              : 'Saved gallery records and clinic profile verified.';
+        }
+      });
+    } catch (e) {
+      if (mounted && _session.isCurrent) {
+        setState(() {
+          trace.failed(e);
+          _notice = ar
+              ? 'تعذر التحقق من ملف العيادة بعد الرفع. حدّث القراءة المحفوظة قبل إعادة المحاولة.'
+              : 'Could not verify the clinic profile after upload. Refresh saved data before retrying.';
+        });
+      }
+    }
   }
 
   Future<void> _remove(ClinicGalleryAsset asset) async {
@@ -395,16 +521,24 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
       _busy = true;
       _batchSize = 0;
       _error = null;
+      _galleryTrace = MediaOperationTrace()
+        ..begin(MediaOperationStage.deletion);
     });
     try {
       await _repository.deleteGallery(_clinicId, asset);
       _session.ensureCurrent();
       _gallery.mutate((items) => items.removeWhere((a) => a.id == asset.id));
       _galleryReceipts.remove(asset.id);
+      _galleryProfilePending.remove(asset.id);
       await _gallery.refresh();
       await _refreshProfile();
     } catch (e) {
-      if (mounted) setState(() => _error = _failure(e));
+      if (mounted) {
+        setState(() {
+          _error = _failure(e);
+          _galleryTrace?.failed(e);
+        });
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -759,6 +893,24 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       ),
                     if (_notice != null)
                       Semantics(liveRegion: true, child: Text(_notice!)),
+                    if (_galleryTrace != null)
+                      ExpansionTile(
+                        key: const ValueKey('gallery-support-details'),
+                        title: Text(
+                          ar
+                              ? 'تفاصيل تشخيص المعرض'
+                              : 'Gallery troubleshooting details',
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: SelectableText(
+                              _galleryTrace!.supportDetails,
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ),
+                        ],
+                      ),
                     if (_busy) ...[
                       LinearProgressIndicator(
                         value: _batchSize > 0 ? _galleryProgress : null,
@@ -788,8 +940,8 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                     const SizedBox(height: 8),
                     Text(
                       ar
-                          ? 'تُحفظ الصور المرفوعة وتظهر مباشرةً. الحذف نهائي لصورة واحدة. تعرض الواجهة العامة أول 10 صور حسب ترتيب الخادم؛ إعادة الترتيب غير متاحة.'
-                          : 'Uploads are saved and published immediately. Deletion permanently removes one photo. The public gallery shows the first 10 images in server order; reordering is unavailable.',
+                          ? 'ارفع الصور المختارة ثم حدّث للتحقق. الظهور العام يتطلب الاعتماد ويعرض أول 10 صور بترتيب الخادم. الحذف نهائي وإعادة الترتيب غير متاحة.'
+                          : 'Upload selected photos, then refresh to verify. Public visibility requires approval; first 10 images in server order. Deletion is permanent; reordering is unavailable.',
                     ),
                     const SizedBox(height: 12),
                     for (final asset in _displayGallery)
@@ -798,6 +950,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                           children: [
                             PortalMediaFrame(
                               imageUrl: asset.url,
+                              verifyRemoteDelivery: true,
                               expandable: true,
                               label: ar
                                   ? 'صورة من معرض العيادة'
@@ -873,6 +1026,7 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                         if (path != null) _selected([path]);
                       },
                       onImagesSelected: _selected,
+                      onPickingChanged: (picking) => _galleryPicking = picking,
                       helperText: ar
                           ? 'JPG / PNG / WebP، حتى 5 MB للصورة، دون 25 MP.'
                           : 'JPG / PNG / WebP, up to 5 MB per image, at most 25 MP.',

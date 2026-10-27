@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 // Identical harness runs on bb9a676 and the updated branch. Fixture-only
 // rendering is not physical device, GPS, provider, or R2 verification.
 import 'dart:io';
@@ -54,6 +55,7 @@ class PreviewGallery extends ClinicMediaRepository {
     String path, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async => throw ApiException.fromDioError(
     DioException(
       requestOptions: RequestOptions(),

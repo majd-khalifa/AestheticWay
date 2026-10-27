@@ -1,0 +1,78 @@
+{
+  "renderer": "Actual Flutter RepaintBoundary capture, Flutter 3.41.5; no generated UI images",
+  "data": "Disposable fixture API/Google values and genuine decoded test-only photos; no production/R2/device proof",
+  "frames": [
+    {
+      "path": "renders/c25e901_gallery_rejection_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "60351547005b2c649a715d42e62602878fa8a1b39a8414a7c73cb25b441b5d76"
+    },
+    {
+      "path": "renders/c25e901_gallery_rejection_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "b38de15247873bf9c7e0da62a5f842359c0337707a7f8f37d1e81d8dd92d329a"
+    },
+    {
+      "path": "renders/c25e901_gallery_rejection_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "646d69f1a53258142d1befe29cdd530d4d7d1bea2bf6dc55d4cef1f4b29c7169"
+    },
+    {
+      "path": "renders/c25e901_gallery_rejection_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "2d5e250276f7a37788385460cce822c1cc629e2f278746cb0860575f0e44f2fd"
+    },
+    {
+      "path": "renders/c25e901_rating_pending_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "855ea9d07001742087c3c6c86f7120ae8fd8c6f9db666caadd5cc5d191cb072c"
+    },
+    {
+      "path": "renders/c25e901_rating_pending_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "0d8cf193d847826b5d8bc76b743234d8c038cd8b117ea98c3e42b8348de4920e"
+    },
+    {
+      "path": "renders/c25e901_rating_pending_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f0efd5562a95c3eeadf39740121e82e548c808c16cf2b24e5d3b7d3a0d0a8390"
+    },
+    {
+      "path": "renders/c25e901_rating_pending_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "03a151fc7c536037b2967efe9d4f5f811a9f60eaa0ac1e704ff3f8f69c31b3bf"
+    },
+    {
+      "path": "renders/c25e901_rating_valid_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "bf9504b3087d91ef03e20eece426e64892be02c46624ddfdff3962c98d2f314f"
+    },
+    {
+      "path": "renders/c25e901_rating_valid_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "1b9178b23d6b1932dd3e28408bbdcab4176be801f0ac7ae78de6441446c90a44"
+    },
+    {
+      "path": "renders/c25e901_rating_valid_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "7c79ee6a3110c0da76fed5fb91d179f6923decdd117e67b69b00a1c6b84e0442"
+    },
+    {
+      "path": "renders/c25e901_rating_valid_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "98a2b5c1829848d16df31e5b287e7d3112709431d5ba0d7e51a761a55f6cca29"
+    }
+  ]
+}

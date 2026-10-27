@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'support/patient_visual_harness.dart';
 import 'dart:async';
@@ -83,6 +84,7 @@ class Gallery extends ClinicMediaRepository {
     String path, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     uploaded.add(path);
     if (reject || rejectPath == path) {
@@ -94,6 +96,9 @@ class Gallery extends ClinicMediaRepository {
       clinicId: clinicId,
       url: path,
     );
+    trace?.httpStatus = 201;
+    trace?.uploadHttpStatus = 201;
+    trace?.assetAcknowledged = true;
     saved.add(a);
     return a;
   }

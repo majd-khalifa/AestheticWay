@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -35,6 +36,7 @@ class _Upload implements MediaUploadService {
     String? clinicId,
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     types.add(mediaType);
     clinicIds.add(clinicId);

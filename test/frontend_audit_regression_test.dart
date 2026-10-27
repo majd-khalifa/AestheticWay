@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -82,6 +83,7 @@ class _Uploader implements MediaUploadService {
     String? clinicId,
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     if (failure != null) throw failure!;
     return {'id': 'asset-new', 'url': signedUrl};

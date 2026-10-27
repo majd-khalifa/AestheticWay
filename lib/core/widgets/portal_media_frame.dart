@@ -18,6 +18,7 @@ class PortalMediaFrame extends StatefulWidget {
     this.label,
     this.radius = 20,
     this.icon = Icons.image_outlined,
+    this.verifyRemoteDelivery = false,
   });
   final String? imageUrl, mediaCacheKey, label;
   final double? width, height;
@@ -25,6 +26,9 @@ class PortalMediaFrame extends StatefulWidget {
   final BoxFit fit;
   final bool expandable;
   final IconData icon;
+
+  /// Gallery audit only: do not substitute the selected local file for its URL.
+  final bool verifyRemoteDelivery;
   @override
   State<PortalMediaFrame> createState() => _PortalMediaFrameState();
 }
@@ -84,6 +88,7 @@ class _PortalMediaFrameState extends State<PortalMediaFrame> {
                     height: box.maxHeight,
                     fit: BoxFit.contain,
                     radius: 0,
+                    verifyRemoteDelivery: widget.verifyRemoteDelivery,
                   ),
                 ),
               ),
@@ -96,7 +101,11 @@ class _PortalMediaFrameState extends State<PortalMediaFrame> {
     }
   }
 
-  Widget _panel({required bool loading, bool failed = false}) => LayoutBuilder(
+  Widget _panel({
+    required bool loading,
+    bool failed = false,
+    Object? failure,
+  }) => LayoutBuilder(
     builder: (context, box) {
       final roomy = box.maxWidth >= 170 && box.maxHeight >= 160;
       final message = loading
@@ -150,6 +159,23 @@ class _PortalMediaFrameState extends State<PortalMediaFrame> {
                         fontSize: 12,
                       ),
                     ),
+                    if (failed && widget.verifyRemoteDelivery) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        _text(
+                          'Saved record and image delivery are separate.',
+                          'سجل الصورة وتسليم ملفها مرحلتان مستقلتان.',
+                        ),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                      Text(
+                        'stage=imageLoad; HTTP=${failure is NetworkImageLoadException ? failure.statusCode : "none"}; kind=${failure is NetworkImageLoadException ? "network" : "decode_or_transport"}',
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
                   ],
                   if ((failed || loading) &&
                       isValidNetworkImageUrl(
@@ -196,6 +222,7 @@ class _PortalMediaFrameState extends State<PortalMediaFrame> {
         _originalProvider = resolveImageProvider(
           _hasImage ? widget.imageUrl : null,
           mediaCacheKey: widget.mediaCacheKey,
+          allowLocalCache: !widget.verifyRemoteDelivery,
         );
         _decodedProvider = _originalProvider == null
             ? null
@@ -209,11 +236,16 @@ class _PortalMediaFrameState extends State<PortalMediaFrame> {
             key: ValueKey('${widget.imageUrl}:$_attempt'),
             imageUrl: _hasImage ? widget.imageUrl : null,
             mediaCacheKey: widget.mediaCacheKey,
+            allowLocalCache: !widget.verifyRemoteDelivery,
             width: width,
             height: height,
             fit: widget.fit,
             customPlaceholder: _panel(loading: false),
             errorPlaceholder: _panel(loading: false, failed: true),
+            errorPlaceholderBuilder: widget.verifyRemoteDelivery
+                ? (error) =>
+                      _panel(loading: false, failed: true, failure: error)
+                : null,
             loadingPlaceholder: _panel(loading: true),
           ),
         );

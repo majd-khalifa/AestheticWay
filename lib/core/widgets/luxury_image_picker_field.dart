@@ -28,6 +28,9 @@ class LuxuryImagePickerField extends StatefulWidget {
 
   /// Gallery mode selects multiple genuine images; existing single-image fields stay unchanged.
   final ValueChanged<List<String>>? onImagesSelected;
+
+  /// Lets an owning editor defer lifecycle refresh until native selection ends.
+  final ValueChanged<bool>? onPickingChanged;
   final int maxImages;
 
   const LuxuryImagePickerField({
@@ -47,6 +50,7 @@ class LuxuryImagePickerField extends StatefulWidget {
     this.mediaCacheKey,
     this.enabled = true,
     this.onImagesSelected,
+    this.onPickingChanged,
     this.maxImages = 10,
   });
 
@@ -89,6 +93,7 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
   Future<void> _pickImage(ImageSource source) async {
     if (_picking || !widget.enabled) return;
     setState(() => _picking = true);
+    widget.onPickingChanged?.call(true);
     try {
       if (source == ImageSource.gallery &&
           widget.onImagesSelected != null &&
@@ -136,7 +141,10 @@ class _LuxuryImagePickerFieldState extends State<LuxuryImagePickerField> {
         );
       }
     } finally {
-      if (mounted) setState(() => _picking = false);
+      if (mounted) {
+        setState(() => _picking = false);
+        widget.onPickingChanged?.call(false);
+      }
     }
   }
 

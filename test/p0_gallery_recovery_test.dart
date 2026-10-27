@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class ReviewGallery extends g.Gallery {
     String path, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     onSendProgress?.call(0, 100);
     final result = await super.uploadGallery(clinicId, path);

@@ -256,6 +256,13 @@ class _GoogleBusinessScreenState extends State<GoogleBusinessScreen> {
                                   'حالة مزامنة التقييمات غير متاحة',
                                 ),
                               }),
+                              if (current.syncStatus == 'pending')
+                                Text(
+                                  t(
+                                    'Ratings require a successful server sync. Refresh reloads the status; it does not start a sync. Confirm this is your clinic’s exact business; unlink an unrelated business.',
+                                    'تظهر التقييمات بعد نجاح المزامنة الخادمية. التحديث يعيد قراءة الحالة ولا يبدأ المزامنة. تأكد أن النشاط هو عيادتك تحديداً؛ ألغِ ارتباط أي نشاط غير تابع لها.',
+                                  ),
+                                ),
                               AsyncActionButton(
                                 label: t(
                                   'Review business in Google Maps',

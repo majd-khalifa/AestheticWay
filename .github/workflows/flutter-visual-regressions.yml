@@ -123,6 +123,12 @@ jobs:
           test/p0_geo_video_recovery_test.dart test/p0_recovery_previews_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/p0-regression-recovery"
           --reporter expanded
+      - name: Physical gallery lifecycle and Google ratings contracts
+        timeout-minutes: 3
+        run: >-
+          flutter test test/gallery_ratings_physical_qa_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/gallery-ratings-c25e901"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -162,3 +168,4 @@ jobs:
             ${{ runner.temp }}/backend-465bf30/**
             ${{ runner.temp }}/final-physical-ux/**
             ${{ runner.temp }}/p0-regression-recovery/**
+            ${{ runner.temp }}/gallery-ratings-c25e901/**

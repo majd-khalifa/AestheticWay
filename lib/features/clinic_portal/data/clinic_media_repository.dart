@@ -4,6 +4,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/services/media_upload_service.dart';
+import '../../../core/services/media_operation_trace.dart';
 import '../../../core/utils/entity_id.dart';
 import 'package:dio/dio.dart';
 
@@ -32,7 +33,7 @@ class ClinicGalleryAsset {
   }
 }
 
-/// Uses actual d1023b0 media routes. Gallery association happens at upload;
+/// Uses source-confirmed c25e901 media routes. Association happens at upload;
 /// gallery_images is read-only and never PATCHed as an array of URLs.
 class ClinicMediaRepository {
   ClinicMediaRepository({ApiClient? apiClient, MediaUploadService? uploads})
@@ -78,6 +79,7 @@ class ClinicMediaRepository {
     String path, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     if (!isEntityUuid(clinicId)) {
       throw const ApiException(
@@ -85,20 +87,44 @@ class ClinicMediaRepository {
       );
     }
     final session = SessionSnapshot();
+    final operation = trace ?? MediaOperationTrace();
     final data = await _uploads.uploadImage(
       filePath: path,
       mediaType: 'clinic_gallery',
       clinicId: clinicId,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
+      trace: operation,
     );
     session.ensureCurrent();
-    final asset = ClinicGalleryAsset.fromJson(data);
-    if (asset.clinicId != clinicId) {
-      throw const ApiException(
-        message: 'The uploaded image does not belong to the current clinic.',
+    operation.stage = MediaOperationStage.acknowledgment;
+    if (operation.httpStatus != 201) {
+      throw ApiException(
+        message:
+            'The upload was not acknowledged as a saved image. Review saved images before retrying.',
+        statusCode: operation.httpStatus,
+        errorCode: 'INVALID_MEDIA_ACK',
       );
     }
+    late ClinicGalleryAsset asset;
+    try {
+      asset = ClinicGalleryAsset.fromJson(data);
+    } on ApiException {
+      throw ApiException(
+        message:
+            'The server acknowledged the upload, but its saved image record is incomplete. Review saved images before retrying.',
+        statusCode: operation.httpStatus,
+        errorCode: 'INVALID_MEDIA_ACK',
+      );
+    }
+    if (asset.clinicId != clinicId) {
+      throw ApiException(
+        message: 'The uploaded image does not belong to the current clinic.',
+        statusCode: operation.httpStatus,
+        errorCode: 'INVALID_MEDIA_ACK',
+      );
+    }
+    operation.assetAcknowledged = true;
     return asset;
   }
 
