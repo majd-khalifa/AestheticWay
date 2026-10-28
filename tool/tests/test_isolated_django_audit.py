@@ -39,6 +39,11 @@ class IsolatedDjangoAuditTest(unittest.TestCase):
                 "PYTHONDONTWRITEBYTECODE": "1",
                 "PYTHONPATH": os.pathsep.join([str(TOOL_ROOT), str(root)]),
                 "DJANGO_SETTINGS_MODULE": "offline_settings",
+                # Own temp files created even by the deliberately preinitialized
+                # settings case, which the isolation boundary must refuse.
+                "TMPDIR": str(root),
+                "TEMP": str(root),
+                "TMP": str(root),
                 storage_flag: "true",
                 # Explicit synthetic values; never copy or use real credentials.
                 "AWS_ACCESS_KEY_ID": "synthetic-not-a-key",
