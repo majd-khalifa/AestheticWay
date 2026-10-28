@@ -101,6 +101,8 @@ jobs:
           gem install bundler --version 4.0.20 --no-document
           bundle _4.0.20_ install
           bundle _4.0.20_ exec pod install
+          # Public dependency evidence, emitted by CocoaPods on this macOS host.
+          ruby -rbase64 -e 'puts "AW_COCOAPODS_LOCK_BASE64=#{Base64.strict_encode64(File.binread("Podfile.lock"))}"'
           cp Podfile.lock ../release-evidence/Podfile.lock
           cp Gemfile.lock ../release-evidence/Gemfile.lock
       - name: Actual unsigned iOS Release device compilation
