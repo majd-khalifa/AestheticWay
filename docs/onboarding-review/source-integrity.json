@@ -1,0 +1,7 @@
+{
+  "backend_commit": "1f1e4bf",
+  "source_files": 403,
+  "all_source_hashes_unchanged": true,
+  "archive_sha256": "48d385acc256ebba450ede43e515f475daf1ae8ed3de80319e68429833f7c1ff",
+  "note": "Read-only source; disposable in-memory tests do not establish deployed API or R2 delivery."
+}

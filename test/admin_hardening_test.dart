@@ -120,6 +120,7 @@ class _Repository implements AdminRepository {
     int pageSize = 20,
     String? status,
     String? tier,
+    String? setupStatus,
     String? search,
   }) async {
     clinicReads++;
@@ -330,7 +331,7 @@ class _Repository implements AdminRepository {
 class _DeferredCategories extends CategoryRepository {
   final response = Completer<List<CategoryModel>>();
   @override
-  Future<List<CategoryModel>> getCategories({int page = 1, String? search}) =>
+  Future<List<CategoryModel>> getAdminCategories({int page = 1}) =>
       response.future;
 }
 
@@ -1424,13 +1425,13 @@ void main() {
     },
   );
   testWidgets(
-    'Admin treatment categories have real search and paging with unavailable writes and separate brand taxonomy',
+    'Admin treatment categories use paged authenticated management and separate brand taxonomy',
     (tester) async {
       final requests = <Map<String, dynamic>>[];
       var writes = 0;
       final api = FakeApiClient(
         onGet: (path, query) {
-          expect(path, ApiConfig.categories);
+          expect(path, CategoryRepository.adminPath);
           final q = Map<String, dynamic>.of(query ?? {});
           requests.add(q);
           final index = q['page'] as int;
@@ -1476,7 +1477,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Active treatment categories'), findsOneWidget);
+      expect(find.text('Treatment categories'), findsOneWidget);
       expect(
         find.textContaining('brand-product categories are separate'),
         findsOneWidget,
@@ -1487,18 +1488,12 @@ void main() {
               find.widgetWithText(OutlinedButton, 'Add Category'),
             )
             .onPressed,
-        isNull,
+        isNotNull,
       );
-      await tester.enterText(find.byType(TextField), 'Skin');
-      await tester.pump(const Duration(milliseconds: 349));
       expect(requests, hasLength(1));
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pumpAndSettle();
-      expect(requests, hasLength(2));
-      expect(requests.last['search'], 'Skin');
-      expect(requests.last['page_size'], 20);
+      expect(requests.single['page_size'], 20);
       final scroll = find.byType(CustomScrollView);
-      for (var i = 0; i < 14 && requests.length < 3; i++) {
+      for (var i = 0; i < 14 && requests.length < 2; i++) {
         await tester.drag(scroll, const Offset(0, -700));
         await tester.pumpAndSettle();
       }
@@ -1513,13 +1508,13 @@ void main() {
         tester
             .widget<TextButton>(find.widgetWithText(TextButton, 'Edit').last)
             .onPressed,
-        isNull,
+        isNotNull,
       );
       expect(
         tester
             .widget<TextButton>(find.widgetWithText(TextButton, 'Delete').last)
             .onPressed,
-        isNull,
+        isNotNull,
       );
       expect(writes, 0);
     },
@@ -1530,7 +1525,7 @@ void main() {
       var fail = true, reads = 0;
       final api = FakeApiClient(
         onGet: (path, q) {
-          expect(path, ApiConfig.categories);
+          expect(path, CategoryRepository.adminPath);
           reads++;
           if (fail) throw const ApiException(message: 'Categories unavailable');
           return {

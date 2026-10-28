@@ -1,3 +1,4 @@
+import 'admin_clinic_reviews_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -85,6 +86,19 @@ class _AdminClinicsScreenState extends State<AdminClinicsScreen> {
                 'Manage clinic identity, subscriptions and access.',
                 'إدارة هوية العيادات واشتراكاتها وحالة تفعيلها.',
               ),
+            ),
+            OutlinedButton.icon(
+              key: const ValueKey('admin-clinics-reviews'),
+              onPressed: !_service.canManage
+                  ? null
+                  : () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AdminClinicReviewsScreen(),
+                      ),
+                    ),
+              icon: const Icon(Icons.fact_check_outlined),
+              label: Text(adminText('Clinic Reviews', 'مراجعة العيادات')),
             ),
             TextField(
               controller: _searchController,

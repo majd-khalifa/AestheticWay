@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import 'token_storage.dart';
+import '../../features/onboarding/services/onboarding_service.dart';
 import '../../features/clinic_portal/services/clinic_portal_service.dart';
 import '../../features/admin/services/admin_portal_service.dart';
 import '../../features/referral/services/referral_service.dart';
@@ -15,11 +16,14 @@ class AuthState extends ChangeNotifier {
   int _sessionEpoch = 0;
   int get sessionEpoch => _sessionEpoch;
   bool _isLoggedIn = false;
+  bool _hasAuthenticatedSession = false;
+  bool get hasAuthenticatedSession => _hasAuthenticatedSession;
   String _userName = '';
   String _userPhone = '';
   String _userEmail = '';
   String _userRole = 'patient';
   bool _isVerified = false;
+  bool _isEmailVerified = false;
   final Set<String> _favoriteClinicIds = {};
 
   bool get isLoggedIn => _isLoggedIn;
@@ -28,6 +32,7 @@ class AuthState extends ChangeNotifier {
   String get userEmail => _userEmail;
   String get userRole => _userRole;
   bool get isVerified => _isVerified;
+  bool get isEmailVerified => _isEmailVerified;
   Set<String> get favoriteClinicIds => _favoriteClinicIds;
 
   bool get isSuperAdmin => _userRole == 'super_admin';
@@ -41,6 +46,7 @@ class AuthState extends ChangeNotifier {
     String email = '',
     String role = 'patient',
     bool isVerified = false,
+    bool isEmailVerified = false,
   }) {
     final changed = !_isLoggedIn || _userPhone != phone || _userRole != role;
     if (_isLoggedIn && changed) {
@@ -50,12 +56,14 @@ class AuthState extends ChangeNotifier {
       _favoriteClinicIds.clear();
     }
     if (changed) ++_sessionEpoch;
+    _hasAuthenticatedSession = true;
     _isLoggedIn = true;
     _userName = name;
     _userPhone = phone;
     _userEmail = email;
     _userRole = role;
     _isVerified = isVerified;
+    _isEmailVerified = isEmailVerified;
     notifyListeners();
   }
 
@@ -64,13 +72,17 @@ class AuthState extends ChangeNotifier {
     required String phone,
     String email = '',
     bool? isVerified,
+    bool? isEmailVerified,
   }) {
+    final sameEmail =
+        email.trim().toLowerCase() == _userEmail.trim().toLowerCase();
     _userName = name;
     _userPhone = phone;
     _userEmail = email;
     if (isVerified != null) {
       _isVerified = isVerified;
     }
+    _isEmailVerified = isEmailVerified ?? (sameEmail && _isEmailVerified);
     notifyListeners();
   }
 
@@ -91,23 +103,36 @@ class AuthState extends ChangeNotifier {
     _userEmail = '';
     _userRole = 'patient';
     _isVerified = false;
+    _isEmailVerified = false;
     _favoriteClinicIds.clear();
     notifyListeners();
   }
 
   /// Restore user session from persistent TokenStorage
-  Future<void> restoreSession() async {
+  Future<void> restoreSession({OnboardingService? onboardingService}) async {
+    final identity = _sessionEpoch;
     await TokenStorage().init();
+    final credentials = TokenStorage().sessionEpoch;
     final hasToken = await TokenStorage().hasToken();
     final user = TokenStorage().getUser();
     if (hasToken && user != null) {
+      await (onboardingService ?? OnboardingService())
+          .recordAuthenticatedSession();
+      // Preference I/O must never resurrect an identity after logout or a
+      // replacement login while startup restoration was waiting.
+      if (identity != _sessionEpoch ||
+          credentials != TokenStorage().sessionEpoch) {
+        return;
+      }
       ++_sessionEpoch;
+      _hasAuthenticatedSession = true;
       _isLoggedIn = true;
       _userName = user['full_name']?.toString() ?? '';
       _userPhone = user['phone']?.toString() ?? '';
       _userEmail = user['email']?.toString() ?? '';
       _userRole = user['role']?.toString() ?? '';
       _isVerified = user['is_verified'] == true;
+      _isEmailVerified = user['is_email_verified'] == true;
       notifyListeners();
     }
   }

@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-26",
+  "backend_supplied_commit": "465bf3089dba98a2b0b4145e728daec3c533b0f1",
+  "backend_unchanged_files": 413,
+  "starting_frontend_commit": "f20ab75ed5e0be5148771b104e9c3ac5d6b2b73c",
+  "local_flutter": "3.41.5",
+  "local_dart": "3.11.3",
+  "local_host": "Ubuntu/Linux",
+  "analyzer_issues": 0,
+  "full_suite_passed": 1183,
+  "full_suite_failed": 0,
+  "new_regressions_and_render_tests": 39,
+  "before_render_tests_passed": 8,
+  "after_render_tests_passed": 8,
+  "format": "dart format .; final no changes",
+  "diff_check": "clean",
+  "19MiB_fixture": {
+    "bytes": 19925044,
+    "ffmpeg_full_decode_exit": 0,
+    "ffprobe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 64,
+          "height": 64
+        }
+      ],
+      "format": {
+        "duration": "2.000000",
+        "size": "19925044"
+      }
+    },
+    "simulated_send_seconds": 320,
+    "native_network_bandwidth_test": false
+  },
+  "renders": {
+    "before": 36,
+    "after": 36,
+    "side_by_side": 8
+  },
+  "golden_baselines": "No existing golden baselines replaced or tolerance weakened",
+  "native_CI_evidence": "See PR13 current-commit checks and final PR body for actual Windows/Ubuntu, Android APK/AAB and macOS iOS/XCTest logs. Do not substitute previous f20ab75 results.",
+  "physical_device": "None available to this execution. Owner-reported PASS and remaining checklist are separated in report.",
+  "otp_receipt": "Unverified",
+  "google_coordinate_adoption": "Not implemented; requires backend provenance/expiry/adoption contract per policy",
+  "django_signing_and_credentials": "Unmodified"
+}

@@ -73,6 +73,8 @@ class FakeApiClient implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     final res = onPost != null ? onPost!(path, data) : <String, dynamic>{};
     return Response<T>(
@@ -88,6 +90,8 @@ class FakeApiClient implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     final res = onPatch != null ? onPatch!(path, data) : <String, dynamic>{};
     return Response<T>(

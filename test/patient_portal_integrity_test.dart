@@ -35,6 +35,8 @@ class PatientRecordingClient implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     posts.add(Map<String, dynamic>.from(data as Map));
     if (failure != null) throw failure!;

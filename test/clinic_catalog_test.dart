@@ -373,6 +373,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        // Approved profiles now retain their review-status card above catalog.
+        await tester.scrollUntilVisible(
+          find.text('إدارة الكتالوج والمحتوى'),
+          400,
+        );
         expect(find.text('إدارة الكتالوج والمحتوى'), findsOneWidget);
         expect(find.text('الأطباء'), findsOneWidget);
         expect(find.text('العلاجات'), findsOneWidget);

@@ -1,0 +1,17 @@
+// Future enabled-SDK fragment only. Retain the existing implicit-engine
+// registration and super.application call. Never replace the AppDelegate file.
+import GoogleMaps
+
+private func configureRestrictedGoogleMaps() {
+  guard let key = Bundle.main.object(forInfoDictionaryKey: "AWGoogleMapsAPIKey") as? String,
+        !key.isEmpty, !key.contains("$(") else {
+    // The intentionally enabled native build must reject missing configuration
+    // before distribution; never call this in the current SDK-free app.
+    preconditionFailure("Restricted iOS Maps SDK configuration is missing.")
+  }
+  GMSServices.provideAPIKey(key)
+}
+// In the approved SDK target's didFinishLaunchingWithOptions, call this before
+// super.application. A CI build phase must reject missing keys without logging
+// values. No new permission is needed for a fixed clinic marker. Foreground
+// patient location remains explicitly consented and independently controlled.

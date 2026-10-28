@@ -1,7 +1,7 @@
 import '../widgets/clinic_catalog_cards.dart';
 import '../../../../core/services/local_media_cache.dart';
 import '../widgets/clinic_location_selector.dart';
-import 'package:aesthetic_way/core/widgets/luxury_image.dart';
+import 'package:aesthetic_way/core/widgets/portal_media_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
@@ -176,26 +176,16 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: LuxuryImage(
+                              child: PortalMediaFrame(
                                 imageUrl: clinic.logoUrl,
                                 mediaCacheKey: LocalMediaCache.clinicLogo(
                                   clinic.id,
                                 ),
-                                fallbackLogoUrl: clinic.coverImageUrl,
                                 width: 58,
                                 height: 58,
-                                fit: BoxFit.cover,
-                                customPlaceholder: Container(
-                                  width: 58,
-                                  height: 58,
-                                  color: isDark
-                                      ? AppColors.cardSurfaceHover
-                                      : AppColors.lightCardSurfaceHover,
-                                  child: Icon(
-                                    Icons.apartment_rounded,
-                                    color: AppColors.goldText(context),
-                                  ),
-                                ),
+                                fit: BoxFit.contain,
+                                radius: 12,
+                                icon: Icons.apartment_rounded,
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -227,7 +217,17 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 6),
-                                  TierBadge(tier: clinic.subscriptionTier),
+                                  if (clinic.subscriptionTierKnown)
+                                    TierBadge(tier: clinic.subscriptionTier)
+                                  else
+                                    Text(
+                                      loc.isArabic
+                                          ? 'الخطة غير متاحة'
+                                          : 'Plan unavailable',
+                                      style: TextStyle(
+                                        color: AppColors.mutedText(context),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -237,11 +237,7 @@ class _ClinicDashboardScreenState extends State<ClinicDashboardScreen> {
                       const SizedBox(height: 16),
 
                       // Clinic Onboarding Setup Checklist (Shown when setup is incomplete)
-                      if (clinic.setupStatus != 'approved' ||
-                          (clinicService.setupChecklist != null &&
-                              !clinicService
-                                  .setupChecklist!
-                                  .isReadyForReview)) ...[
+                      ...[
                         ClinicSetupChecklistCard(
                           clinic: clinic,
                           checklist: clinicService.setupChecklist,

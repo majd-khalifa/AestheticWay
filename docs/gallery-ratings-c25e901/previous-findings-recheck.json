@@ -1,0 +1,231 @@
+[
+  {
+    "case": "doctor_without_photo",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "nurse_without_photo",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "licensed_professional_without_photo",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "flutter_blank_title_fallback",
+    "status": 400,
+    "errors": {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "One or more fields failed validation.",
+        "fields": {
+          "title_en": [
+            "Ensure this field has no more than 100 characters."
+          ]
+        }
+      }
+    }
+  },
+  {
+    "case": "fixed_optional_blank_title",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "invalid_type",
+    "status": 400,
+    "errors": {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "One or more fields failed validation.",
+        "fields": {
+          "type": [
+            "\"Nurse\" is not a valid choice."
+          ]
+        }
+      }
+    }
+  },
+  {
+    "case": "invalid_title_en",
+    "status": 400,
+    "errors": {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "One or more fields failed validation.",
+        "fields": {
+          "title_en": [
+            "Ensure this field has no more than 100 characters."
+          ]
+        }
+      }
+    }
+  },
+  {
+    "case": "invalid_speciality_en",
+    "status": 400,
+    "errors": {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "One or more fields failed validation.",
+        "fields": {
+          "speciality_en": [
+            "Ensure this field has no more than 200 characters."
+          ]
+        }
+      }
+    }
+  },
+  {
+    "case": "nurse_edit_new_authenticated_read",
+    "status": 200,
+    "read_status": 200,
+    "blank_title_preserved": true,
+    "edited_bio_persisted": true
+  },
+  {
+    "case": "practitioner_page2_tenant_scope",
+    "status": 200,
+    "count": 25,
+    "page1_rows": 20,
+    "page2_rows": 5,
+    "overlap": false,
+    "all_current_tenant": true
+  },
+  {
+    "case": "active_practitioner_avatar",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "nurse_with_asset",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "active_clinic_gallery",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "gallery_readback",
+    "status": 200,
+    "count": 1,
+    "keys": [
+      "id",
+      "media_type",
+      "url",
+      "original_filename",
+      "file_size",
+      "mime_type",
+      "width",
+      "height",
+      "clinic_id",
+      "uploader_id",
+      "created_at"
+    ]
+  },
+  {
+    "case": "gallery_new_authenticated_client_profile_read",
+    "status": 200,
+    "gallery_count": 1
+  },
+  {
+    "case": "gallery_delete",
+    "status": 204
+  },
+  {
+    "case": "pending_practitioner_avatar",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "nurse_with_asset",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "pending_clinic_gallery",
+    "status": 201,
+    "errors": null
+  },
+  {
+    "case": "gallery_readback",
+    "status": 200,
+    "count": 1,
+    "keys": [
+      "id",
+      "media_type",
+      "url",
+      "original_filename",
+      "file_size",
+      "mime_type",
+      "width",
+      "height",
+      "clinic_id",
+      "uploader_id",
+      "created_at"
+    ]
+  },
+  {
+    "case": "gallery_new_authenticated_client_profile_read",
+    "status": 200,
+    "gallery_count": 1
+  },
+  {
+    "case": "gallery_delete",
+    "status": 204
+  },
+  {
+    "case": "contradictory_location",
+    "status": 400,
+    "stored": {
+      "city": [
+        "City 'Dubai' belongs to Dubai (DU), which conflicts with emirate 'Abu Dhabi' (AD)."
+      ],
+      "emirate": [
+        "City 'Dubai' belongs to Dubai (DU), which conflicts with emirate 'Abu Dhabi' (AD).",
+        "Coordinates (25.3463, 55.4209) (located in Sharjah) do not match selected emirate/city 'Abu Dhabi' (AD).",
+        "Coordinates (25.3463, 55.4209) (located in Sharjah) do not match selected emirate/city 'Dubai' (DU)."
+      ],
+      "address_en": [
+        "Address 'Sharjah' references emirate 'Sharjah', which conflicts with selected location 'Abu Dhabi'.",
+        "Address 'Sharjah' references emirate 'Sharjah', which conflicts with selected location 'Dubai'."
+      ],
+      "latitude": [
+        "Coordinates (25.3463, 55.4209) (located in Sharjah) do not match selected emirate/city 'Abu Dhabi' (AD).",
+        "Coordinates (25.3463, 55.4209) (located in Sharjah) do not match selected emirate/city 'Dubai' (DU)."
+      ],
+      "longitude": [
+        "Coordinates (25.3463, 55.4209) (located in Sharjah) do not match selected emirate/city 'Abu Dhabi' (AD).",
+        "Coordinates (25.3463, 55.4209) (located in Sharjah) do not match selected emirate/city 'Dubai' (DU)."
+      ]
+    }
+  },
+  {
+    "case": "Dubai_filter",
+    "status": 200,
+    "names": [
+      "Disposable active_branch"
+    ]
+  },
+  {
+    "case": "nearby_cross_emirate_branch_metadata",
+    "status": 200,
+    "nearest_branch": {
+      "id": "4a0f53dc-b6b2-4cea-8a9e-1c3d35f9ebbd",
+      "name_en": "Test branch",
+      "name_ar": "",
+      "address_en": "",
+      "address_ar": "",
+      "latitude": 25.2315,
+      "longitude": 55.3242,
+      "city": "Dubai",
+      "emirate": "Dubai"
+    },
+    "distance_km": 0.08
+  }
+]

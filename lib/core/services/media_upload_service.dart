@@ -1,5 +1,6 @@
 import '../auth/session_changed_exception.dart';
 import 'media_file_policy.dart';
+import 'media_operation_trace.dart';
 import '../auth/session_snapshot.dart';
 import 'local_media_cache.dart';
 import 'package:dio/dio.dart';
@@ -34,10 +35,14 @@ class MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     final cacheEpoch = LocalMediaCache().epoch;
     final session = SessionSnapshot();
     try {
+      trace?.begin(MediaOperationStage.localValidation);
       final mime = await MediaFilePolicy.inspect(filePath);
       final fileName = 'image.${mime.subtype == 'jpeg' ? 'jpg' : mime.subtype}';
       final formData = FormData.fromMap({
@@ -51,12 +56,18 @@ class MediaUploadService {
       });
 
       session.ensureCurrent();
+      trace?.begin(MediaOperationStage.multipartUpload);
       final response = await _client.post(
         ApiConfig.mediaUpload,
         data: formData,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
 
       final data = response.data;
+      trace?.begin(MediaOperationStage.acknowledgment);
+      trace?.httpStatus = response.statusCode;
+      trace?.uploadHttpStatus = response.statusCode;
       if (data is Map<String, dynamic>) {
         LocalMediaCache().remember(
           localPath: filePath,
@@ -67,6 +78,7 @@ class MediaUploadService {
       }
       return <String, dynamic>{};
     } on DioException catch (e) {
+      trace?.failed(ApiException.fromDioError(e));
       if (kDebugMode) {
         debugPrint(
           '[media_upload] failed status=${e.response?.statusCode} type=${e.type.name}',
@@ -74,6 +86,7 @@ class MediaUploadService {
       }
       throw ApiException.fromDioError(e);
     } catch (e) {
+      trace?.failed(e);
       if (kDebugMode) debugPrint('[media_upload] failed type=${e.runtimeType}');
       if (e is ApiException || e is SessionChangedException) rethrow;
       throw const ApiException(

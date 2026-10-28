@@ -19,11 +19,14 @@ bool isValidNetworkImageUrl(String? url) {
 }
 
 /// Use the actual source. A valid device/asset path is not a missing image.
-ImageProvider? resolveImageProvider(String? source, {String? mediaCacheKey}) {
-  final cached = LocalMediaCache().lookup(
-    entityKey: mediaCacheKey,
-    remoteUrl: source,
-  );
+ImageProvider? resolveImageProvider(
+  String? source, {
+  String? mediaCacheKey,
+  bool allowLocalCache = true,
+}) {
+  final cached = allowLocalCache
+      ? LocalMediaCache().lookup(entityKey: mediaCacheKey, remoteUrl: source)
+      : null;
   if (cached != null) return FileImage(File(cached));
   if (source == null || source.trim().isEmpty) return null;
   final value = source.trim();
@@ -109,6 +112,11 @@ class LuxuryImage extends StatelessWidget {
   /// Optional patient-only error artwork; legacy portal fallbacks are unchanged.
   final Widget? errorPlaceholder;
 
+  /// Opt-in first-frame skeleton for portal media; patient defaults unchanged.
+  final Widget? loadingPlaceholder;
+  final bool allowLocalCache;
+  final Widget Function(Object error)? errorPlaceholderBuilder;
+
   const LuxuryImage({
     super.key,
     required this.imageUrl,
@@ -122,6 +130,9 @@ class LuxuryImage extends StatelessWidget {
     this.iconSize,
     this.customPlaceholder,
     this.errorPlaceholder,
+    this.loadingPlaceholder,
+    this.allowLocalCache = true,
+    this.errorPlaceholderBuilder,
   });
 
   @override
@@ -135,6 +146,7 @@ class LuxuryImage extends StatelessWidget {
     final primaryProvider = resolveImageProvider(
       imageUrl,
       mediaCacheKey: mediaCacheKey,
+      allowLocalCache: allowLocalCache,
     );
 
     Widget buildBrandEmblemFallback() => Container(
@@ -219,7 +231,12 @@ class LuxuryImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
+      frameBuilder: loadingPlaceholder == null
+          ? null
+          : (context, child, frame, sync) =>
+                sync || frame != null ? child : loadingPlaceholder!,
       errorBuilder: (context, error, stackTrace) =>
+          errorPlaceholderBuilder?.call(error) ??
           buildSmartFallback(failed: true),
     );
 

@@ -1,0 +1,13 @@
+M apps/accounts/services/account_deletion.py
+M apps/admin_portal/serializers.py
+M apps/admin_portal/tests/test_clinic_provisioning.py
+M apps/admin_portal/tests/test_super_admin_portal.py
+M apps/admin_portal/urls.py
+M apps/admin_portal/views.py
+M apps/clinics/portal_serializers.py
+M apps/clinics/portal_views.py
+A apps/clinics/tests/test_final_integration_and_hardening.py
+A apps/site_pages/templates/site_pages/account_deletion.html
+M apps/site_pages/urls.py
+M apps/site_pages/views.py
+M apps/treatments/views_category_requests.py

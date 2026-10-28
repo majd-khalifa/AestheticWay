@@ -8,6 +8,9 @@ on:
       - 'pubspec.*'
       - 'assets/fonts/**'
       - 'tool/*public_clinic*.ps1'
+      - 'tool/audit_*contracts.py'
+      - 'tool/isolated_django_audit.py'
+      - 'tool/tests/**'
       - '.github/workflows/flutter-visual-regressions.yml'
 
 permissions:
@@ -36,6 +39,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Offline audit-storage isolation regressions
+        run: |
+          python -m pip install 'Django==5.2.4'
+          python -m unittest discover -s tool/tests -v
       - name: Record native renderer provenance
         run: |
           flutter --version --machine > visual-flutter-version.json
@@ -50,9 +57,93 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./tool/test_public_clinic_capture.ps1
+      - name: Parse Windows preview helper without building or accessing credentials
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '[scriptblock]::Create((Get-Content -Raw tool/build_android_preview.ps1)) | Out-Null'
       - run: flutter analyze
+      - name: Clinic Portal regressions and render capture
+        timeout-minutes: 3
+        run: >-
+          flutter test test/clinic_media_contract_test.dart test/clinic_treatment_contract_test.dart
+          --dart-define=CLINIC_AUDIT_CAPTURE_DIR="${{ runner.temp }}/clinic-portal-audit"
+          --timeout 60s --reporter expanded
+      - name: Onboarding and admin review workflows and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/onboarding_review_workflows_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/onboarding-review"
+          --reporter expanded
+      - name: VIP entitlement and admin media regressions and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/admin_media_polish_test.dart test/admin_media_visual_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/admin-media-polish"
+          --reporter expanded
+      - name: Backend 09f49bb contracts and review renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/backend_09_integration_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-09-review"
+          --reporter expanded
+      - name: Physical-QA video persistence and UAE location boundary
+        timeout-minutes: 3
+        run: >-
+          flutter test test/uae_location_qa_test.dart test/video_save_qa_preview_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/uae-nearby-qa"
+          --reporter expanded
+      - name: Google Business and three-level nearby readiness
+        timeout-minutes: 3
+        run: >-
+          flutter test test/google_business_readiness_test.dart test/nearby_locality_readiness_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/maps-business-readiness"
+          --reporter expanded
+      - name: Backend401560b Google, canonical catalog and deletion regressions
+        timeout-minutes: 3
+        run: >-
+          flutter test test/backend_401560b_integration_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-401560b"
+          --reporter expanded
+      - name: Physical QA request body and locality UX
+        timeout-minutes: 3
+        run: >-
+          flutter test test/physical_qa_wire_test.dart test/physical_qa_location_polish_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/physical-qa-remediation"
+          --reporter expanded
+      - name: Backend465bf30 large video, enabled Nearby and verified email
+        timeout-minutes: 3
+        run: >-
+          flutter test test/backend_465bf30_integration_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/backend-465bf30"
+          --reporter expanded
+      - name: Final physical UX regressions and bilingual renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/final_physical_video_ux_test.dart test/final_physical_upload_test.dart
+          test/final_physical_location_test.dart test/final_physical_ui_preview_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/final-physical-ux"
+          --reporter expanded
+      - name: P0 practitioner, gallery, geography, GPS and video recovery
+        timeout-minutes: 3
+        run: >-
+          flutter test test/p0_practitioner_recovery_test.dart test/p0_gallery_recovery_test.dart
+          test/p0_geo_video_recovery_test.dart test/p0_recovery_previews_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/p0-regression-recovery"
+          --reporter expanded
+      - name: Physical gallery lifecycle and Google ratings contracts
+        timeout-minutes: 3
+        run: >-
+          flutter test test/gallery_ratings_physical_qa_test.dart
+          --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/gallery-ratings-c25e901"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
+      - name: Final backend integration contracts and renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/final_integration_contract_test.dart test/account_deletion_navigation_test.dart
+          --dart-define=FINAL_INTEGRATION_CAPTURE_DIR="${{ runner.temp }}/final-integration"
+          --timeout 60s --reporter expanded
       - name: Capture candidates for review only
         if: always() && !cancelled()
         run: >-
@@ -72,3 +163,16 @@ jobs:
             visual-manifest.json
             test/failures/**
             ${{ runner.temp }}/patient-golden-candidates/**
+            ${{ runner.temp }}/clinic-portal-audit/**
+            ${{ runner.temp }}/final-integration/**
+            ${{ runner.temp }}/onboarding-review/**
+            ${{ runner.temp }}/admin-media-polish/**
+            ${{ runner.temp }}/backend-09-review/**
+            ${{ runner.temp }}/uae-nearby-qa/**
+            ${{ runner.temp }}/maps-business-readiness/**
+            ${{ runner.temp }}/backend-401560b/**
+            ${{ runner.temp }}/physical-qa-remediation/**
+            ${{ runner.temp }}/backend-465bf30/**
+            ${{ runner.temp }}/final-physical-ux/**
+            ${{ runner.temp }}/p0-regression-recovery/**
+            ${{ runner.temp }}/gallery-ratings-c25e901/**

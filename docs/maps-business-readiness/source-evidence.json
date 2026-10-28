@@ -1,0 +1,46 @@
+{
+  "backend_commit": "09f49bbd22131f6dad49a65a5167de5396f03797",
+  "scope": "Isolated SQLite/source profile views; synthetic records; no production, Google, R2 or OTP traffic",
+  "responses": [
+    {
+      "method": "GET",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "route": "/api/v1/clinic-portal/profile/",
+      "status": 401
+    }
+  ],
+  "generic_patch_accepts_unverified_nonempty_place_id": true,
+  "manual_pin_preserved_business": true,
+  "unlink_cleared_identity_url_cached_ratings": true,
+  "unlink_preserved_pin_cover_video_and_other_tenant": true,
+  "source_files_unchanged": 405
+}

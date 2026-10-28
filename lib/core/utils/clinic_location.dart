@@ -1,3 +1,5 @@
+import '../../features/locations/data/uae_location_repository.dart';
+
 /// Coordinates must come from a stored record or a confirmed map selection.
 class ClinicCoordinates {
   const ClinicCoordinates(this.latitude, this.longitude);
@@ -44,6 +46,8 @@ String _cityKey(String value) {
 }
 
 String localizedClinicCity(String value, {required bool arabic}) {
+  final city = currentUaeCatalog.resolve(value);
+  if (city != null) return city.label(arabic);
   final key = _cityKey(value);
   return arabic ? (clinicCities[key] ?? value.trim()) : key;
 }

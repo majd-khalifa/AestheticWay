@@ -1,0 +1,1866 @@
+{
+  "source_commit": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
+  "emirates": [
+    {
+      "emirate_code": "AD",
+      "name_en": "Abu Dhabi",
+      "name_ar": "أبوظبي",
+      "display_order": 1,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "abu-dhabi",
+          "name_en": "Abu Dhabi",
+          "name_ar": "أبوظبي",
+          "emirate_code": "AD",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-khalidiyah",
+              "name_en": "Al Khalidiyah",
+              "name_ar": "الخالدية",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "al-reem-island",
+              "name_en": "Al Reem Island",
+              "name_ar": "جزيرة الريم",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "khalifa-city",
+              "name_en": "Khalifa City",
+              "name_ar": "مدينة خليفة",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 3,
+              "is_active": true
+            },
+            {
+              "area_code": "al-bateen",
+              "name_en": "Al Bateen",
+              "name_ar": "البطين",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 4,
+              "is_active": true
+            },
+            {
+              "area_code": "yas-island",
+              "name_en": "Yas Island",
+              "name_ar": "جزيرة ياس",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 5,
+              "is_active": true
+            },
+            {
+              "area_code": "saadiyat-island",
+              "name_en": "Saadiyat Island",
+              "name_ar": "جزيرة السعديات",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 6,
+              "is_active": true
+            },
+            {
+              "area_code": "al-maryah-island",
+              "name_en": "Al Maryah Island",
+              "name_ar": "جزيرة المارية",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 7,
+              "is_active": true
+            },
+            {
+              "area_code": "al-mushrif",
+              "name_en": "Al Mushrif",
+              "name_ar": "المشرف",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 8,
+              "is_active": true
+            },
+            {
+              "area_code": "mohamed-bin-zayed-city",
+              "name_en": "Mohamed Bin Zayed City",
+              "name_ar": "مدينة محمد بن زايد",
+              "city_code": "abu-dhabi",
+              "emirate_code": "AD",
+              "display_order": 9,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "al-ain",
+          "name_en": "Al Ain",
+          "name_ar": "العين",
+          "emirate_code": "AD",
+          "display_order": 2,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-jahili",
+              "name_en": "Al Jahili",
+              "name_ar": "الجاهلي",
+              "city_code": "al-ain",
+              "emirate_code": "AD",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "al-muwaiji",
+              "name_en": "Al Muwaiji",
+              "name_ar": "المويجعي",
+              "city_code": "al-ain",
+              "emirate_code": "AD",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "al-markaniya",
+              "name_en": "Al Markaniya",
+              "name_ar": "المرخانية",
+              "city_code": "al-ain",
+              "emirate_code": "AD",
+              "display_order": 3,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "madinat-zayed",
+          "name_en": "Madinat Zayed / Al Dhafra",
+          "name_ar": "مدينة زايد / الظفرة",
+          "emirate_code": "AD",
+          "display_order": 3,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "madinat-zayed-center",
+              "name_en": "Madinat Zayed Center",
+              "name_ar": "وسط مدينة زايد",
+              "city_code": "madinat-zayed",
+              "emirate_code": "AD",
+              "display_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "ruwais",
+          "name_en": "Ruwais",
+          "name_ar": "الرويس",
+          "emirate_code": "AD",
+          "display_order": 4,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "ruwais-housing-complex",
+              "name_en": "Ruwais Residential Complex",
+              "name_ar": "مجمع الرويس السكني",
+              "city_code": "ruwais",
+              "emirate_code": "AD",
+              "display_order": 1,
+              "is_active": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "emirate_code": "DU",
+      "name_en": "Dubai",
+      "name_ar": "دبي",
+      "display_order": 2,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "dubai",
+          "name_en": "Dubai",
+          "name_ar": "دبي",
+          "emirate_code": "DU",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "jumeirah",
+              "name_en": "Jumeirah",
+              "name_ar": "الجميرا",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "downtown-dubai",
+              "name_en": "Downtown Dubai",
+              "name_ar": "وسط مدينة دبي",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "dubai-marina",
+              "name_en": "Dubai Marina",
+              "name_ar": "دبي مارينا",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 3,
+              "is_active": true
+            },
+            {
+              "area_code": "business-bay",
+              "name_en": "Business Bay",
+              "name_ar": "الخليج التجاري",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 4,
+              "is_active": true
+            },
+            {
+              "area_code": "al-barsha",
+              "name_en": "Al Barsha",
+              "name_ar": "البرشاء",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 5,
+              "is_active": true
+            },
+            {
+              "area_code": "palm-jumeirah",
+              "name_en": "Palm Jumeirah",
+              "name_ar": "نخلة جميرا",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 6,
+              "is_active": true
+            },
+            {
+              "area_code": "deira",
+              "name_en": "Deira",
+              "name_ar": "ديرة",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 7,
+              "is_active": true
+            },
+            {
+              "area_code": "bur-dubai",
+              "name_en": "Bur Dubai",
+              "name_ar": "بر دبي",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 8,
+              "is_active": true
+            },
+            {
+              "area_code": "al-quoz",
+              "name_en": "Al Quoz",
+              "name_ar": "القوز",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 9,
+              "is_active": true
+            },
+            {
+              "area_code": "mirdif",
+              "name_en": "Mirdif",
+              "name_ar": "مردف",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 10,
+              "is_active": true
+            },
+            {
+              "area_code": "jbr",
+              "name_en": "JBR",
+              "name_ar": "جميرا بيتش ريزيدنس",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 11,
+              "is_active": true
+            },
+            {
+              "area_code": "jlt",
+              "name_en": "JLT",
+              "name_ar": "أبراج بحيرات جميرا",
+              "city_code": "dubai",
+              "emirate_code": "DU",
+              "display_order": 12,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "hatta",
+          "name_en": "Hatta",
+          "name_ar": "حتا",
+          "emirate_code": "DU",
+          "display_order": 2,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "hatta-heritage-village",
+              "name_en": "Hatta Heritage Village",
+              "name_ar": "قرية حتا التراثية",
+              "city_code": "hatta",
+              "emirate_code": "DU",
+              "display_order": 1,
+              "is_active": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "emirate_code": "SH",
+      "name_en": "Sharjah",
+      "name_ar": "الشارقة",
+      "display_order": 3,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "sharjah",
+          "name_en": "Sharjah",
+          "name_ar": "الشارقة",
+          "emirate_code": "SH",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-majaz",
+              "name_en": "Al Majaz",
+              "name_ar": "المجاز",
+              "city_code": "sharjah",
+              "emirate_code": "SH",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "al-nahda-sh",
+              "name_en": "Al Nahda",
+              "name_ar": "النهدة",
+              "city_code": "sharjah",
+              "emirate_code": "SH",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "muwaileh",
+              "name_en": "Muwaileh",
+              "name_ar": "مويلح",
+              "city_code": "sharjah",
+              "emirate_code": "SH",
+              "display_order": 3,
+              "is_active": true
+            },
+            {
+              "area_code": "al-taawun",
+              "name_en": "Al Taawun",
+              "name_ar": "التعاون",
+              "city_code": "sharjah",
+              "emirate_code": "SH",
+              "display_order": 4,
+              "is_active": true
+            },
+            {
+              "area_code": "al-khan",
+              "name_en": "Al Khan",
+              "name_ar": "الخان",
+              "city_code": "sharjah",
+              "emirate_code": "SH",
+              "display_order": 5,
+              "is_active": true
+            },
+            {
+              "area_code": "al-qasimia",
+              "name_en": "Al Qasimia",
+              "name_ar": "القاسمية",
+              "city_code": "sharjah",
+              "emirate_code": "SH",
+              "display_order": 6,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "khor-fakkan",
+          "name_en": "Khor Fakkan",
+          "name_ar": "خورفكان",
+          "emirate_code": "SH",
+          "display_order": 2,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "khor-fakkan-corniche",
+              "name_en": "Khor Fakkan Corniche",
+              "name_ar": "كورنيش خورفكان",
+              "city_code": "khor-fakkan",
+              "emirate_code": "SH",
+              "display_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "kalba",
+          "name_en": "Kalba",
+          "name_ar": "كلباء",
+          "emirate_code": "SH",
+          "display_order": 3,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "kalba-center",
+              "name_en": "Kalba Center",
+              "name_ar": "وسط كلباء",
+              "city_code": "kalba",
+              "emirate_code": "SH",
+              "display_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "dibba-al-hisn",
+          "name_en": "Dibba Al Hisn",
+          "name_ar": "دبا الحصن",
+          "emirate_code": "SH",
+          "display_order": 4,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "dibba-al-hisn-center",
+              "name_en": "Dibba Al Hisn Center",
+              "name_ar": "وسط دبا الحصن",
+              "city_code": "dibba-al-hisn",
+              "emirate_code": "SH",
+              "display_order": 1,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "al-dhaid",
+          "name_en": "Al Dhaid",
+          "name_ar": "الذيد",
+          "emirate_code": "SH",
+          "display_order": 5,
+          "is_active": true,
+          "areas": []
+        }
+      ]
+    },
+    {
+      "emirate_code": "AJ",
+      "name_en": "Ajman",
+      "name_ar": "عجمان",
+      "display_order": 4,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "ajman",
+          "name_en": "Ajman",
+          "name_ar": "عجمان",
+          "emirate_code": "AJ",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-nuaimia",
+              "name_en": "Al Nuaimia",
+              "name_ar": "النعيمية",
+              "city_code": "ajman",
+              "emirate_code": "AJ",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "al-rashidiya-aj",
+              "name_en": "Al Rashidiya",
+              "name_ar": "الراشدية",
+              "city_code": "ajman",
+              "emirate_code": "AJ",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "al-rawda-aj",
+              "name_en": "Al Rawda",
+              "name_ar": "الروضة",
+              "city_code": "ajman",
+              "emirate_code": "AJ",
+              "display_order": 3,
+              "is_active": true
+            },
+            {
+              "area_code": "al-jurf",
+              "name_en": "Al Jurf",
+              "name_ar": "الجرف",
+              "city_code": "ajman",
+              "emirate_code": "AJ",
+              "display_order": 4,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "masfout",
+          "name_en": "Masfout",
+          "name_ar": "مصفوت",
+          "emirate_code": "AJ",
+          "display_order": 2,
+          "is_active": true,
+          "areas": []
+        },
+        {
+          "city_code": "al-manama",
+          "name_en": "Al Manama",
+          "name_ar": "المنامة",
+          "emirate_code": "AJ",
+          "display_order": 3,
+          "is_active": true,
+          "areas": []
+        }
+      ]
+    },
+    {
+      "emirate_code": "UQ",
+      "name_en": "Umm Al Quwain",
+      "name_ar": "أم القيوين",
+      "display_order": 5,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "umm-al-quwain",
+          "name_en": "Umm Al Quwain",
+          "name_ar": "أم القيوين",
+          "emirate_code": "UQ",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-salama",
+              "name_en": "Al Salama",
+              "name_ar": "السلامة",
+              "city_code": "umm-al-quwain",
+              "emirate_code": "UQ",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "al-rawdah-uq",
+              "name_en": "Al Rawdah",
+              "name_ar": "الروضة",
+              "city_code": "umm-al-quwain",
+              "emirate_code": "UQ",
+              "display_order": 2,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "falaj-al-mualla",
+          "name_en": "Falaj Al Mualla",
+          "name_ar": "فلج المعلا",
+          "emirate_code": "UQ",
+          "display_order": 2,
+          "is_active": true,
+          "areas": []
+        }
+      ]
+    },
+    {
+      "emirate_code": "RK",
+      "name_en": "Ras Al Khaimah",
+      "name_ar": "رأس الخيمة",
+      "display_order": 6,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "ras-al-khaimah",
+          "name_en": "Ras Al Khaimah",
+          "name_ar": "رأس الخيمة",
+          "emirate_code": "RK",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-nakheel",
+              "name_en": "Al Nakheel",
+              "name_ar": "النخيل",
+              "city_code": "ras-al-khaimah",
+              "emirate_code": "RK",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "al-dhait",
+              "name_en": "Al Dhait",
+              "name_ar": "الظيت",
+              "city_code": "ras-al-khaimah",
+              "emirate_code": "RK",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "khuzam",
+              "name_en": "Khuzam",
+              "name_ar": "خزام",
+              "city_code": "ras-al-khaimah",
+              "emirate_code": "RK",
+              "display_order": 3,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "al-jazirah-al-hamra",
+          "name_en": "Al Jazirah Al Hamra",
+          "name_ar": "الجزيرة الحمراء",
+          "emirate_code": "RK",
+          "display_order": 2,
+          "is_active": true,
+          "areas": []
+        },
+        {
+          "city_code": "al-rams",
+          "name_en": "Al Rams",
+          "name_ar": "الرمس",
+          "emirate_code": "RK",
+          "display_order": 3,
+          "is_active": true,
+          "areas": []
+        }
+      ]
+    },
+    {
+      "emirate_code": "FU",
+      "name_en": "Fujairah",
+      "name_ar": "الفجيرة",
+      "display_order": 7,
+      "is_active": true,
+      "cities": [
+        {
+          "city_code": "fujairah",
+          "name_en": "Fujairah",
+          "name_ar": "الفجيرة",
+          "emirate_code": "FU",
+          "display_order": 1,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-faseel",
+              "name_en": "Al Faseel",
+              "name_ar": "الفصيل",
+              "city_code": "fujairah",
+              "emirate_code": "FU",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "mirbah",
+              "name_en": "Mirbah",
+              "name_ar": "مربح",
+              "city_code": "fujairah",
+              "emirate_code": "FU",
+              "display_order": 2,
+              "is_active": true
+            },
+            {
+              "area_code": "sakamkam",
+              "name_en": "Sakamkam",
+              "name_ar": "سكمكم",
+              "city_code": "fujairah",
+              "emirate_code": "FU",
+              "display_order": 3,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "dibba-al-fujairah",
+          "name_en": "Dibba Al Fujairah",
+          "name_ar": "دبا الفجيرة",
+          "emirate_code": "FU",
+          "display_order": 2,
+          "is_active": true,
+          "areas": [
+            {
+              "area_code": "al-ghurfa",
+              "name_en": "Al Ghurfa",
+              "name_ar": "الغرفة",
+              "city_code": "dibba-al-fujairah",
+              "emirate_code": "FU",
+              "display_order": 1,
+              "is_active": true
+            },
+            {
+              "area_code": "dibba-center",
+              "name_en": "Dibba Center",
+              "name_ar": "وسط دبا الفجيرة",
+              "city_code": "dibba-al-fujairah",
+              "emirate_code": "FU",
+              "display_order": 2,
+              "is_active": true
+            }
+          ]
+        },
+        {
+          "city_code": "mirbah",
+          "name_en": "Mirbah",
+          "name_ar": "مربح",
+          "emirate_code": "FU",
+          "display_order": 3,
+          "is_active": true,
+          "areas": []
+        },
+        {
+          "city_code": "masafi",
+          "name_en": "Masafi",
+          "name_ar": "مسافي",
+          "emirate_code": "FU",
+          "display_order": 4,
+          "is_active": true,
+          "areas": []
+        }
+      ]
+    }
+  ],
+  "cities": [
+    {
+      "city_code": "abu-dhabi",
+      "name_en": "Abu Dhabi",
+      "name_ar": "أبوظبي",
+      "emirate_code": "AD",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-khalidiyah",
+          "name_en": "Al Khalidiyah",
+          "name_ar": "الخالدية",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "al-reem-island",
+          "name_en": "Al Reem Island",
+          "name_ar": "جزيرة الريم",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "khalifa-city",
+          "name_en": "Khalifa City",
+          "name_ar": "مدينة خليفة",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 3,
+          "is_active": true
+        },
+        {
+          "area_code": "al-bateen",
+          "name_en": "Al Bateen",
+          "name_ar": "البطين",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 4,
+          "is_active": true
+        },
+        {
+          "area_code": "yas-island",
+          "name_en": "Yas Island",
+          "name_ar": "جزيرة ياس",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 5,
+          "is_active": true
+        },
+        {
+          "area_code": "saadiyat-island",
+          "name_en": "Saadiyat Island",
+          "name_ar": "جزيرة السعديات",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 6,
+          "is_active": true
+        },
+        {
+          "area_code": "al-maryah-island",
+          "name_en": "Al Maryah Island",
+          "name_ar": "جزيرة المارية",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 7,
+          "is_active": true
+        },
+        {
+          "area_code": "al-mushrif",
+          "name_en": "Al Mushrif",
+          "name_ar": "المشرف",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 8,
+          "is_active": true
+        },
+        {
+          "area_code": "mohamed-bin-zayed-city",
+          "name_en": "Mohamed Bin Zayed City",
+          "name_ar": "مدينة محمد بن زايد",
+          "city_code": "abu-dhabi",
+          "emirate_code": "AD",
+          "display_order": 9,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "al-ain",
+      "name_en": "Al Ain",
+      "name_ar": "العين",
+      "emirate_code": "AD",
+      "display_order": 2,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-jahili",
+          "name_en": "Al Jahili",
+          "name_ar": "الجاهلي",
+          "city_code": "al-ain",
+          "emirate_code": "AD",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "al-muwaiji",
+          "name_en": "Al Muwaiji",
+          "name_ar": "المويجعي",
+          "city_code": "al-ain",
+          "emirate_code": "AD",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "al-markaniya",
+          "name_en": "Al Markaniya",
+          "name_ar": "المرخانية",
+          "city_code": "al-ain",
+          "emirate_code": "AD",
+          "display_order": 3,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "madinat-zayed",
+      "name_en": "Madinat Zayed / Al Dhafra",
+      "name_ar": "مدينة زايد / الظفرة",
+      "emirate_code": "AD",
+      "display_order": 3,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "madinat-zayed-center",
+          "name_en": "Madinat Zayed Center",
+          "name_ar": "وسط مدينة زايد",
+          "city_code": "madinat-zayed",
+          "emirate_code": "AD",
+          "display_order": 1,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "ruwais",
+      "name_en": "Ruwais",
+      "name_ar": "الرويس",
+      "emirate_code": "AD",
+      "display_order": 4,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "ruwais-housing-complex",
+          "name_en": "Ruwais Residential Complex",
+          "name_ar": "مجمع الرويس السكني",
+          "city_code": "ruwais",
+          "emirate_code": "AD",
+          "display_order": 1,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "dubai",
+      "name_en": "Dubai",
+      "name_ar": "دبي",
+      "emirate_code": "DU",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "jumeirah",
+          "name_en": "Jumeirah",
+          "name_ar": "الجميرا",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "downtown-dubai",
+          "name_en": "Downtown Dubai",
+          "name_ar": "وسط مدينة دبي",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "dubai-marina",
+          "name_en": "Dubai Marina",
+          "name_ar": "دبي مارينا",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 3,
+          "is_active": true
+        },
+        {
+          "area_code": "business-bay",
+          "name_en": "Business Bay",
+          "name_ar": "الخليج التجاري",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 4,
+          "is_active": true
+        },
+        {
+          "area_code": "al-barsha",
+          "name_en": "Al Barsha",
+          "name_ar": "البرشاء",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 5,
+          "is_active": true
+        },
+        {
+          "area_code": "palm-jumeirah",
+          "name_en": "Palm Jumeirah",
+          "name_ar": "نخلة جميرا",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 6,
+          "is_active": true
+        },
+        {
+          "area_code": "deira",
+          "name_en": "Deira",
+          "name_ar": "ديرة",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 7,
+          "is_active": true
+        },
+        {
+          "area_code": "bur-dubai",
+          "name_en": "Bur Dubai",
+          "name_ar": "بر دبي",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 8,
+          "is_active": true
+        },
+        {
+          "area_code": "al-quoz",
+          "name_en": "Al Quoz",
+          "name_ar": "القوز",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 9,
+          "is_active": true
+        },
+        {
+          "area_code": "mirdif",
+          "name_en": "Mirdif",
+          "name_ar": "مردف",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 10,
+          "is_active": true
+        },
+        {
+          "area_code": "jbr",
+          "name_en": "JBR",
+          "name_ar": "جميرا بيتش ريزيدنس",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 11,
+          "is_active": true
+        },
+        {
+          "area_code": "jlt",
+          "name_en": "JLT",
+          "name_ar": "أبراج بحيرات جميرا",
+          "city_code": "dubai",
+          "emirate_code": "DU",
+          "display_order": 12,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "hatta",
+      "name_en": "Hatta",
+      "name_ar": "حتا",
+      "emirate_code": "DU",
+      "display_order": 2,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "hatta-heritage-village",
+          "name_en": "Hatta Heritage Village",
+          "name_ar": "قرية حتا التراثية",
+          "city_code": "hatta",
+          "emirate_code": "DU",
+          "display_order": 1,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "sharjah",
+      "name_en": "Sharjah",
+      "name_ar": "الشارقة",
+      "emirate_code": "SH",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-majaz",
+          "name_en": "Al Majaz",
+          "name_ar": "المجاز",
+          "city_code": "sharjah",
+          "emirate_code": "SH",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "al-nahda-sh",
+          "name_en": "Al Nahda",
+          "name_ar": "النهدة",
+          "city_code": "sharjah",
+          "emirate_code": "SH",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "muwaileh",
+          "name_en": "Muwaileh",
+          "name_ar": "مويلح",
+          "city_code": "sharjah",
+          "emirate_code": "SH",
+          "display_order": 3,
+          "is_active": true
+        },
+        {
+          "area_code": "al-taawun",
+          "name_en": "Al Taawun",
+          "name_ar": "التعاون",
+          "city_code": "sharjah",
+          "emirate_code": "SH",
+          "display_order": 4,
+          "is_active": true
+        },
+        {
+          "area_code": "al-khan",
+          "name_en": "Al Khan",
+          "name_ar": "الخان",
+          "city_code": "sharjah",
+          "emirate_code": "SH",
+          "display_order": 5,
+          "is_active": true
+        },
+        {
+          "area_code": "al-qasimia",
+          "name_en": "Al Qasimia",
+          "name_ar": "القاسمية",
+          "city_code": "sharjah",
+          "emirate_code": "SH",
+          "display_order": 6,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "khor-fakkan",
+      "name_en": "Khor Fakkan",
+      "name_ar": "خورفكان",
+      "emirate_code": "SH",
+      "display_order": 2,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "khor-fakkan-corniche",
+          "name_en": "Khor Fakkan Corniche",
+          "name_ar": "كورنيش خورفكان",
+          "city_code": "khor-fakkan",
+          "emirate_code": "SH",
+          "display_order": 1,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "kalba",
+      "name_en": "Kalba",
+      "name_ar": "كلباء",
+      "emirate_code": "SH",
+      "display_order": 3,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "kalba-center",
+          "name_en": "Kalba Center",
+          "name_ar": "وسط كلباء",
+          "city_code": "kalba",
+          "emirate_code": "SH",
+          "display_order": 1,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "dibba-al-hisn",
+      "name_en": "Dibba Al Hisn",
+      "name_ar": "دبا الحصن",
+      "emirate_code": "SH",
+      "display_order": 4,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "dibba-al-hisn-center",
+          "name_en": "Dibba Al Hisn Center",
+          "name_ar": "وسط دبا الحصن",
+          "city_code": "dibba-al-hisn",
+          "emirate_code": "SH",
+          "display_order": 1,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "al-dhaid",
+      "name_en": "Al Dhaid",
+      "name_ar": "الذيد",
+      "emirate_code": "SH",
+      "display_order": 5,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "ajman",
+      "name_en": "Ajman",
+      "name_ar": "عجمان",
+      "emirate_code": "AJ",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-nuaimia",
+          "name_en": "Al Nuaimia",
+          "name_ar": "النعيمية",
+          "city_code": "ajman",
+          "emirate_code": "AJ",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "al-rashidiya-aj",
+          "name_en": "Al Rashidiya",
+          "name_ar": "الراشدية",
+          "city_code": "ajman",
+          "emirate_code": "AJ",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "al-rawda-aj",
+          "name_en": "Al Rawda",
+          "name_ar": "الروضة",
+          "city_code": "ajman",
+          "emirate_code": "AJ",
+          "display_order": 3,
+          "is_active": true
+        },
+        {
+          "area_code": "al-jurf",
+          "name_en": "Al Jurf",
+          "name_ar": "الجرف",
+          "city_code": "ajman",
+          "emirate_code": "AJ",
+          "display_order": 4,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "masfout",
+      "name_en": "Masfout",
+      "name_ar": "مصفوت",
+      "emirate_code": "AJ",
+      "display_order": 2,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "al-manama",
+      "name_en": "Al Manama",
+      "name_ar": "المنامة",
+      "emirate_code": "AJ",
+      "display_order": 3,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "umm-al-quwain",
+      "name_en": "Umm Al Quwain",
+      "name_ar": "أم القيوين",
+      "emirate_code": "UQ",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-salama",
+          "name_en": "Al Salama",
+          "name_ar": "السلامة",
+          "city_code": "umm-al-quwain",
+          "emirate_code": "UQ",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "al-rawdah-uq",
+          "name_en": "Al Rawdah",
+          "name_ar": "الروضة",
+          "city_code": "umm-al-quwain",
+          "emirate_code": "UQ",
+          "display_order": 2,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "falaj-al-mualla",
+      "name_en": "Falaj Al Mualla",
+      "name_ar": "فلج المعلا",
+      "emirate_code": "UQ",
+      "display_order": 2,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "ras-al-khaimah",
+      "name_en": "Ras Al Khaimah",
+      "name_ar": "رأس الخيمة",
+      "emirate_code": "RK",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-nakheel",
+          "name_en": "Al Nakheel",
+          "name_ar": "النخيل",
+          "city_code": "ras-al-khaimah",
+          "emirate_code": "RK",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "al-dhait",
+          "name_en": "Al Dhait",
+          "name_ar": "الظيت",
+          "city_code": "ras-al-khaimah",
+          "emirate_code": "RK",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "khuzam",
+          "name_en": "Khuzam",
+          "name_ar": "خزام",
+          "city_code": "ras-al-khaimah",
+          "emirate_code": "RK",
+          "display_order": 3,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "al-jazirah-al-hamra",
+      "name_en": "Al Jazirah Al Hamra",
+      "name_ar": "الجزيرة الحمراء",
+      "emirate_code": "RK",
+      "display_order": 2,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "al-rams",
+      "name_en": "Al Rams",
+      "name_ar": "الرمس",
+      "emirate_code": "RK",
+      "display_order": 3,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "fujairah",
+      "name_en": "Fujairah",
+      "name_ar": "الفجيرة",
+      "emirate_code": "FU",
+      "display_order": 1,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-faseel",
+          "name_en": "Al Faseel",
+          "name_ar": "الفصيل",
+          "city_code": "fujairah",
+          "emirate_code": "FU",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "mirbah",
+          "name_en": "Mirbah",
+          "name_ar": "مربح",
+          "city_code": "fujairah",
+          "emirate_code": "FU",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "area_code": "sakamkam",
+          "name_en": "Sakamkam",
+          "name_ar": "سكمكم",
+          "city_code": "fujairah",
+          "emirate_code": "FU",
+          "display_order": 3,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "dibba-al-fujairah",
+      "name_en": "Dibba Al Fujairah",
+      "name_ar": "دبا الفجيرة",
+      "emirate_code": "FU",
+      "display_order": 2,
+      "is_active": true,
+      "areas": [
+        {
+          "area_code": "al-ghurfa",
+          "name_en": "Al Ghurfa",
+          "name_ar": "الغرفة",
+          "city_code": "dibba-al-fujairah",
+          "emirate_code": "FU",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "area_code": "dibba-center",
+          "name_en": "Dibba Center",
+          "name_ar": "وسط دبا الفجيرة",
+          "city_code": "dibba-al-fujairah",
+          "emirate_code": "FU",
+          "display_order": 2,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "city_code": "mirbah",
+      "name_en": "Mirbah",
+      "name_ar": "مربح",
+      "emirate_code": "FU",
+      "display_order": 3,
+      "is_active": true,
+      "areas": []
+    },
+    {
+      "city_code": "masafi",
+      "name_en": "Masafi",
+      "name_ar": "مسافي",
+      "emirate_code": "FU",
+      "display_order": 4,
+      "is_active": true,
+      "areas": []
+    }
+  ],
+  "areas": [
+    {
+      "area_code": "al-khalidiyah",
+      "name_en": "Al Khalidiyah",
+      "name_ar": "الخالدية",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-reem-island",
+      "name_en": "Al Reem Island",
+      "name_ar": "جزيرة الريم",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "khalifa-city",
+      "name_en": "Khalifa City",
+      "name_ar": "مدينة خليفة",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "al-bateen",
+      "name_en": "Al Bateen",
+      "name_ar": "البطين",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 4,
+      "is_active": true
+    },
+    {
+      "area_code": "yas-island",
+      "name_en": "Yas Island",
+      "name_ar": "جزيرة ياس",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 5,
+      "is_active": true
+    },
+    {
+      "area_code": "saadiyat-island",
+      "name_en": "Saadiyat Island",
+      "name_ar": "جزيرة السعديات",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 6,
+      "is_active": true
+    },
+    {
+      "area_code": "al-maryah-island",
+      "name_en": "Al Maryah Island",
+      "name_ar": "جزيرة المارية",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 7,
+      "is_active": true
+    },
+    {
+      "area_code": "al-mushrif",
+      "name_en": "Al Mushrif",
+      "name_ar": "المشرف",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 8,
+      "is_active": true
+    },
+    {
+      "area_code": "mohamed-bin-zayed-city",
+      "name_en": "Mohamed Bin Zayed City",
+      "name_ar": "مدينة محمد بن زايد",
+      "city_code": "abu-dhabi",
+      "emirate_code": "AD",
+      "display_order": 9,
+      "is_active": true
+    },
+    {
+      "area_code": "al-jahili",
+      "name_en": "Al Jahili",
+      "name_ar": "الجاهلي",
+      "city_code": "al-ain",
+      "emirate_code": "AD",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-muwaiji",
+      "name_en": "Al Muwaiji",
+      "name_ar": "المويجعي",
+      "city_code": "al-ain",
+      "emirate_code": "AD",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "al-markaniya",
+      "name_en": "Al Markaniya",
+      "name_ar": "المرخانية",
+      "city_code": "al-ain",
+      "emirate_code": "AD",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "madinat-zayed-center",
+      "name_en": "Madinat Zayed Center",
+      "name_ar": "وسط مدينة زايد",
+      "city_code": "madinat-zayed",
+      "emirate_code": "AD",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "ruwais-housing-complex",
+      "name_en": "Ruwais Residential Complex",
+      "name_ar": "مجمع الرويس السكني",
+      "city_code": "ruwais",
+      "emirate_code": "AD",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-nuaimia",
+      "name_en": "Al Nuaimia",
+      "name_ar": "النعيمية",
+      "city_code": "ajman",
+      "emirate_code": "AJ",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-rashidiya-aj",
+      "name_en": "Al Rashidiya",
+      "name_ar": "الراشدية",
+      "city_code": "ajman",
+      "emirate_code": "AJ",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "al-rawda-aj",
+      "name_en": "Al Rawda",
+      "name_ar": "الروضة",
+      "city_code": "ajman",
+      "emirate_code": "AJ",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "al-jurf",
+      "name_en": "Al Jurf",
+      "name_ar": "الجرف",
+      "city_code": "ajman",
+      "emirate_code": "AJ",
+      "display_order": 4,
+      "is_active": true
+    },
+    {
+      "area_code": "jumeirah",
+      "name_en": "Jumeirah",
+      "name_ar": "الجميرا",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "downtown-dubai",
+      "name_en": "Downtown Dubai",
+      "name_ar": "وسط مدينة دبي",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "dubai-marina",
+      "name_en": "Dubai Marina",
+      "name_ar": "دبي مارينا",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "business-bay",
+      "name_en": "Business Bay",
+      "name_ar": "الخليج التجاري",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 4,
+      "is_active": true
+    },
+    {
+      "area_code": "al-barsha",
+      "name_en": "Al Barsha",
+      "name_ar": "البرشاء",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 5,
+      "is_active": true
+    },
+    {
+      "area_code": "palm-jumeirah",
+      "name_en": "Palm Jumeirah",
+      "name_ar": "نخلة جميرا",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 6,
+      "is_active": true
+    },
+    {
+      "area_code": "deira",
+      "name_en": "Deira",
+      "name_ar": "ديرة",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 7,
+      "is_active": true
+    },
+    {
+      "area_code": "bur-dubai",
+      "name_en": "Bur Dubai",
+      "name_ar": "بر دبي",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 8,
+      "is_active": true
+    },
+    {
+      "area_code": "al-quoz",
+      "name_en": "Al Quoz",
+      "name_ar": "القوز",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 9,
+      "is_active": true
+    },
+    {
+      "area_code": "mirdif",
+      "name_en": "Mirdif",
+      "name_ar": "مردف",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 10,
+      "is_active": true
+    },
+    {
+      "area_code": "jbr",
+      "name_en": "JBR",
+      "name_ar": "جميرا بيتش ريزيدنس",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 11,
+      "is_active": true
+    },
+    {
+      "area_code": "jlt",
+      "name_en": "JLT",
+      "name_ar": "أبراج بحيرات جميرا",
+      "city_code": "dubai",
+      "emirate_code": "DU",
+      "display_order": 12,
+      "is_active": true
+    },
+    {
+      "area_code": "hatta-heritage-village",
+      "name_en": "Hatta Heritage Village",
+      "name_ar": "قرية حتا التراثية",
+      "city_code": "hatta",
+      "emirate_code": "DU",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-ghurfa",
+      "name_en": "Al Ghurfa",
+      "name_ar": "الغرفة",
+      "city_code": "dibba-al-fujairah",
+      "emirate_code": "FU",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "dibba-center",
+      "name_en": "Dibba Center",
+      "name_ar": "وسط دبا الفجيرة",
+      "city_code": "dibba-al-fujairah",
+      "emirate_code": "FU",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "al-faseel",
+      "name_en": "Al Faseel",
+      "name_ar": "الفصيل",
+      "city_code": "fujairah",
+      "emirate_code": "FU",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "mirbah",
+      "name_en": "Mirbah",
+      "name_ar": "مربح",
+      "city_code": "fujairah",
+      "emirate_code": "FU",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "sakamkam",
+      "name_en": "Sakamkam",
+      "name_ar": "سكمكم",
+      "city_code": "fujairah",
+      "emirate_code": "FU",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "al-nakheel",
+      "name_en": "Al Nakheel",
+      "name_ar": "النخيل",
+      "city_code": "ras-al-khaimah",
+      "emirate_code": "RK",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-dhait",
+      "name_en": "Al Dhait",
+      "name_ar": "الظيت",
+      "city_code": "ras-al-khaimah",
+      "emirate_code": "RK",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "khuzam",
+      "name_en": "Khuzam",
+      "name_ar": "خزام",
+      "city_code": "ras-al-khaimah",
+      "emirate_code": "RK",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "dibba-al-hisn-center",
+      "name_en": "Dibba Al Hisn Center",
+      "name_ar": "وسط دبا الحصن",
+      "city_code": "dibba-al-hisn",
+      "emirate_code": "SH",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "kalba-center",
+      "name_en": "Kalba Center",
+      "name_ar": "وسط كلباء",
+      "city_code": "kalba",
+      "emirate_code": "SH",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "khor-fakkan-corniche",
+      "name_en": "Khor Fakkan Corniche",
+      "name_ar": "كورنيش خورفكان",
+      "city_code": "khor-fakkan",
+      "emirate_code": "SH",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-majaz",
+      "name_en": "Al Majaz",
+      "name_ar": "المجاز",
+      "city_code": "sharjah",
+      "emirate_code": "SH",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-nahda-sh",
+      "name_en": "Al Nahda",
+      "name_ar": "النهدة",
+      "city_code": "sharjah",
+      "emirate_code": "SH",
+      "display_order": 2,
+      "is_active": true
+    },
+    {
+      "area_code": "muwaileh",
+      "name_en": "Muwaileh",
+      "name_ar": "مويلح",
+      "city_code": "sharjah",
+      "emirate_code": "SH",
+      "display_order": 3,
+      "is_active": true
+    },
+    {
+      "area_code": "al-taawun",
+      "name_en": "Al Taawun",
+      "name_ar": "التعاون",
+      "city_code": "sharjah",
+      "emirate_code": "SH",
+      "display_order": 4,
+      "is_active": true
+    },
+    {
+      "area_code": "al-khan",
+      "name_en": "Al Khan",
+      "name_ar": "الخان",
+      "city_code": "sharjah",
+      "emirate_code": "SH",
+      "display_order": 5,
+      "is_active": true
+    },
+    {
+      "area_code": "al-qasimia",
+      "name_en": "Al Qasimia",
+      "name_ar": "القاسمية",
+      "city_code": "sharjah",
+      "emirate_code": "SH",
+      "display_order": 6,
+      "is_active": true
+    },
+    {
+      "area_code": "al-salama",
+      "name_en": "Al Salama",
+      "name_ar": "السلامة",
+      "city_code": "umm-al-quwain",
+      "emirate_code": "UQ",
+      "display_order": 1,
+      "is_active": true
+    },
+    {
+      "area_code": "al-rawdah-uq",
+      "name_en": "Al Rawdah",
+      "name_ar": "الروضة",
+      "city_code": "umm-al-quwain",
+      "emirate_code": "UQ",
+      "display_order": 2,
+      "is_active": true
+    }
+  ]
+}

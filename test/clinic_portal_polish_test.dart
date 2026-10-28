@@ -189,7 +189,7 @@ void main() {
   });
 
   testWidgets(
-    'location preset confirms coordinates and cancel returns no selection',
+    'area preview requires explicit exact-pin confirmation and cancel returns no selection',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -246,9 +246,31 @@ void main() {
       );
       tester.state<ScrollableState>(locationScroll).position.jumpTo(0);
       await tester.pump();
-      await tester.tap(find.text('Dubai Healthcare City'));
+      // A catalog district is not an exact clinic entrance. Enter explicit UAE
+      // coordinates rather than adopting a removed hardcoded district centroid.
+      await tester.enterText(
+        find.byKey(const ValueKey('clinic-address-search')),
+        '25.2315, 55.3242',
+      );
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
       final confirm = find.text('Use This Location');
+      await scrollLocationToEnd();
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.ancestor(of: confirm, matching: find.byType(FilledButton)),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester.ensureVisible(
+        find.text('Confirm pin is the exact clinic location'),
+      );
+      await tester.tap(find.text('Confirm pin is the exact clinic location'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm entrance'));
+      await tester.pumpAndSettle();
       await scrollLocationToEnd();
       await tester.tap(confirm);
       await tester.pumpAndSettle();

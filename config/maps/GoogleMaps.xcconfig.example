@@ -1,0 +1,4 @@
+// Future configuration only; no key value in this repository.
+// A local/CI generator supplies AW_IOS_MAPS_SDK_KEY in the ignored
+// ios/Flutter/GoogleMaps.local.xcconfig. Do not replace this comment with a key.
+#include? "GoogleMaps.local.xcconfig"

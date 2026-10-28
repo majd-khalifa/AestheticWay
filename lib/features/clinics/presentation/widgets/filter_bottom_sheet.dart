@@ -1,3 +1,4 @@
+import '../../../locations/presentation/uae_location_picker.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/paged_entity_field.dart';
 import '../../../treatments/models/category_model.dart';
@@ -7,15 +8,17 @@ import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/theme/app_typography.dart';
 import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import '../../../../core/auth/session_snapshot.dart';
 
 class ClinicFilterOptions {
-  String
-  selectedCity; // 'الكل' / 'دبي' / 'أبوظبي' or 'All' / 'Dubai' / 'Abu Dhabi'
+  String selectedCity;
+  String? selectedAreaCode;
   String? selectedSpecialtyId;
   String? specialtyNameAr, specialtyNameEn;
 
   ClinicFilterOptions({
     this.selectedCity = 'الكل',
+    this.selectedAreaCode,
     this.selectedSpecialtyId,
     this.specialtyNameAr,
     this.specialtyNameEn,
@@ -27,6 +30,7 @@ class ClinicFilterOptions {
   }) {
     return ClinicFilterOptions(
       selectedCity: selectedCity ?? this.selectedCity,
+      selectedAreaCode: selectedCity == null ? selectedAreaCode : null,
       selectedSpecialtyId: selectedSpecialtyId ?? this.selectedSpecialtyId,
       specialtyNameAr: specialtyNameAr,
       specialtyNameEn: specialtyNameEn,
@@ -35,6 +39,7 @@ class ClinicFilterOptions {
 
   void reset() {
     selectedCity = 'الكل';
+    selectedAreaCode = null;
     selectedSpecialtyId = null;
     specialtyNameAr = null;
     specialtyNameEn = null;
@@ -62,6 +67,7 @@ class FilterBottomSheet extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: isDark
           ? AppColors.backgroundBase
           : AppColors.lightCardSurface,
@@ -80,6 +86,8 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   late ClinicFilterOptions _filters;
   String? _categoryLabel;
+  final _session = SessionSnapshot();
+  bool _applied = false;
 
   @override
   void initState() {
@@ -113,25 +121,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.tune_rounded,
-                    size: 20,
-                    color: AppColors.accentChampagne,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    loc.tr('filter_title'),
-                    style: AppTypography.cardTitle.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: isDark
-                          ? AppColors.silverPrimary
-                          : AppColors.lightTextPrimary,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.tune_rounded,
+                      size: 20,
+                      color: AppColors.accentChampagne,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        loc.tr('filter_title'),
+                        style: AppTypography.cardTitle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.silverPrimary
+                              : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -152,6 +164,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           const SizedBox(height: 12),
           const Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              loc.isArabic
+                  ? 'اختر المدينة والمنطقة الاختيارية والتصنيف الطبي المناسب.'
+                  : 'Choose a city, an optional area and a medical category.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.subtext(context),
+              ),
+            ),
+          ),
 
           Flexible(
             fit: FlexFit.loose,
@@ -171,37 +194,25 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _FilterChipWidget(
-                        label: loc.tr('city_all'),
-                        isSelected:
-                            _filters.selectedCity == 'الكل' ||
-                            _filters.selectedCity == 'All',
-                        onTap: () =>
-                            setState(() => _filters.selectedCity = 'الكل'),
-                      ),
-                      _FilterChipWidget(
-                        label: loc.tr('city_dubai'),
-                        isSelected:
-                            _filters.selectedCity == 'دبي' ||
-                            _filters.selectedCity == 'Dubai',
-                        onTap: () =>
-                            setState(() => _filters.selectedCity = 'دبي'),
-                      ),
-                      _FilterChipWidget(
-                        label: loc.tr('city_abudhabi'),
-                        isSelected:
-                            _filters.selectedCity == 'أبوظبي' ||
-                            _filters.selectedCity == 'Abu Dhabi',
-                        onTap: () =>
-                            setState(() => _filters.selectedCity = 'أبوظبي'),
-                      ),
-                    ],
+                  UaeLocationField(
+                    value: _filters.selectedCity,
+                    areaCode: _filters.selectedAreaCode,
+                    onLocalityChanged: (value) => setState(() {
+                      _filters.selectedCity = value.city.nameEn;
+                      _filters.selectedAreaCode = value.area?.code;
+                    }),
+                    onChanged: (city) => setState(() {
+                      _filters.selectedCity = city;
+                      _filters.selectedAreaCode = null;
+                    }),
                   ),
 
+                  if (_filters.selectedAreaCode != null)
+                    Text(
+                      loc.isArabic
+                          ? 'ستُعرض نتائج المدينة؛ ترشيح المنطقة غير متاح بعد.'
+                          : 'Showing city results; area filtering is not available yet.',
+                    ),
                   const SizedBox(height: 18),
                   // 2. Specialty Filter
                   Text(
@@ -257,64 +268,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             icon: Icons.check_circle_outline,
             isFullWidth: true,
             onPressed: () {
-              widget.onApply(_filters);
+              if (_applied || !_session.isCurrent) return;
+              _applied = true;
+              widget.onApply(_filters.copyWith());
               Navigator.pop(context);
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FilterChipWidget extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterChipWidget({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppColors.isDark(context);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.goldText(
-                  context,
-                ).withValues(alpha: isDark ? 0.2 : 0.16)
-              : (isDark
-                    ? AppColors.cardSurfaceHover
-                    : AppColors.lightCardSurfaceHover),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.goldText(context)
-                : AppColors.border(context),
-            width: isSelected ? 1.2 : 0.8,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.caption.copyWith(
-            color: isSelected
-                ? AppColors.goldText(context)
-                : (isDark
-                      ? AppColors.silverPrimary
-                      : AppColors.lightTextPrimary),
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            fontSize: 12,
-          ),
-        ),
       ),
     );
   }

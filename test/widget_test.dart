@@ -89,7 +89,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(FeaturedAdSlideMedia), findsOneWidget);
-      expect(find.text('15s Video'), findsOneWidget);
+      expect(find.text('Clinic video'), findsOneWidget);
       expect(find.text('Elite Clinic Dubai'), findsOneWidget);
     },
   );

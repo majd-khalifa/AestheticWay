@@ -1,3 +1,4 @@
+import '../../../../core/auth/session_snapshot.dart';
 import '../widgets/clinic_catalog_cards.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
@@ -45,39 +46,59 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
     PractitionerModel? existing,
   }) {
     final formKey = GlobalKey<FormState>();
+    final editorSession = SessionSnapshot();
     final isEditing = existing != null;
 
     String? avatarPath = existing?.avatarUrl;
     bool avatarPathChanged = false;
     final nameEnController = TextEditingController(
-      text: existing?.nameEn ?? '',
+      text: existing?.editableText('name_en', existing.nameEn) ?? '',
     );
     final nameArController = TextEditingController(
-      text: existing?.nameAr ?? '',
+      text: existing?.editableText('name_ar', existing.nameAr) ?? '',
     );
     final specialtyEnController = TextEditingController(
-      text: existing?.specialtyEn ?? '',
+      text: existing?.editableText('speciality_en', existing.specialtyEn) ?? '',
     );
     final specialtyArController = TextEditingController(
-      text: existing?.specialtyAr ?? '',
+      text: existing?.editableText('speciality_ar', existing.specialtyAr) ?? '',
     );
     final titleEnController = TextEditingController(
-      text: existing?.classificationEn ?? '',
+      text:
+          existing?.editableText('title_en', existing.classificationEn ?? '') ??
+          '',
     );
     final titleArController = TextEditingController(
-      text: existing?.classificationAr ?? '',
+      text: existing?.editableText('title_ar', existing.classificationAr) ?? '',
     );
     final bioEnController = TextEditingController(
-      text: existing?.aboutEn ?? '',
+      text: existing?.editableText('bio_en', existing.aboutEn ?? '') ?? '',
     );
     final bioArController = TextEditingController(
-      text: existing?.aboutAr ?? '',
+      text: existing?.editableText('bio_ar', existing.aboutAr) ?? '',
     );
 
     PractitionerType selectedType = existing?.type ?? PractitionerType.doctor;
     String status = existing?.status ?? 'active';
     String? modalErrorMessage;
     bool isSubmitting = false;
+    Map<String, List<String>> fieldErrors = {};
+    String? validateField(
+      String key,
+      String? value, {
+      int? limit,
+      bool required = false,
+    }) {
+      if (fieldErrors[key]?.isNotEmpty == true) return fieldErrors[key]!.first;
+      final text = value?.trim() ?? '';
+      if (required && text.isEmpty) return loc.tr('clinic_validation_required');
+      if (limit != null && text.length > limit) {
+        return loc.isArabic
+            ? 'الحد الأقصى $limit حرفاً.'
+            : 'Use at most $limit characters.';
+      }
+      return null;
+    }
 
     final isDark = AppColors.isDark(context);
 
@@ -200,17 +221,22 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     Center(
                       child: LuxuryImagePickerField(
                         label: loc.isArabic
-                            ? 'صورة الطبيب / الممارس'
-                            : 'Practitioner Photo',
+                            ? 'صورة الطبيب / الممارس (اختياري)'
+                            : 'Practitioner Photo (optional)',
                         initialUrl: existing?.avatarUrl.isNotEmpty == true
                             ? existing?.avatarUrl
                             : null,
+                        enabled: !isSubmitting,
                         isCircular: true,
                         height: 110,
                         width: 110,
                         onImageSelected: (path) {
-                          avatarPath = path;
-                          avatarPathChanged = true;
+                          setModalState(() {
+                            avatarPath = path;
+                            avatarPathChanged = true;
+                            fieldErrors.remove('avatar');
+                            fieldErrors.remove('media_asset');
+                          });
                         },
                       ),
                     ),
@@ -219,6 +245,7 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     // Practitioner Type Dropdown
                     DropdownButtonFormField<PractitionerType>(
                       initialValue: selectedType,
+                      validator: (_) => fieldErrors['type']?.firstOrNull,
                       dropdownColor: isDark
                           ? AppColors.cardSurface
                           : AppColors.lightCardSurface,
@@ -252,17 +279,25 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (v) {
-                        if (v != null) {
-                          setModalState(() => selectedType = v);
-                        }
-                      },
+                      onChanged: isSubmitting
+                          ? null
+                          : (v) {
+                              if (v != null) {
+                                setModalState(() {
+                                  selectedType = v;
+                                  fieldErrors.remove('type');
+                                });
+                              }
+                            },
                     ),
                     const SizedBox(height: 10),
 
                     // Name EN & Name AR
                     LtrTextFormField(
                       controller: nameEnController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) =>
+                          setModalState(() => fieldErrors.remove('name_en')),
                       style: TextStyle(
                         color: isDark
                             ? AppColors.textPrimary
@@ -294,13 +329,19 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                           ),
                         ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? loc.tr('clinic_validation_required')
-                          : null,
+                      validator: (v) => validateField(
+                        'name_en',
+                        v,
+                        limit: 200,
+                        required: true,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: nameArController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) =>
+                          setModalState(() => fieldErrors.remove('name_ar')),
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       style: TextStyle(
@@ -312,8 +353,8 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                       decoration: InputDecoration(
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: loc.isArabic
-                            ? 'الاسم الكامل بالعربية *'
-                            : 'Full Name (Arabic) *',
+                            ? 'الاسم الكامل بالعربية (اختياري)'
+                            : 'Full Name (Arabic, optional)',
                         hintText: 'مثال: د. ليلى الهاشمي',
                         hintStyle: TextStyle(
                           color: AppColors.text(
@@ -334,15 +375,18 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                           ),
                         ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? loc.tr('clinic_validation_required')
-                          : null,
+                      validator: (v) => validateField('name_ar', v, limit: 200),
                     ),
                     const SizedBox(height: 10),
 
                     // Title EN & Title AR
                     LtrTextFormField(
                       controller: titleEnController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) =>
+                          setModalState(() => fieldErrors.remove('title_en')),
+                      validator: (v) =>
+                          validateField('title_en', v, limit: 100),
                       style: TextStyle(
                         color: isDark
                             ? AppColors.textPrimary
@@ -371,6 +415,11 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: titleArController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) =>
+                          setModalState(() => fieldErrors.remove('title_ar')),
+                      validator: (v) =>
+                          validateField('title_ar', v, limit: 100),
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       style: TextStyle(
@@ -403,6 +452,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     // Specialty EN & AR
                     LtrTextFormField(
                       controller: specialtyEnController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) => setModalState(
+                        () => fieldErrors.remove('speciality_en'),
+                      ),
+                      validator: (v) =>
+                          validateField('speciality_en', v, limit: 200),
                       style: TextStyle(
                         color: isDark
                             ? AppColors.textPrimary
@@ -431,6 +486,12 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: specialtyArController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) => setModalState(
+                        () => fieldErrors.remove('speciality_ar'),
+                      ),
+                      validator: (v) =>
+                          validateField('speciality_ar', v, limit: 200),
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       style: TextStyle(
@@ -463,6 +524,10 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     // Bio EN & Bio AR
                     LtrTextFormField(
                       controller: bioEnController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) =>
+                          setModalState(() => fieldErrors.remove('bio_en')),
+                      validator: (v) => validateField('bio_en', v),
                       maxLines: 2,
                       style: TextStyle(
                         color: isDark
@@ -500,6 +565,10 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: bioArController,
+                      enabled: !isSubmitting,
+                      onChanged: (_) =>
+                          setModalState(() => fieldErrors.remove('bio_ar')),
+                      validator: (v) => validateField('bio_ar', v),
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       maxLines: 2,
@@ -553,29 +622,24 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                           : () async {
                               setModalState(() => modalErrorMessage = null);
                               if (!formKey.currentState!.validate()) return;
+                              if (!editorSession.isCurrent) {
+                                setModalState(
+                                  () => modalErrorMessage = loc.isArabic
+                                      ? 'تغيرت الجلسة. أغلق النموذج وأعد فتحه.'
+                                      : 'Your session changed. Close and reopen this form.',
+                                );
+                                return;
+                              }
 
                               final data = <String, dynamic>{
                                 'name_en': nameEnController.text.trim(),
-                                'name_ar':
-                                    nameArController.text.trim().isNotEmpty
-                                    ? nameArController.text.trim()
-                                    : nameEnController.text.trim(),
-                                'title_en':
-                                    titleEnController.text.trim().isNotEmpty
-                                    ? titleEnController.text.trim()
-                                    : specialtyEnController.text.trim(),
-                                'title_ar':
-                                    titleArController.text.trim().isNotEmpty
-                                    ? titleArController.text.trim()
-                                    : specialtyArController.text.trim(),
-                                'speciality_en':
-                                    specialtyEnController.text.trim().isNotEmpty
-                                    ? specialtyEnController.text.trim()
-                                    : 'Aesthetic Practitioner',
-                                'speciality_ar':
-                                    specialtyArController.text.trim().isNotEmpty
-                                    ? specialtyArController.text.trim()
-                                    : 'ممارس تجميلي معتمد',
+                                'name_ar': nameArController.text.trim(),
+                                'title_en': titleEnController.text.trim(),
+                                'title_ar': titleArController.text.trim(),
+                                'speciality_en': specialtyEnController.text
+                                    .trim(),
+                                'speciality_ar': specialtyArController.text
+                                    .trim(),
                                 'type': selectedType.value,
                                 'bio_en': bioEnController.text.trim(),
                                 'bio_ar': bioArController.text.trim(),
@@ -613,20 +677,19 @@ class _ClinicPractitionersScreenState extends State<ClinicPractitionersScreen> {
                                 if (!ctx.mounted) return;
                                 String cleanMsg;
                                 if (e is ApiException) {
-                                  cleanMsg = e.message;
-                                } else {
                                   cleanMsg =
-                                      ApiException.sanitizeRegulatoryCompliance(
-                                        e
-                                            .toString()
-                                            .replaceFirst('Exception: ', '')
-                                            .replaceFirst('ApiException: ', ''),
-                                      );
+                                      '${e.message}${e.statusCode == null ? '' : ' (HTTP ${e.statusCode})'}';
+                                  fieldErrors = e.fieldErrors ?? {};
+                                } else {
+                                  cleanMsg = loc.isArabic
+                                      ? 'تعذر حفظ الممارس. احتُفظ بالبيانات.'
+                                      : 'Could not save the practitioner. Your entries are preserved.';
                                 }
                                 setModalState(() {
                                   modalErrorMessage = cleanMsg;
                                   isSubmitting = false;
                                 });
+                                formKey.currentState?.validate();
                               }
                             },
                     ),

@@ -1,0 +1,320 @@
+{
+  "supplied_backend_commit": "c25e901ec10c7c3f751462b414d90d5ab88d3c85",
+  "evidence_scope": "isolated SQLite/local storage; explicit Google provider stubs; no production/R2/device evidence",
+  "source_files_unchanged": 413,
+  "observations": [
+    {
+      "case": "active_PNG_upload_read_association",
+      "status": 201,
+      "keys": [
+        "clinic_id",
+        "created_at",
+        "file_size",
+        "height",
+        "id",
+        "media_type",
+        "mime_type",
+        "original_filename",
+        "uploader_id",
+        "url",
+        "width"
+      ],
+      "mime": "image/png",
+      "saved_bytes": 95,
+      "width": 32,
+      "height": 24,
+      "db_clinic_matches": true,
+      "fresh_list_status": 200,
+      "fresh_list_contains_ack": true,
+      "fresh_profile_status": 200,
+      "profile_contains_url": true,
+      "public_status": 200,
+      "public_contains_url": true
+    },
+    {
+      "case": "active_PNG_delete",
+      "status": 204,
+      "foreign_patient_status": 403,
+      "db_removed": true,
+      "fresh_list_removed": true,
+      "fresh_profile_removed": true,
+      "binary_removed": true
+    },
+    {
+      "case": "active_JPEG_upload_read_association",
+      "status": 201,
+      "keys": [
+        "clinic_id",
+        "created_at",
+        "file_size",
+        "height",
+        "id",
+        "media_type",
+        "mime_type",
+        "original_filename",
+        "uploader_id",
+        "url",
+        "width"
+      ],
+      "mime": "image/jpeg",
+      "saved_bytes": 644,
+      "width": 32,
+      "height": 24,
+      "db_clinic_matches": true,
+      "fresh_list_status": 200,
+      "fresh_list_contains_ack": true,
+      "fresh_profile_status": 200,
+      "profile_contains_url": true,
+      "public_status": 200,
+      "public_contains_url": true
+    },
+    {
+      "case": "active_JPEG_delete",
+      "status": 204,
+      "foreign_patient_status": 403,
+      "db_removed": true,
+      "fresh_list_removed": true,
+      "fresh_profile_removed": true,
+      "binary_removed": true
+    },
+    {
+      "case": "active_WEBP_upload_read_association",
+      "status": 201,
+      "keys": [
+        "clinic_id",
+        "created_at",
+        "file_size",
+        "height",
+        "id",
+        "media_type",
+        "mime_type",
+        "original_filename",
+        "uploader_id",
+        "url",
+        "width"
+      ],
+      "mime": "image/webp",
+      "saved_bytes": 74,
+      "width": 32,
+      "height": 24,
+      "db_clinic_matches": true,
+      "fresh_list_status": 200,
+      "fresh_list_contains_ack": true,
+      "fresh_profile_status": 200,
+      "profile_contains_url": true,
+      "public_status": 200,
+      "public_contains_url": true
+    },
+    {
+      "case": "active_WEBP_delete",
+      "status": 204,
+      "foreign_patient_status": 403,
+      "db_removed": true,
+      "fresh_list_removed": true,
+      "fresh_profile_removed": true,
+      "binary_removed": true
+    },
+    {
+      "case": "pending_PNG_upload_read_association",
+      "status": 201,
+      "keys": [
+        "clinic_id",
+        "created_at",
+        "file_size",
+        "height",
+        "id",
+        "media_type",
+        "mime_type",
+        "original_filename",
+        "uploader_id",
+        "url",
+        "width"
+      ],
+      "mime": "image/png",
+      "saved_bytes": 95,
+      "width": 32,
+      "height": 24,
+      "db_clinic_matches": true,
+      "fresh_list_status": 200,
+      "fresh_list_contains_ack": true,
+      "fresh_profile_status": 200,
+      "profile_contains_url": true,
+      "public_status": 404
+    },
+    {
+      "case": "pending_PNG_delete",
+      "status": 204,
+      "foreign_patient_status": 403,
+      "db_removed": true,
+      "fresh_list_removed": true,
+      "fresh_profile_removed": true,
+      "binary_removed": true
+    },
+    {
+      "case": "pending_JPEG_upload_read_association",
+      "status": 201,
+      "keys": [
+        "clinic_id",
+        "created_at",
+        "file_size",
+        "height",
+        "id",
+        "media_type",
+        "mime_type",
+        "original_filename",
+        "uploader_id",
+        "url",
+        "width"
+      ],
+      "mime": "image/jpeg",
+      "saved_bytes": 644,
+      "width": 32,
+      "height": 24,
+      "db_clinic_matches": true,
+      "fresh_list_status": 200,
+      "fresh_list_contains_ack": true,
+      "fresh_profile_status": 200,
+      "profile_contains_url": true,
+      "public_status": 404
+    },
+    {
+      "case": "pending_JPEG_delete",
+      "status": 204,
+      "foreign_patient_status": 403,
+      "db_removed": true,
+      "fresh_list_removed": true,
+      "fresh_profile_removed": true,
+      "binary_removed": true
+    },
+    {
+      "case": "pending_WEBP_upload_read_association",
+      "status": 201,
+      "keys": [
+        "clinic_id",
+        "created_at",
+        "file_size",
+        "height",
+        "id",
+        "media_type",
+        "mime_type",
+        "original_filename",
+        "uploader_id",
+        "url",
+        "width"
+      ],
+      "mime": "image/webp",
+      "saved_bytes": 74,
+      "width": 32,
+      "height": 24,
+      "db_clinic_matches": true,
+      "fresh_list_status": 200,
+      "fresh_list_contains_ack": true,
+      "fresh_profile_status": 200,
+      "profile_contains_url": true,
+      "public_status": 404
+    },
+    {
+      "case": "pending_WEBP_delete",
+      "status": 204,
+      "foreign_patient_status": 403,
+      "db_removed": true,
+      "fresh_list_removed": true,
+      "fresh_profile_removed": true,
+      "binary_removed": true
+    },
+    {
+      "case": "corrupt_image",
+      "status": 400,
+      "api_code": "VALIDATION_ERROR",
+      "validation_fields": [
+        "file"
+      ]
+    },
+    {
+      "case": "missing_file",
+      "status": 400,
+      "api_code": "VALIDATION_ERROR",
+      "validation_fields": [
+        "file"
+      ]
+    },
+    {
+      "case": "suspended_upload",
+      "status": 403
+    },
+    {
+      "case": "link_mismatched_business",
+      "status": 200,
+      "returned_place_verification": "linked_verified_place",
+      "sync_status": "pending",
+      "rating": null,
+      "count": 0,
+      "provider_calls_including_details": 1,
+      "immediate_rating_fetches": 0
+    },
+    {
+      "case": "unrelated_business_rating_exposure",
+      "before_sync_rating": null,
+      "after_sync_public_rating": 4.6,
+      "after_sync_public_count": 42,
+      "public_place_matches_link": true,
+      "backend_identity_match_enforced": false,
+      "public_has_identity_review_field": false
+    },
+    {
+      "case": "link_matching_fixture",
+      "status": 200,
+      "returned_place_verification": "linked_verified_place",
+      "sync_status": "pending",
+      "rating": null,
+      "count": 0,
+      "provider_calls_including_details": 1,
+      "immediate_rating_fetches": 0
+    },
+    {
+      "case": "successful_controlled_rating_sync",
+      "public_status": 200,
+      "public_rating": 4.6,
+      "public_count": 42,
+      "private_sync_status": "synced",
+      "persisted_synced_at": true
+    },
+    {
+      "case": "link_matching_fixture",
+      "status": 200,
+      "returned_place_verification": "linked_verified_place",
+      "sync_status": "pending",
+      "rating": null,
+      "count": 0,
+      "provider_calls_including_details": 1,
+      "immediate_rating_fetches": 0
+    },
+    {
+      "case": "pending_clinic_daily_sync_exclusion",
+      "task_total": 0,
+      "provider_calls": 0,
+      "clinic_sync_status": "pending",
+      "rating": null
+    },
+    {
+      "case": "provider_403_before_first_rating",
+      "sync_status": "failed",
+      "rating": null,
+      "count": 0
+    },
+    {
+      "case": "association_changed_during_rating_fetch",
+      "newer_place_preserved": false,
+      "old_place_restored": true,
+      "sync_status": "pending",
+      "rating": null
+    },
+    {
+      "case": "multi_membership_gallery_filter_ignored",
+      "status": 200,
+      "queried_one_clinic": true,
+      "returned_distinct_clinics": 2,
+      "returned_other_assigned_clinic": true
+    }
+  ]
+}

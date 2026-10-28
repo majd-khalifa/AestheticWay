@@ -1,0 +1,26 @@
+{
+  "frontend_baseline": "5bdfc27c1c093775bcd553142dcb29646573329c",
+  "backend_commit": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
+  "archive_sha256": "4066d72ffab19d9282e0e91a58856ed761a16cb25e61f59c5f70e4e113990321",
+  "django_source_files_unchanged": 410,
+  "source_API_responses": 25,
+  "independently_run_backend_tests": 40,
+  "ali_reported_full_backend_tests": 693,
+  "new_flutter_tests": 30,
+  "full_flutter_suite": {
+    "passed": 1110,
+    "failed": 0,
+    "scope": "Local Linux Flutter3.41.5/Dart3.11.3; current-commit nativeCI recorded in PR13"
+  },
+  "analyzer_issues": 0,
+  "format_files": 267,
+  "rendered_previews": 18,
+  "git_diff_check": "clean",
+  "native_CI": "Actual current-commit Windows/Ubuntu, Android and macOS evidence is linked in updated PR13; no physical-device claim. Prior5bdfc27 checks are historical.",
+  "limitations": [
+    "Nearby GPS/manual transports implemented but production query gated:401560b returns active draft profiles.",
+    "EmbeddedGoogleMaps keys absent; SDK minimumOS/toolchain decision outstanding; safe externalnavigation retained.",
+    "LiveGoogle, OTPdelivery, R2Range206, physicalvideo restart/playback and deployedproxysettings not independently verified.",
+    "Backend staffGooglemutation, genericPUTbypass, provideremptyresponse, proofURLbinding, areaFK/filter and manualtop10limit handed off separately."
+  ]
+}

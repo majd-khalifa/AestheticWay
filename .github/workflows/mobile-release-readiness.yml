@@ -1,0 +1,142 @@
+name: Mobile release readiness
+
+on:
+  push:
+    branches: [codex/mobile-release-readiness, codex/final-backend-integration-client-preview]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: '3.41.5'
+          channel: stable
+          cache: true
+      - name: Install reviewed Android toolchain
+        shell: bash
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
+          flutter pub get
+      - name: Signed release compilation with disposable verification key
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_key_dir=$(mktemp -d "$RUNNER_TEMP/aw-verification.XXXXXX")
+          trap 'rm -rf "$release_key_dir"' EXIT
+          export AW_ANDROID_STORE_FILE="$release_key_dir/verification-only.jks"
+          export AW_ANDROID_STORE_PASSWORD=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
+          export AW_ANDROID_KEY_ALIAS=aw-release-verification-only
+          export AW_ANDROID_KEY_PASSWORD="$AW_ANDROID_STORE_PASSWORD"
+          keytool -genkeypair -keystore "$AW_ANDROID_STORE_FILE" -storetype JKS -alias "$AW_ANDROID_KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=AW Build Verification Only' -storepass:env AW_ANDROID_STORE_PASSWORD -keypass:env AW_ANDROID_KEY_PASSWORD
+          flutter build appbundle --release --build-number=1 --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+          flutter build apk --release --build-number=1 --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+          mkdir -p release-evidence
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build/app/outputs/flutter-apk/app-release.apk > release-evidence/apk-signature.txt
+          sha256sum build/app/outputs/flutter-apk/app-release.apk > release-evidence/apk-sha256.txt
+          cd android
+          ./gradlew -q printReleaseConfiguration
+      - name: Inspect actual AAB, signature, manifest and 16KB native libraries
+        shell: bash
+        run: |
+          curl --fail --location --silent --show-error https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar -o "$RUNNER_TEMP/bundletool.jar"
+          python tool/verify_android_bundle.py --bundle build/app/outputs/bundle/release/app-release.aab --bundletool "$RUNNER_TEMP/bundletool.jar" --output release-evidence/android-aab.json
+          flutter --version --machine > release-evidence/flutter-android.json
+      - name: Verify missing credentials fail closed
+        shell: bash
+        run: |
+          set +e
+          cd android
+          ./gradlew bundleRelease --dry-run > "$RUNNER_TEMP/aw-no-signing.log" 2>&1
+          result=$?
+          set -e
+          test "$result" -ne 0
+          grep -q 'Release signing is not configured' "$RUNNER_TEMP/aw-no-signing.log"
+      - name: Upload non-secret build evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-release-evidence
+          path: release-evidence/
+          retention-days: 14
+
+  ios-xcode26:
+    # macos-15 is the available standard ARM64 label (confirmed by native SDK provenance).
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+      BUNDLE_FROZEN: 'true'
+      BUNDLE_GEMFILE: ${{ github.workspace }}/ios/Gemfile
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: '3.41.5'
+          channel: stable
+          cache: true
+      - name: Record Xcode and SDK; install pinned CocoaPods
+        run: |
+          mkdir -p release-evidence
+          sudo xcode-select --switch "$DEVELOPER_DIR"
+          sudo xcodebuild -runFirstLaunch
+          xcodebuild -version | tee release-evidence/xcode.txt
+          xcrun --sdk iphoneos --show-sdk-version | tee release-evidence/ios-sdk.txt
+          xcodebuild -version | grep -q 'Xcode 26'
+          flutter pub get
+          cd ios
+          ruby --version
+          gem install bundler --version 4.0.20 --no-document
+          bundle _4.0.20_ install
+          bundle _4.0.20_ exec pod install --deployment
+          cp Podfile.lock ../release-evidence/Podfile.lock
+          cp Gemfile.lock ../release-evidence/Gemfile.lock
+          cd ..
+          git diff --exit-code -- ios/Podfile.lock ios/Gemfile.lock
+          ruby -rjson -ryaml -e '
+            plugins = JSON.parse(File.read(".flutter-plugins-dependencies")).fetch("plugins").fetch("ios")
+            expected = ["Flutter"] + plugins.select { |p| p.fetch("native_build", true) }.map { |p| p.fetch("name") }
+            actual = YAML.load_file("ios/Podfile.lock").fetch("DEPENDENCIES").map { |p| p.split.first }
+            abort "Committed Pods do not match Flutter native plugins" unless actual.sort == expected.sort
+            puts "Committed Pods match all #{expected.length} Flutter/native dependencies"
+          '
+      - name: Actual unsigned iOS Release device compilation
+        run: |
+          bundle _4.0.20_ exec pod --version | grep -x '1.16.2'
+          bundle _4.0.20_ exec flutter build ios --release --no-codesign
+          find build/ios/iphoneos/Runner.app -name PrivacyInfo.xcprivacy > release-evidence/packaged-privacy-manifests.txt
+          test -f build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy
+          plutil -lint build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy
+          plutil -convert json -o release-evidence/runner-info.json build/ios/iphoneos/Runner.app/Info.plist
+          plutil -convert json -o release-evidence/app-framework-info.json build/ios/iphoneos/Runner.app/Frameworks/App.framework/Info.plist
+          flutter --version --machine > release-evidence/flutter-ios.json
+      - name: Boot iOS26 simulator and execute native hosted tests
+        timeout-minutes: 12
+        run: |
+          bundle _4.0.20_ exec python3 tool/run_ios_hosted_tests.py
+      - name: Verify native locks remain unchanged after build and tests
+        run: |
+          git diff --exit-code -- ios/Podfile.lock ios/Gemfile.lock
+          cmp ios/Podfile.lock ios/Pods/Manifest.lock
+          shasum -a 256 ios/Podfile.lock ios/Gemfile.lock > release-evidence/committed-lock-sha256.txt
+      - name: Upload native build/test evidence, no signing material
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ios-xcode26-evidence
+          path: release-evidence/
+          retention-days: 14

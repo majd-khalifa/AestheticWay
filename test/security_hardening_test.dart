@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -80,6 +81,8 @@ class _Api implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     posts.add(path);
     return Response<T>(
@@ -99,6 +102,9 @@ class _Upload implements MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) => gate.future;
 }
 

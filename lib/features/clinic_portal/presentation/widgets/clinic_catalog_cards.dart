@@ -4,7 +4,7 @@ import '../../../../core/services/local_media_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/contact_launcher.dart';
 import '../../../../core/widgets/luxury_card.dart';
-import '../../../../core/widgets/luxury_image.dart';
+import '../../../../core/widgets/portal_media_frame.dart';
 import '../../../appointment_lead/models/appointment_request_model.dart';
 import '../../../offers/models/offer_model.dart';
 import '../../../practitioners/models/practitioner_model.dart';
@@ -234,23 +234,13 @@ class ClinicPractitionerCard extends StatelessWidget {
                   color: AppColors.goldText(context).withValues(alpha: .55),
                 ),
               ),
-              child: LuxuryImage(
+              child: PortalMediaFrame(
                 imageUrl: p.avatarUrl,
                 mediaCacheKey: LocalMediaCache.entity('practitioner', p.id),
-                fallbackLogoUrl: clinicLogoUrl ?? p.clinicLogoUrl,
                 width: 68,
-                height: 68,
-                borderRadius: BorderRadius.circular(16),
-                customPlaceholder: Container(
-                  width: 68,
-                  height: 68,
-                  color: AppColors.goldText(context).withValues(alpha: .09),
-                  child: Icon(
-                    Icons.person_outline,
-                    color: AppColors.goldText(context),
-                    size: 28,
-                  ),
-                ),
+                height: 85,
+                radius: 16,
+                icon: Icons.person_outline,
               ),
             ),
             const SizedBox(width: 12),
@@ -444,22 +434,13 @@ class ClinicOfferCard extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LuxuryImage(
+            PortalMediaFrame(
               imageUrl: o.imageUrl,
               mediaCacheKey: LocalMediaCache.entity('offer', o.id),
-              fallbackLogoUrl: o.clinicLogoUrl,
               width: 80,
               height: 76,
-              borderRadius: BorderRadius.circular(14),
-              customPlaceholder: Container(
-                width: 80,
-                height: 76,
-                color: AppColors.goldText(context).withValues(alpha: .08),
-                child: Icon(
-                  Icons.local_offer_outlined,
-                  color: AppColors.goldText(context),
-                ),
-              ),
+              radius: 14,
+              icon: Icons.local_offer_outlined,
             ),
             const SizedBox(width: 12),
             Expanded(

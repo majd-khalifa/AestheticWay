@@ -1,9 +1,7 @@
 import 'clinic_category_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
-import '../../../../core/widgets/paged_entity_picker.dart';
 import '../../../treatments/models/category_model.dart';
-import '../../data/clinic_catalog_repository.dart';
 
 /// A bounded dropdown for loaded categories, with paged access to the full directory.
 class ClinicCategoryField extends StatelessWidget {
@@ -28,36 +26,6 @@ class ClinicCategoryField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () async {
-                final category = await showClinicCategoryEditor(context);
-                if (context.mounted && category != null) onChanged(category);
-              },
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(loc.isArabic ? 'إضافة تصنيف' : 'Add Category'),
-            ),
-            TextButton.icon(
-              onPressed: () => showClinicCategoryManager(
-                context,
-                onUpdated: (category) {
-                  if (category.id == value) onChanged(category);
-                },
-                onDeleted: (id) {
-                  if (id == value) onChanged(null);
-                },
-              ),
-              icon: const Icon(Icons.tune, size: 18),
-              label: Text(
-                loc.isArabic ? 'إدارة التصنيفات' : 'Manage Categories',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           key: ValueKey(value),
           initialValue: value,
@@ -83,7 +51,7 @@ class ClinicCategoryField extends StatelessWidget {
               (c) => DropdownMenuItem(
                 value: c.id,
                 child: Text(
-                  loc.isArabic ? c.nameAr : c.nameEn,
+                  loc.isArabic && c.nameAr.isNotEmpty ? c.nameAr : c.nameEn,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -102,21 +70,13 @@ class ClinicCategoryField extends StatelessWidget {
           label: Text(
             loc.isArabic ? 'تصفح جميع التصنيفات' : 'Browse all categories',
           ),
-          onPressed: () async {
-            final result = await showPagedEntityPicker<CategoryModel>(
-              context,
-              title: loc.isArabic ? 'التصنيف الطبي' : 'Medical Category',
-              hint: loc.isArabic ? 'ابحث عن تصنيف' : 'Search categories',
-              selectedKey: value,
-              keyOf: (c) => c.id,
-              labelOf: (c) => loc.isArabic ? c.nameAr : c.nameEn,
-              loader: (page, search) => ClinicCatalogRepository().getCategories(
-                page: page,
-                search: search,
-              ),
-            );
-            if (context.mounted && result != null) onChanged(result.value);
-          },
+          onPressed: () => showClinicCategoryManager(
+            context,
+            selectedId: value,
+            onSelected: (category) {
+              if (context.mounted) onChanged(category);
+            },
+          ),
         ),
       ],
     );

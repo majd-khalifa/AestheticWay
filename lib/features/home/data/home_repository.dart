@@ -1,3 +1,4 @@
+import '../../locations/data/uae_location_repository.dart';
 import '../../clinics/data/clinics_repository.dart';
 import '../../clinics/models/clinic_model.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
@@ -23,19 +24,8 @@ class HomeRepository {
       queryParams['latitude'] = latitude;
       queryParams['longitude'] = longitude;
     } else if (city != null && city.isNotEmpty) {
-      final normalizedCity = city.trim().toLowerCase();
-      if (normalizedCity != 'all' && normalizedCity != 'الكل') {
-        if (normalizedCity.contains('dubai') ||
-            normalizedCity.contains('دبي')) {
-          queryParams['city'] = 'dubai';
-        } else if (normalizedCity.contains('abu dhabi') ||
-            normalizedCity.contains('أبوظبي') ||
-            normalizedCity.contains('ابوظبي')) {
-          queryParams['city'] = 'abu dhabi';
-        } else {
-          queryParams['city'] = city.trim();
-        }
-      }
+      final canonical = currentUaeCatalog.legacyCityQuery(city);
+      if (canonical != null) queryParams['city'] = canonical;
     }
 
     // Independent bounded reads start together. Attach the error handler now so

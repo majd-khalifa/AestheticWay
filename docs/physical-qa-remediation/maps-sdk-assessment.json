@@ -1,0 +1,149 @@
+{
+  "google_maps_flutter": {
+    "latest": "2.19.0",
+    "candidate": "2.18.1",
+    "environment": {
+      "sdk": "^3.10.0",
+      "flutter": ">=3.38.0"
+    },
+    "dependencies": {
+      "flutter": {
+        "sdk": "flutter"
+      },
+      "google_maps_flutter_android": "^2.19.1",
+      "google_maps_flutter_ios": "^2.18.0",
+      "google_maps_flutter_platform_interface": "^2.16.0",
+      "google_maps_flutter_web": "^0.6.3"
+    },
+    "archive": "https://pub.dev/api/archives/google_maps_flutter-2.18.1.tar.gz"
+  },
+  "google_maps_flutter_android": {
+    "latest": "2.21.0",
+    "candidate": "2.19.10",
+    "environment": {
+      "sdk": "^3.10.0",
+      "flutter": ">=3.38.0"
+    },
+    "dependencies": {
+      "flutter": {
+        "sdk": "flutter"
+      },
+      "flutter_plugin_android_lifecycle": "^2.0.1",
+      "google_maps_flutter_platform_interface": "^2.13.0",
+      "meta": "^1.10.0",
+      "stream_transform": "^2.0.0"
+    },
+    "archive": "https://pub.dev/api/archives/google_maps_flutter_android-2.19.10.tar.gz",
+    "native": [],
+    "inspected_build": {
+      "path": "android/build.gradle.kts",
+      "sha256": "5fa624be580ccdc831e4201acdd7e068b038204c02b7ca2ec02057a87ecdd679",
+      "minSdk": 24,
+      "compileSdk": "flutter.compileSdkVersion",
+      "nativeMapsDependency": "com.google.android.gms:play-services-maps:20.0.0"
+    }
+  },
+  "google_maps_flutter_ios_sdk9": {
+    "latest": "2.19.0",
+    "candidate": "2.19.0",
+    "environment": {
+      "sdk": "^3.11.0",
+      "flutter": ">=3.41.0"
+    },
+    "dependencies": {
+      "flutter": {
+        "sdk": "flutter"
+      },
+      "google_maps_flutter_platform_interface": "^2.17.0",
+      "meta": "^1.10.0",
+      "stream_transform": "^2.0.0"
+    },
+    "archive": "https://pub.dev/api/archives/google_maps_flutter_ios_sdk9-2.19.0.tar.gz",
+    "native": [
+      {
+        "file": "ios/google_maps_flutter_ios_sdk9/Package.swift",
+        "lines": [
+          "platforms: [",
+          "name: \"GoogleMapsUtils\",",
+          "name: \"GoogleMaps\","
+        ]
+      },
+      {
+        "file": "ios/google_maps_flutter_ios_sdk9.podspec",
+        "lines": [
+          "s.dependency 'GoogleMaps', '~> 9.2'",
+          "# Google-Maps-iOS-Utils 6.0 and 6.1.0 support GoogleMaps 9.x. The next release",
+          "# was 6.1.3, which switched to GoogleMaps 10.x without a major version change.",
+          "s.platform = :ios, '15.0'"
+        ]
+      }
+    ]
+  },
+  "google_maps_flutter_ios_sdk10": {
+    "latest": "2.19.0",
+    "candidate": "2.19.0",
+    "environment": {
+      "sdk": "^3.11.0",
+      "flutter": ">=3.41.0"
+    },
+    "dependencies": {
+      "flutter": {
+        "sdk": "flutter"
+      },
+      "google_maps_flutter_platform_interface": "^2.17.0",
+      "meta": "^1.10.0",
+      "stream_transform": "^2.0.0"
+    },
+    "archive": "https://pub.dev/api/archives/google_maps_flutter_ios_sdk10-2.19.0.tar.gz",
+    "native": [
+      {
+        "file": "ios/google_maps_flutter_ios_sdk10/Package.swift",
+        "lines": [
+          "platforms: [",
+          "// 6.1.3 switched from GoogleMaps 9.x to 10.x without a major version",
+          "name: \"GoogleMapsUtils\",",
+          "name: \"GoogleMaps\","
+        ]
+      },
+      {
+        "file": "ios/google_maps_flutter_ios_sdk10.podspec",
+        "lines": [
+          "s.dependency 'GoogleMaps', '~> 10.0'",
+          "# 6.1.3 was the first version to support GoogleMaps 10.x.",
+          "s.platform = :ios, '16.0'"
+        ]
+      }
+    ]
+  },
+  "google_maps_flutter_ios": {
+    "latest": "2.18.7",
+    "candidate": "2.18.7",
+    "environment": {
+      "sdk": "^3.11.0",
+      "flutter": ">=3.41.0"
+    },
+    "dependencies": {
+      "flutter": {
+        "sdk": "flutter"
+      },
+      "google_maps_flutter_platform_interface": "^2.14.2",
+      "meta": "^1.10.0",
+      "stream_transform": "^2.0.0"
+    },
+    "archive": "https://pub.dev/api/archives/google_maps_flutter_ios-2.18.7.tar.gz"
+  },
+  "isolated_resolution": {
+    "flutter": "3.41.5",
+    "dart": "3.11.3",
+    "result": "success",
+    "wrapper": "2.18.1",
+    "android": "2.19.10",
+    "ios": "google_maps_flutter_ios_sdk10:2.19.0",
+    "selected_plugin_registration": {
+      "android": "google_maps_flutter_android",
+      "ios": "google_maps_flutter_ios_sdk10"
+    },
+    "app_dependency_or_native_OS_changes": false,
+    "native_sdk_build_performed": false
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-27",
+  "branch": "codex/final-backend-integration-client-preview",
+  "baseline": "cf52892cf56492179aad85b32c78c3315fec09fe",
+  "supplied_backend_commit": "c25e901ec10c7c3f751462b414d90d5ab88d3c85",
+  "archive_sha256": "0db1da5c354c0835ef9c92d3ea193b539862e42865ee8474515d11d55f01e28f",
+  "backend_source_files_unchanged": 413,
+  "new_source_observations": 24,
+  "previous_findings_rechecked": 25,
+  "supplied_backend_relevant_tests_passed": 59,
+  "source_scope": "SQLite, temporary local storage and explicit provider stubs; not production",
+  "source_probe_sha256": "99a02dadb21a3dc86ff9a02d720455341408e9db5083a3e94df0b4bffef9a2a8",
+  "local_host": "Linux",
+  "flutter": "3.41.5",
+  "dart": "3.11.3",
+  "format": "289 files; zero changes",
+  "analyzer_issues": 0,
+  "initial_full_suite_passed": 1230,
+  "final_full_suite": "1230 passed, zero failed",
+  "new_regression_tests": 24,
+  "render_pngs": 12,
+  "existing_golden_changes": 0,
+  "native_CI": "Exact final-head Windows/Ubuntu and Android/macOS run links and conclusions are recorded in PR13 after push; do not reuse baseline results.",
+  "owner_reported_physical_pass": [
+    "Nurse without photo",
+    "Emirate filtering",
+    "Clinic location saving",
+    "Google association",
+    "VIP upload/persistence/playback"
+  ],
+  "owner_gallery_clarification": "Selection disappeared before Save; matches reproduced lifecycle race",
+  "physical_new_build": "Not tested by this execution; gallery save/restart/patient/CDN checks still required",
+  "live_public_google_rating": "Unverified; production host not allowed by environment policy",
+  "backend_remaining": [
+    "Wrong business affiliation can publish a rating",
+    "Stale rating worker can restore an older association",
+    "Multi-membership media list lacks current-clinic filtering",
+    "Live sync/job/provider eligibility requires operator evidence"
+  ],
+  "native_and_signing_changes": false,
+  "focused_regressions_passed": 24,
+  "diff_check": "clean"
+}

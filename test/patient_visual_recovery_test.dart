@@ -146,7 +146,7 @@ void main() {
       ).getHomeFeed(city: 'Dubai');
       expect(client.calls, ['home/feed/', 'clinics/']);
       expect(client.queries.last, containsPair('page_size', 20));
-      expect(client.queries.last, containsPair('city', 'dubai'));
+      expect(client.queries.last, containsPair('city', 'Dubai'));
       expect(feed.featuredAds.single.id, 'ad-uuid');
       expect(feed.premiumPartners.where((p) => !p.isAdvertisement).length, 2);
       expect(

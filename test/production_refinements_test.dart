@@ -221,13 +221,15 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('#REQ-99001'), findsOneWidget);
+        expect(find.text('#REQ-99001'), findsNothing);
+        expect(fakeRepo.mockLeads.single.referenceCode, '#REQ-99001');
 
         // Tap the lead card to open the detail modal sheet
-        await tester.tap(find.text('#REQ-99001'));
+        await tester.tap(find.textContaining('Medical Retinol Cream'));
         await tester.pumpAndSettle();
 
         expect(find.text('Request Details'), findsOneWidget);
+        expect(find.text('#REQ-99001'), findsNothing);
         expect(
           find.text('Is this suitable for sensitive skin?'),
           findsOneWidget,

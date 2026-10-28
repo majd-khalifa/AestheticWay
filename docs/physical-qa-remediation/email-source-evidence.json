@@ -1,0 +1,36 @@
+{
+  "source_commit": "401560bdb06bd739f74eb42a88c68fc748e43dbb",
+  "scope": "Isolated SQLite/APIClient; all mail/SMS mocked; no physical/provider delivery verification",
+  "responses": [
+    {
+      "route": "auth/me/email/change/request/",
+      "status": 200
+    },
+    {
+      "route": "auth/me/email/change/confirm/",
+      "status": 200
+    },
+    {
+      "route": "auth/me/deletion/request/",
+      "status": 200
+    },
+    {
+      "route": "auth/me/deletion/request/",
+      "status": 400
+    }
+  ],
+  "email_change_OTP_confirmed": true,
+  "persisted_email_verified_flag_exists": false,
+  "deletion_uses_confirmed_email": false,
+  "deletion_dispatches_only_SMS_when_phone_present": true,
+  "no_verified_channel_when_phone_absent_even_after_email_confirmation": true,
+  "SMS_factory_has_real_gateway": false,
+  "SMS_factory_implemented_providers": [
+    "console",
+    "mock"
+  ],
+  "unknown_SMS_provider_falls_back_to_console": true,
+  "console_reports_success_without_SMS_gateway": true,
+  "deployed_provider_configuration_verified": false,
+  "source_files_unchanged": 410
+}

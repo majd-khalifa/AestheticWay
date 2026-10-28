@@ -1,0 +1,14 @@
+{
+  "verified_commit": "75a7e199f7df959d254bf0b4401373a9da7447f9",
+  "paths": {
+    "lib": "84e353dab68d6c70fa0a8a9c3685aa819c0a00ad",
+    "test": "c02efa0142a72ff769157e73c1742efbd9b8e4aa",
+    "android": "e61abb2dce2eacac2d54a97ee8fe8b4be3f7d384",
+    "ios": "9dcf6501222bc2e1ef2ca5201e0270d6fcab3ba1",
+    "pubspec.yaml": "2457d16e411ca6d4408b39886f05c6941ebdac51",
+    "pubspec.lock": "099fd1672c2c217e472294a43ddebfc291a6c193",
+    ".github/workflows": "76def2623b46110cdec9f3ebb616661891594855",
+    "tool": "7a7f576903f472d04d30960c8c0527a6cf6c247c"
+  },
+  "qualification": "Final evidence-only commits must preserve every object ID below. Native CI also runs on final branch head."
+}

@@ -1,3 +1,4 @@
+import '../../onboarding/services/onboarding_service.dart';
 import 'package:dio/dio.dart';
 import '../../../core/auth/session_changed_exception.dart';
 import '../../../core/network/api_transport_policy.dart';
@@ -99,12 +100,18 @@ class AuthRepository {
     if (attempt != _authenticationAttempt) {
       throw const SessionChangedException();
     }
+    await OnboardingService().recordAuthenticatedSession();
+    _check(current);
+    if (attempt != _authenticationAttempt) {
+      throw const SessionChangedException();
+    }
     AuthState().login(
       name: response.user.fullName,
       phone: response.user.phone,
       email: response.user.email ?? '',
       role: response.user.role,
       isVerified: response.user.isVerified,
+      isEmailVerified: response.user.isEmailVerified,
     );
   }
 
@@ -304,6 +311,82 @@ class AuthRepository {
   }
 
   /// Get current user profile from server (GET /api/v1/auth/me/)
+  Future<Map<String, dynamic>> requestAccountDeletion() async {
+    final stamp = _snapshot();
+    final response = await _api.post(
+      'auth/me/deletion/request/',
+      data: <String, dynamic>{},
+    );
+    _check(stamp);
+    final data = Map<String, dynamic>.from(response.data as Map);
+    if (data['success'] != true) {
+      throw const ApiException(
+        message: 'The deletion challenge was not confirmed by the server.',
+      );
+    }
+    return data;
+  }
+
+  /// Explicit administrator choices only. Never invoked by deletion automatically.
+  Future<void> resolveClinicDeletion({
+    String? newAdminUserId,
+    bool deactivate = false,
+  }) async {
+    if (!AuthState().isClinicAdmin || (!deactivate && newAdminUserId == null)) {
+      throw const ApiException(
+        message: 'Clinic administrator access required.',
+        statusCode: 403,
+      );
+    }
+    final stamp = _snapshot();
+    final response = await _api.post(
+      'clinic-portal/profile/${deactivate ? 'deactivate-clinic' : 'transfer-ownership'}/',
+      data: deactivate
+          ? <String, dynamic>{}
+          : {'new_admin_user_id': newAdminUserId},
+    );
+    _check(stamp);
+    if (response.data is! Map ||
+        (response.data as Map)['status'] != 'success' ||
+        (deactivate &&
+            (response.data as Map)['clinic_status'] != 'suspended') ||
+        (!deactivate &&
+            (response.data as Map)['new_admin_user_id'] != newAdminUserId)) {
+      throw const ApiException(
+        message:
+            'The administrator change was not confirmed. Refresh before retrying.',
+      );
+    }
+  }
+
+  /// Only an acknowledged deletion invalidates this session. No real-account
+  /// probes or local "success" substitute for the purpose-bound server OTP.
+  Future<void> confirmAccountDeletion(String code) async {
+    final stamp = _snapshot();
+    final refresh = _tokenStorage.currentRefreshToken;
+    final response = await _api.post(
+      'auth/me/deletion/confirm/',
+      data: {
+        'code': code.trim(),
+        if (refresh != null && refresh.isNotEmpty) 'refresh_token': refresh,
+      },
+    );
+    _check(stamp);
+    if (response.data is! Map || (response.data as Map)['success'] != true) {
+      throw const ApiException(
+        message: 'The server did not confirm account deletion.',
+      );
+    }
+    ++_authenticationAttempt;
+    final deviceClearing = DeviceTokenService().clearLocalToken();
+    final clearing = _tokenStorage.clear();
+    AuthState()
+        .logout(); // Clears clinic, admin, referral and local-media caches.
+    await clearing;
+    await deviceClearing;
+  }
+
+  /// Get current user profile from server (GET /api/v1/auth/me/)
   Future<UserModel> getMe() async {
     final stamp = _snapshot();
     final response = await _api.get(ApiConfig.me);
@@ -315,6 +398,7 @@ class AuthRepository {
       email: user.email ?? '',
       role: user.role,
       isVerified: user.isVerified,
+      isEmailVerified: user.isEmailVerified,
     );
     return user;
   }
@@ -349,6 +433,7 @@ class AuthRepository {
       email: user.email ?? '',
       role: user.role,
       isVerified: user.isVerified,
+      isEmailVerified: user.isEmailVerified,
     );
     return user;
   }

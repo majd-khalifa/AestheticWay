@@ -1,7 +1,10 @@
+import '../../../core/localization/app_locale.dart';
+import '../../../core/auth/guest_auth_guard.dart';
 import '../../../core/auth/session_snapshot.dart';
 import '../../../core/data/paged_collection.dart';
 import '../../../core/network/api_exception.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/services/media_payload_builder.dart';
 import '../../../core/services/media_upload_service.dart';
 import '../../../core/network/api_client.dart';
@@ -16,6 +19,7 @@ import '../models/admin_lead_model.dart';
 
 /// Repository handling Super Admin API operations across the platform
 class AdminRepository {
+  static final clinicReviewDecisions = ValueNotifier<int>(0);
   static final AdminRepository _instance = AdminRepository._internal();
   factory AdminRepository({
     ApiClient? apiClient,
@@ -107,6 +111,7 @@ class AdminRepository {
     int pageSize = 20,
     String? status,
     String? tier,
+    String? setupStatus,
     String? search,
   }) async {
     final queryParams = <String, dynamic>{};
@@ -120,6 +125,17 @@ class AdminRepository {
       queryParams['search'] = search.trim();
     }
 
+    if (setupStatus != null && setupStatus != 'all') {
+      if (![
+        'draft',
+        'submitted',
+        'approved',
+        'rejected',
+      ].contains(setupStatus)) {
+        throw ArgumentError.value(setupStatus, 'setupStatus');
+      }
+      queryParams['setup_status'] = setupStatus;
+    }
     queryParams['page'] = page;
     queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
@@ -127,11 +143,21 @@ class AdminRepository {
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    return PageItems<AdminClinicModel>.fromResponse(
+    final rows = PageItems<AdminClinicModel>.fromResponse(
       response.data,
       AdminClinicModel.fromJson,
       page: page,
     );
+    if (setupStatus != null &&
+        setupStatus != 'all' &&
+        rows.any((row) => row.setupStatus != setupStatus)) {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'لم يطبق الخادم مرشح مراجعة الملف. حدّث البيانات وتحقق من إصدار الخادم.'
+            : 'The server did not apply the setup review filter. Refresh and verify the backend version.',
+      );
+    }
+    return rows;
   }
 
   Future<AdminClinicModel> getClinicDetail(String id) async {
@@ -159,6 +185,112 @@ class AdminRepository {
       data: {'reason': reason},
     );
     return response.data as Map<String, dynamic>? ?? {};
+  }
+
+  /// Setup approval is distinct from ordinary activation. Django verify also
+  /// activates the clinic; callers must explicitly confirm both effects.
+  Future<AdminClinicModel> approveClinicProfile(String id) async {
+    if (!AuthState().isLoggedIn || !AuthState().isSuperAdmin) {
+      throw const ApiException(
+        message: 'Super Admin access is required.',
+        statusCode: 403,
+      );
+    }
+    final session = SessionSnapshot();
+    // Re-read after the confirmation dialog; a stale inbox must not re-approve
+    // an already reviewed profile. Django independently guards the transition.
+    final latest = await getClinicDetail(id);
+    session.ensureCurrent();
+    if (latest.id != id || latest.setupStatus != 'submitted') {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'تغيرت حالة الملف. حدّث المراجعة قبل اتخاذ إجراء.'
+            : 'The profile status changed. Refresh before reviewing.',
+      );
+    }
+    final response = await _api.post(
+      ApiConfig.adminClinicVerify(id),
+      data: {'reason': 'Clinic profile approved through platform review.'},
+    );
+    session.ensureCurrent();
+    final ack = _object(response.data);
+    if (ack['status'] != 'success' ||
+        ack['clinic_id']?.toString() != id ||
+        ack['setup_status'] != 'approved' ||
+        ack['new_status'] != 'active') {
+      throw const ApiException(
+        message:
+            'The profile approval response could not be verified. Refresh before retrying.',
+      );
+    }
+    final refreshed = await getClinicDetail(id);
+    session.ensureCurrent();
+    if (refreshed.id != id ||
+        refreshed.setupStatus != 'approved' ||
+        refreshed.status != 'active') {
+      throw const ApiException(
+        message: 'Please refresh the clinic review status.',
+      );
+    }
+    clinicReviewDecisions.value++;
+    return refreshed;
+  }
+
+  Future<AdminClinicModel> rejectClinicSetup(String id, String reason) async {
+    if (!AuthState().isLoggedIn || !AuthState().isSuperAdmin) {
+      throw const ApiException(
+        message: 'Super Admin access is required.',
+        statusCode: 403,
+      );
+    }
+    final text = reason.trim();
+    if (text.isEmpty || text.length > 1000) {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'أدخل سبباً واضحاً من 1 إلى 1000 حرف.'
+            : 'Enter a clear reason from 1 to 1000 characters.',
+        statusCode: 400,
+      );
+    }
+    final session = SessionSnapshot();
+    final latest = await getClinicDetail(id);
+    session.ensureCurrent();
+    if (latest.id != id || latest.setupStatus != 'submitted') {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'تغيرت حالة الملف. حدّث المراجعة.'
+            : 'The profile status changed. Refresh the review.',
+        statusCode: 409,
+        errorCode: 'INVALID_SETUP_TRANSITION',
+      );
+    }
+    final result = await _api.post(
+      ApiConfig.adminClinicRejectSetup(id),
+      data: {'rejection_reason': text},
+    );
+    session.ensureCurrent();
+    final ack = _object(result.data);
+    if (ack['status'] != 'success' ||
+        ack['clinic_id']?.toString() != id ||
+        ack['setup_status'] != 'rejected' ||
+        ack['rejection_reason'] != text) {
+      throw const ApiException(
+        message:
+            'The server did not confirm the review decision. Refresh before retrying.',
+      );
+    }
+    final refreshed = await getClinicDetail(id);
+    session.ensureCurrent();
+    if (refreshed.id != id ||
+        refreshed.setupStatus != 'rejected' ||
+        refreshed.moderationNotes != text) {
+      throw const ApiException(
+        message:
+            'The saved rejection could not be verified. Refresh before retrying.',
+      );
+    }
+    clinicReviewDecisions.value++;
+    return refreshed;
   }
 
   /// Atomically provision a new Clinic and its initial Administrator

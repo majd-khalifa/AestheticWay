@@ -1,3 +1,4 @@
+import '../../../locations/data/uae_location_repository.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/async_action_button.dart';
 import '../../../../core/localization/app_locale.dart';
@@ -8,6 +9,8 @@ import '../../../clinics/presentation/widgets/patient_clinic_card.dart';
 class NearbyClinicsSection extends StatelessWidget {
   final Future<void> Function(ClinicModel, AsyncActionScope)? onRequestAction;
   final List<ClinicModel> clinics;
+  final String city;
+  final VoidCallback? onSeeAll;
   final ValueChanged<ClinicModel> onClinicTap;
   final ValueChanged<ClinicModel>? onRequestTap;
   final ValueChanged<ClinicModel> onContactTap;
@@ -15,6 +18,8 @@ class NearbyClinicsSection extends StatelessWidget {
   const NearbyClinicsSection({
     super.key,
     required this.clinics,
+    this.city = 'All',
+    this.onSeeAll,
     required this.onClinicTap,
     this.onRequestTap,
     required this.onContactTap,
@@ -31,9 +36,23 @@ class NearbyClinicsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            loc.isArabic ? 'اكتشف العيادات' : 'Discover clinics',
+            currentUaeCatalog.legacyCityQuery(city) == null
+                ? (loc.isArabic
+                      ? 'تصفح العيادات في الإمارات'
+                      : 'Browse clinics across the UAE')
+                : (loc.isArabic
+                      ? 'تصفح العيادات في ${currentUaeCatalog.resolve(city)?.label(true) ?? city}'
+                      : 'Browse clinics in ${currentUaeCatalog.resolve(city)?.label(false) ?? city}'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
+          if (onSeeAll != null)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                onPressed: onSeeAll,
+                child: Text(loc.isArabic ? 'عرض الكل' : 'See all'),
+              ),
+            ),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -50,6 +69,7 @@ class NearbyClinicsSection extends StatelessWidget {
                       ),
                       child: PatientClinicCard(
                         clinic: clinic,
+                        filterCity: city,
                         compact: true,
                         onTap: () => onClinicTap(clinic),
                       ),

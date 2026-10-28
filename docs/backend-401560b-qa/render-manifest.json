@@ -1,0 +1,113 @@
+{
+  "scope": "Actual Flutter renders; disposable fixtures; no live Google, production or physical-device claim",
+  "renders": [
+    {
+      "file": "business_401560b_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "586131139edcb419f0cb7665a81458af3996d0c54edbe280170d71eeeec5d6e0"
+    },
+    {
+      "file": "business_401560b_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ea12167baf4c57a3440d5e4e81c5b47415af73aa6fdd09a63b0f9a3e49afd0ca"
+    },
+    {
+      "file": "business_401560b_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "26d56e32a4205f5378da3732478b7c18ac1eb2b3370800d92efc3879bdbefc73"
+    },
+    {
+      "file": "business_401560b_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a59612943f7ecafdd00142b27bb7710e33b3f56aaa24049f2eb8d7cdd5f870c6"
+    },
+    {
+      "file": "business_details_401560b_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "c43667802248c72aa9d5ea6d01f903cb417bd1071e01878c7b1ad8dadd1a7f12"
+    },
+    {
+      "file": "business_details_401560b_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "e7a485141d6f92000b255c90fdbeaf29e0ded694f5e253d7a034abef43e46a38"
+    },
+    {
+      "file": "business_details_401560b_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "62dd6398ed3a9b13166addb73713bc5a73dd7d55896dfd55af37f5397663e74e"
+    },
+    {
+      "file": "business_details_401560b_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "912810b4b6d0b2bc43278c44371ff3da0bbcd603159fc52c8682a0458dd347df"
+    },
+    {
+      "file": "clinic_deactivation_confirmation_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "badb1417401a294bfc6a14c4a9617f000433fa6e9d6aefa59aa17b209c1343e0"
+    },
+    {
+      "file": "localities_401560b_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "580170dcf72761c3555b89c5c14f9f25f50f984b3fde223b125aba82ed9ab0a1"
+    },
+    {
+      "file": "localities_401560b_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "0911d1d9de0d1f73ff532f7eea4fa0ec573ef39696130eac74881e660c5680dc"
+    },
+    {
+      "file": "localities_401560b_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "b769aee70b0ade7a26f20affdb837bc6589267e0f58d6aee5ae3b3504349b556"
+    },
+    {
+      "file": "localities_401560b_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ebdc9647a5c4218ba7c91987892a771c6824faac5f33ad96c44c35861fd0a6cd"
+    },
+    {
+      "file": "otp_destination_401560b_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "e00a797d084e404146d0e2a9dde14e539fa952fa2a16afae86bd8e8c0b240b4a"
+    },
+    {
+      "file": "otp_destination_401560b_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "8da82a8f27604315d77a915e79ccc3560dbcdd33fec62a38a721dd328c56d429"
+    },
+    {
+      "file": "otp_destination_401560b_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "3258bcf43218f338b437d4435ca66c13be78afebc2cf842b2926cc400ff72062"
+    },
+    {
+      "file": "otp_destination_401560b_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "af3ca11c331a3bccb485e05abb613dc6efb64e788b720d68dcc12102c0682a92"
+    },
+    {
+      "file": "sole_admin_resolution_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "70841e3553638f217489c0928bdf845ca3725b27e30e54076bfba03e81dd6815"
+    }
+  ]
+}

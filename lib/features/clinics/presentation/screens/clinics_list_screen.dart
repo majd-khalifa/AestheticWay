@@ -1,3 +1,4 @@
+import '../../../locations/presentation/uae_location_picker.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/patient_clinic_card.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
@@ -327,7 +328,10 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                     _filterOptions.selectedCity == 'الكل' ||
                     _filterOptions.selectedCity == 'All',
                 onTap: () {
-                  setState(() => _filterOptions.selectedCity = 'الكل');
+                  setState(() {
+                    _filterOptions.selectedCity = 'الكل';
+                    _filterOptions.selectedAreaCode = null;
+                  });
                   _paging.search({
                     'search': _searchQuery,
                     'city': _filterOptions.selectedCity,
@@ -336,34 +340,34 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                 },
               ),
               const SizedBox(width: 6),
-              _QuickCityChip(
-                label: loc.isArabic ? "دبي" : "Dubai",
-                isSelected:
-                    _filterOptions.selectedCity == 'دبي' ||
-                    _filterOptions.selectedCity == 'Dubai',
-                onTap: () {
-                  setState(() => _filterOptions.selectedCity = 'دبي');
-                  _paging.search({
-                    'search': _searchQuery,
-                    'city': _filterOptions.selectedCity,
-                    'category': _categoryUuid,
-                  });
-                },
-              ),
-              const SizedBox(width: 6),
-              _QuickCityChip(
-                label: loc.isArabic ? "أبوظبي" : "Abu Dhabi",
-                isSelected:
-                    _filterOptions.selectedCity == 'أبوظبي' ||
-                    _filterOptions.selectedCity == 'Abu Dhabi',
-                onTap: () {
-                  setState(() => _filterOptions.selectedCity = 'أبوظبي');
-                  _paging.search({
-                    'search': _searchQuery,
-                    'city': _filterOptions.selectedCity,
-                    'category': _categoryUuid,
-                  });
-                },
+              SizedBox(
+                width: 210,
+                child: UaeLocationField(
+                  value: _filterOptions.selectedCity,
+                  areaCode: _filterOptions.selectedAreaCode,
+                  onLocalityChanged: (value) {
+                    setState(() {
+                      _filterOptions.selectedCity = value.city.nameEn;
+                      _filterOptions.selectedAreaCode = value.area?.code;
+                    });
+                    _paging.search({
+                      'search': _searchQuery,
+                      'city': value.city.nameEn,
+                      'category': _categoryUuid,
+                    });
+                  },
+                  onChanged: (city) {
+                    setState(() {
+                      _filterOptions.selectedCity = city;
+                      _filterOptions.selectedAreaCode = null;
+                    });
+                    _paging.search({
+                      'search': _searchQuery,
+                      'city': city,
+                      'category': _categoryUuid,
+                    });
+                  },
+                ),
               ),
               if (_filterOptions.selectedSpecialtyId != null) ...[
                 const SizedBox(width: 6),
@@ -423,6 +427,16 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
             ],
           ),
         ),
+
+        if (_filterOptions.selectedAreaCode != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Text(
+              loc.isArabic
+                  ? 'ستُعرض نتائج المدينة؛ ترشيح المنطقة غير متاح بعد.'
+                  : 'Showing city results; area filtering is not available yet.',
+            ),
+          ),
 
         // Results Count Indicator
         if (!_isLoading && _errorMessage == null)
@@ -512,6 +526,7 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                     final clinic = clinicList[index];
                     return PatientClinicCard(
                       clinic: clinic,
+                      filterCity: _filterOptions.selectedCity,
                       onTap: () => Navigator.push(
                         context,
                         LuxuryPageRoute(

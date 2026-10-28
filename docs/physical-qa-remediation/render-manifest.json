@@ -1,0 +1,138 @@
+{
+  "before_commit": "32498e331f972fa0a036c46d98d39bd78c1207fe",
+  "viewport": "Matching430x1000/DPR1 for before/after; actual Flutter renders; catalog sourced401560b; synthetic video fixture; no physical/live-production claim",
+  "images": [
+    {
+      "file": "location_after_area_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ecd9638983b2225dcdf57c397f6fa03745cd80e33079a3fb528aa2cb43838ce0"
+    },
+    {
+      "file": "location_after_area_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "817ec64c98ce4a92fd146d7bba7e84c2eb070689675df42135ff41730e214644"
+    },
+    {
+      "file": "location_after_area_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "6e204c6d981d231c1ff024eba81187a8d540fa023b52ffc7d878997cd959f124"
+    },
+    {
+      "file": "location_after_area_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "dbb5e99051d03086b66b5728c5f86c73cfae81f16beced9548482a9db3bc9645"
+    },
+    {
+      "file": "location_after_city_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a7ad7a917b54d537004d5bc6ccc4688cbc3c6db4aefc190dca61dd90cf2470f7"
+    },
+    {
+      "file": "location_after_city_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "5d2d3ec8ee04892e1a9434ebcef5c42d10852b34ab383003def5e4e03d4c2606"
+    },
+    {
+      "file": "location_after_city_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "38f81200f5a7ed5039b4ea1f29a65fc45360f4e18b83c1b80e105c81c71068db"
+    },
+    {
+      "file": "location_after_city_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "44c8886af7a296cd4a992dd2fddc58c559cece42fc66cba5a2a04bcb86f30174"
+    },
+    {
+      "file": "location_before_area_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "b355684deb6f80e66a293c6a58654e3502cfe0fadf54885a56089c024a2575d7"
+    },
+    {
+      "file": "location_before_area_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "d16c19679fbd133efa17d48413d5cae4824d46879470f5be3ae209a480ff289a"
+    },
+    {
+      "file": "location_before_area_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "6d9e36f84c6515055ae25b217d417c61559c5e1d5e349d7bb3289a2659f28081"
+    },
+    {
+      "file": "location_before_area_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "61b8aa59d9c304326f643ddf8c5cc2646329288477179fbc84fbb72fad36669e"
+    },
+    {
+      "file": "location_before_city_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "580170dcf72761c3555b89c5c14f9f25f50f984b3fde223b125aba82ed9ab0a1"
+    },
+    {
+      "file": "location_before_city_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "0911d1d9de0d1f73ff532f7eea4fa0ec573ef39696130eac74881e660c5680dc"
+    },
+    {
+      "file": "location_before_city_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "b769aee70b0ade7a26f20affdb837bc6589267e0f58d6aee5ae3b3504349b556"
+    },
+    {
+      "file": "location_before_city_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ebdc9647a5c4218ba7c91987892a771c6824faac5f33ad96c44c35861fd0a6cd"
+    },
+    {
+      "file": "location_scaled_ar.png",
+      "width": 320,
+      "height": 1000,
+      "sha256": "ca6d77b00e8c8f60ed6e76c6e1111b7679c2a5c02eb381f90362c5712e6ce557"
+    },
+    {
+      "file": "location_scaled_en.png",
+      "width": 320,
+      "height": 1000,
+      "sha256": "8e9cdeea941008fc0ea1a8f53c7e248cbf7215e3f7c420e1376a694e6098eee0"
+    },
+    {
+      "file": "video_upload_http500_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "3d4ece4ee7e6cea328f8896bb53a118943993e38839ea8502b344bdbda18a7ce"
+    },
+    {
+      "file": "video_upload_http500_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "4cf8b967f51c80393af1e75d44c27265077ebc6d84214388a379b11e80758a6b"
+    },
+    {
+      "file": "video_upload_http500_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f9449a257e8f03093cc737706ef7588a515768f5de3243d948d7fd9523a61106"
+    },
+    {
+      "file": "video_upload_http500_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "21b03e6da537949301d38b18db138619052f653a506c01d370c61455827a1711"
+    }
+  ]
+}

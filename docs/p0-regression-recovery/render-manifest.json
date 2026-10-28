@@ -1,0 +1,525 @@
+{
+  "before_commit": "bb9a6762354b06e9f7392234a037ed5497d3154f",
+  "native_renderer": "Linux Flutter3.41.5 actual widget RepaintBoundary PNGs",
+  "viewport": {
+    "width": 430,
+    "height": 1000,
+    "dpr": 1
+  },
+  "modes": [
+    "light_en",
+    "light_ar",
+    "dark_en",
+    "dark_ar"
+  ],
+  "baseline_production_modified": false,
+  "harness_sha256": "dcfa678b40202584171d4c32be8a8202dd8f04282002c5000f3b22bb61bc7490",
+  "before_harness_sha256": "dcfa678b40202584171d4c32be8a8202dd8f04282002c5000f3b22bb61bc7490",
+  "fixture_disclosure": "Disposable test data; genuine decoded fixture photo; fake foreground GPS/API transport; poster-only reduced-motion video renders; offline OSM tile boundary; no production or physical-device evidence",
+  "images": [
+    {
+      "path": "after/featured_controls_dark_ar.png",
+      "sha256": "068ea7d7a848cf2b55edefbc3a36c2ac068d4d7094ac70671d22d27acac9fb71",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/featured_controls_dark_en.png",
+      "sha256": "a7990f2db0930032e28c7ca2266460dc662f7a12c62edb5c6e0c8de354dd48a6",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/featured_controls_light_ar.png",
+      "sha256": "7041e7ff5626b04704388da6a28f1a6507c3154f6af9bbf61bf30fc78aeb06c5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/featured_controls_light_en.png",
+      "sha256": "c092ec664af58707d7ee11250fdb815c11892290ef5ddee229503491b3f886f8",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/gallery_failure_dark_ar.png",
+      "sha256": "578029babeb7f0b61c9507aa745114c74b079fd8abdbb7cd72300eac53ba3a89",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/gallery_failure_dark_en.png",
+      "sha256": "c2c942685ceeb561066fb01e5a620e8bc086b9be9482e1fd203a228767d8f881",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/gallery_failure_light_ar.png",
+      "sha256": "975f8690e67ef3ef4d94fa1789a67739c993ede9de595bec6fe2f6909db7cbb4",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/gallery_failure_light_en.png",
+      "sha256": "52d8a040c019fa0744a3499e27798ba15439b006624a2825d59c664b58207b16",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/home_gps_dark_ar.png",
+      "sha256": "d253befb1715545fa5e024b696191340e180d2e73272e8d31200082f8cccb789",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/home_gps_dark_en.png",
+      "sha256": "9a9a5728db89a61158470e0583215266ebf1caed4efc72de1b3a256b85952680",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/home_gps_light_ar.png",
+      "sha256": "ba7b28fe667811e65faacf1ed10baaa7d9fb4f6d1dfd323689182387bc7c7dbe",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/home_gps_light_en.png",
+      "sha256": "814cb08d16cc08800c9f1821ad18e60b4a8a1c47ad1414379272ccff05ff9b02",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/location_conflict_dark_ar.png",
+      "sha256": "779d91ee76204a4d976b65d05e72e6418e90b3fb60c4b214e83ed522a3785bb5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/location_conflict_dark_en.png",
+      "sha256": "0ea77953b35c732f0de81327acbefc9f311cd0d1bba9d0ef768bb11a7aa40df6",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/location_conflict_light_ar.png",
+      "sha256": "dd202a076aa3cc861d6df89e43347928ff069c7bfad4437e7b2382b25f8d8432",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/location_conflict_light_en.png",
+      "sha256": "26ce89edf4e4229ce5a113298bc476edc0ec3f9a3aea12f27b3b91f9169d828d",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/nearby_distance_dark_ar.png",
+      "sha256": "69db271778b304a5d25e1f8e583a45f894ecdf7dc8b54f668750bbb8b3217513",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/nearby_distance_dark_en.png",
+      "sha256": "f6e5f6ca0c1af22cf17cfbd1742bf684986cf72e9292ea008b0c7f578c2653b5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/nearby_distance_light_ar.png",
+      "sha256": "1acf6a035f554272d167f92ef7db4c38ad4085e99e565b0d49c0f7623942b9f5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/nearby_distance_light_en.png",
+      "sha256": "7c7a95ecf98dc05ccdcfc6b18210bc9c72622396f20383fa4b79bf4472e4a887",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/practitioner_result_dark_ar.png",
+      "sha256": "ea75f19cbd25040f9c94159219cf3387b0f47867b1c657d6bdacad9bc1e384f7",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/practitioner_result_dark_en.png",
+      "sha256": "38499c551b599f57fed4683b9da8e92de81a82111cf117313de42c1e77c595c9",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/practitioner_result_light_ar.png",
+      "sha256": "f7aef196442e4b26e38378492221dea7aaad60e72d9c55c4574faaa25b5b34c5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/practitioner_result_light_en.png",
+      "sha256": "63f66b757aa0b927680ce5f6c924aa3e781fbd9b0a9880e16f936567c0190027",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/profile_controls_dark_ar.png",
+      "sha256": "0b6e14142166f5a19df68cc3a02e37ca9751f24b5d52c7d75da087402774915d",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/profile_controls_dark_en.png",
+      "sha256": "f8d9d35e2f5ef7abf68d308e55b250e510b0f7d64fd02b1d833eb4a90af47354",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/profile_controls_light_ar.png",
+      "sha256": "eefeb988bc1c8cffa3b428dc514e905199e5fe3a33efa49efe845e66c3bccd87",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "after/profile_controls_light_en.png",
+      "sha256": "6e90e2af9cc8e572cabad87f11daa4a1eb95ee885c9edfd25a42cadd2ba98bbe",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/featured_controls_dark_ar.png",
+      "sha256": "07c5489e116a5a901fcab820537b34ae95e77a626f97838cbb4583d5f2e98abf",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/featured_controls_dark_en.png",
+      "sha256": "959daf8916b130548ebcc340793f1d11a7c8a7b091c12e833c420f4825cde406",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/featured_controls_light_ar.png",
+      "sha256": "e72eb9629f8da96874844bfa5c8551e48a4098cc662319192c6a92ba86a9ec31",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/featured_controls_light_en.png",
+      "sha256": "710becc47ffcf4d1aa7c7336cf13b35827fee6b0abbae4baf63510adbed8d7d3",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/gallery_failure_dark_ar.png",
+      "sha256": "1852299a5f34885fa7b54895390b148e20267c63fbf3d732f98acabbf2c84f1f",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/gallery_failure_dark_en.png",
+      "sha256": "77a0ab78cae56ffae4a3817386f66ed493b60deb5f48e42dabea359435a9c73d",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/gallery_failure_light_ar.png",
+      "sha256": "60687e23e7c90a4151e696368ba5f53939bda726a1ed0103a8edc0e048fbb653",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/gallery_failure_light_en.png",
+      "sha256": "ea395091696af7685ff7269bc50d1bc7ed3c9598cefca5dbceed1c513609b45b",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/home_gps_dark_ar.png",
+      "sha256": "8f47ebd9d6e4f62423e4f8b781b4975ffc1c74489c8c9f16ed40c2604a17068f",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/home_gps_dark_en.png",
+      "sha256": "e253e3876c87db5d75bbfe3df2019d44862fe04c0e6652f4d7e3b151d9bd4da1",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/home_gps_light_ar.png",
+      "sha256": "78c16afa97b5b466312e4bee5f047b0984ceed86a1c82c4f938a311b33ae3cf8",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/home_gps_light_en.png",
+      "sha256": "c0a37ce841190333d1fe0d585e37fc0e117872c82509eabe282c554bdae8bdbc",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/location_conflict_dark_ar.png",
+      "sha256": "832969f63d9eb82506b363840310d15a8329d830a0f6bb9a77bd5f0c80c23ba9",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/location_conflict_dark_en.png",
+      "sha256": "7bfeed8e877b5a2f3f955f2468bca0df87e53539ccf60bb3df2df5c4c1fc7380",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/location_conflict_light_ar.png",
+      "sha256": "4a8e3db0ac31d4f4f5b72889763b646c1c4eb5025308b55b1b43069e857b4901",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/location_conflict_light_en.png",
+      "sha256": "2d09a67d30c6730e10777c88ddf5fa159b500921895127528088289643342d79",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/nearby_distance_dark_ar.png",
+      "sha256": "8237ef16b7d913b47f885c1e28f8838775d00ada0ea707f092ed47d74c42d4d3",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/nearby_distance_dark_en.png",
+      "sha256": "affe64fcacb4d360d6325dd158ff59c88c20068c300435fa2835165002e1c568",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/nearby_distance_light_ar.png",
+      "sha256": "3fecb005af37761e64df84062dbd3e2a1684cd98751ae726ebafd1d8814f2a4f",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/nearby_distance_light_en.png",
+      "sha256": "24d13634acb083b9e5040a4e5e4b1c4ee530427486438484823d4986864a4fd1",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/practitioner_result_dark_ar.png",
+      "sha256": "7aa68c03499bdc96aef4d147a75fe026ed41b4366c97c94efb6e4fe9a17b92f7",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/practitioner_result_dark_en.png",
+      "sha256": "2a347a0b7c0eaed583a07db95551ca8c508b3aa0a479a9f2cd194798bd70d437",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/practitioner_result_light_ar.png",
+      "sha256": "d54306de8ba284faf81a48b13a44c9129f6f66a6e6e0496b13c4714d5a92de5b",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/practitioner_result_light_en.png",
+      "sha256": "d5159beb639509ae77467a84d414685d633cdec01e28872399ac69b5f9a6021f",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/profile_controls_dark_ar.png",
+      "sha256": "d0e261db3abc37189f5a9e93dd04136b40d97d9283c85fa25027d43c2a62e6cf",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/profile_controls_dark_en.png",
+      "sha256": "9d3d5697d055aea05118dcaaad423c2590812085a4a52c2e410553c0a3d45be5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/profile_controls_light_ar.png",
+      "sha256": "57f8450f0ce5314f237249307444e34c344746288811c96a5610a6059d542cc5",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "before/profile_controls_light_en.png",
+      "sha256": "09e8cee67114ea59ae3632d144bdaf689f8212fc99de9af50a19fbab33c7f596",
+      "size": [
+        430,
+        1000
+      ]
+    },
+    {
+      "path": "comparison_featured_controls_dark_ar.png",
+      "sha256": "9f337613645b44593dd4d1c6565564b9ae3c95c8ee774c1e54bf1ddf251be68b",
+      "size": [
+        880,
+        1050
+      ]
+    },
+    {
+      "path": "comparison_gallery_failure_dark_ar.png",
+      "sha256": "453652cd53ab35019ac7008e29c7712d861494fc3078cc8860eee7fa357336bb",
+      "size": [
+        880,
+        1050
+      ]
+    },
+    {
+      "path": "comparison_home_gps_light_en.png",
+      "sha256": "a48a3d711f95fe07f0677d77f991ee0e3759f6e1039ce3cd4d307ad7b6842e66",
+      "size": [
+        880,
+        1050
+      ]
+    },
+    {
+      "path": "comparison_location_conflict_light_en.png",
+      "sha256": "0bfe13ab570e0e33db81a739a821d8bab3c2702152202a0d9d90897dbb5d6703",
+      "size": [
+        880,
+        1050
+      ]
+    },
+    {
+      "path": "comparison_nearby_distance_dark_ar.png",
+      "sha256": "988d83708ca365119fe7b2024cb91b538b0c77df502d76c9080765b17375f32a",
+      "size": [
+        880,
+        1050
+      ]
+    },
+    {
+      "path": "comparison_practitioner_result_light_en.png",
+      "sha256": "6b62941795215310233f3b9e7fa916886a00b0b37df75527bd15031838b04230",
+      "size": [
+        880,
+        1050
+      ]
+    },
+    {
+      "path": "comparison_profile_controls_light_en.png",
+      "sha256": "1030a1623693755828499189750c79d42fc2c8253ac6176da6291668e4e7585e",
+      "size": [
+        880,
+        1050
+      ]
+    }
+  ]
+}

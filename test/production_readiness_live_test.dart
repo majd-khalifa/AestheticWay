@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
@@ -82,7 +83,11 @@ class _FakeClinicCatalogRepository implements ClinicCatalogRepository {
   }
 
   @override
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) async {
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     lastUpdatedProfilePayload = data;
     return ClinicModel(
       id: 'clinic-live-1',
@@ -276,6 +281,7 @@ void main() {
           phone: '+971509998877',
           whatsapp: '+971509998877',
           addressAr: 'وسط مدينة دبي',
+          city: 'Dubai',
           googleMapsUrl: 'https://maps.google.com/?q=Updated+Elite',
         );
 

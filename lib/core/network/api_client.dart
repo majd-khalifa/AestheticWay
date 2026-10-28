@@ -8,6 +8,7 @@ import 'api_config.dart';
 import 'api_exception.dart';
 import 'auth_interceptor.dart';
 import 'request_backpressure.dart';
+import '../services/video_upload_policy.dart';
 
 /// Centralized HTTP API Client powered by Dio
 class ApiClient {
@@ -17,6 +18,7 @@ class ApiClient {
   late final Dio dio;
   final _reads = SingleFlight();
   final _backpressure = RequestBackpressure();
+  final _leadWriteBackpressure = RequestBackpressure();
 
   ApiClient._internal() {
     dio = Dio(
@@ -39,6 +41,7 @@ class ApiClient {
     dio.options.baseUrl = ApiConfig.baseUrl;
     _reads.clear();
     _backpressure.clear();
+    _leadWriteBackpressure.clear();
   }
 
   Options _sessionOptions(Options? options) {
@@ -97,6 +100,8 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     return _send<T>(
       'POST',
@@ -104,6 +109,8 @@ class ApiClient {
       data: data,
       queryParameters: queryParameters,
       options: _sessionOptions(options),
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
   }
 
@@ -113,6 +120,8 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     return _send<T>(
       'PATCH',
@@ -120,6 +129,8 @@ class ApiClient {
       data: data,
       queryParameters: queryParameters,
       options: _sessionOptions(options),
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
     );
   }
 
@@ -187,22 +198,41 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     required Options options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     final scope = _scope();
     _backpressure.check(scope);
+    final isLeadWrite = method == 'POST' && path == ApiConfig.leads;
+    if (isLeadWrite) _leadWriteBackpressure.check(scope);
     if (method != 'GET') _reads.clear();
+    final candidate = options.extra?[VideoUploadPolicy.traceKey];
+    final trace = candidate is VideoTransferTrace ? candidate : null;
     try {
+      trace?.start();
       final response = await dio.request<T>(
         path,
         data: data,
         queryParameters: queryParameters,
         options: options.copyWith(method: method),
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
+      trace?.finish(response.statusCode);
       _backpressure.succeeded(scope);
+      if (isLeadWrite) _leadWriteBackpressure.succeeded(scope);
       return response;
     } on DioException catch (error) {
+      trace?.finish(error.response?.statusCode);
       final mapped = ApiException.fromDioError(error);
-      _backpressure.record(scope, mapped);
+      // d1023b0 isolates lead creation/duplicate throttles. A rejected POST
+      // must not block the patient's recovery GET to My Requests. Global GET
+      // throttles and service-wide 503 protection still apply to every call.
+      if (isLeadWrite && mapped.statusCode == 429) {
+        _leadWriteBackpressure.record(scope, mapped);
+      } else {
+        _backpressure.record(scope, mapped);
+      }
       throw mapped;
     } finally {
       // A GET started before/during a write must not service a post-write read.

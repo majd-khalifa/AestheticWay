@@ -5,6 +5,7 @@ class CategoryModel {
   final String slug;
   final String? icon;
   final int displayOrder;
+  final bool isActive;
 
   const CategoryModel({
     required this.id,
@@ -13,6 +14,7 @@ class CategoryModel {
     required this.slug,
     this.icon,
     this.displayOrder = 0,
+    this.isActive = true,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class CategoryModel {
       nameAr: json['name_ar']?.toString() ?? '',
       slug: json['slug']?.toString() ?? '',
       icon: json['icon']?.toString(),
+      isActive: json['is_active'] != false,
       displayOrder: json['display_order'] is int
           ? json['display_order'] as int
           : 0,
@@ -36,6 +39,7 @@ class CategoryModel {
       'slug': slug,
       'icon': icon,
       'display_order': displayOrder,
+      'is_active': isActive,
     };
   }
 

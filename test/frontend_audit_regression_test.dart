@@ -1,3 +1,4 @@
+import 'package:aesthetic_way/core/services/media_operation_trace.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -40,6 +41,8 @@ class _Api implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     patchBodies.add(data);
     return Response<T>(
@@ -54,6 +57,8 @@ class _Api implements ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
     postBodies.add(data);
     return Response<T>(
@@ -76,6 +81,9 @@ class _Uploader implements MediaUploadService {
     required String filePath,
     required String mediaType,
     String? clinicId,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+    MediaOperationTrace? trace,
   }) async {
     if (failure != null) throw failure!;
     return {'id': 'asset-new', 'url': signedUrl};
@@ -87,7 +95,11 @@ class _Catalog implements ClinicCatalogRepository {
   Map<String, dynamic>? payload;
 
   @override
-  Future<ClinicModel> updateClinicProfile(Map<String, dynamic> data) {
+  Future<ClinicModel> updateClinicProfile(
+    Map<String, dynamic> data, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) {
     payload = data;
     return pending.future;
   }

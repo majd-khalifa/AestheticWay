@@ -115,18 +115,31 @@ class ClinicModel {
   final double rating;
   final int reviewCount;
   final SubscriptionTier subscriptionTier;
+
+  /// An omitted/unrecognized API tier is not a confirmed Basic entitlement.
+  final bool subscriptionTierKnown;
   final String licenseAuthority; // DHA, DOH, MOHAP
   final String licenseNumber;
   final String city; // Dubai, Abu Dhabi
+  final String emirate;
   final String areaAr;
   final String areaEn;
   final String addressAr;
   final String addressEn;
+
+  /// Display fallbacks are useful to patients, but never prefill an editor's
+  /// missing language with the other language as if it were a translation.
+  final String? rawAddressAr, rawAddressEn;
+  String get editableAddressAr => rawAddressAr ?? addressAr;
+  String get editableAddressEn => rawAddressEn ?? addressEn;
   final double distanceKm;
   final String mainPhone;
   final String receptionPhone;
   final String whatsapp;
   final String? googlePlaceId;
+  final String googleSyncStatus;
+  final String googleLinkStatus;
+  final DateTime? googleLastSyncedAt;
   final double latitude;
   final double longitude;
   final String workingHoursAr;
@@ -141,6 +154,7 @@ class ClinicModel {
   final String? videoUrl;
   final String mediaType; // 'image' | 'video'
   final String setupStatus; // 'draft' | 'submitted' | 'approved' | 'rejected'
+  final String setupRejectionReason;
   final bool hasBranchDirectory;
   final List<dynamic>? rawPractitioners;
   final List<dynamic>? rawTreatments;
@@ -160,18 +174,25 @@ class ClinicModel {
     required this.rating,
     required this.reviewCount,
     required this.subscriptionTier,
+    this.subscriptionTierKnown = true,
     this.licenseAuthority = 'DHA',
     this.licenseNumber = '',
     required this.city,
+    this.emirate = '',
     required this.areaAr,
     this.areaEn = '',
     required this.addressAr,
     this.addressEn = '',
+    this.rawAddressAr,
+    this.rawAddressEn,
     this.distanceKm = 0.0,
     this.mainPhone = '',
     this.receptionPhone = '',
     this.whatsapp = '',
     this.googlePlaceId,
+    this.googleSyncStatus = '',
+    this.googleLinkStatus = '',
+    this.googleLastSyncedAt,
     this.latitude = 0.0,
     this.longitude = 0.0,
     this.workingHoursAr = '',
@@ -186,13 +207,14 @@ class ClinicModel {
     this.videoUrl,
     this.mediaType = 'image',
     this.setupStatus = 'approved',
+    this.setupRejectionReason = '',
     this.hasBranchDirectory = false,
     this.rawPractitioners,
     this.rawTreatments,
   });
 
   factory ClinicModel.fromJson(Map<String, dynamic> json) {
-    final tier = json['subscription_tier']?.toString().toLowerCase();
+    final tier = json['subscription_tier']?.toString().trim().toLowerCase();
     final googleRating = double.tryParse('${json['google_rating']}');
     final googleCount = int.tryParse('${json['google_reviews_count']}');
     final validRating =
@@ -273,6 +295,12 @@ class ClinicModel {
       logoUrl: logo,
       rating: validRating ? googleRating : 0,
       reviewCount: validRating && googleCount != null ? googleCount : 0,
+      subscriptionTierKnown: const [
+        'vip',
+        'vip_platinum',
+        'featured',
+        'basic',
+      ].contains(tier),
       subscriptionTier: switch (tier) {
         'vip' || 'vip_platinum' => SubscriptionTier.vipPlatinum,
         'featured' => SubscriptionTier.featured,
@@ -282,15 +310,25 @@ class ClinicModel {
       licenseAuthority: json['license_authority']?.toString() ?? 'DHA',
       licenseNumber: json['license_number']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
+      emirate: json['emirate']?.toString() ?? '',
       areaAr: json['area_ar'] ?? '',
       areaEn: json['area_en'] ?? '',
       addressAr: firstSourceText([json['address_ar'], json['address_en']]),
       addressEn: firstSourceText([json['address_en'], json['address_ar']]),
-      distanceKm: double.tryParse(json['distance']?.toString() ?? '') ?? 0.0,
+      rawAddressAr: json['address_ar'] is String
+          ? (json['address_ar'] as String).trim()
+          : '',
+      rawAddressEn: json['address_en'] is String
+          ? (json['address_en'] as String).trim()
+          : '',
+      distanceKm: double.tryParse(json['distance_km']?.toString() ?? '') ?? 0.0,
       mainPhone: json['phone']?.toString() ?? '',
       receptionPhone: json['phone']?.toString() ?? '',
       whatsapp: json['whatsapp']?.toString() ?? '',
       googlePlaceId: json['google_place_id']?.toString(),
+      googleSyncStatus: json['google_sync_status']?.toString() ?? '',
+      googleLinkStatus: json['google_link_status']?.toString() ?? '',
+      googleLastSyncedAt: DateTime.tryParse('${json['google_last_synced_at']}'),
       latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
       longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
       workingHoursAr: json['working_hours_ar'] ?? '',
@@ -303,6 +341,10 @@ class ClinicModel {
       videoUrl: hasVideoUrl ? resolvedVideoUrl : null,
       mediaType: resolvedMediaType,
       setupStatus: json['setup_status']?.toString() ?? 'unknown',
+      setupRejectionReason: json['setup_status'] == 'rejected'
+          ? (json['setup_rejection_reason'] ?? json['moderation_notes'] ?? '')
+                .toString()
+          : '',
       hasBranchDirectory: json['branches_directory_url'] != null,
       rawPractitioners: practitionersRaw,
       rawTreatments: treatmentsRaw,
@@ -359,9 +401,11 @@ class ClinicModel {
     double? rating,
     int? reviewCount,
     SubscriptionTier? subscriptionTier,
+    bool? subscriptionTierKnown,
     String? licenseAuthority,
     String? licenseNumber,
     String? city,
+    String? emirate,
     String? areaAr,
     String? areaEn,
     String? addressAr,
@@ -385,6 +429,7 @@ class ClinicModel {
     String? videoUrl,
     String? mediaType,
     String? setupStatus,
+    String? setupRejectionReason,
     bool? hasBranchDirectory,
     List<dynamic>? rawPractitioners,
     List<dynamic>? rawTreatments,
@@ -401,18 +446,27 @@ class ClinicModel {
       rating: rating ?? this.rating,
       reviewCount: reviewCount ?? this.reviewCount,
       subscriptionTier: subscriptionTier ?? this.subscriptionTier,
+      subscriptionTierKnown:
+          subscriptionTierKnown ??
+          (subscriptionTier != null ? true : this.subscriptionTierKnown),
       licenseAuthority: licenseAuthority ?? this.licenseAuthority,
       licenseNumber: licenseNumber ?? this.licenseNumber,
       city: city ?? this.city,
+      emirate: emirate ?? this.emirate,
       areaAr: areaAr ?? this.areaAr,
       areaEn: areaEn ?? this.areaEn,
       addressAr: addressAr ?? this.addressAr,
       addressEn: addressEn ?? this.addressEn,
+      rawAddressAr: addressAr ?? rawAddressAr,
+      rawAddressEn: addressEn ?? rawAddressEn,
       distanceKm: distanceKm ?? this.distanceKm,
       mainPhone: mainPhone ?? this.mainPhone,
       receptionPhone: receptionPhone ?? this.receptionPhone,
       whatsapp: whatsapp ?? this.whatsapp,
       googlePlaceId: googlePlaceId ?? this.googlePlaceId,
+      googleSyncStatus: googleSyncStatus,
+      googleLinkStatus: googleLinkStatus,
+      googleLastSyncedAt: googleLastSyncedAt,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       workingHoursAr: workingHoursAr ?? this.workingHoursAr,
@@ -427,6 +481,7 @@ class ClinicModel {
       videoUrl: videoUrl ?? this.videoUrl,
       mediaType: mediaType ?? this.mediaType,
       setupStatus: setupStatus ?? this.setupStatus,
+      setupRejectionReason: setupRejectionReason ?? this.setupRejectionReason,
       hasBranchDirectory: hasBranchDirectory ?? this.hasBranchDirectory,
       rawPractitioners: rawPractitioners ?? this.rawPractitioners,
       rawTreatments: rawTreatments ?? this.rawTreatments,

@@ -1,0 +1,496 @@
+{
+  "renderer": "Flutter3.41.5 Linux software widget-test renderer, actual RepaintBoundary PNGs",
+  "before_source": "f20ab75ed5e0be5148771b104e9c3ac5d6b2b73c detached worktree",
+  "before_production_modified": false,
+  "before_test_harness_sha256": "3d9b1ab1c574e40c5edc190f092a0ec8aa918051fddfebb5bdb9ac4e66a18e4c",
+  "after_test_harness_sha256": "3d9b1ab1c574e40c5edc190f092a0ec8aa918051fddfebb5bdb9ac4e66a18e4c",
+  "modes": [
+    "light_en",
+    "light_ar",
+    "dark_en",
+    "dark_ar"
+  ],
+  "fixture_disclosure": "Disposable fixture records and genuine decoded test-only media; reduced motion holds Featured poster; video texture/player tested with explicit platform fake; OSM tile HTTP blocked by widget binding, gray map is not live cartography; no production Google/R2 evidence",
+  "images": [
+    {
+      "path": "after/clinic_location_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f1e516bf4b4acc71a05e5ef33ded93a4db705a7ba4354cb57bdf46e87026ee48"
+    },
+    {
+      "path": "after/clinic_location_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "66c00cbb873ebfd5b31f5c5e7e3c42ea3bdc1659dfb01f96d8ccfbd771e389e4"
+    },
+    {
+      "path": "after/clinic_location_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "5146ac53af731fd23cd40ff2d9cc12c558df4e7c772d220765054c72a150a16b"
+    },
+    {
+      "path": "after/clinic_location_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "94a5ada28af1dd17b065368d61c643e7fb914a6a5cc382a3fd653e31462e0e06"
+    },
+    {
+      "path": "after/featured_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "213891216f2afd7868f305a5ae802aba0276ac30bc484b670d0a87e18f384310"
+    },
+    {
+      "path": "after/featured_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "9dc3b6ecf511c636430ebd57f0e45a736582ad03a173ad2d27ddd96f7a16a156"
+    },
+    {
+      "path": "after/featured_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "3bd7300bbac651330c1cf5b4d7eca963db4b3aa4ee4c5daaea9ea0da52788aad"
+    },
+    {
+      "path": "after/featured_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "acc29f1c633be12c34763b8eb3ba216584a94746e6695286641654b3425f09cb"
+    },
+    {
+      "path": "after/filters_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a6bf52cb12ca24b6f31ea07885f7bf46ac76b63f8c9a4d41e3348f3515bc4b76"
+    },
+    {
+      "path": "after/filters_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "9a74221eca8cb3c66c1eb8099c6b532c0960ef00901bffe09d0babc4a7484ba2"
+    },
+    {
+      "path": "after/filters_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "b4589c9c94f4c2189bccf712f57073d2d62a4f6a4f93c21fa06013e063bd8bad"
+    },
+    {
+      "path": "after/filters_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "453b1f09fc76387d90de89d19b8b90cb41beca0d3e46221dc20291c9149e1e5f"
+    },
+    {
+      "path": "after/google_business_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "3b28903b4cb2571313b2a54fc84169d7bc7373ab0ce4214bb0bd448f6e9199de"
+    },
+    {
+      "path": "after/google_business_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a20ca9cf4bb480328b2c387aeceb865aa6ea3c7abce43195fe373c91a65adf94"
+    },
+    {
+      "path": "after/google_business_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f719fb889256ebaec1dd483a82ab0fc667f14ec936360ae01924f022a01e3383"
+    },
+    {
+      "path": "after/google_business_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "0e88d4f632dc04d62e5bcaf593ff9a60eefa4c3649f5b40162f6dc3e1b97c1d3"
+    },
+    {
+      "path": "after/google_selected_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f11c06ee5e8d03d5dd8c8de70f8cca3ca4e3f01fb1f1516e42f0bd931ea0d90f"
+    },
+    {
+      "path": "after/google_selected_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "6eb058e7d98b4ff387c3809c040d00d92806f39b2e526bc3fa64a7a29484142d"
+    },
+    {
+      "path": "after/google_selected_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "5d44e3e6d29029735be2e2fafa474fc0cc3f2945be80569fec61fdcbe0daa2c6"
+    },
+    {
+      "path": "after/google_selected_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "39953a8c8f8a63613ee2ff319d6303da6d266ceee1274145131f6071e9e2321a"
+    },
+    {
+      "path": "after/locality_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "55d8d0394856ea7b208069e7f1027c5b7701cb553ee7ab5f761e9fdde52cea1b"
+    },
+    {
+      "path": "after/locality_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "900fb71f2cd88a2395e4e05f8df0b50c56751432af8d22a13596a1382ba18ba0"
+    },
+    {
+      "path": "after/locality_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "35b028fd3fd8d8846d90cf11b62a2b9bcc186ee046621a620a4b96f0dc20b761"
+    },
+    {
+      "path": "after/locality_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f95cc3b566ca6850392e61e4d0a31a66c2ad6e6f9da562fe838fdcf43414c16d"
+    },
+    {
+      "path": "after/nearby_gps_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "8237ef16b7d913b47f885c1e28f8838775d00ada0ea707f092ed47d74c42d4d3"
+    },
+    {
+      "path": "after/nearby_gps_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "affe64fcacb4d360d6325dd158ff59c88c20068c300435fa2835165002e1c568"
+    },
+    {
+      "path": "after/nearby_gps_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "3fecb005af37761e64df84062dbd3e2a1684cd98751ae726ebafd1d8814f2a4f"
+    },
+    {
+      "path": "after/nearby_gps_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "24d13634acb083b9e5040a4e5e4b1c4ee530427486438484823d4986864a4fd1"
+    },
+    {
+      "path": "after/nearby_manual_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ee901e1eb3332b883bbd03212e01d9e1993a2c0ab91139603257815c66febe46"
+    },
+    {
+      "path": "after/nearby_manual_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "94443ce29d87508256e1245c7b080273b3138f2658c857efa389ed93735228ae"
+    },
+    {
+      "path": "after/nearby_manual_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "cf769568958e327e7b7403cfbfdde2629badc2990476bf6de29906aeab1cc3d2"
+    },
+    {
+      "path": "after/nearby_manual_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "6b28a9991481ded20d4aa766ac8b4465db63573d900b096a8db7fd8441e18c78"
+    },
+    {
+      "path": "after/patient_profile_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "40f6cda828cda5a28ed34420964df82f54ba97c4cce4b8e3fce6d315d29ea1bb"
+    },
+    {
+      "path": "after/patient_profile_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "1f7bbac34b658e121eaea094d4ed6d541df7f4d7f9e3bb6fef046f84ba96e2b4"
+    },
+    {
+      "path": "after/patient_profile_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "cd48d9a05afca31b73606e84721efe0c95f1e2135ae37f5606119d0eb15176c5"
+    },
+    {
+      "path": "after/patient_profile_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "18870f6545d0f79b7ce8a67ae9f0c481b9bfe32b63bdf176c4278fb8bcb5f730"
+    },
+    {
+      "path": "before/clinic_location_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "d9787692fb5fcaa1ee94d3c5f6d8d72720d57be387fc15d9006588e39a6d84e3"
+    },
+    {
+      "path": "before/clinic_location_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "4404e3659b5759d671e00b0d113d32f94fc44f720e7f45d6fdd52a3b8cb380ad"
+    },
+    {
+      "path": "before/clinic_location_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "08de9d6dadb7c9fb9783c04c1bd8afa7067a744f5341e30c2132cc656315b21a"
+    },
+    {
+      "path": "before/clinic_location_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "252c0101a04fa63048ef779eea3115f07084a165facfe6c5cb06b3e2e8ef6510"
+    },
+    {
+      "path": "before/featured_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "4d0195348f0c8d4fe217fbb811d46e34efeeba73500747409f111e562aee5b18"
+    },
+    {
+      "path": "before/featured_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "1249f741feff533e36901c93d777fe57d042b7fee1ab0a2752702adc1be1e3e1"
+    },
+    {
+      "path": "before/featured_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "aa77cd7c307c0cc0e53e39f53de81cfa399c24ee0d618c3df20e95dd8b0a2a36"
+    },
+    {
+      "path": "before/featured_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "50ba9523c6bc9fe72e20971a54ec03339c5a6df7d0c0a4b3b6437f8d15fec9ad"
+    },
+    {
+      "path": "before/filters_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "00b7acc3dcdf9a8a3abd233d4db515096d0c66017f29c337044c342c55a6a509"
+    },
+    {
+      "path": "before/filters_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "33fdbb6b946c5a7a1d0bb767bad5c2a6d608ac105be0f704a855a3f256a3d1b7"
+    },
+    {
+      "path": "before/filters_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "7af96aacbaa9467328aaf7e515c56e57a467739912c7661906f8cd3adfb2e4cf"
+    },
+    {
+      "path": "before/filters_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "28d533fc6360ee491f10ee56bd31801cdf52b72388492ce8212ccb1170cc1c22"
+    },
+    {
+      "path": "before/google_business_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "3b28903b4cb2571313b2a54fc84169d7bc7373ab0ce4214bb0bd448f6e9199de"
+    },
+    {
+      "path": "before/google_business_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a20ca9cf4bb480328b2c387aeceb865aa6ea3c7abce43195fe373c91a65adf94"
+    },
+    {
+      "path": "before/google_business_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f719fb889256ebaec1dd483a82ab0fc667f14ec936360ae01924f022a01e3383"
+    },
+    {
+      "path": "before/google_business_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "0e88d4f632dc04d62e5bcaf593ff9a60eefa4c3649f5b40162f6dc3e1b97c1d3"
+    },
+    {
+      "path": "before/google_selected_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "e325c499abf9a1b93c9aafb9206e8a21fb5d4976d0b640fd363a5120bbff9b41"
+    },
+    {
+      "path": "before/google_selected_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "b5542e6aa8c26651f28c960cd6d2b35f4d6b0df292e3cd2d402aac7208ced8b5"
+    },
+    {
+      "path": "before/google_selected_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "686f207d366a18dd8374db5350a1d0839fbe9bd3da059e756f09247ea2dac22b"
+    },
+    {
+      "path": "before/google_selected_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "26534aac8a35f1afb2ec9f086e3ff3bb112e25e3d6eb2036a7d934eebf38a467"
+    },
+    {
+      "path": "before/locality_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a7ad7a917b54d537004d5bc6ccc4688cbc3c6db4aefc190dca61dd90cf2470f7"
+    },
+    {
+      "path": "before/locality_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "5d2d3ec8ee04892e1a9434ebcef5c42d10852b34ab383003def5e4e03d4c2606"
+    },
+    {
+      "path": "before/locality_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "38f81200f5a7ed5039b4ea1f29a65fc45360f4e18b83c1b80e105c81c71068db"
+    },
+    {
+      "path": "before/locality_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "44c8886af7a296cd4a992dd2fddc58c559cece42fc66cba5a2a04bcb86f30174"
+    },
+    {
+      "path": "before/nearby_gps_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "461983633d8bb971ed0d20a003981ea7f0cc1c040286fa4ef616fb59fb1825e8"
+    },
+    {
+      "path": "before/nearby_gps_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "d5b8c9ccba26ccbf635670b738b89c9869360b9efbe4da7a5c44f0bf85014157"
+    },
+    {
+      "path": "before/nearby_gps_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "f2896d43e77d7086d280f965f5e8cc89d1dc1f3ad1f534159f10374df0545eed"
+    },
+    {
+      "path": "before/nearby_gps_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "25ef53283549e71285a137693a5d0842ed64e2706948da66a8c3e74d1f74f4c4"
+    },
+    {
+      "path": "before/nearby_manual_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "bb0f3f4ef3e938723cf2b6fb59426ee72762ad4cd1b44e97558a3ffe357395b8"
+    },
+    {
+      "path": "before/nearby_manual_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "a2da09515b7f36223e8be67438264caec5fc6b609969eca7f23af1fc821aaf81"
+    },
+    {
+      "path": "before/nearby_manual_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "48b9ba0b48cc0056795187bc4047585c92740c95714a6fd08423c8474944cd92"
+    },
+    {
+      "path": "before/nearby_manual_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "c63f28f400e9197a0d1b1e7f850fb236552a4f73c53ead7662c96ee87843a859"
+    },
+    {
+      "path": "before/patient_profile_dark_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "6b679b563fee0431083db38c38cb095689293a10f6c05c9314970df9f340552b"
+    },
+    {
+      "path": "before/patient_profile_dark_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ac709c94fe32140e23ae795dfca9d98c8f93f57561fbe61219f661522df783db"
+    },
+    {
+      "path": "before/patient_profile_light_ar.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "ab97df8f013caa0fbb8f4d458fa1b9a29b68bbcb8cc0c5789cf7c461ab6ddd89"
+    },
+    {
+      "path": "before/patient_profile_light_en.png",
+      "width": 430,
+      "height": 1000,
+      "sha256": "1b209ac818cecabefeab791edaa20b9632333a4c97953605d2b96da31dd5044e"
+    },
+    {
+      "path": "comparison_clinic_location_light_en.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "90405687a22c4756f8ca6a5e17f04b95aabc95c40338107feba3fee9e083ebb9"
+    },
+    {
+      "path": "comparison_featured_light_en.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "b8050a658da510520f6a7b6eb7e44d01ce222a6e2b2358a89bbab4d354ca71f8"
+    },
+    {
+      "path": "comparison_filters_dark_en.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "5e2436931c84298af3b13a1209be0467efe6ff26ccfbf6651be28249fb71928a"
+    },
+    {
+      "path": "comparison_google_selected_light_ar.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "79f97ea1fff95b77725e56e07e1437257dd294cc9b5388be5ff738de1875710e"
+    },
+    {
+      "path": "comparison_locality_dark_ar.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "435713a7cb5ac8b19556938454b6b15cdd03fe765ae461e4b83c535e850aa1fb"
+    },
+    {
+      "path": "comparison_nearby_gps_light_en.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "5cd4a8a865007cd94bf20e80eb27e0f1709e689be38ed37b719de07b9cc79a46"
+    },
+    {
+      "path": "comparison_nearby_manual_dark_ar.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "de5ad61282e131e7728cf27f9edd35de674124b85d9b9f88f347a4443855ef54"
+    },
+    {
+      "path": "comparison_patient_profile_dark_ar.png",
+      "width": 880,
+      "height": 1050,
+      "sha256": "c48739be2ef3b3c1895492b8997dc1ed61cc29db7ec617dc47141f9c51a9d83f"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "verified_code_commit": "75a7e199f7df959d254bf0b4401373a9da7447f9",
+  "workflow_run": 39955046873,
+  "job": 120418681697,
+  "xcode": "26.2",
+  "xcode_build": "17C52",
+  "ios_sdk": "26.2",
+  "runner_app_mb": 33.0,
+  "codesigned": false,
+  "hosted_xctest_passed": 2,
+  "hosted_xctest_failed": 0,
+  "runner_bundle_id": "com.aestheticway.aestheticWay",
+  "runner_min_os": "13.0",
+  "app_framework_min_os": "13.0",
+  "device_families": [
+    1,
+    2
+  ],
+  "packaged_privacy_manifests": [
+    "build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/image_picker_ios.framework/image_picker_ios_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/video_player_avfoundation.framework/video_player_avfoundation_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/Flutter.framework/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/url_launcher_ios.framework/url_launcher_ios_privacy.bundle/PrivacyInfo.xcprivacy",
+    "build/ios/iphoneos/Runner.app/Frameworks/flutter_secure_storage.framework/flutter_secure_storage.bundle/PrivacyInfo.xcprivacy"
+  ],
+  "signed_ipa_or_physical_device_verified": false
+}
