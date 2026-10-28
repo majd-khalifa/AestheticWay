@@ -8,6 +8,9 @@ on:
       - 'pubspec.*'
       - 'assets/fonts/**'
       - 'tool/*public_clinic*.ps1'
+      - 'tool/audit_*contracts.py'
+      - 'tool/isolated_django_audit.py'
+      - 'tool/tests/**'
       - '.github/workflows/flutter-visual-regressions.yml'
 
 permissions:
@@ -36,6 +39,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Offline audit-storage isolation regressions
+        run: |
+          python -m pip install 'Django==5.2.4'
+          python -m unittest discover -s tool/tests -v
       - name: Record native renderer provenance
         run: |
           flutter --version --machine > visual-flutter-version.json

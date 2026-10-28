@@ -80,6 +80,7 @@ jobs:
     timeout-minutes: 40
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+      BUNDLE_FROZEN: 'true'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -100,11 +101,18 @@ jobs:
           ruby --version
           gem install bundler --version 4.0.20 --no-document
           bundle _4.0.20_ install
-          bundle _4.0.20_ exec pod install
-          # Public dependency evidence, emitted by CocoaPods on this macOS host.
-          ruby -rbase64 -e 'puts "AW_COCOAPODS_LOCK_BASE64=#{Base64.strict_encode64(File.binread("Podfile.lock"))}"'
+          bundle _4.0.20_ exec pod install --deployment
           cp Podfile.lock ../release-evidence/Podfile.lock
           cp Gemfile.lock ../release-evidence/Gemfile.lock
+          cd ..
+          git diff --exit-code -- ios/Podfile.lock ios/Gemfile.lock
+          ruby -rjson -ryaml -e '
+            plugins = JSON.parse(File.read(".flutter-plugins-dependencies")).fetch("plugins").fetch("ios")
+            expected = ["Flutter"] + plugins.select { |p| p.fetch("native_build", true) }.map { |p| p.fetch("name") }
+            actual = YAML.load_file("ios/Podfile.lock").fetch("DEPENDENCIES").map { |p| p.split.first }
+            abort "Committed Pods do not match Flutter native plugins" unless actual.sort == expected.sort
+            puts "Committed Pods match all #{expected.length} Flutter/native dependencies"
+          '
       - name: Actual unsigned iOS Release device compilation
         run: |
           flutter build ios --release --no-codesign
@@ -118,6 +126,11 @@ jobs:
         timeout-minutes: 12
         run: |
           python3 tool/run_ios_hosted_tests.py
+      - name: Verify native locks remain unchanged after build and tests
+        run: |
+          git diff --exit-code -- ios/Podfile.lock ios/Gemfile.lock
+          cmp ios/Podfile.lock ios/Pods/Manifest.lock
+          shasum -a 256 ios/Podfile.lock ios/Gemfile.lock > release-evidence/committed-lock-sha256.txt
       - name: Upload native build/test evidence, no signing material
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
