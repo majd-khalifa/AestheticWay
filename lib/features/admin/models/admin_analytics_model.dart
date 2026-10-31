@@ -1,5 +1,16 @@
 import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 
+int? _count(dynamic value) {
+  final parsed = value is int ? value : int.tryParse('$value');
+  return parsed != null && parsed >= 0 ? parsed : null;
+}
+
+class AdminDailyEventCount {
+  const AdminDailyEventCount(this.date, this.count);
+  final String date;
+  final int? count;
+}
+
 /// Clinic engagement breakdown entry in analytics
 class AdminClinicEngagementEntry {
   final String clinicId;
@@ -7,6 +18,7 @@ class AdminClinicEngagementEntry {
   final String? localizedNameAr;
   final bool hasTier;
   final int eventsCount;
+  final bool hasEventCount;
   final int views;
   final int whatsappTaps;
   final int callTaps;
@@ -21,6 +33,7 @@ class AdminClinicEngagementEntry {
     this.localizedNameAr,
     this.hasTier = false,
     this.eventsCount = 0,
+    this.hasEventCount = true,
     this.views = 0,
     this.whatsappTaps = 0,
     this.callTaps = 0,
@@ -58,10 +71,9 @@ class AdminClinicEngagementEntry {
       hasTier: json['tier'] != null || json['subscription_tier'] != null,
       clinicName:
           json['clinic_name']?.toString() ?? json['name']?.toString() ?? '',
-      eventsCount:
-          (json['events_count'] as num?)?.toInt() ??
-          (json['event_count'] as num?)?.toInt() ??
-          0,
+      eventsCount: _count(json['events_count'] ?? json['event_count']) ?? 0,
+      hasEventCount:
+          _count(json['events_count'] ?? json['event_count']) != null,
       views:
           (json['views'] as num?)?.toInt() ??
           (json['app_views'] as num?)?.toInt() ??
@@ -81,6 +93,15 @@ class AdminClinicEngagementEntry {
 
 /// Platform-wide analytics metrics model for Super Admin
 class AdminAnalyticsModel {
+  static const metricKeys = {
+    'total_events',
+    'app_opens',
+    'clinic_views',
+    'whatsapp_taps',
+    'call_taps',
+    'maps_taps',
+    'lead_submissions',
+  };
   final String? dateFrom;
   final String? dateTo;
   final int totalEvents;
@@ -91,6 +112,22 @@ class AdminAnalyticsModel {
   final int mapsTaps;
   final int leadSubmissions;
   final List<AdminClinicEngagementEntry> clinicEngagement;
+  final Set<String> availableMetrics;
+  final List<AdminDailyEventCount> dailyTrends;
+
+  /// Null means absent/invalid, never a verified zero.
+  int? recordedCount(String key) => !availableMetrics.contains(key)
+      ? null
+      : switch (key) {
+          'total_events' => totalEvents,
+          'app_opens' => appOpens,
+          'clinic_views' => clinicViews,
+          'whatsapp_taps' => whatsappTaps,
+          'call_taps' => callTaps,
+          'maps_taps' => mapsTaps,
+          'lead_submissions' => leadSubmissions,
+          _ => null,
+        };
 
   const AdminAnalyticsModel({
     this.dateFrom,
@@ -103,6 +140,8 @@ class AdminAnalyticsModel {
     this.mapsTaps = 0,
     this.leadSubmissions = 0,
     this.clinicEngagement = const [],
+    this.availableMetrics = metricKeys,
+    this.dailyTrends = const [],
   });
 
   factory AdminAnalyticsModel.fromJson(Map<String, dynamic> json) {
@@ -117,14 +156,23 @@ class AdminAnalyticsModel {
     return AdminAnalyticsModel(
       dateFrom: json['date_from']?.toString(),
       dateTo: json['date_to']?.toString(),
-      totalEvents: (json['total_events'] as num?)?.toInt() ?? 0,
-      appOpens: (json['app_opens'] as num?)?.toInt() ?? 0,
-      clinicViews: (json['clinic_views'] as num?)?.toInt() ?? 0,
-      whatsappTaps: (json['whatsapp_taps'] as num?)?.toInt() ?? 0,
-      callTaps: (json['call_taps'] as num?)?.toInt() ?? 0,
-      mapsTaps: (json['maps_taps'] as num?)?.toInt() ?? 0,
-      leadSubmissions: (json['lead_submissions'] as num?)?.toInt() ?? 0,
+      totalEvents: _count(json['total_events']) ?? 0,
+      appOpens: _count(json['app_opens']) ?? 0,
+      clinicViews: _count(json['clinic_views']) ?? 0,
+      whatsappTaps: _count(json['whatsapp_taps']) ?? 0,
+      callTaps: _count(json['call_taps']) ?? 0,
+      mapsTaps: _count(json['maps_taps']) ?? 0,
+      leadSubmissions: _count(json['lead_submissions']) ?? 0,
       clinicEngagement: parsedEngagement,
+      availableMetrics: Set.unmodifiable(
+        metricKeys.where((key) => _count(json[key]) != null),
+      ),
+      dailyTrends: List.unmodifiable([
+        if (json['daily_trends'] is List)
+          for (final row in json['daily_trends'])
+            if (row is Map && row['date'] is String)
+              AdminDailyEventCount(row['date'], _count(row['total_events'])),
+      ]),
     );
   }
 }

@@ -93,6 +93,7 @@ class AdminClinicModel {
   final int productsCount;
   final int articlesCount;
   final int leadsCount;
+  final bool hasLeadCount;
   final List<AdminClinicBranchModel> branches;
   final List<AdminReviewMedia> galleryAssets;
   final List<AdminReviewPractitioner> practitioners;
@@ -142,6 +143,7 @@ class AdminClinicModel {
     this.productsCount = 0,
     this.articlesCount = 0,
     this.leadsCount = 0,
+    this.hasLeadCount = true,
     this.branches = const [],
     this.galleryAssets = const [],
     this.practitioners = const [],
@@ -288,6 +290,8 @@ class AdminClinicModel {
       productsCount: (json['products_count'] as num?)?.toInt() ?? 0,
       articlesCount: (json['articles_count'] as num?)?.toInt() ?? 0,
       leadsCount: (json['leads_count'] as num?)?.toInt() ?? 0,
+      hasLeadCount:
+          json['leads_count'] is int && (json['leads_count'] as int) >= 0,
       branches: parsedBranches,
       hasGalleryProjection:
           json['gallery_assets'] is List || json['gallery_images'] is List,
@@ -378,6 +382,7 @@ class AdminClinicModel {
       productsCount: productsCount,
       articlesCount: articlesCount,
       leadsCount: leadsCount,
+      hasLeadCount: hasLeadCount,
       branches: branches,
       galleryAssets: galleryAssets,
       practitioners: practitioners,

@@ -1,0 +1,165 @@
+{
+  "backend_commit_stamp": "52666c1711469ec8a3689cf54f93c1c5fa963e6e",
+  "source_tree_sha256": "c4358997205f608b350169e7b7985187108918fd30eb8868b68063cf93a792d4",
+  "source_files_unchanged": 413,
+  "evidence_scope": "SQLite, temporary local media, network denied, synthetic fixtures; no production evidence",
+  "records": [
+    {
+      "case": "seven_lead_only_shape",
+      "http": 200,
+      "metrics": {
+        "total_events": 7,
+        "app_opens": 0,
+        "clinic_views": 0,
+        "whatsapp_taps": 0,
+        "call_taps": 0,
+        "maps_taps": 0,
+        "lead_submissions": 7
+      },
+      "scope": "synthetic records, not device or live database evidence"
+    },
+    {
+      "case": "real_lead_create",
+      "http": 201,
+      "saved_leads": 8,
+      "server_lead_events": 8
+    },
+    {
+      "case": "anonymous_duplicate_forged_lead_events",
+      "http": [
+        201,
+        201
+      ],
+      "duplicate_rows": 2,
+      "has_event_id_ack": false,
+      "sensitive_metadata_accepted": true
+    },
+    {
+      "case": "raw_events_diverge_from_saved_leads",
+      "total_events": 10,
+      "saved_leads": 8
+    },
+    {
+      "case": "analytics_clinic_and_page_filters_ignored",
+      "same_response": true,
+      "returned_clinics": 10,
+      "row_fields": [
+        "clinic_id",
+        "clinic_name",
+        "events_count"
+      ]
+    },
+    {
+      "case": "admin_directory_pagination",
+      "http": 200,
+      "count": 14,
+      "page2_rows": 2
+    },
+    {
+      "case": "admin_read_role_matrix",
+      "role": "anonymous",
+      "statuses": {
+        "dashboard/": 401,
+        "clinics/": 401,
+        "leads/": 401,
+        "offers/": 401,
+        "products/": 401,
+        "articles/": 401,
+        "analytics/": 401,
+        "analytics/referrals/": 401,
+        "settings/": 401,
+        "audit/": 401,
+        "treatment-categories/": 401,
+        "brand-product-categories/": 401,
+        "category-requests/": 401
+      }
+    },
+    {
+      "case": "admin_read_role_matrix",
+      "role": "patient",
+      "statuses": {
+        "dashboard/": 403,
+        "clinics/": 403,
+        "leads/": 403,
+        "offers/": 403,
+        "products/": 403,
+        "articles/": 403,
+        "analytics/": 403,
+        "analytics/referrals/": 403,
+        "settings/": 403,
+        "audit/": 403,
+        "treatment-categories/": 403,
+        "brand-product-categories/": 403,
+        "category-requests/": 403
+      }
+    },
+    {
+      "case": "admin_read_role_matrix",
+      "role": "clinic_admin",
+      "statuses": {
+        "dashboard/": 403,
+        "clinics/": 403,
+        "leads/": 403,
+        "offers/": 403,
+        "products/": 403,
+        "articles/": 403,
+        "analytics/": 403,
+        "analytics/referrals/": 403,
+        "settings/": 403,
+        "audit/": 403,
+        "treatment-categories/": 403,
+        "brand-product-categories/": 403,
+        "category-requests/": 403
+      }
+    },
+    {
+      "case": "admin_read_role_matrix",
+      "role": "super_admin",
+      "statuses": {
+        "dashboard/": 200,
+        "clinics/": 200,
+        "leads/": 200,
+        "offers/": 200,
+        "products/": 200,
+        "articles/": 200,
+        "analytics/": 200,
+        "analytics/referrals/": 200,
+        "settings/": 200,
+        "audit/": 200,
+        "treatment-categories/": 200,
+        "brand-product-categories/": 200,
+        "category-requests/": 200
+      }
+    },
+    {
+      "case": "inclusive_dubai_date_bounds",
+      "maps_inside": 2,
+      "date_from": "2026-09-30",
+      "date_to": "2026-10-30",
+      "configured_timezone": "Asia/Dubai"
+    },
+    {
+      "case": "nullable_platform_rollup_not_unique",
+      "duplicate_rows": 2,
+      "rerun_error": "MultipleObjectsReturned"
+    },
+    {
+      "case": "deletion_same_six_hex_prefix",
+      "fixture_index": 0,
+      "request_http": 200,
+      "confirm_http": 200,
+      "inactive": true,
+      "stored_phone_length": 11,
+      "schema_phone_max_length": 20
+    },
+    {
+      "case": "deletion_same_six_hex_prefix",
+      "fixture_index": 1,
+      "request_http": 200,
+      "confirm_http": 500,
+      "inactive": false,
+      "stored_phone_length": 13,
+      "schema_phone_max_length": 20
+    }
+  ]
+}
