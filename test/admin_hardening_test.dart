@@ -165,6 +165,8 @@ class _Repository implements AdminRepository {
     String? status,
     String? clinicId,
     String? search,
+    String? dateFrom,
+    String? dateTo,
   }) async => [_lead()];
   @override
   Future<AdminLeadModel> getLeadDetail(String id) async => _lead();
@@ -510,7 +512,7 @@ void main() {
     },
   );
   test(
-    'admin serializers missing status stay unknown; filtered status is reliable and search avoids broken server fields',
+    'admin serializers missing status stay unknown; filtered status is reliable and searches reach supported server fields',
     () async {
       final queries = <String, Map<String, dynamic>>{};
       final api = FakeApiClient(
@@ -545,8 +547,8 @@ void main() {
       );
       await repo.getProducts(page: 2, search: 'Brand');
       await repo.getArticles(search: 'hello');
-      expect(queries[ApiConfig.adminOffers]!.containsKey('search'), isFalse);
-      expect(queries[ApiConfig.adminArticles]!.containsKey('search'), isFalse);
+      expect(queries[ApiConfig.adminOffers]!['search'], 'hello');
+      expect(queries[ApiConfig.adminArticles]!['search'], 'hello');
       expect(queries[ApiConfig.adminProducts]!['search'], 'Brand');
       expect(queries[ApiConfig.adminProducts]!['page'], 2);
       expect(queries[ApiConfig.adminProducts]!['page_size'], 20);

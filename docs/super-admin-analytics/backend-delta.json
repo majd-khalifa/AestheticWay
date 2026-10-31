@@ -1,0 +1,12 @@
+{
+  "added": [],
+  "removed": [],
+  "changed": [
+    "apps/accounts/services/account_deletion.py",
+    "apps/accounts/tests/test_account_deletion.py",
+    "config/settings/production.py",
+    "config/settings/testing.py",
+    "conftest.py",
+    "pytest.ini"
+  ]
+}

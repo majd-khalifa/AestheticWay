@@ -78,8 +78,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   'لوحة القيادة والمتابعة المركزية',
                 ),
                 subtitle: adminText(
-                  'AESTHETIC WAY · Platform supervision',
-                  'AESTHETIC WAY · متابعة أداء المنصة',
+                  'All-time operational totals · account counts are not active usage',
+                  'إجماليات التشغيل طوال المدة · أعداد الحسابات ليست استخداماً نشطاً',
                 ),
               ),
               if (_service.isLoading && !_service.overviewLoaded)
@@ -181,40 +181,59 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   children: [
                     AdminMetricCard(
                       label: LocaleService().tr('admin_total_events'),
-                      value: adminNumber(d.totalAnalyticsEvents),
+                      value: d.hasMetric('total_analytics_events')
+                          ? adminNumber(d.totalAnalyticsEvents)
+                          : '—',
                       icon: Icons.insights_outlined,
                     ),
                     AdminMetricCard(
                       label: LocaleService().tr('admin_active_clinics'),
-                      value: adminNumber(d.activeClinics),
+                      value: d.hasMetric('active_clinics')
+                          ? adminNumber(d.activeClinics)
+                          : '—',
                       caption: adminText(
-                        '${adminNumber(d.totalClinics)} clinics registered',
-                        '${adminNumber(d.totalClinics)} عيادة مسجلة',
+                        '${d.hasMetric('total_clinics') ? adminNumber(d.totalClinics) : '—'} clinic accounts registered',
+                        '${d.hasMetric('total_clinics') ? adminNumber(d.totalClinics) : '—'} حساب عيادة مسجل',
                       ),
                       icon: Icons.apartment_outlined,
                     ),
                     AdminMetricCard(
                       label: LocaleService().tr('admin_total_leads'),
-                      value: adminNumber(d.totalLeads),
-                      caption: adminText(
-                        '${d.closureRate.toStringAsFixed(1)}% closed',
-                        '${d.closureRate.toStringAsFixed(1)}٪ طلبات مغلقة',
-                      ),
+                      value: d.hasMetric('total_leads')
+                          ? adminNumber(d.totalLeads)
+                          : '—',
+                      caption:
+                          !d.hasMetric('total_leads') ||
+                              !d.leadsByStatus.containsKey('closed')
+                          ? null
+                          : adminText(
+                              '${d.closureRate.toStringAsFixed(1)}% closed',
+                              '${d.closureRate.toStringAsFixed(1)}٪ طلبات مغلقة',
+                            ),
                       icon: Icons.mark_email_read_outlined,
                     ),
                     AdminMetricCard(
                       label: LocaleService().tr('admin_contacted_leads'),
-                      value: adminNumber(d.contactedLeads),
+                      value: d.leadsByStatus.containsKey('contacted')
+                          ? adminNumber(d.contactedLeads)
+                          : '—',
                       icon: Icons.support_agent_outlined,
                     ),
                     AdminMetricCard(
-                      label: LocaleService().tr('admin_registered_patients'),
-                      value: adminNumber(d.totalPatients),
+                      label: adminText(
+                        'Active patient accounts',
+                        'حسابات المرضى المفعلة',
+                      ),
+                      value: d.hasMetric('total_patients')
+                          ? adminNumber(d.totalPatients)
+                          : '—',
                       icon: Icons.people_outline,
                     ),
                     AdminMetricCard(
                       label: adminText('Total Offers', 'إجمالي العروض'),
-                      value: adminNumber(d.totalOffers),
+                      value: d.hasMetric('total_offers')
+                          ? adminNumber(d.totalOffers)
+                          : '—',
                       icon: Icons.local_offer_outlined,
                     ),
                   ],

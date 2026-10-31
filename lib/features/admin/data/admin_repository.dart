@@ -13,6 +13,7 @@ import '../../offers/models/offer_model.dart';
 import '../../products/models/product_model.dart';
 import '../../articles/models/article_model.dart';
 import '../models/admin_analytics_model.dart';
+import '../models/admin_reporting_period.dart';
 import '../models/admin_clinic_model.dart';
 import '../models/admin_dashboard_model.dart';
 import '../models/admin_lead_model.dart';
@@ -355,8 +356,14 @@ class AdminRepository {
     String? status,
     String? clinicId,
     String? search,
+    String? dateFrom,
+    String? dateTo,
   }) async {
-    final queryParams = <String, dynamic>{};
+    AdminReportingPeriod.validate(dateFrom, dateTo);
+    final queryParams = <String, dynamic>{
+      'date_from': ?dateFrom,
+      'date_to': ?dateTo,
+    };
     if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
       queryParams['status'] = status.toLowerCase();
     }
@@ -405,8 +412,9 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
-    // The supplied server searches nonexistent name fields for offers/articles.
-    // These two directories use explicitly labeled loaded-page search until Ali fixes it.
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
     queryParams['page'] = page;
     queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
@@ -536,8 +544,9 @@ class AdminRepository {
       queryParams['clinic'] = clinicId;
     }
 
-    // The supplied server searches nonexistent name fields for offers/articles.
-    // These two directories use explicitly labeled loaded-page search until Ali fixes it.
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
     queryParams['page'] = page;
     queryParams['page_size'] = catalogPageSize;
     final response = await _api.get(
@@ -590,6 +599,7 @@ class AdminRepository {
     String? dateFrom,
     String? dateTo,
   }) async {
+    AdminReportingPeriod.validate(dateFrom, dateTo);
     final queryParams = <String, dynamic>{};
     if (dateFrom != null && dateFrom.isNotEmpty) {
       queryParams['date_from'] = dateFrom;
@@ -601,7 +611,16 @@ class AdminRepository {
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
 
-    return AdminAnalyticsModel.fromJson(_object(response.data));
+    final result = AdminAnalyticsModel.fromJson(_object(response.data));
+    if ((dateFrom != null && result.dateFrom != dateFrom) ||
+        (dateTo != null && result.dateTo != dateTo)) {
+      throw ApiException(
+        message: LocaleService().isArabic
+            ? 'لم يؤكد الخادم فترة التقرير. حدّث البيانات قبل استخدام الأرقام.'
+            : 'The server did not confirm the reporting dates. Refresh before using these figures.',
+      );
+    }
+    return result;
   }
 
   Future<AdminReferralAnalyticsModel> getReferralAnalytics() async {

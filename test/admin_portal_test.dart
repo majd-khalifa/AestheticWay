@@ -148,7 +148,7 @@ void main() {
         expect(find.text('العيادات النشطة'), findsOneWidget);
         expect(find.text('إجمالي طلبات الاستشارة'), findsOneWidget);
         expect(find.text('طلبات تم التواصل معها'), findsOneWidget);
-        expect(find.text('المرضى المسجلين'), findsOneWidget);
+        expect(find.text('حسابات المرضى المفعلة'), findsOneWidget);
         expect(find.text('إجمالي العروض'), findsOneWidget);
         expect(find.text('سجل النشاط المباشر في المنصة'), findsOneWidget);
       },
@@ -205,7 +205,7 @@ void main() {
     });
 
     testWidgets(
-      'AdminAnalyticsScreen renders detailed clinic engagement breakdown',
+      'AdminAnalyticsScreen labels recorded activity and collection limitations',
       (WidgetTester tester) async {
         await tester.binding.setSurfaceSize(const Size(800, 2000));
         await tester.pumpWidget(
@@ -215,10 +215,7 @@ void main() {
           ),
         );
 
-        expect(
-          find.text('التحليلات ومعدلات تفاعل المرضى مع العيادات'),
-          findsOneWidget,
-        );
+        expect(find.text('سجلات نشاط المنصة'), findsOneWidget);
         expect(find.text('مشاهدات العيادات'), findsWidgets);
         expect(find.text('واتساب'), findsWidgets);
         expect(find.text('اتصال'), findsWidgets);
