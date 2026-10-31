@@ -1,5 +1,7 @@
 /// Admin Dashboard Aggregates Model
 class AdminDashboardModel {
+  final Set<String>? availableMetrics;
+  bool hasMetric(String key) => availableMetrics?.contains(key) ?? true;
   final int totalClinics;
   final int activeClinics;
   final int suspendedClinics;
@@ -23,6 +25,7 @@ class AdminDashboardModel {
   final int featuredClinics;
 
   const AdminDashboardModel({
+    this.availableMetrics,
     this.totalClinics = 0,
     this.activeClinics = 0,
     this.suspendedClinics = 0,
@@ -65,6 +68,14 @@ class AdminDashboardModel {
     }
 
     return AdminDashboardModel(
+      availableMetrics: Set.unmodifiable(
+        json.keys.where(
+          (key) =>
+              json[key] is num &&
+              (json[key] as num).isFinite &&
+              (json[key] as num) >= 0,
+        ),
+      ),
       totalClinics: (json['total_clinics'] as num?)?.toInt() ?? 0,
       activeClinics: (json['active_clinics'] as num?)?.toInt() ?? 0,
       suspendedClinics: (json['suspended_clinics'] as num?)?.toInt() ?? 0,

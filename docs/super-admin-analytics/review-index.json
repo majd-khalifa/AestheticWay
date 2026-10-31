@@ -1,0 +1,1490 @@
+[
+  {
+    "file": "lib/features/admin/data/admin_repository.dart",
+    "lines": 627,
+    "methods": [
+      {
+        "line": 22,
+        "declaration": "class AdminRepository {"
+      },
+      {
+        "line": 46,
+        "declaration": "Future<dynamic> _buildPayload("
+      },
+      {
+        "line": 101,
+        "declaration": "Future<AdminDashboardModel> getDashboard() async {"
+      },
+      {
+        "line": 102,
+        "declaration": "final response = await _api.get(ApiConfig.adminDashboard);"
+      },
+      {
+        "line": 110,
+        "declaration": "Future<List<AdminClinicModel>> getClinics({"
+      },
+      {
+        "line": 142,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 164,
+        "declaration": "Future<AdminClinicModel> getClinicDetail(String id) async {"
+      },
+      {
+        "line": 165,
+        "declaration": "final response = await _api.get(ApiConfig.adminClinicDetail(id));"
+      },
+      {
+        "line": 169,
+        "declaration": "Future<Map<String, dynamic>> suspendClinic("
+      },
+      {
+        "line": 173,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 180,
+        "declaration": "Future<Map<String, dynamic>> activateClinic("
+      },
+      {
+        "line": 184,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 193,
+        "declaration": "Future<AdminClinicModel> approveClinicProfile(String id) async {"
+      },
+      {
+        "line": 212,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 240,
+        "declaration": "Future<AdminClinicModel> rejectClinicSetup(String id, String reason) async {"
+      },
+      {
+        "line": 268,
+        "declaration": "final result = await _api.post("
+      },
+      {
+        "line": 298,
+        "declaration": "Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {"
+      },
+      {
+        "line": 305,
+        "declaration": "final response = await _api.post(ApiConfig.adminClinics, data: payload);"
+      },
+      {
+        "line": 310,
+        "declaration": "Future<Map<String, dynamic>> resetClinicAdminPassword("
+      },
+      {
+        "line": 318,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 326,
+        "declaration": "Future<void> archiveClinic(String clinicId) async {"
+      },
+      {
+        "line": 327,
+        "declaration": "await _api.delete(ApiConfig.adminClinicDetail(clinicId));"
+      },
+      {
+        "line": 331,
+        "declaration": "Future<AdminClinicModel> updateClinic("
+      },
+      {
+        "line": 342,
+        "declaration": "final response = await _api.patch("
+      },
+      {
+        "line": 353,
+        "declaration": "Future<List<AdminLeadModel>> getLeads({"
+      },
+      {
+        "line": 379,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 391,
+        "declaration": "Future<AdminLeadModel> getLeadDetail(String id) async {"
+      },
+      {
+        "line": 392,
+        "declaration": "final response = await _api.get(ApiConfig.adminLeadDetail(id));"
+      },
+      {
+        "line": 400,
+        "declaration": "Future<List<OfferModel>> getOffers({"
+      },
+      {
+        "line": 419,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 431,
+        "declaration": "Future<Map<String, dynamic>> approveOffer("
+      },
+      {
+        "line": 435,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 446,
+        "declaration": "Future<Map<String, dynamic>> suspendOffer("
+      },
+      {
+        "line": 450,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 465,
+        "declaration": "Future<List<ProductModel>> getProducts({"
+      },
+      {
+        "line": 485,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 497,
+        "declaration": "Future<Map<String, dynamic>> approveProduct("
+      },
+      {
+        "line": 501,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 512,
+        "declaration": "Future<Map<String, dynamic>> suspendProduct("
+      },
+      {
+        "line": 516,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 531,
+        "declaration": "Future<List<ArticleModel>> getArticles({"
+      },
+      {
+        "line": 550,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 562,
+        "declaration": "Future<Map<String, dynamic>> approveArticle("
+      },
+      {
+        "line": 566,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 577,
+        "declaration": "Future<Map<String, dynamic>> suspendArticle("
+      },
+      {
+        "line": 581,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 596,
+        "declaration": "Future<AdminAnalyticsModel> getAnalytics({"
+      },
+      {
+        "line": 607,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 623,
+        "declaration": "Future<AdminReferralAnalyticsModel> getReferralAnalytics() async {"
+      },
+      {
+        "line": 624,
+        "declaration": "final response = await _api.get(ApiConfig.adminReferralAnalytics);"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/models/admin_analytics_model.dart",
+    "lines": 193,
+    "methods": [
+      {
+        "line": 8,
+        "declaration": "class AdminDailyEventCount {"
+      },
+      {
+        "line": 15,
+        "declaration": "class AdminClinicEngagementEntry {"
+      },
+      {
+        "line": 95,
+        "declaration": "class AdminAnalyticsModel {"
+      },
+      {
+        "line": 181,
+        "declaration": "class AdminReferralAnalyticsModel {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/models/admin_clinic_model.dart",
+    "lines": 398,
+    "methods": [
+      {
+        "line": 7,
+        "declaration": "class AdminClinicBranchModel {"
+      },
+      {
+        "line": 62,
+        "declaration": "class AdminClinicModel {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/models/admin_dashboard_model.dart",
+    "lines": 98,
+    "methods": [
+      {
+        "line": 2,
+        "declaration": "class AdminDashboardModel {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/models/admin_lead_model.dart",
+    "lines": 178,
+    "methods": [
+      {
+        "line": 4,
+        "declaration": "class AdminLeadModel {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/models/admin_reporting_period.dart",
+    "lines": 34,
+    "methods": [
+      {
+        "line": 2,
+        "declaration": "class AdminReportingPeriod {"
+      },
+      {
+        "line": 27,
+        "declaration": "static void validate(String? from, String? to) {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/models/admin_clinic_inspection.dart",
+    "lines": 83,
+    "methods": [
+      {
+        "line": 4,
+        "declaration": "class AdminReviewMedia {"
+      },
+      {
+        "line": 25,
+        "declaration": "class AdminReviewPractitioner {"
+      },
+      {
+        "line": 63,
+        "declaration": "class AdminReviewTreatment {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/services/admin_portal_service.dart",
+    "lines": 1072,
+    "methods": [
+      {
+        "line": 21,
+        "declaration": "class AdminPortalService extends ChangeNotifier {"
+      },
+      {
+        "line": 78,
+        "declaration": "void _requireManager() {"
+      },
+      {
+        "line": 87,
+        "declaration": "Future<bool> _confirmedWrite("
+      },
+      {
+        "line": 89,
+        "declaration": "Future<void> Function() action,"
+      },
+      {
+        "line": 114,
+        "declaration": "void _commitCollection(String key, VoidCallback change) {"
+      },
+      {
+        "line": 123,
+        "declaration": "void _rememberClinicMedia("
+      },
+      {
+        "line": 147,
+        "declaration": "Future<void> loadClinicDetail("
+      },
+      {
+        "line": 186,
+        "declaration": "void enableMockMode() {"
+      },
+      {
+        "line": 201,
+        "declaration": "Future<void>? _analyticsFlight;"
+      },
+      {
+        "line": 270,
+        "declaration": "Future<void> loadCollection("
+      },
+      {
+        "line": 279,
+        "declaration": "void searchCollection(String key, Map<String, dynamic> query) {"
+      },
+      {
+        "line": 283,
+        "declaration": "Future<void> loadMore(String key) =>"
+      },
+      {
+        "line": 286,
+        "declaration": "void _replaceItems<T>(List<T> target, Iterable<dynamic> values) {"
+      },
+      {
+        "line": 296,
+        "declaration": "void clearSession({bool notify = true}) {"
+      },
+      {
+        "line": 336,
+        "declaration": "void resetTestingState() => clearSession(notify: false);"
+      },
+      {
+        "line": 338,
+        "declaration": "Future<T> _inSession<T>(Future<T> future, int epoch) async {"
+      },
+      {
+        "line": 407,
+        "declaration": "Future<bool> toggleProductModeration(String id, {String notes = ''}) {"
+      },
+      {
+        "line": 418,
+        "declaration": "Future<bool> toggleArticleModeration(String id, {String notes = ''}) {"
+      },
+      {
+        "line": 430,
+        "declaration": "Future<bool> setContentStatus("
+      },
+      {
+        "line": 502,
+        "declaration": "void _populateInitialSeedData() {"
+      },
+      {
+        "line": 610,
+        "declaration": "Future<void> loadAllData({bool refresh = false}) {"
+      },
+      {
+        "line": 628,
+        "declaration": "Future<void> loadOverview({bool refresh = false}) {"
+      },
+      {
+        "line": 635,
+        "declaration": "Future<void> _loadRecentLeads({bool refresh = false}) async {"
+      },
+      {
+        "line": 668,
+        "declaration": "Future<void> _fetchOverview({bool refresh = false}) async {"
+      },
+      {
+        "line": 694,
+        "declaration": "Future<List<OfferModel>> getClinicOffersPage("
+      },
+      {
+        "line": 712,
+        "declaration": "Future<void> loadProducts({String? status, String? clinicId}) =>"
+      },
+      {
+        "line": 719,
+        "declaration": "Future<void> loadArticles({String? status, String? clinicId}) =>"
+      },
+      {
+        "line": 726,
+        "declaration": "Future<AdminLeadModel> getLeadDetail(String id) =>"
+      },
+      {
+        "line": 729,
+        "declaration": "Future<void> loadDashboard() async {"
+      },
+      {
+        "line": 743,
+        "declaration": "Future<void> loadClinics({String? status, String? tier, String? search}) =>"
+      },
+      {
+        "line": 750,
+        "declaration": "Future<void> loadLeads({String? status, String? clinicId, String? search}) =>"
+      },
+      {
+        "line": 757,
+        "declaration": "Future<void> loadOffers({String? status, String? clinicId}) => loadCollection("
+      },
+      {
+        "line": 763,
+        "declaration": "Future<void> loadAnalytics({"
+      },
+      {
+        "line": 791,
+        "declaration": "Future<void> _fetchAnalytics("
+      },
+      {
+        "line": 822,
+        "declaration": "Future<void> loadReferralAnalytics({bool refresh = false}) {"
+      },
+      {
+        "line": 853,
+        "declaration": "Future<bool> toggleClinicStatus(String id, {String reason = ''}) {"
+      },
+      {
+        "line": 891,
+        "declaration": "Future<bool> toggleOfferModeration(String id, {String notes = ''}) {"
+      },
+      {
+        "line": 918,
+        "declaration": "Future<Map<String, dynamic>> createClinic(Map<String, dynamic> data) async {"
+      },
+      {
+        "line": 971,
+        "declaration": "Future<Map<String, dynamic>> resetClinicAdminPassword("
+      },
+      {
+        "line": 1000,
+        "declaration": "Future<void> archiveClinic(String clinicId) async {"
+      },
+      {
+        "line": 1009,
+        "declaration": "Future<AdminClinicModel> updateClinic("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/services/admin_review_service.dart",
+    "lines": 130,
+    "methods": [
+      {
+        "line": 12,
+        "declaration": "class AdminReviewService extends ChangeNotifier {"
+      },
+      {
+        "line": 32,
+        "declaration": "Future<void>? _flight;"
+      },
+      {
+        "line": 35,
+        "declaration": "void _sessionChanged() {"
+      },
+      {
+        "line": 48,
+        "declaration": "void _decisionChanged() {"
+      },
+      {
+        "line": 57,
+        "declaration": "Future<void> refresh() {"
+      },
+      {
+        "line": 68,
+        "declaration": "late final Future<void> flight;"
+      },
+      {
+        "line": 107,
+        "declaration": "Future<void> _loadClinicCount(SessionSnapshot session, int generation) async {"
+      },
+      {
+        "line": 123,
+        "declaration": "void dispose() {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_analytics_screen.dart",
+    "lines": 495,
+    "methods": [
+      {
+        "line": 18,
+        "declaration": "class AdminAnalyticsScreen extends StatefulWidget {"
+      },
+      {
+        "line": 24,
+        "declaration": "class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {"
+      },
+      {
+        "line": 31,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 38,
+        "declaration": "Future<void> _load({bool refresh = false}) async {"
+      },
+      {
+        "line": 46,
+        "declaration": "Future<void> _chooseDates() async {"
+      },
+      {
+        "line": 79,
+        "declaration": "Future<void> _chooseClinic() async {"
+      },
+      {
+        "line": 132,
+        "declaration": "Widget _clinicRecords() {"
+      },
+      {
+        "line": 229,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_clinic_detail_sheet.dart",
+    "lines": 471,
+    "methods": [
+      {
+        "line": 17,
+        "declaration": "class AdminClinicDetailSheet extends StatefulWidget {"
+      },
+      {
+        "line": 24,
+        "declaration": "class _AdminClinicDetailSheetState extends State<AdminClinicDetailSheet> {"
+      },
+      {
+        "line": 31,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 36,
+        "declaration": "void _showOffers() {"
+      },
+      {
+        "line": 48,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 58,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_clinics_screen.dart",
+    "lines": 336,
+    "methods": [
+      {
+        "line": 15,
+        "declaration": "class AdminClinicsScreen extends StatefulWidget {"
+      },
+      {
+        "line": 21,
+        "declaration": "class _AdminClinicsScreenState extends State<AdminClinicsScreen> {"
+      },
+      {
+        "line": 27,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 35,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 40,
+        "declaration": "void _query() => _service.searchCollection('clinics', {"
+      },
+      {
+        "line": 44,
+        "declaration": "void _selectTier(SubscriptionTier? tier) {"
+      },
+      {
+        "line": 50,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      },
+      {
+        "line": 157,
+        "declaration": "class AdminClinicCard extends StatelessWidget {"
+      },
+      {
+        "line": 166,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 315,
+        "declaration": "class _Count extends StatelessWidget {"
+      },
+      {
+        "line": 321,
+        "declaration": "Widget build(BuildContext context) => Text.rich("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_create_clinic_dialog.dart",
+    "lines": 22,
+    "methods": [
+      {
+        "line": 6,
+        "declaration": "class AdminCreateClinicDialog extends StatelessWidget {"
+      },
+      {
+        "line": 8,
+        "declaration": "static Future<void> show(BuildContext context) => showModalBottomSheet<void>("
+      },
+      {
+        "line": 21,
+        "declaration": "Widget build(BuildContext context) => const AdminClinicEditor();"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_dashboard_screen.dart",
+    "lines": 289,
+    "methods": [
+      {
+        "line": 11,
+        "declaration": "class AdminDashboardScreen extends StatefulWidget {"
+      },
+      {
+        "line": 25,
+        "declaration": "class _AdminDashboardScreenState extends State<AdminDashboardScreen>"
+      },
+      {
+        "line": 30,
+        "declaration": "void didChangeAppLifecycleState(AppLifecycleState state) {"
+      },
+      {
+        "line": 35,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 41,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 53,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_lead_detail_screen.dart",
+    "lines": 199,
+    "methods": [
+      {
+        "line": 10,
+        "declaration": "class AdminLeadDetailScreen extends StatefulWidget {"
+      },
+      {
+        "line": 17,
+        "declaration": "class _AdminLeadDetailScreenState extends State<AdminLeadDetailScreen> {"
+      },
+      {
+        "line": 22,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 28,
+        "declaration": "Future<void> _refresh() async {"
+      },
+      {
+        "line": 52,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 163,
+        "declaration": "class _ReadOnlyField extends StatelessWidget {"
+      },
+      {
+        "line": 172,
+        "declaration": "Widget build(BuildContext context) => Padding("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_leads_screen.dart",
+    "lines": 212,
+    "methods": [
+      {
+        "line": 15,
+        "declaration": "class AdminLeadsScreen extends StatefulWidget {"
+      },
+      {
+        "line": 28,
+        "declaration": "class _AdminLeadsScreenState extends State<AdminLeadsScreen> {"
+      },
+      {
+        "line": 35,
+        "declaration": "void _sessionChanged() {"
+      },
+      {
+        "line": 48,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 76,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 83,
+        "declaration": "void _query() {"
+      },
+      {
+        "line": 91,
+        "declaration": "Future<void> _chooseClinic() async {"
+      },
+      {
+        "line": 109,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_main_nav_screen.dart",
+    "lines": 413,
+    "methods": [
+      {
+        "line": 22,
+        "declaration": "class AdminMainNavScreen extends StatefulWidget {"
+      },
+      {
+        "line": 31,
+        "declaration": "class _AdminMainNavScreenState extends State<AdminMainNavScreen> {"
+      },
+      {
+        "line": 38,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 45,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 51,
+        "declaration": "void _sessionChanged() {"
+      },
+      {
+        "line": 64,
+        "declaration": "void _onTabSelected(int index) {"
+      },
+      {
+        "line": 76,
+        "declaration": "void _handleBackPress(BuildContext context, LocaleService loc) {"
+      },
+      {
+        "line": 100,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 323,
+        "declaration": "class _AdminFloatingNavItem extends StatelessWidget {"
+      },
+      {
+        "line": 341,
+        "declaration": "Widget build(BuildContext context) {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_offers_screen.dart",
+    "lines": 630,
+    "methods": [
+      {
+        "line": 13,
+        "declaration": "class AdminOffersScreen extends StatefulWidget {"
+      },
+      {
+        "line": 19,
+        "declaration": "class _AdminOffersScreenState extends State<AdminOffersScreen> {"
+      },
+      {
+        "line": 29,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 37,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 47,
+        "declaration": "void _changeModule(int value) {"
+      },
+      {
+        "line": 58,
+        "declaration": "void _searchChanged(String value) {"
+      },
+      {
+        "line": 71,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      },
+      {
+        "line": 329,
+        "declaration": "class _Content {"
+      },
+      {
+        "line": 357,
+        "declaration": "class _ModerationCard extends StatelessWidget {"
+      },
+      {
+        "line": 360,
+        "declaration": "Future<void> _moderate(BuildContext context, String target) async {"
+      },
+      {
+        "line": 378,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 532,
+        "declaration": "class _ContentInspection extends StatelessWidget {"
+      },
+      {
+        "line": 536,
+        "declaration": "Widget build(BuildContext context) => SizedBox("
+      },
+      {
+        "line": 621,
+        "declaration": "class _BrandProductAvailability extends StatelessWidget {"
+      },
+      {
+        "line": 624,
+        "declaration": "Widget build(BuildContext context) => AdminNotice("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_settings_screen.dart",
+    "lines": 126,
+    "methods": [
+      {
+        "line": 12,
+        "declaration": "class AdminSettingsScreen extends StatelessWidget {"
+      },
+      {
+        "line": 15,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_categories_screen.dart",
+    "lines": 250,
+    "methods": [
+      {
+        "line": 16,
+        "declaration": "class AdminCategoriesScreen extends StatefulWidget {"
+      },
+      {
+        "line": 23,
+        "declaration": "class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {"
+      },
+      {
+        "line": 35,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 41,
+        "declaration": "void _changed() {"
+      },
+      {
+        "line": 47,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 53,
+        "declaration": "Future<void> _edit([CategoryModel? category]) async {"
+      },
+      {
+        "line": 79,
+        "declaration": "Future<void> _delete(CategoryModel category) async {"
+      },
+      {
+        "line": 129,
+        "declaration": "Future<void> _requests() async {"
+      },
+      {
+        "line": 146,
+        "declaration": "Widget build(BuildContext context) => ListenableBuilder("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/screens/admin_clinic_reviews_screen.dart",
+    "lines": 888,
+    "methods": [
+      {
+        "line": 30,
+        "declaration": "class AdminClinicReviewsScreen extends StatefulWidget {"
+      },
+      {
+        "line": 38,
+        "declaration": "class _AdminClinicReviewsScreenState extends State<AdminClinicReviewsScreen>"
+      },
+      {
+        "line": 51,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 58,
+        "declaration": "Future<void> _refresh() =>"
+      },
+      {
+        "line": 61,
+        "declaration": "void _changed() {"
+      },
+      {
+        "line": 67,
+        "declaration": "void didChangeAppLifecycleState(AppLifecycleState state) {"
+      },
+      {
+        "line": 72,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 80,
+        "declaration": "Widget build(BuildContext context) => Scaffold("
+      },
+      {
+        "line": 186,
+        "declaration": "class AdminClinicReviewDetail extends StatefulWidget {"
+      },
+      {
+        "line": 199,
+        "declaration": "class _AdminClinicReviewDetailState extends State<AdminClinicReviewDetail> {"
+      },
+      {
+        "line": 208,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 214,
+        "declaration": "void _changed() {"
+      },
+      {
+        "line": 223,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 228,
+        "declaration": "Future<void> _load() async {"
+      },
+      {
+        "line": 258,
+        "declaration": "Future<void> _approve() async {"
+      },
+      {
+        "line": 323,
+        "declaration": "Future<void> _reject() async {"
+      },
+      {
+        "line": 366,
+        "declaration": "Widget _field(String en, String ar, String value, {bool ltr = false}) =>"
+      },
+      {
+        "line": 393,
+        "declaration": "Widget _section(String en, String ar, IconData icon, List<Widget> children) =>"
+      },
+      {
+        "line": 426,
+        "declaration": "Widget build(BuildContext context) => PopScope("
+      },
+      {
+        "line": 741,
+        "declaration": "class _ReviewVideo extends StatefulWidget {"
+      },
+      {
+        "line": 748,
+        "declaration": "class _ReviewVideoState extends State<_ReviewVideo>"
+      },
+      {
+        "line": 754,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 760,
+        "declaration": "void didChangeAppLifecycleState(AppLifecycleState state) {"
+      },
+      {
+        "line": 765,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 771,
+        "declaration": "Future<void> _play() async {"
+      },
+      {
+        "line": 807,
+        "declaration": "Widget build(BuildContext context) => Column("
+      },
+      {
+        "line": 830,
+        "declaration": "class _ClinicRejectionDialog extends StatefulWidget {"
+      },
+      {
+        "line": 836,
+        "declaration": "class _ClinicRejectionDialogState extends State<_ClinicRejectionDialog> {"
+      },
+      {
+        "line": 839,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 845,
+        "declaration": "Widget build(BuildContext context) => AlertDialog("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/widgets/admin_password_reset_dialog.dart",
+    "lines": 134,
+    "methods": [
+      {
+        "line": 7,
+        "declaration": "class AdminPasswordResetDialog extends StatefulWidget {"
+      },
+      {
+        "line": 15,
+        "declaration": "class _AdminPasswordResetDialogState extends State<AdminPasswordResetDialog> {"
+      },
+      {
+        "line": 21,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 28,
+        "declaration": "Widget build(BuildContext context) => PopScope("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/widgets/admin_clinic_editor.dart",
+    "lines": 769,
+    "methods": [
+      {
+        "line": 17,
+        "declaration": "class AdminClinicEditor extends StatefulWidget {"
+      },
+      {
+        "line": 24,
+        "declaration": "class _AdminClinicEditorState extends State<AdminClinicEditor> {"
+      },
+      {
+        "line": 37,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 63,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 72,
+        "declaration": "void _generatePassword() {"
+      },
+      {
+        "line": 135,
+        "declaration": "Future<void> _save() async {"
+      },
+      {
+        "line": 229,
+        "declaration": "Widget _textField("
+      },
+      {
+        "line": 269,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 652,
+        "declaration": "Future<void> showAdminCredentials("
+      },
+      {
+        "line": 732,
+        "declaration": "class _TemporarySecret extends StatefulWidget {"
+      },
+      {
+        "line": 739,
+        "declaration": "class _TemporarySecretState extends State<_TemporarySecret> {"
+      },
+      {
+        "line": 742,
+        "declaration": "Widget build(BuildContext context) => Row("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/widgets/admin_components.dart",
+    "lines": 490,
+    "methods": [
+      {
+        "line": 27,
+        "declaration": "class AdminStatusBadge extends StatelessWidget {"
+      },
+      {
+        "line": 31,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 90,
+        "declaration": "class AdminNotice extends StatelessWidget {"
+      },
+      {
+        "line": 101,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 144,
+        "declaration": "class AdminSectionTitle extends StatelessWidget {"
+      },
+      {
+        "line": 150,
+        "declaration": "Widget build(BuildContext context) => Padding("
+      },
+      {
+        "line": 182,
+        "declaration": "class AdminMetricCard extends StatelessWidget {"
+      },
+      {
+        "line": 194,
+        "declaration": "Widget build(BuildContext context) => LuxuryCard("
+      },
+      {
+        "line": 238,
+        "declaration": "class AdminMetricGrid extends StatelessWidget {"
+      },
+      {
+        "line": 242,
+        "declaration": "Widget build(BuildContext context) => LayoutBuilder("
+      },
+      {
+        "line": 262,
+        "declaration": "class AdminEntityImage extends StatelessWidget {"
+      },
+      {
+        "line": 275,
+        "declaration": "Widget build(BuildContext context) => Container("
+      },
+      {
+        "line": 292,
+        "declaration": "class AdminDirectory<T> extends StatelessWidget {"
+      },
+      {
+        "line": 306,
+        "declaration": "final Widget Function(BuildContext, T) itemBuilder;"
+      },
+      {
+        "line": 307,
+        "declaration": "final Future<void> Function() onRefresh;"
+      },
+      {
+        "line": 311,
+        "declaration": "Widget build(BuildContext context) {"
+      },
+      {
+        "line": 378,
+        "declaration": "class AdminLeadCard extends StatelessWidget {"
+      },
+      {
+        "line": 383,
+        "declaration": "Widget build(BuildContext context) => LuxuryCard("
+      },
+      {
+        "line": 467,
+        "declaration": "Future<bool> confirmClinicSuspension(BuildContext context) async =>"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/admin/presentation/widgets/admin_clinic_inspection.dart",
+    "lines": 233,
+    "methods": [
+      {
+        "line": 13,
+        "declaration": "class AdminClinicInspection extends StatefulWidget {"
+      },
+      {
+        "line": 26,
+        "declaration": "class _AdminClinicInspectionState extends State<AdminClinicInspection> {"
+      },
+      {
+        "line": 30,
+        "declaration": "void initState() {"
+      },
+      {
+        "line": 35,
+        "declaration": "void _changed() {"
+      },
+      {
+        "line": 40,
+        "declaration": "void dispose() {"
+      },
+      {
+        "line": 46,
+        "declaration": "Widget more(bool show, VoidCallback action) => show"
+      },
+      {
+        "line": 58,
+        "declaration": "Widget build(BuildContext context) {"
+      }
+    ]
+  },
+  {
+    "file": "lib/features/treatments/data/category_repository.dart",
+    "lines": 112,
+    "methods": [
+      {
+        "line": 11,
+        "declaration": "class CategoryRepository {"
+      },
+      {
+        "line": 17,
+        "declaration": "Future<List<CategoryModel>> getCategories({"
+      },
+      {
+        "line": 21,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 45,
+        "declaration": "Future<CategoryModel> createCategory({"
+      },
+      {
+        "line": 49,
+        "declaration": "Future<CategoryModel> updateCategory("
+      },
+      {
+        "line": 54,
+        "declaration": "Future<void> deleteCategory(String id) async => throw writesUnavailable();"
+      },
+      {
+        "line": 57,
+        "declaration": "void _requireAdmin() {"
+      },
+      {
+        "line": 66,
+        "declaration": "Future<List<CategoryModel>> getAdminCategories({int page = 1}) async {"
+      },
+      {
+        "line": 69,
+        "declaration": "final response = await _api.get("
+      },
+      {
+        "line": 81,
+        "declaration": "Future<CategoryModel> saveAdminCategory({"
+      },
+      {
+        "line": 98,
+        "declaration": "? await _api.post(adminPath, data: payload)"
+      },
+      {
+        "line": 99,
+        "declaration": ": await _api.patch('$adminPath$id/', data: payload);"
+      },
+      {
+        "line": 106,
+        "declaration": "Future<void> deleteAdminCategory(String id) async {"
+      },
+      {
+        "line": 109,
+        "declaration": "await _api.delete('$adminPath$id/');"
+      }
+    ]
+  },
+  {
+    "file": "lib/core/auth/guest_auth_guard.dart",
+    "lines": 178,
+    "methods": [
+      {
+        "line": 11,
+        "declaration": "class AuthState extends ChangeNotifier {"
+      },
+      {
+        "line": 43,
+        "declaration": "void login({"
+      },
+      {
+        "line": 70,
+        "declaration": "void updateProfile({"
+      },
+      {
+        "line": 89,
+        "declaration": "void logout() {"
+      },
+      {
+        "line": 112,
+        "declaration": "Future<void> restoreSession({OnboardingService? onboardingService}) async {"
+      },
+      {
+        "line": 142,
+        "declaration": "void toggleFavorite(String clinicId) {"
+      },
+      {
+        "line": 154,
+        "declaration": "class GuestAuthGuard {"
+      },
+      {
+        "line": 155,
+        "declaration": "static Future<bool> requireAuth("
+      }
+    ]
+  },
+  {
+    "file": "lib/features/auth/data/auth_repository.dart",
+    "lines": 499,
+    "methods": [
+      {
+        "line": 17,
+        "declaration": "class AuthRepository {"
+      },
+      {
+        "line": 41,
+        "declaration": "void _check((int, int) stamp) {"
+      },
+      {
+        "line": 45,
+        "declaration": "void _validateUser(UserModel user) {"
+      },
+      {
+        "line": 59,
+        "declaration": "Future<void> _storeUser(UserModel user, (int, int) stamp) async {"
+      },
+      {
+        "line": 68,
+        "declaration": "Future<void> _acceptAuthentication("
+      },
+      {
+        "line": 129,
+        "declaration": "Future<RegisterResponse> register({"
+      },
+      {
+        "line": 161,
+        "declaration": "final response = await _api.post(ApiConfig.register, data: data);"
+      },
+      {
+        "line": 166,
+        "declaration": "Future<AuthResponse?> verifyOtp({"
+      },
+      {
+        "line": 174,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 196,
+        "declaration": "Future<AuthResponse> login({"
+      },
+      {
+        "line": 207,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 221,
+        "declaration": "Future<Map<String, dynamic>> resendOtp({"
+      },
+      {
+        "line": 226,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 234,
+        "declaration": "Future<Map<String, dynamic>> forgotPassword({required String phone}) async {"
+      },
+      {
+        "line": 236,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 244,
+        "declaration": "Future<Map<String, dynamic>> resetPassword({"
+      },
+      {
+        "line": 257,
+        "declaration": "final response = await _api.post(ApiConfig.resetPassword, data: data);"
+      },
+      {
+        "line": 262,
+        "declaration": "Future<void> logout() async {"
+      },
+      {
+        "line": 300,
+        "declaration": "await dio.delete("
+      },
+      {
+        "line": 305,
+        "declaration": "await dio.post(ApiConfig.logout, data: {'refresh_token': refresh});"
+      },
+      {
+        "line": 314,
+        "declaration": "Future<Map<String, dynamic>> requestAccountDeletion() async {"
+      },
+      {
+        "line": 316,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 331,
+        "declaration": "Future<void> resolveClinicDeletion({"
+      },
+      {
+        "line": 342,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 364,
+        "declaration": "Future<void> confirmAccountDeletion(String code) async {"
+      },
+      {
+        "line": 367,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 390,
+        "declaration": "Future<UserModel> getMe() async {"
+      },
+      {
+        "line": 392,
+        "declaration": "final response = await _api.get(ApiConfig.me);"
+      },
+      {
+        "line": 408,
+        "declaration": "Future<UserModel> updateMe({"
+      },
+      {
+        "line": 427,
+        "declaration": "final response = await _api.patch(ApiConfig.me, data: payload);"
+      },
+      {
+        "line": 442,
+        "declaration": "Future<Map<String, dynamic>> requestPhoneChange(String newPhone) async {"
+      },
+      {
+        "line": 443,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 451,
+        "declaration": "Future<Map<String, dynamic>> confirmPhoneChange({"
+      },
+      {
+        "line": 456,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 469,
+        "declaration": "Future<Map<String, dynamic>> requestEmailChange(String newEmail) async {"
+      },
+      {
+        "line": 470,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 478,
+        "declaration": "Future<Map<String, dynamic>> confirmEmailChange({"
+      },
+      {
+        "line": 483,
+        "declaration": "final response = await _api.post("
+      },
+      {
+        "line": 496,
+        "declaration": "Future<bool> isLoggedIn() async {"
+      }
+    ]
+  }
+]

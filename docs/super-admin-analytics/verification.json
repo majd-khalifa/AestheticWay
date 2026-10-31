@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-31",
+  "display_timezone": "Asia/Damascus",
+  "branch": "codex/super-admin-analytics-forensic-audit",
+  "git_state": "Preserved original audit patch prepared for a new draft PR on the existing branch; final commit and CI status are recorded by the PR metadata",
+  "backend_commit_stamp": "52666c1711469ec8a3689cf54f93c1c5fa963e6e",
+  "archive_sha256": "82bd1337a3e935a444ba2367ec1a35efbcfbd560d15d1d244f1d46a67fe905fc",
+  "backend_source_tree_sha256": "c4358997205f608b350169e7b7985187108918fd30eb8868b68063cf93a792d4",
+  "backend_files_unchanged": 413,
+  "backend_delta": "Exactly six modified files, no additions/deletions versus c25e901",
+  "environment": {
+    "os": "Debian GNU/Linux 13 (Linux x86_64)",
+    "flutter": "3.41.5",
+    "dart": "3.11.3",
+    "django": "5.2.4"
+  },
+  "checks": {
+    "dart_format": {
+      "result": "pass",
+      "files": 291,
+      "changed_on_final_run": 0
+    },
+    "flutter_analyze": {
+      "result": "pass",
+      "issues": 0
+    },
+    "focused_flutter": {
+      "result": "pass",
+      "passed": 91,
+      "new_tests": 17,
+      "command": "flutter test test/super_admin_analytics_forensic_test.dart test/admin_hardening_test.dart test/admin_portal_test.dart test/portal_load_coalescing_test.dart --reporter expanded"
+    },
+    "full_flutter": {
+      "result": "pass",
+      "passed": 1247,
+      "failed": 0,
+      "command": "flutter test --reporter expanded"
+    },
+    "original_backend_suites": {
+      "result": "pass",
+      "passed": 99,
+      "labels": [
+        "apps.accounts.tests.test_account_deletion",
+        "apps.analytics.tests",
+        "apps.admin_portal.tests"
+      ],
+      "boundary": "in-memory SQLite; temporary filesystem-only media aliases; network denied; synthetic providers/fixtures"
+    },
+    "source_probe": {
+      "result": "pass",
+      "controlled_observations": 14,
+      "role_read_outcomes": 52,
+      "backend_files_unchanged": 413,
+      "note": "Reproduces defects; passing audit assertions do not fix Django"
+    },
+    "audit_storage_isolation": {
+      "result": "pass",
+      "passed": 7,
+      "command": "python -m unittest discover -s tool/tests -v"
+    },
+    "git_diff_check": {
+      "result": "pass"
+    },
+    "renders": {
+      "result": "pass",
+      "png_count": 8,
+      "locales": [
+        "en",
+        "ar RTL"
+      ],
+      "themes": [
+        "Light",
+        "Dark"
+      ],
+      "boundary": "Actual Flutter widgets, synthetic fixtures and canonical test fonts; representative EN/Dark and AR/Light visually reviewed"
+    },
+    "patch_source_integrity": {
+      "result": "pass",
+      "files": 15
+    },
+    "backend_integrity": {
+      "result": "pass",
+      "files": 413
+    },
+    "audit_source_and_output_guards": {
+      "result": "pass",
+      "cases": 2,
+      "evidence": "Wrong source identity and output inside read-only backend both fail closed before Django initialization and write no output"
+    }
+  },
+  "unchanged_boundaries": [
+    "Django source",
+    "Patient and Clinic Portal production code",
+    "Native Android/iOS configuration",
+    "Application IDs and signing",
+    "Delivered client APK",
+    "Default and persisted theme/language behavior"
+  ],
+  "assessment": {
+    "read_side_patch": "GO for review with passing local tests; not an authorization to merge/publish",
+    "complete_production_analytics": "NO-GO; backend ingestion integrity/privacy, per-clinic reporting and coverage contracts remain missing",
+    "production_deletion_fix": "UNVERIFIED; source length fix includes a reproduced 24-bit prefix collision"
+  },
+  "changed_files": [
+    "docs/BACKEND_52666C1_INTEGRATION_VERIFICATION.md",
+    "docs/SUPER_ADMIN_ANALYTICS_ACCEPTANCE_CHECKLIST.md",
+    "docs/SUPER_ADMIN_ANALYTICS_BACKEND_HANDOFF_FOR_ALI.md",
+    "docs/SUPER_ADMIN_ANALYTICS_EVENT_MATRIX.md",
+    "docs/SUPER_ADMIN_ANALYTICS_FLUTTER_ACTION_PLAN.md",
+    "docs/SUPER_ADMIN_FULL_FORENSIC_AUDIT.md",
+    "docs/super-admin-analytics/README.md",
+    "docs/super-admin-analytics/backend-delta.json",
+    "docs/super-admin-analytics/renders/analytics_dark_ar_directory.png",
+    "docs/super-admin-analytics/renders/analytics_dark_ar_top.png",
+    "docs/super-admin-analytics/renders/analytics_dark_en_directory.png",
+    "docs/super-admin-analytics/renders/analytics_dark_en_top.png",
+    "docs/super-admin-analytics/renders/analytics_light_ar_directory.png",
+    "docs/super-admin-analytics/renders/analytics_light_ar_top.png",
+    "docs/super-admin-analytics/renders/analytics_light_en_directory.png",
+    "docs/super-admin-analytics/renders/analytics_light_en_top.png",
+    "docs/super-admin-analytics/review-index.json",
+    "docs/super-admin-analytics/source-evidence.json",
+    "docs/super-admin-analytics/verification.json",
+    "lib/features/admin/data/admin_repository.dart",
+    "lib/features/admin/models/admin_analytics_model.dart",
+    "lib/features/admin/models/admin_clinic_model.dart",
+    "lib/features/admin/models/admin_dashboard_model.dart",
+    "lib/features/admin/models/admin_reporting_period.dart",
+    "lib/features/admin/presentation/screens/admin_analytics_screen.dart",
+    "lib/features/admin/presentation/screens/admin_dashboard_screen.dart",
+    "lib/features/admin/presentation/screens/admin_leads_screen.dart",
+    "lib/features/admin/presentation/screens/admin_offers_screen.dart",
+    "lib/features/admin/services/admin_portal_service.dart",
+    "test/admin_hardening_test.dart",
+    "test/admin_portal_test.dart",
+    "test/portal_load_coalescing_test.dart",
+    "test/super_admin_analytics_forensic_test.dart",
+    "tool/audit_super_admin_52666c1.py"
+  ],
+  "base_sha": "8f48a80c311080299591f4f51dc3141914d6fb5b",
+  "original_audit_git_state": "Uncommitted reviewable changes on a new local branch; no commit, push, merge or publication performed",
+  "preservation_review": {
+    "date": "2026-10-31",
+    "display_timezone": "Asia/Damascus",
+    "original_manifest_files": 34,
+    "all_original_source_test_helper_hashes_match": true,
+    "source_test_helper_files": 15,
+    "six_required_reports_preserved": true,
+    "eight_original_renders_preserved": true,
+    "safety_copy": "Created outside Git in the execution workspace",
+    "review_scope": "Entire original changed-file diff; no new forensic investigation or production-code changes during preservation",
+    "secret_pattern_scan": "No private-key blocks, GitHub/AWS access tokens, JWTs or credential URLs found in intended files; audit credentials and contact values are explicitly synthetic fixtures",
+    "intended_artifacts": "Eight reviewed Flutter PNG captures and synthetic/source-only JSON evidence under docs; no build output, logs, caches, signing or cloud credentials",
+    "production_event_writes_added": false,
+    "backend_evidence": "Original 99 tests, 14 observations and 52 role checks preserved; not rerun as a new audit",
+    "ci": "Existing pull_request workflow runs Ubuntu/Windows regressions including the full suite. Results must be read for the published head; no Android/iOS release workflow or signing configuration changed.",
+    "validation": {
+      "environment": "Debian Linux; Flutter 3.41.5 / Dart 3.11.3",
+      "format": {
+        "command": "dart format .",
+        "files": 291,
+        "changed": 0,
+        "result": "pass"
+      },
+      "analyzer": {
+        "command": "flutter analyze --no-pub",
+        "issues": 0,
+        "result": "pass"
+      },
+      "flutter": {
+        "command": "flutter test --no-pub --reporter expanded",
+        "passed": 1247,
+        "failed": 0,
+        "result": "pass",
+        "includes_all_17_new_forensic_tests": true
+      },
+      "storage_isolation": {
+        "command": "python -m unittest discover -s tool/tests -v",
+        "passed": 7,
+        "result": "pass"
+      },
+      "git_diff_check": "pass",
+      "backend_source_integrity": {
+        "files": 413,
+        "unchanged": true
+      },
+      "not_rerun": [
+        "Original completed forensic investigation and Django contract suites",
+        "Android/iOS compilation and physical-device/provider testing"
+      ],
+      "native_ci": "Ubuntu/Windows jobs will be triggered by the new draft PR; use its checks for actual outcome, not prior PR #13 results"
+    }
+  },
+  "not_performed_at_original_audit": [
+    "Production API/database/storage/OTP operations",
+    "Production deployment verification of 52666c1",
+    "Native Windows/Ubuntu CI for this patch",
+    "Android release build or device test for this patch",
+    "macOS/iOS compilation or device test for this patch",
+    "PostgreSQL concurrency, query-plan or load testing"
+  ]
+}
