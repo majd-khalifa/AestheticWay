@@ -55,7 +55,8 @@
       "before_expected": "CA",
       "before_actual": "US",
       "after": "All70 supported examples resolve their correct numbering region, including US/Canada sharing +1"
-    }
+    },
+    "phone_locale_layout": "All four EN/AR Light/Dark phone scenarios mount real Material locale/delegates and paint validation errors; RTL/LTR and forced LTR number assertions retained"
   },
   "dependency": "One new pinned pure-Dart dependency, phone_numbers_parser9.0.29; existing versions/native plugins unchanged",
   "runtime_analytics_writes": false,

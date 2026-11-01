@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:aesthetic_way/core/auth/guest_auth_guard.dart';
 import 'package:aesthetic_way/core/auth/token_storage.dart';
@@ -174,6 +175,9 @@ void main() {
           await tester.pumpWidget(
             MaterialApp(
               theme: patientVisualTheme(dark: dark),
+              locale: Locale(arabic ? 'ar' : 'en'),
+              supportedLocales: const [Locale('en'), Locale('ar')],
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
               home: Scaffold(
                 body: Form(
                   key: form,
@@ -243,6 +247,7 @@ void main() {
           await tester.pump();
           expect(input.controller!.text, '9' * 19);
           expect(form.currentState!.validate(), isFalse);
+          await tester.pump();
           expect(tester.takeException(), isNull);
         },
       );
