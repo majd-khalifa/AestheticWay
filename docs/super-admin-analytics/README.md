@@ -1,3 +1,5 @@
+> Historical source evidence for backend52666c1. The newer [5fd66e6 integration report](../FINAL_PHONE_ANALYTICS_INTEGRATION_AUDIT.md) and [final Ali handoff](../FINAL_PHONE_ANALYTICS_BACKEND_HANDOFF_FOR_ALI.md) supersede resolved backend findings; the original audit remains preserved below.
+
 # Super Admin audit evidence
 
 Frontend base: `8f48a80c311080299591f4f51dc3141914d6fb5b` (merged PR #13). Feature branch: `codex/super-admin-analytics-forensic-audit`. Backend: supplied `52666c1711469ec8a3689cf54f93c1c5fa963e6e` snapshot; deployment unverified.

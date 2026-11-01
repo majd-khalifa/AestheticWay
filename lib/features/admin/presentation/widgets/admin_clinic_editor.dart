@@ -9,6 +9,7 @@ import '../../../../core/services/local_media_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_image_picker_field.dart';
 import '../../../../core/widgets/luxury_phone_input_field.dart';
+import '../../../../core/utils/international_phone.dart';
 import '../../models/admin_clinic_model.dart';
 import '../../../clinics/models/clinic_model.dart';
 import '../../services/admin_portal_service.dart';
@@ -85,9 +86,7 @@ class _AdminClinicEditorState extends State<AdminClinicEditor> {
       );
     }
     bool validPhone(String value) =>
-        RegExp(r'^\+[1-9]\d{6,14}$').hasMatch(value) &&
-        LuxuryPhoneInputField.extractLocalDigits(value).length >= 7 &&
-        LuxuryPhoneInputField.extractLocalDigits(value).length <= 10;
+        InternationalPhone.issue(value, required: true) == null;
     if (!validPhone(_field('phone').text)) {
       return adminText(
         'Enter a valid clinic phone number.',

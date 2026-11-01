@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+import '../utils/international_phone.dart';
 
 /// Supported GCC and international dial codes
 class CountryDialCode {
@@ -16,6 +18,10 @@ class CountryDialCode {
     required this.nameAr,
     required this.nameEn,
   });
+
+  IsoCode get isoCode => IsoCode.values.byName(
+    String.fromCharCodes(flag.runes.map((r) => r - 0x1f1e6 + 65)),
+  );
 }
 
 const List<CountryDialCode> kSupportedDialCodes = [
@@ -450,7 +456,7 @@ const List<CountryDialCode> kSupportedDialCodes = [
 /// Reusable Luxury Phone Input Field
 /// - Forces TextDirection.ltr so numbers never scramble in Arabic RTL mode
 /// - Prefix country dial code selector defaulting to UAE (🇦🇪 +971)
-/// - Enforces maxLength: 10 digits after country code (digits only)
+/// - Uses country-aware numbering validation; never truncates pasted numbers
 /// - Automatically normalizes E.164 and strips leading zeros (e.g. 0501234567 -> +971501234567)
 class LuxuryPhoneInputField extends StatefulWidget {
   final TextEditingController? controller;
@@ -495,49 +501,31 @@ class LuxuryPhoneInputField extends StatefulWidget {
     return list;
   }
 
-  static String _national(String value, String dialCode) {
-    final digits = value.replaceAll(RegExp(r'\D'), '');
-    // Italian and San Marino fixed-line zeros are part of the E.164 number.
-    return ['+39', '+378'].contains(dialCode)
-        ? digits
-        : digits.replaceFirst(RegExp(r'^0+'), '');
-  }
-
   /// Static helper to normalize any phone string and country code into standard E.164
   static String normalizeToE164(
     String rawInput, {
     String defaultDialCode = '+971',
   }) {
-    var value = rawInput.replaceAll(RegExp(r'[^\d+]'), '');
-    if (value.isEmpty) return '';
-    if (value.startsWith('00')) value = '+${value.substring(2)}';
-    if (value.startsWith('+')) {
-      for (final country in _sortedDialCodes) {
-        if (value.startsWith(country.dialCode)) {
-          return '${country.dialCode}${_national(value.substring(country.dialCode.length), country.dialCode)}';
-        }
-      }
-      return '+${value.substring(1).replaceAll(RegExp(r'\D'), '')}';
-    }
-    final code = defaultDialCode.substring(1);
-    // Only an explicit default country prefix is inferred from an unprefixed full number.
-    if (value.startsWith(code) && value.length > 10) {
-      value = value.substring(code.length);
-    }
-    return '$defaultDialCode${_national(value, defaultDialCode)}';
+    return InternationalPhone.normalize(
+      rawInput,
+      country: extractCountry(
+        rawInput,
+        defaultDialCode: defaultDialCode,
+      ).isoCode,
+    );
   }
 
   static String extractLocalDigits(
     String rawInput, {
     String defaultDialCode = '+971',
   }) {
-    var value = rawInput.replaceAll(RegExp(r'[^\d+]'), '');
-    if (value.startsWith('00')) value = '+${value.substring(2)}';
-    final country = extractCountry(value, defaultDialCode: defaultDialCode);
-    if (value.startsWith(country.dialCode)) {
-      value = value.substring(country.dialCode.length);
-    }
-    return _national(value, country.dialCode);
+    return InternationalPhone.localDigits(
+      rawInput,
+      country: extractCountry(
+        rawInput,
+        defaultDialCode: defaultDialCode,
+      ).isoCode,
+    );
   }
 
   /// Extracts dial code from raw input if matched, otherwise returns defaultDialCode
@@ -545,7 +533,9 @@ class LuxuryPhoneInputField extends StatefulWidget {
     String rawInput, {
     String defaultDialCode = '+971',
   }) {
-    final cleaned = rawInput.replaceAll(RegExp(r'[^\d+]'), '').trim();
+    final cleaned = InternationalPhone.asciiDigits(
+      rawInput,
+    ).replaceAll(RegExp(r'[^\d+]'), '').trim();
     for (final country in _sortedDialCodes) {
       final code = country.dialCode;
       final codeNoPlus = code.replaceFirst('+', '');
@@ -567,6 +557,7 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
   late CountryDialCode _selectedCountry;
   late final TextEditingController _localController;
   bool _isInternalController = false;
+  bool _processingLocalEdit = false;
 
   @override
   void initState() {
@@ -621,18 +612,31 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
   }
 
   void _handleLocalTextChanged() {
-    final local = _localController.text;
-    _syncExternalController(local);
+    if (_processingLocalEdit) return;
+    _processingLocalEdit = true;
+    try {
+      var local = _localController.text;
+      if (local.startsWith('+') || local.startsWith('00')) {
+        final country = LuxuryPhoneInputField.extractCountry(local);
+        final digits = LuxuryPhoneInputField.extractLocalDigits(local);
+        setState(() => _selectedCountry = country);
+        _localController.value = TextEditingValue(
+          text: digits,
+          selection: TextSelection.collapsed(offset: digits.length),
+        );
+        local = digits;
+      }
+      _syncExternalController(local);
+    } finally {
+      _processingLocalEdit = false;
+    }
   }
 
   void _syncExternalController(String localDigits) {
-    final digits = LuxuryPhoneInputField._national(
+    final fullNumber = InternationalPhone.normalize(
       localDigits,
-      _selectedCountry.dialCode,
+      country: _selectedCountry.isoCode,
     );
-    final fullNumber = digits.isEmpty
-        ? ''
-        : '${_selectedCountry.dialCode}$digits';
 
     if (widget.controller != null && widget.controller!.text != fullNumber) {
       widget.controller!.text = fullNumber;
@@ -674,12 +678,31 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
         textAlign: TextAlign.left,
         readOnly: widget.readOnly,
         enabled: widget.enabled,
-        maxLength: 10,
+        maxLength: InternationalPhone.inputLimit(_selectedCountry.isoCode),
+        maxLengthEnforcement: MaxLengthEnforcement.none,
         textInputAction: widget.textInputAction,
         onFieldSubmitted: widget.onFieldSubmitted,
         inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(10),
+          TextInputFormatter.withFunction((oldValue, newValue) {
+            final text = InternationalPhone.asciiDigits(
+              newValue.text,
+            ).replaceAll(RegExp(r'[^0-9+]'), '');
+            final international = text.startsWith('00')
+                ? '+${text.substring(2)}'
+                : text;
+            if (international.startsWith('+') &&
+                !kSupportedDialCodes.any(
+                  (c) => international.startsWith(c.dialCode),
+                )) {
+              return oldValue;
+            }
+            if (text.contains('+') && !text.startsWith('+')) return oldValue;
+            if (text == newValue.text) return newValue;
+            return TextEditingValue(
+              text: text,
+              selection: TextSelection.collapsed(offset: text.length),
+            );
+          }),
         ],
         style: TextStyle(
           color: widget.readOnly
@@ -795,24 +818,26 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
           ),
         ),
         validator: (val) {
-          if (widget.validator != null) {
-            return widget.validator!(val);
+          if (widget.readOnly) return widget.validator?.call(val);
+          final issue = InternationalPhone.issue(
+            val ?? '',
+            country: _selectedCountry.isoCode,
+            required: widget.isRequired,
+          );
+          if (issue == PhoneNumberIssue.required) {
+            return loc.tr('val_phone_required');
           }
-          if (widget.isRequired) {
-            if (val == null || val.trim().isEmpty) {
-              return loc.tr('val_phone_required');
-            }
-            final digits = LuxuryPhoneInputField._national(
-              val,
-              _selectedCountry.dialCode,
-            );
-            if (digits.length < 7 || digits.length > 10) {
-              return loc.isArabic
-                  ? 'يرجى إدخال رقم هاتف محلي صالح'
-                  : 'Please enter a valid local number';
-            }
+          if (issue == PhoneNumberIssue.length) {
+            return loc.isArabic
+                ? 'عدد الأرقام غير صالح للدولة المختارة. تحقق من الرقم كاملاً.'
+                : 'Invalid number length for the selected country. Check the complete number.';
           }
-          return null;
+          if (issue != null) {
+            return loc.isArabic
+                ? 'أدخل رقم هاتف صالحاً للدولة المختارة.'
+                : 'Enter a valid phone number for the selected country.';
+          }
+          return widget.validator?.call(val);
         },
       ),
     );

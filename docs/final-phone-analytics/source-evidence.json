@@ -1,0 +1,156 @@
+{
+  "backend": "5fd66e60d76350ac1feb2a044bf2e8544ecfc318",
+  "scope": "disposable SQLite/local storage/network denied, synthetic fixtures; not production",
+  "unchanged_source_files": 415,
+  "records": [
+    {
+      "case": "valid_syrian_registration",
+      "http": 201,
+      "canonical_phone_matches": true,
+      "provider_delivery": "mocked; not verified"
+    },
+    {
+      "case": "invalid_phone",
+      "http": 400,
+      "code": "VALIDATION_ERROR",
+      "fields": [
+        "phone"
+      ],
+      "field_error_codes": {
+        "phone": [
+          "invalid"
+        ]
+      }
+    },
+    {
+      "case": "invalid_email",
+      "http": 400,
+      "code": "VALIDATION_ERROR",
+      "fields": [
+        "email"
+      ],
+      "field_error_codes": {
+        "email": [
+          "invalid"
+        ]
+      }
+    },
+    {
+      "case": "duplicate_phone",
+      "http": 400,
+      "code": "VALIDATION_ERROR",
+      "fields": [
+        "phone"
+      ],
+      "field_error_codes": {
+        "phone": [
+          "unique"
+        ]
+      }
+    },
+    {
+      "case": "duplicate_email",
+      "http": 400,
+      "code": "VALIDATION_ERROR",
+      "fields": [
+        "email"
+      ],
+      "field_error_codes": {
+        "email": [
+          "invalid"
+        ]
+      }
+    },
+    {
+      "case": "missing_email",
+      "http": 400,
+      "code": "VALIDATION_ERROR",
+      "fields": [
+        "email"
+      ],
+      "field_error_codes": {
+        "email": [
+          "required"
+        ]
+      }
+    },
+    {
+      "case": "source_idempotent_ack",
+      "http": [
+        201,
+        200,
+        409
+      ],
+      "ack_matches": true,
+      "rows": 1
+    },
+    {
+      "case": "cross_actor_duplicate_ack",
+      "http": 200,
+      "stored_user_unchanged": true
+    },
+    {
+      "case": "client_lead_rejected",
+      "http": 400
+    },
+    {
+      "case": "missing_id_rejected",
+      "http": 400
+    },
+    {
+      "case": "branch_can_derive_unpublished_clinic",
+      "http": 201
+    },
+    {
+      "case": "clinicless_contact_accepted",
+      "http": 201
+    },
+    {
+      "case": "unbounded_metadata_token_like_value_accepted",
+      "http": 201
+    },
+    {
+      "case": "forbidden_key_rejected",
+      "http": 400
+    },
+    {
+      "case": "saved_lead_server_event_still_has_inquiry_metadata",
+      "http": 201,
+      "events_for_saved_lead": 1,
+      "metadata_field_names": [
+        "lead_type",
+        "reference_code",
+        "service_name"
+      ]
+    },
+    {
+      "case": "per_clinic_routes_absent_and_filters_ignored",
+      "proposed_routes_http": [
+        404,
+        404
+      ],
+      "same_summary": true,
+      "row_fields": [
+        "clinic_id",
+        "clinic_name",
+        "events_count"
+      ]
+    },
+    {
+      "case": "platform_null_rollup_unique_fixed",
+      "duplicate_rejected": true
+    },
+    {
+      "case": "deletion_same_prefix_fixed",
+      "fixture": 0,
+      "http": 200,
+      "tombstone_length": 37
+    },
+    {
+      "case": "deletion_same_prefix_fixed",
+      "fixture": 1,
+      "http": 200,
+      "tombstone_length": 37
+    }
+  ]
+}

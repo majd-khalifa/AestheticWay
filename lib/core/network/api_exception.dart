@@ -62,7 +62,9 @@ class ApiException implements Exception {
         error.type == DioExceptionType.sendTimeout ||
         error.type == DioExceptionType.receiveTimeout) {
       return ApiException(
-        message: 'انتهت مهلة الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت.',
+        message: LocaleService().isArabic
+            ? 'انتهت مهلة الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت.'
+            : 'The connection timed out. Check your internet connection and try again.',
         statusCode: statusCode,
         errorCode: 'TIMEOUT',
       );
@@ -70,8 +72,9 @@ class ApiException implements Exception {
 
     if (error.type == DioExceptionType.connectionError) {
       return ApiException(
-        message:
-            'تعذر الاتصال بالخادم. تأكد من تشغيل السيرفر المحلي أو الاتصال بالشبكة.',
+        message: LocaleService().isArabic
+            ? 'تعذر الاتصال بالخادم. تحقق من اتصال الإنترنت وحاول مجدداً.'
+            : 'Unable to connect. Check your internet connection and try again.',
         statusCode: statusCode,
         errorCode: 'CONNECTION_ERROR',
       );
@@ -215,6 +218,15 @@ class ApiException implements Exception {
     }
 
     final ar = LocaleService().isArabic;
+    if (statusCode == 401 && fieldErrors == null) {
+      message = ar
+          ? 'تعذر التحقق من الجلسة. سجّل الدخول مجدداً.'
+          : 'Authentication is required. Please sign in again.';
+    } else if (statusCode == 403 && fieldErrors == null) {
+      message = ar
+          ? 'ليس لديك إذن لإتمام هذا الطلب.'
+          : 'You do not have permission to complete this request.';
+    }
     message = switch (errorCode) {
       'CATEGORY_ALREADY_EXISTS' =>
         ar
@@ -529,6 +541,44 @@ class ApiException implements Exception {
   static String _localizeBackendMessage(String msg) {
     final lower = msg.toLowerCase();
     final isArabic = LocaleService().isArabic;
+    // Recognize only source-confirmed meanings. Never echo backend values:
+    // normalize_phone errors can include the complete submitted phone number.
+    if (lower.contains('phone') && lower.contains('already exists')) {
+      return isArabic
+          ? 'رقم الهاتف مسجل بالفعل في حساب آخر'
+          : 'An account with this phone number already exists.';
+    }
+    if (lower.contains('email') && lower.contains('already exists')) {
+      return isArabic
+          ? 'البريد الإلكتروني مسجل بالفعل في حساب آخر'
+          : 'An account with this email address already exists.';
+    }
+    if (lower.contains('invalid phone number') ||
+        lower.contains('cannot parse phone number')) {
+      return isArabic
+          ? 'أدخل رقم هاتف صالحاً مع رمز الدولة المختارة.'
+          : 'Enter a valid phone number with the selected country code.';
+    }
+    if (lower.contains('valid email')) {
+      return isArabic
+          ? 'أدخل بريداً إلكترونياً صالحاً.'
+          : 'Enter a valid email address.';
+    }
+    if (lower.contains('password is too common')) {
+      return isArabic
+          ? 'كلمة المرور شائعة وسهلة التخمين، يرجى اختيار كلمة مرور قوية تضم أحرفاً وأرقاماً ورموزاً'
+          : 'Choose a less common password that is harder to guess.';
+    }
+    if (lower.contains('password is entirely numeric')) {
+      return isArabic
+          ? 'كلمة المرور لا يمكن أن تتكون من أرقام فقط'
+          : 'The password must not contain only numbers.';
+    }
+    if (lower.contains('password is too similar')) {
+      return isArabic
+          ? 'كلمة المرور مشابهة جداً للاسم أو البريد الإلكتروني'
+          : 'Choose a password different from the account details.';
+    }
     if (lower.contains('not a valid image') ||
         lower.contains('image is corrupted')) {
       return isArabic

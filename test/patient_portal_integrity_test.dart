@@ -361,7 +361,9 @@ void main() {
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(430, 1700));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      AuthState().login(name: 'Fixture Patient', phone: '+447700900123');
+      // libphonenumber's GB mobile example; the old reserved drama number is
+      // invalid under the same numbering rules used by the backend.
+      AuthState().login(name: 'Fixture Patient', phone: '+447400123456');
       final repo = FixtureLeadsRepository();
       await tester.pumpWidget(
         MaterialApp(
@@ -385,7 +387,7 @@ void main() {
       expect(repo.lastPayload!['clinic'], patientClinicId);
       expect(repo.lastPayload!['offer'], patientOfferId);
       expect(repo.lastPayload!['lead_type'], 'offer');
-      expect(repo.lastPayload!['patient_phone'], '+447700900123');
+      expect(repo.lastPayload!['patient_phone'], '+447400123456');
       expect(repo.lastPayload!['consent_accepted'], isTrue);
       expect(repo.lastPayload!.containsKey('preferred_time_window'), isFalse);
       expect(find.text('تم إرسال طلبك وستتواصل العيادة معك'), findsOneWidget);

@@ -1,0 +1,16 @@
+{
+  "scope": "PROPOSED code only; not deployed routes",
+  "result": "passed",
+  "max_list_queries": 4,
+  "clinics": 21,
+  "permission_statuses": [
+    401,
+    403,
+    403,
+    200
+  ],
+  "recorded_total": 5,
+  "canonical_total": null,
+  "duplicate_raw_lead_events_excluded": true,
+  "backend_files_edited": 0
+}
