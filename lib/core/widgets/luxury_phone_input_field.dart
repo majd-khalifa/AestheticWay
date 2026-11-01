@@ -536,6 +536,24 @@ class LuxuryPhoneInputField extends StatefulWidget {
     final cleaned = InternationalPhone.asciiDigits(
       rawInput,
     ).replaceAll(RegExp(r'[^\d+]'), '').trim();
+    // Calling codes can be shared (for example US/Canada +1). A complete,
+    // valid number identifies its numbering region; partial edits still use
+    // the longest calling-code match below.
+    final international = cleaned.startsWith('00')
+        ? '+${cleaned.substring(2)}'
+        : cleaned;
+    if (international.startsWith('+')) {
+      try {
+        final parsed = PhoneNumber.parse(international);
+        if (parsed.isValid()) {
+          for (final country in kSupportedDialCodes) {
+            if (country.isoCode == parsed.isoCode) return country;
+          }
+        }
+      } catch (_) {
+        // Invalid/partial input is validated by the field, never logged.
+      }
+    }
     for (final country in _sortedDialCodes) {
       final code = country.dialCode;
       final codeNoPlus = code.replaceFirst('+', '');

@@ -113,6 +113,12 @@ void main() {
         final country = IsoCode.values.byName(row['iso'] as String);
         final e164 = row['e164'] as String;
         expect(
+          LuxuryPhoneInputField.extractCountry(e164).isoCode,
+          country,
+          reason:
+              'Shared calling codes must resolve the actual numbering region',
+        );
+        expect(
           InternationalPhone.normalize(e164, country: country),
           e164,
           reason: country.name,
