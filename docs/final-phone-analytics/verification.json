@@ -45,6 +45,11 @@
     "backend_integrity": {
       "files": 415,
       "unchanged": true
+    },
+    "arabic_edit_position": {
+      "before_expected": 4,
+      "before_actual": 10,
+      "after": "passes in the four EN/AR Light/Dark phone widget scenarios; digit normalization preserves selection"
     }
   },
   "dependency": "One new pinned pure-Dart dependency, phone_numbers_parser9.0.29; existing versions/native plugins unchanged",

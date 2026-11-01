@@ -698,9 +698,23 @@ class _LuxuryPhoneInputFieldState extends State<LuxuryPhoneInputField> {
             }
             if (text.contains('+') && !text.startsWith('+')) return oldValue;
             if (text == newValue.text) return newValue;
+            int offset(int original) {
+              if (original < 0) return text.length;
+              final prefix = newValue.text.substring(
+                0,
+                original.clamp(0, newValue.text.length),
+              );
+              return InternationalPhone.asciiDigits(
+                prefix,
+              ).replaceAll(RegExp(r'[^0-9+]'), '').length;
+            }
+
             return TextEditingValue(
               text: text,
-              selection: TextSelection.collapsed(offset: text.length),
+              selection: TextSelection(
+                baseOffset: offset(newValue.selection.baseOffset),
+                extentOffset: offset(newValue.selection.extentOffset),
+              ),
             );
           }),
         ],

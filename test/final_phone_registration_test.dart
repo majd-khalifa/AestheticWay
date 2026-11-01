@@ -197,6 +197,22 @@ void main() {
           await tester.enterText(find.byType(TextFormField), '٠٩٤٤٥٦٧٨٩٠');
           expect(controller.text, '+963944567890');
           expect(form.currentState!.validate(), isTrue);
+          tester.testTextInput.updateEditingValue(
+            const TextEditingValue(
+              text: '٠٩٤٤٥٦٧٨٩٠',
+              selection: TextSelection.collapsed(offset: 4),
+            ),
+          );
+          await tester.pump();
+          expect(
+            tester
+                .widget<EditableText>(find.byType(EditableText))
+                .controller
+                .selection
+                .extentOffset,
+            4,
+            reason: 'Normalizing Arabic digits must preserve the edit position',
+          );
           final german = example('DE');
           await tester.enterText(find.byType(TextFormField), german);
           await tester.pump();
