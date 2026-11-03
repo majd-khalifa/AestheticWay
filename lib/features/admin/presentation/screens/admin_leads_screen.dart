@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/auth/guest_auth_guard.dart';
+import '../../../../core/auth/session_snapshot.dart';
+import '../../../../core/data/paged_collection.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/paged_entity_picker.dart';
@@ -10,7 +13,14 @@ import '../widgets/admin_components.dart';
 import 'admin_lead_detail_screen.dart';
 
 class AdminLeadsScreen extends StatefulWidget {
-  const AdminLeadsScreen({super.key});
+  const AdminLeadsScreen({
+    super.key,
+    this.initialClinic,
+    this.dateFrom,
+    this.dateTo,
+  });
+  final AdminClinicModel? initialClinic;
+  final String? dateFrom, dateTo;
   @override
   State<AdminLeadsScreen> createState() => _AdminLeadsScreenState();
 }
@@ -20,25 +30,57 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
   final _search = TextEditingController();
   AdminClinicModel? _clinic;
   String? _status;
+  PagedCollection<AdminLeadModel>? _scoped;
+  final _session = SessionSnapshot();
+  void _sessionChanged() {
+    if (!_session.isCurrent) _scoped?.clear();
+  }
+
+  Map<String, dynamic> get _queryValues => {
+    'search': _search.text.trim(),
+    'clinic': _clinic?.id,
+    'status': _status,
+    'date_from': widget.dateFrom,
+    'date_to': widget.dateTo,
+  };
+
   @override
   void initState() {
     super.initState();
+    _clinic = widget.initialClinic;
+    if (_clinic != null || widget.dateFrom != null || widget.dateTo != null) {
+      _scoped = PagedCollection<AdminLeadModel>(
+        keyOf: (l) => l.id,
+        loader: (page, q) => _service.getLeadRecordsPage(page, q),
+      );
+      AuthState().addListener(_sessionChanged);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _service.loadCollection('leads');
+      if (!mounted) return;
+      if (_scoped != null) {
+        _scoped!.refresh(query: _queryValues);
+      } else {
+        _service.loadCollection('leads', refresh: true, query: _queryValues);
+      }
     });
   }
 
   @override
   void dispose() {
     _search.dispose();
+    AuthState().removeListener(_sessionChanged);
+    _scoped?.dispose();
     super.dispose();
   }
 
-  void _query() => _service.searchCollection('leads', {
-    'search': _search.text.trim(),
-    'clinic': _clinic?.id,
-    'status': _status,
-  });
+  void _query() {
+    if (_scoped != null) {
+      _scoped!.search(_queryValues);
+    } else {
+      _service.searchCollection('leads', _queryValues);
+    }
+  }
+
   Future<void> _chooseClinic() async {
     final result = await showPagedEntityPicker<AdminClinicModel>(
       context,
@@ -58,9 +100,9 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([_service, LocaleService()]),
+    listenable: Listenable.merge([_service, LocaleService(), ?_scoped]),
     builder: (context, _) {
-      var leads = _service.allLeads;
+      var leads = _scoped?.items ?? _service.allLeads;
       if (_service.isMockMode) {
         leads = _service
             .getFilteredLeads(clinicId: _clinic?.id, status: _status)
@@ -76,9 +118,11 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
         backgroundColor: AppColors.bg(context),
         body: AdminDirectory<AdminLeadModel>(
           items: leads,
-          page: _service.collection('leads'),
-          onRefresh: () => _service.loadCollection('leads', refresh: true),
-          onLoadMore: () => _service.loadMore('leads'),
+          page: _scoped ?? _service.collection('leads'),
+          onRefresh: () =>
+              _scoped?.refresh(force: true) ??
+              _service.loadCollection('leads', refresh: true),
+          onLoadMore: () => _scoped?.loadMore() ?? _service.loadMore('leads'),
           headers: [
             AdminSectionTitle(
               adminText('Consultation requests', 'طلبات الاستشارة'),
@@ -86,6 +130,11 @@ class _AdminLeadsScreenState extends State<AdminLeadsScreen> {
             AdminNotice(
               message: LocaleService().tr('admin_lead_monitoring_banner'),
             ),
+            if (widget.dateFrom != null && widget.dateTo != null)
+              Text(
+                '${widget.dateFrom} — ${widget.dateTo} · UTC+4',
+                textDirection: TextDirection.ltr,
+              ),
             const SizedBox(height: 8),
             TextField(
               controller: _search,

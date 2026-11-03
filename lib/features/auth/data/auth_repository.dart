@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import '../../../core/auth/session_changed_exception.dart';
 import '../../../core/network/api_transport_policy.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/utils/international_phone.dart';
+import '../../../core/localization/app_locale.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -117,12 +119,7 @@ class AuthRepository {
 
   /// Preserve international E.164 numbers; assume UAE only for local input.
   static String normalizePhone(String phone) {
-    final value = phone.trim();
-    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-    if (value.startsWith('+')) return '+$digits';
-    if (digits.startsWith('00')) return '+${digits.substring(2)}';
-    if (digits.startsWith('971')) return '+$digits';
-    return '+971${digits.replaceFirst(RegExp(r'^0+'), '')}';
+    return InternationalPhone.normalize(phone);
   }
 
   /// Register a new patient account
@@ -134,6 +131,36 @@ class AuthRepository {
     String? referralCode,
   }) async {
     final normalized = normalizePhone(phone);
+    final ar = LocaleService().isArabic;
+    final phoneIssue = InternationalPhone.issue(normalized, required: true);
+    if (phoneIssue != null) {
+      final message = phoneIssue == PhoneNumberIssue.length
+          ? (ar
+                ? 'عدد أرقام الهاتف غير صالح للدولة المختارة.'
+                : 'Invalid phone number length for the selected country.')
+          : (ar
+                ? 'أدخل رقم هاتف صالحاً مع رمز الدولة.'
+                : 'Enter a valid phone number with its country code.');
+      throw ApiException(
+        message: message,
+        fieldErrors: {
+          'phone': [message],
+        },
+      );
+    }
+    final cleanEmail = email?.trim().toLowerCase() ?? '';
+    if (cleanEmail.isEmpty ||
+        !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(cleanEmail)) {
+      final message = ar
+          ? 'أدخل بريداً إلكترونياً صالحاً.'
+          : 'Enter a valid email address.';
+      throw ApiException(
+        message: message,
+        fieldErrors: {
+          'email': [message],
+        },
+      );
+    }
     final String platform = kIsWeb
         ? 'web'
         : (Platform.isAndroid ? 'android' : 'ios');
@@ -145,9 +172,7 @@ class AuthRepository {
       'device_platform': platform,
     };
 
-    if (email != null && email.trim().isNotEmpty) {
-      data['email'] = email.trim();
-    }
+    data['email'] = cleanEmail;
 
     // Only include referral_code if provided, non-empty, and not a placeholder like 'string'
     final cleanRef = referralCode?.trim();
@@ -159,7 +184,19 @@ class AuthRepository {
     }
 
     final response = await _api.post(ApiConfig.register, data: data);
-    return RegisterResponse.fromJson(response.data as Map<String, dynamic>);
+    final body = response.data;
+    if (response.statusCode != 201 ||
+        body is! Map<String, dynamic> ||
+        body['user_id'] is! String ||
+        (body['user_id'] as String).isEmpty) {
+      throw ApiException(
+        message: ar
+            ? 'لم يؤكد الخادم إنشاء الحساب. حاول لاحقاً.'
+            : 'The server did not confirm account creation. Please try later.',
+        statusCode: response.statusCode,
+      );
+    }
+    return RegisterResponse.fromJson(body);
   }
 
   /// Verify 6-digit OTP code

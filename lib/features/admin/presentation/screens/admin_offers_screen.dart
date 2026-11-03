@@ -1,5 +1,4 @@
 import '../../../treatments/presentation/category_requests_screen.dart';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,7 +8,7 @@ import '../../services/admin_portal_service.dart';
 import '../widgets/admin_components.dart';
 import 'admin_categories_screen.dart';
 
-/// Each module owns its server page. Unsupported legacy search stays explicitly local.
+/// Each module owns its server page. Every supported content search is sent to its server directory.
 class AdminOffersScreen extends StatefulWidget {
   const AdminOffersScreen({super.key});
   @override
@@ -19,9 +18,7 @@ class AdminOffersScreen extends StatefulWidget {
 class _AdminOffersScreenState extends State<AdminOffersScreen> {
   final _service = AdminPortalService();
   final _search = TextEditingController();
-  Timer? _localDebounce;
   int _module = 0;
-  String _localQuery = '';
   final _queries = ['', '', ''];
   final List<String?> _statuses = [null, null, null];
   String get _key => const ['offers', 'products', 'articles'][_module];
@@ -35,36 +32,27 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
 
   @override
   void dispose() {
-    _localDebounce?.cancel();
     _search.dispose();
     super.dispose();
   }
 
   Map<String, dynamic> get _query => {
     'status': _statuses[_module],
-    if (_module == 1) 'search': _search.text.trim(),
+    'search': _search.text.trim(),
   };
   void _changeModule(int value) {
     if (value == _module) return;
-    _localDebounce?.cancel();
     setState(() {
       _module = value;
       _search.text = _queries[value];
-      _localQuery = _search.text.toLowerCase().trim();
     });
     _service.loadCollection(_key, query: _query);
   }
 
   void _searchChanged(String value) {
     _queries[_module] = value;
-    if (_module == 1) {
-      _service.searchCollection(_key, _query);
-      return;
-    }
-    _localDebounce?.cancel();
-    _localDebounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) setState(() => _localQuery = value.trim().toLowerCase());
-    });
+    _service.searchCollection(_key, _query);
+    if (_service.isMockMode) setState(() {});
   }
 
   @override
@@ -174,8 +162,8 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                         'البحث بالمنتج أو العلامة أو الراعي',
                       )
                     : adminText(
-                        'Search loaded content',
-                        'البحث في المحتوى المحمّل',
+                        'Search content or clinic',
+                        'البحث في المحتوى أو العيادة',
                       ),
                 prefixIcon: const Icon(Icons.search),
               ),
@@ -186,8 +174,8 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   adminText(
-                    'Search covers loaded records. Load more to include additional content.',
-                    'يشمل البحث السجلات المحمّلة. حمّل المزيد لتوسيع النتائج.',
+                    'Server search applies across all pages.',
+                    'يطبّق الخادم البحث على جميع الصفحات.',
                   ),
                   style: TextStyle(
                     color: AppColors.mutedText(context),
@@ -308,9 +296,9 @@ class _AdminOffersScreenState extends State<AdminOffersScreen> {
         );
       }
     }
-    final query = _module == 1
-        ? (_service.isMockMode ? _search.text.toLowerCase().trim() : '')
-        : _localQuery;
+    // Server search also matches the other language, clinic and author fields.
+    // Do not discard valid results by re-filtering only the displayed language.
+    final query = _service.isMockMode ? _search.text.toLowerCase().trim() : '';
     return result
         .where(
           (r) =>

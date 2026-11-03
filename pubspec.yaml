@@ -46,6 +46,7 @@ dependencies:
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   geolocator: ^14.0.2
+  phone_numbers_parser: 9.0.29
 
 dev_dependencies:
   image_picker_platform_interface: 2.11.1

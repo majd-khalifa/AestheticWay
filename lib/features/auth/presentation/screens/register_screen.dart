@@ -15,7 +15,8 @@ import 'package:aesthetic_way/features/auth/data/auth_repository.dart';
 
 /// Screen 3: Luxury Registration Screen with Full Name, Phone, Email, Password & Terms
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.repository});
+  final AuthRepository? repository;
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -73,7 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _passwordController.text;
 
     try {
-      final response = await AuthRepository().register(
+      final response = await (widget.repository ?? AuthRepository()).register(
         fullName: fullName,
         phone: phone,
         password: password,
@@ -122,13 +123,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       });
       showAppSnackBar(context, e.message, type: AppSnackBarType.error);
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
+      final message = loc.isArabic
+          ? 'تعذر إنشاء الحساب حالياً. حاول مجدداً.'
+          : 'Unable to create the account right now. Please try again.';
       setState(() {
         _isLoading = false;
-        _serverErrorMessage = e.toString();
+        _serverErrorMessage = message;
       });
-      showAppSnackBar(context, e.toString(), type: AppSnackBarType.error);
+      showAppSnackBar(context, message, type: AppSnackBarType.error);
     }
   }
 
@@ -398,10 +402,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                   validator: (val) {
                                     if (val == null || val.trim().isEmpty) {
-                                      return null; // email optional in backend
+                                      return loc.isArabic
+                                          ? 'البريد الإلكتروني مطلوب'
+                                          : 'Email address is required';
                                     }
-                                    if (!val.contains('@') ||
-                                        !val.contains('.')) {
+                                    if (!RegExp(
+                                      r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                                    ).hasMatch(val.trim())) {
                                       return loc.tr('val_email_invalid');
                                     }
                                     return null;

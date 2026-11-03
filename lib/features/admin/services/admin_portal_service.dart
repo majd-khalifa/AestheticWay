@@ -196,6 +196,9 @@ class AdminPortalService extends ChangeNotifier {
   bool _overviewLoaded = false;
   bool _overviewDirty = false;
   String? _analyticsKey;
+  String? _analyticsRequestedKey;
+  int _analyticsRevision = 0;
+  Future<void>? _analyticsFlight;
 
   PagedCollection<dynamic> collection(String key) {
     final result = _pages.putIfAbsent(key, () {
@@ -217,6 +220,8 @@ class AdminPortalService extends ChangeNotifier {
             status: q['status'] as String?,
             clinicId: q['clinic'] as String?,
             search: q['search'] as String?,
+            dateFrom: q['date_from'] as String?,
+            dateTo: q['date_to'] as String?,
           ),
           keyOf: (item) => item.id,
         ),
@@ -297,6 +302,9 @@ class AdminPortalService extends ChangeNotifier {
     _overviewLoaded = false;
     _overviewDirty = false;
     _analyticsKey = null;
+    _analyticsRequestedKey = null;
+    _analyticsRevision++;
+    _analyticsFlight = null;
     _mockMode = false;
     _isLoading = false;
     _errorMessage = null;
@@ -666,14 +674,11 @@ class AdminPortalService extends ChangeNotifier {
       final values = await _inSession(
         Future.wait([
           _repository.getDashboard(),
-          _repository.getAnalytics(),
           _loadRecentLeads(refresh: refresh),
         ]),
         epoch,
       );
       _dashboard = values[0] as AdminDashboardModel;
-      _analytics = values[1] as AdminAnalyticsModel;
-      _analyticsKey = '|';
       _overviewLoaded = true;
       _overviewDirty = false;
     } catch (error) {
@@ -721,6 +726,32 @@ class AdminPortalService extends ChangeNotifier {
   Future<AdminLeadModel> getLeadDetail(String id) =>
       _inSession(_repository.getLeadDetail(id), _sessionEpoch);
 
+  Future<List<AdminClinicModel>> getClinicRecordsPage(int page, String search) {
+    _requireManager();
+    return _inSession(
+      _repository.getClinics(page: page, search: search),
+      _sessionEpoch,
+    );
+  }
+
+  Future<List<AdminLeadModel>> getLeadRecordsPage(
+    int page,
+    Map<String, dynamic> query,
+  ) {
+    _requireManager();
+    return _inSession(
+      _repository.getLeads(
+        page: page,
+        clinicId: query['clinic'] as String?,
+        status: query['status'] as String?,
+        search: query['search'] as String?,
+        dateFrom: query['date_from'] as String?,
+        dateTo: query['date_to'] as String?,
+      ),
+      _sessionEpoch,
+    );
+  }
+
   Future<void> loadDashboard() async {
     final sessionEpoch = _sessionEpoch;
     try {
@@ -761,31 +792,57 @@ class AdminPortalService extends ChangeNotifier {
     bool refresh = false,
   }) {
     final key = '${dateFrom ?? ""}|${dateTo ?? ""}';
-    if (_mockMode || (!refresh && _analyticsKey == key)) return Future.value();
-    return _flights.run('analytics:$key', () async {
-      final epoch = _sessionEpoch;
-      _analyticsLoading = true;
-      _analyticsError = null;
-      notifyListeners();
-      try {
-        _analytics = await _inSession(
-          _repository.getAnalytics(dateFrom: dateFrom, dateTo: dateTo),
-          epoch,
-        );
-        _analyticsKey = key;
-      } catch (error) {
-        if (epoch == _sessionEpoch) {
-          _analyticsError = error is ApiException
-              ? error.message
-              : 'Could not load analytics.';
-        }
-      } finally {
-        if (epoch == _sessionEpoch) {
-          _analyticsLoading = false;
-          notifyListeners();
-        }
+    if (_mockMode) return Future.value();
+    if (_analyticsLoading && _analyticsRequestedKey == key) {
+      return _analyticsFlight ?? Future.value();
+    }
+    if (!refresh && !_analyticsLoading && _analyticsKey == key) {
+      return Future.value();
+    }
+    final revision = ++_analyticsRevision;
+    final epoch = _sessionEpoch;
+    _analyticsRequestedKey = key;
+    _analyticsLoading = true;
+    _analyticsError = null;
+    notifyListeners();
+    return _analyticsFlight = _fetchAnalytics(
+      dateFrom,
+      dateTo,
+      revision,
+      epoch,
+      key,
+    );
+  }
+
+  Future<void> _fetchAnalytics(
+    String? from,
+    String? to,
+    int revision,
+    int epoch,
+    String key,
+  ) async {
+    bool current() => epoch == _sessionEpoch && revision == _analyticsRevision;
+    try {
+      final result = await _inSession(
+        _repository.getAnalytics(dateFrom: from, dateTo: to),
+        epoch,
+      );
+      if (!current()) return;
+      _analytics = result;
+      _analyticsKey = key;
+    } catch (error) {
+      if (current()) {
+        _analyticsError = error is ApiException
+            ? error.message
+            : 'Could not load analytics.';
       }
-    });
+    } finally {
+      if (current()) {
+        _analyticsLoading = false;
+        _analyticsFlight = null;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> loadReferralAnalytics({bool refresh = false}) {

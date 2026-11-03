@@ -1,0 +1,17 @@
+{
+  "added": [
+    "apps/accounts/migrations/0007_alter_user_phone.py",
+    "apps/analytics/migrations/0003_remove_analyticsdailyaggregate_unique_daily_aggregate_per_clinic_and_more.py"
+  ],
+  "removed": [],
+  "changed": [
+    "apps/accounts/models.py",
+    "apps/accounts/services/account_deletion.py",
+    "apps/accounts/tests/test_account_deletion.py",
+    "apps/analytics/models.py",
+    "apps/analytics/serializers.py",
+    "apps/analytics/tests/test_analytics.py",
+    "apps/analytics/views.py",
+    "apps/leads/tests/test_patient_flow.py"
+  ]
+}

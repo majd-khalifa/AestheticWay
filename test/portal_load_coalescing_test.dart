@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:aesthetic_way/core/network/api_config.dart';
 import 'package:aesthetic_way/features/admin/data/admin_repository.dart';
 import 'package:aesthetic_way/features/admin/services/admin_portal_service.dart';
 import 'package:aesthetic_way/features/clinic_portal/data/clinic_leads_repository.dart';
@@ -44,7 +45,7 @@ void main() {
     },
   );
   test(
-    '500 concurrent admin loadAllData calls fetch each first page once',
+    '500 concurrent admin loads coalesce operational pages and lazy analytics separately',
     () async {
       final counts = <String, int>{};
       final api = FakeApiClient(
@@ -56,8 +57,23 @@ void main() {
       final service = AdminPortalService()..resetTestingState();
       AdminPortalService(repository: AdminRepository(apiClient: api));
       await Future.wait(List.generate(500, (_) => service.loadAllData()));
+      expect(counts, {
+        ApiConfig.adminDashboard: 1,
+        ApiConfig.adminClinics: 1,
+        ApiConfig.adminLeads: 1,
+        ApiConfig.adminOffers: 1,
+        ApiConfig.adminProducts: 1,
+        ApiConfig.adminArticles: 1,
+      });
+      // Dashboard refreshes must not request or replace a reporting period.
+      await Future.wait(List.generate(500, (_) => service.loadAnalytics()));
+      expect(counts[ApiConfig.adminAnalytics], 1);
       expect(counts.length, 7);
       expect(counts.values.every((count) => count == 1), isTrue);
+      final before = Map.of(counts);
+      await service.loadAllData();
+      await service.loadAnalytics();
+      expect(counts, before);
       service.resetTestingState();
     },
   );
