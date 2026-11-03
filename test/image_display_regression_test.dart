@@ -678,7 +678,7 @@ void main() {
       });
       expect(
         body!['image'],
-        'https://aestheticway.ae/media/fresh.png?sig=a%2Bb',
+        'https://api.aestheticway.ae/media/fresh.png?sig=a%2Bb',
       );
       expect(product.imageUrl, body!['image']);
       await repo.updateProduct('p', {'image': '  $_signed  '});

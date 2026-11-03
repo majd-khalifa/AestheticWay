@@ -20,7 +20,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Could not create disposable QA key.' }
     & flutter pub get
     if ($LASTEXITCODE -ne 0) { throw 'Dependency resolution failed.' }
-    & flutter build apk --release --build-number $BuildNumber --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+    & flutter build apk --release --build-number $BuildNumber --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
     if ($LASTEXITCODE -ne 0) { throw 'QA APK compilation failed.' }
     $apk = Join-Path $repoRoot 'build/app/outputs/flutter-apk/app-release.apk'
     $sdk = $env:ANDROID_HOME
@@ -32,7 +32,7 @@ try {
     Get-FileHash -LiteralPath $apk -Algorithm SHA256
     Write-Output "QA-signed APK: $apk"
     if ($IncludeBundle) {
-        & flutter build appbundle --release --build-number $BuildNumber --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+        & flutter build appbundle --release --build-number $BuildNumber --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
         if ($LASTEXITCODE -ne 0) { throw 'QA AAB compilation failed.' }
         $aab = Join-Path $repoRoot 'build/app/outputs/bundle/release/app-release.aab'
         & jarsigner -verify $aab

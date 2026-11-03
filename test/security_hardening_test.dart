@@ -13,6 +13,8 @@ import 'package:aesthetic_way/core/auth/token_storage.dart';
 import 'package:aesthetic_way/core/auth/session_changed_exception.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/core/network/api_client.dart';
+import 'package:aesthetic_way/core/network/api_config.dart';
+import 'package:aesthetic_way/core/widgets/app_brand_logo.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
 import 'package:aesthetic_way/core/network/api_transport_policy.dart';
 import 'package:aesthetic_way/core/network/auth_interceptor.dart';
@@ -470,8 +472,13 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 1600));
       expect(find.byType(SplashScreen), findsOneWidget);
+      // Definitive rejected refresh is handled by AuthInterceptor.
+      AuthState().logout();
       gate.completeError(
-        const ApiException(message: 'Synthetic revoked session'),
+        const ApiException(
+          message: 'Synthetic revoked session',
+          statusCode: 401,
+        ),
       );
       await tester.pump();
       expect(AuthState().isLoggedIn, isFalse);
@@ -479,6 +486,212 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+  for (final arabic in [false, true]) {
+    for (final status in [null, 401, 429, 503]) {
+      testWidgets(
+        'Startup failure $status preserves credentials behind retry gate AR=$arabic',
+        (tester) async {
+          unawaited(
+            LocaleService().setLanguage(
+              arabic ? AppLanguage.arabic : AppLanguage.english,
+            ),
+          );
+          await tokens.saveTokens(
+            accessToken: 'fixture-access',
+            refreshToken: 'fixture-refresh',
+          );
+          await tokens.saveUser(_user('A'));
+          AuthState().login(name: 'Fixture A', phone: '+971501111111');
+          var calls = 0;
+          var gate = Completer<Object>();
+          final repo = AuthRepository(
+            apiClient: _Api(
+              getReply: (_) {
+                calls++;
+                return gate.future;
+              },
+            ),
+          );
+          await tester.pumpWidget(
+            MaterialApp(home: SplashScreen(authRepository: repo)),
+          );
+          await tester.pump(const Duration(milliseconds: 1600));
+          gate.completeError(
+            ApiException(message: 'Synthetic unavailable', statusCode: status),
+          );
+          await tester.pumpAndSettle();
+          expect(tokens.currentAccessToken, 'fixture-access');
+          expect(tokens.currentRefreshToken, 'fixture-refresh');
+          expect(tokens.getUser()!['id'], 'A');
+          expect(AuthState().isLoggedIn, isTrue);
+          expect(find.byType(SplashScreen), findsOneWidget);
+          final retry = arabic ? 'إعادة المحاولة' : 'Retry';
+          expect(find.text(retry), findsOneWidget);
+          gate = Completer<Object>();
+          await tester.tap(find.text(retry));
+          await tester.pump();
+          await tester.tap(find.byType(AppBrandLogo));
+          await tester.pump();
+          expect(
+            calls,
+            2,
+          ); // A pending retry cannot be duplicated by splash taps.
+          gate.completeError(
+            ApiException(message: 'Synthetic unavailable', statusCode: status),
+          );
+          await tester.pumpAndSettle();
+          expect(tokens.currentAccessToken, 'fixture-access');
+          await tester.tap(
+            find.text(arabic ? 'تسجيل الدخول مجدداً' : 'Sign in again'),
+          );
+          await tester.pump();
+          expect(AuthState().isLoggedIn, isFalse);
+          expect(tokens.currentAccessToken, isNull);
+          await tester.pumpWidget(const SizedBox());
+        },
+      );
+    }
+  }
+  for (final refreshStatus in [null, 401, 403, 503]) {
+    test(
+      'Migration refresh failure $refreshStatus clears only rejected credentials',
+      () async {
+        await tokens.saveTokens(
+          accessToken: 'fixture-access',
+          refreshToken: 'fixture-refresh',
+        );
+        await tokens.saveUser(_user('A'));
+        AuthState().login(name: 'Fixture A', phone: '+971501111111');
+        const secure = FlutterSecureStorage();
+        await secure.write(key: 'aw_pref_theme_mode', value: 'dark');
+        final dio = Dio(
+          BaseOptions(baseUrl: 'https://api.aestheticway.ae/api/v1/'),
+        );
+        final refresh = Dio(BaseOptions(baseUrl: dio.options.baseUrl));
+        var requests = 0, refreshes = 0;
+        dio.httpClientAdapter = _Adapter((_) async {
+          requests++;
+          return _body(401, {});
+        });
+        refresh.httpClientAdapter = _Adapter((o) async {
+          refreshes++;
+          expect(o.followRedirects, isFalse);
+          expect(o.uri.origin, 'https://api.aestheticway.ae');
+          if (refreshStatus == null) {
+            throw DioException(
+              requestOptions: o,
+              type: DioExceptionType.connectionError,
+            );
+          }
+          return _body(refreshStatus, {});
+        });
+        dio.interceptors.add(AuthInterceptor(dio, refreshDio: refresh));
+        await expectLater(dio.get('auth/me/'), throwsA(isA<DioException>()));
+        final revoked = refreshStatus == 401 || refreshStatus == 403;
+        expect(tokens.currentAccessToken, revoked ? isNull : 'fixture-access');
+        expect(
+          tokens.currentRefreshToken,
+          revoked ? isNull : 'fixture-refresh',
+        );
+        expect(AuthState().isLoggedIn, !revoked);
+        expect(await secure.read(key: 'aw_pref_theme_mode'), 'dark');
+        expect(requests, 1);
+        expect(refreshes, 1);
+        dio.close();
+        refresh.close();
+      },
+    );
+  }
+  for (final status in [301, 302, 307, 308]) {
+    test(
+      'Migration redirect HTTP$status is never followed with credentials',
+      () async {
+        await tokens.saveTokens(
+          accessToken: 'fixture-access',
+          refreshToken: 'fixture-refresh',
+        );
+        final dio = Dio(
+          BaseOptions(baseUrl: 'https://aestheticway.ae/api/v1/'),
+        );
+        var calls = 0;
+        dio.httpClientAdapter = _Adapter((o) async {
+          calls++;
+          expect(o.uri.origin, 'https://aestheticway.ae');
+          expect(o.followRedirects, isFalse);
+          return ResponseBody.fromString(
+            '',
+            status,
+            headers: {
+              'location': ['https://api.aestheticway.ae/api/v1/auth/me/'],
+            },
+          );
+        });
+        dio.interceptors.add(AuthInterceptor(dio));
+        await expectLater(dio.get('auth/me/'), throwsA(isA<DioException>()));
+        expect(calls, 1);
+        expect(tokens.currentAccessToken, 'fixture-access');
+        dio.close();
+      },
+    );
+  }
+  test(
+    'Production API and explicit build flags use the confirmed canonical subdomain',
+    () {
+      const root = 'https://api.aestheticway.ae/api/v1/';
+      expect(ApiConfig.defaultProductionBaseUrl, root);
+      expect(ApiConfig.siteOrigin, 'https://aestheticway.ae');
+      for (final path in [
+        'tool/build_android_preview.ps1',
+        'tool/build_android_release.ps1',
+        'tool/capture_public_clinic_contract.ps1',
+        '.github/workflows/mobile-release-readiness.yml',
+        '.github/workflows/android-signed-bundle.yml',
+      ]) {
+        final source = File(path).readAsStringSync();
+        expect(source, contains(root), reason: path);
+        expect(
+          source,
+          isNot(contains('https://aestheticway.ae/api/v1/')),
+          reason: path,
+        );
+      }
+    },
+  );
+  for (final root in [
+    'https://aestheticway.ae/api/v1/',
+    'https://api.aestheticway.ae/api/v1/',
+  ]) {
+    test(
+      'Migration candidate preserves API origin, media and signed URL bytes: $root',
+      () {
+        ApiConfig.setBaseUrl(root);
+        try {
+          expect(ApiConfig.baseUrl, root);
+          expect(
+            Uri.parse(root).resolve(ApiConfig.me).path,
+            '/api/v1/auth/me/',
+          );
+          expect(
+            ApiConfig.resolveUrl('/media/clinic.jpg'),
+            '${Uri.parse(root).origin}/media/clinic.jpg',
+          );
+          for (final absolute in [
+            'https://aestheticway.ae/media/clinic.jpg',
+            'https://api.aestheticway.ae/media/video.mp4',
+            'https://cdn.example.test/file.jpg?X-Amz-Signature=a%2Fb&x=1',
+          ]) {
+            expect(ApiConfig.resolveUrl(absolute), absolute);
+          }
+          final other = root.contains('://api.')
+              ? 'https://aestheticway.ae/api/v1/auth/me/'
+              : 'https://api.aestheticway.ae/api/v1/auth/me/';
+          expect(ApiTransportPolicy.permits(Uri.parse(other), root), isFalse);
+        } finally {
+          ApiConfig.resetBaseUrl();
+        }
+      },
+    );
+  }
   testWidgets(
     'An old startup validation failure cannot log out a newer identity',
     (tester) async {

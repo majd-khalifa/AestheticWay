@@ -151,7 +151,7 @@ void main() {
       expect(feed.premiumPartners.where((p) => !p.isAdvertisement).length, 2);
       expect(
         feed.nearbyClinics.single.coverImageUrl,
-        'https://aestheticway.ae/media/genuine.jpg',
+        'https://api.aestheticway.ae/media/genuine.jpg',
       );
       expect(feed.nearbyClinics.single.hasGoogleRating, isTrue);
     },

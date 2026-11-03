@@ -11,7 +11,7 @@ $record = @{
 function Invoke-RestMethod {
     param($Uri, $Method, $MaximumRedirection, $TimeoutSec)
     $testProbe.Requests.Add([string]$Uri)
-    if ($Method -ne 'Get' -or $Uri.Host -ne 'aestheticway.ae' -or $MaximumRedirection -ne 0) { throw 'Unsafe request' }
+    if ($Method -ne 'Get' -or $Uri.Host -ne 'api.aestheticway.ae' -or $MaximumRedirection -ne 0) { throw 'Unsafe request' }
     if ($Uri.AbsolutePath.EndsWith('/home/feed/')) { return @{ nearby_clinics = @($record); featured_ads = @() } }
     if ($Uri.Query) { return @{ results = @($record) } }
     return $record

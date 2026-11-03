@@ -353,13 +353,13 @@ void main() {
     );
   }
   testWidgets(
-    'failed/revoked session with missing introduction marker reaches Login and never sticks on splash',
+    'invalid cached session without refresh reaches Login and never replays introduction',
     (tester) async {
       AuthState().login(name: 'QA', phone: 'qa', role: 'patient');
       use(
         (o) => body({
-          'error': {'code': 'PERMISSION_DENIED', 'message': 'revoked'},
-        }, 403),
+          'error': {'code': 'UNAUTHENTICATED', 'message': 'revoked'},
+        }, 401),
       );
       await render(
         tester,

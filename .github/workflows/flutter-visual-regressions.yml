@@ -60,7 +60,10 @@ jobs:
       - name: Parse Windows preview helper without building or accessing credentials
         if: runner.os == 'Windows'
         shell: pwsh
-        run: '[scriptblock]::Create((Get-Content -Raw tool/build_android_preview.ps1)) | Out-Null'
+        run: |
+          foreach ($script in @('build_android_preview.ps1', 'build_android_release.ps1', 'capture_public_clinic_contract.ps1', 'check_backend_hosts_readonly.ps1')) {
+            [scriptblock]::Create((Get-Content -Raw (Join-Path tool $script))) | Out-Null
+          }
       - run: flutter analyze
       - name: Clinic Portal regressions and render capture
         timeout-minutes: 3

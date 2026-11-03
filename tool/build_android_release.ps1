@@ -19,7 +19,7 @@ Push-Location $repoRoot
 try {
     & flutter pub get
     if ($LASTEXITCODE -ne 0) { throw 'Flutter dependency resolution failed.' }
-    & flutter build appbundle --release --build-name $BuildName --build-number $BuildNumber --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+    & flutter build appbundle --release --build-name $BuildName --build-number $BuildNumber --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
     if ($LASTEXITCODE -ne 0) { throw 'Android release compilation failed.' }
     $bundle = Join-Path $repoRoot 'build/app/outputs/bundle/release/app-release.aab'
     if (-not (Test-Path -LiteralPath $bundle)) { throw 'Release AAB is missing.' }

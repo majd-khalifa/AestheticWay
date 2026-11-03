@@ -1,4 +1,5 @@
 import '../../../auth/data/auth_repository.dart';
+import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _scaleAnimation;
   Timer? _timer;
   bool _hasNavigated = false;
+  bool _sessionCheckFailed = false;
 
   @override
   void initState() {
@@ -54,6 +56,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigateNext() async {
     if (!mounted || _hasNavigated) return;
     _hasNavigated = true;
+    if (_sessionCheckFailed) setState(() => _sessionCheckFailed = false);
     _timer?.cancel();
 
     final onboarding = widget.onboardingService ?? OnboardingService();
@@ -69,7 +72,18 @@ class _SplashScreenState extends State<SplashScreen>
       try {
         await (widget.authRepository ?? AuthRepository()).getMe();
       } catch (_) {
-        if (AuthState().sessionEpoch == identityEpoch) AuthState().logout();
+        if (!mounted) return;
+        if (AuthState().sessionEpoch == identityEpoch &&
+            AuthState().isLoggedIn) {
+          // A transport/server failure is not proof of revoked credentials.
+          // Keep cached identity behind this gate; AuthInterceptor owns logout
+          // after a definitive rejected refresh. Never enter a cached portal.
+          setState(() {
+            _sessionCheckFailed = true;
+            _hasNavigated = false;
+          });
+          return;
+        }
       }
       if (!mounted) return;
       // A replacement login owns navigation; never route it using an old check.
@@ -109,6 +123,15 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
+  void _signInAgain() {
+    if (!_sessionCheckFailed) return;
+    AuthState().logout(); // Explicit user choice, not an outage side effect.
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -132,17 +155,62 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
         child: Scaffold(
           backgroundColor: AppColors.bg(context),
-          body: Center(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: AppBrandLogo.splash(height: 300, width: 300),
+          body: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24),
+                        child: AppBrandLogo.splash(height: 300, width: 300),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              if (_sessionCheckFailed)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          LocaleService().isArabic
+                              ? 'تعذر التحقق من جلستك الآن. يرجى المحاولة مجدداً.'
+                              : 'Unable to verify your session right now. Please try again.',
+                          textAlign: TextAlign.center,
+                        ),
+                        Wrap(
+                          spacing: 16,
+                          children: [
+                            TextButton(
+                              onPressed: _navigateNext,
+                              child: Text(
+                                LocaleService().isArabic
+                                    ? 'إعادة المحاولة'
+                                    : 'Retry',
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _signInAgain,
+                              child: Text(
+                                LocaleService().isArabic
+                                    ? 'تسجيل الدخول مجدداً'
+                                    : 'Sign in again',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

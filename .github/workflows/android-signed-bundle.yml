@@ -59,7 +59,7 @@ jobs:
           python -c 'import os,base64; p=os.environ["AW_ANDROID_STORE_FILE"]; f=os.open(p,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600); os.write(f,base64.b64decode(os.environ["AW_ANDROID_UPLOAD_KEYSTORE_BASE64"],validate=True)); os.close(f)'
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
           flutter pub get
-          flutter build appbundle --release --build-name "$AW_RELEASE_BUILD_NAME" --build-number "$AW_RELEASE_BUILD_NUMBER"
+          flutter build appbundle --release --build-name "$AW_RELEASE_BUILD_NAME" --build-number "$AW_RELEASE_BUILD_NUMBER" --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
           curl --fail --location --silent --show-error https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar -o "$RUNNER_TEMP/bundletool.jar"
           python tool/verify_android_bundle.py --bundle build/app/outputs/bundle/release/app-release.aab --bundletool "$RUNNER_TEMP/bundletool.jar" --expected-certificate-sha256 "$AW_ANDROID_UPLOAD_CERT_SHA256" --output release-evidence/android-aab.json
       - name: Retain signed bundle for owner review; no Play upload
