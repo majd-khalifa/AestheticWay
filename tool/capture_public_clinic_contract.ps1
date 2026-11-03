@@ -3,7 +3,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][guid]$ClinicId,
-    [uri]$ApiBase = 'https://aestheticway.ae/api/v1/',
+    [uri]$ApiBase = 'https://api.aestheticway.ae/api/v1/',
     [string]$OutputPath = './public-clinic-contract-sanitized.json'
 )
 $ErrorActionPreference = 'Stop'

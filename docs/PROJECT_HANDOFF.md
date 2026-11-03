@@ -34,12 +34,12 @@ All three portals live inside the **same Flutter application** (`AestheticWay`) 
 ## 3. Technology Stack & Production Environment
 - **Mobile Frontend**: Flutter (Dart SDK `^3.11.1`), `dio` HTTP client with JWT Bearer + automatic token refresh interceptor, `flutter_secure_storage` for tokens and user preferences, `video_player` for 15s muted VIP video ads.
 - **Backend**: Django + Django REST Framework (SimpleJWT, PostgreSQL, Swagger/OpenAPI).
-- **Production Base URL**: `https://aestheticway.ae/api/v1/`
+- **Production Base URL**: `https://api.aestheticway.ae/api/v1/`
 - **Production API Docs (Swagger)**: `https://aestheticway.ae/api/docs/`
 - **Production Django Admin**: `https://aestheticway.ae/django-admin/`
 - **Flutter Build / Run Configuration**:
-  - `ApiConfig.defaultProductionBaseUrl` defaults to `https://aestheticway.ae/api/v1/`.
-  - Can also be explicitly passed via `--dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/` or overridden at runtime via `ApiConfig.setBaseUrl(...)`.
+  - `ApiConfig.defaultProductionBaseUrl` defaults to `https://api.aestheticway.ae/api/v1/`.
+  - Can also be explicitly passed via `--dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/` or overridden at runtime via `ApiConfig.setBaseUrl(...)`.
 
 ---
 
@@ -82,7 +82,7 @@ When the backend is seeded via `python manage.py seed_data` (default staging/see
 ---
 
 ## 7. Current Production Status Summary
-- **Production Backend**: Live at `https://aestheticway.ae` (`https://aestheticway.ae/api/v1/`).
+- **Production Backend**: Live at `https://aestheticway.ae` (`https://api.aestheticway.ae/api/v1/`).
 - **Patient Login & Pre-Verified Accounts**: Working end-to-end against production.
 - **Catalog Data**: Served live from production database (currently populated with the staging/production seed clinics and catalog items).
 - **Known Infrastructure Blocker (OTP Email Delivery)**: Transactional OTP emails for new user signups / password resets are currently delayed (~72h DNS/SMTP propagation window on production mail provider). Pre-verified accounts (`is_verified=True`) log in immediately via `POST /api/v1/auth/login/`.

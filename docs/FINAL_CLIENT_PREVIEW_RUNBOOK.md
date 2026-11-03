@@ -1,5 +1,7 @@
 # Consolidated client preview and MacBook handoff
 
+> 2026-11-03 migration update: API subdomain is owner-confirmed canonical; live compatibility/deployed SHA/migration output remain unverified. The new database is intentionally fresh and prior records were not migrated. Do not generate a final APK or publish until [compatibility acceptance](BACKEND_HOST_MIGRATION_COMPATIBILITY_AUDIT.md) is complete.
+
 Use branch `codex/final-backend-integration-client-preview`. This is a QA build runbook; no store upload or publication is authorized. New integration preserves the reviewed patient design and PR11 release-signing fail-closed configuration. For store upload credentials and Play App Signing ownership, retain [the original release runbook](MOBILE_RELEASE_RUNBOOK.md).
 
 ## Exact Windows QA-signed APK commands
@@ -23,7 +25,7 @@ flutter test
 Get-FileHash .\build\app\outputs\flutter-apk\app-release.apk -Algorithm SHA256
 ```
 
-The helper passes exactly `--dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/` to `flutter build apk --release` and optional `flutter build appbundle --release`. APK: `build/app/outputs/flutter-apk/app-release.apk`. AAB: `build/app/outputs/bundle/release/app-release.aab`. Neither file, keys nor passwords belongs in Git. Do not print environment secrets or use passwords as command-line literals.
+The helper passes exactly `--dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/` to `flutter build apk --release` and optional `flutter build appbundle --release`. APK: `build/app/outputs/flutter-apk/app-release.apk`. AAB: `build/app/outputs/bundle/release/app-release.aab`. Neither file, keys nor passwords belongs in Git. Do not print environment secrets or use passwords as command-line literals.
 
 A disposable key changes on each run and cannot update an app signed by another key or by Play. Use an isolated QA device/profile or an intentionally managed external QA key. Do not uninstall an existing app containing needed data merely to resolve a signature mismatch. A successful compile/signature check does not prove a device launch or production connectivity.
 
@@ -59,7 +61,7 @@ gem install bundler --version 4.0.20 --no-document
 bundle _4.0.20_ install
 bundle _4.0.20_ exec pod install
 cd ..
-flutter build ios --release --no-codesign --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+flutter build ios --release --no-codesign --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
 open ios/Runner.xcworkspace
 ```
 
@@ -71,7 +73,7 @@ For a signed IPA: Apple Developer Program access, registered App ID, matching Ap
 
 ```bash
 flutter build ipa --release --build-name=1.0.0 --build-number=20 \
-  --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/ \
+  --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/ \
   --export-options-plist=/absolute/path/outside/repository/ExportOptions.plist
 ```
 

@@ -1,5 +1,7 @@
 # Reproducible release builds and smoke checks
 
+> 2026-11-03 migration update: API subdomain is owner-confirmed canonical; live compatibility/deployed SHA/migration output remain unverified. The new database is intentionally fresh and prior records were not migrated. Do not generate a final APK or publish until [compatibility acceptance](BACKEND_HOST_MIGRATION_COMPATIBILITY_AUDIT.md) is complete.
+
 > Update: self-service deletion and category contracts now exist in supplied backend 1f1e4bf. Use [the consolidated report](FINAL_BACKEND_INTEGRATION_REPORT.md) and [current handoff](FINAL_INTEGRATION_BACKEND_HANDOFF_FOR_ALI.md) for current availability and remaining gates; original release/declaration evidence below remains historical.
 
 Reproducibility here means pinned toolchains/locked dependencies and an auditable artifact hash. Signed outputs are not promised byte-identical, especially when CI deliberately creates a fresh disposable certificate.
@@ -104,7 +106,7 @@ To create a **signed archive and IPA**, after the owner configures signing in Xc
 ```sh
 next_build=123 # Replace with an unused App Store Connect build number.
 flutter build ipa --release --build-name=1.0.0 --build-number="$next_build" \
-  --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/ \
+  --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/ \
   --export-options-plist=/absolute/external/path/ExportOptions.plist
 ls -lh build/ios/ipa/*.ipa
 ```

@@ -43,8 +43,8 @@ jobs:
           export AW_ANDROID_KEY_ALIAS=aw-release-verification-only
           export AW_ANDROID_KEY_PASSWORD="$AW_ANDROID_STORE_PASSWORD"
           keytool -genkeypair -keystore "$AW_ANDROID_STORE_FILE" -storetype JKS -alias "$AW_ANDROID_KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=AW Build Verification Only' -storepass:env AW_ANDROID_STORE_PASSWORD -keypass:env AW_ANDROID_KEY_PASSWORD
-          flutter build appbundle --release --build-number=1 --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
-          flutter build apk --release --build-number=1 --dart-define=API_BASE_URL=https://aestheticway.ae/api/v1/
+          flutter build appbundle --release --build-number=1 --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
+          flutter build apk --release --build-number=1 --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
           mkdir -p release-evidence
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build/app/outputs/flutter-apk/app-release.apk > release-evidence/apk-signature.txt
           sha256sum build/app/outputs/flutter-apk/app-release.apk > release-evidence/apk-sha256.txt
@@ -117,7 +117,7 @@ jobs:
       - name: Actual unsigned iOS Release device compilation
         run: |
           bundle _4.0.20_ exec pod --version | grep -x '1.16.2'
-          bundle _4.0.20_ exec flutter build ios --release --no-codesign
+          bundle _4.0.20_ exec flutter build ios --release --no-codesign --dart-define=API_BASE_URL=https://api.aestheticway.ae/api/v1/
           find build/ios/iphoneos/Runner.app -name PrivacyInfo.xcprivacy > release-evidence/packaged-privacy-manifests.txt
           test -f build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy
           plutil -lint build/ios/iphoneos/Runner.app/PrivacyInfo.xcprivacy

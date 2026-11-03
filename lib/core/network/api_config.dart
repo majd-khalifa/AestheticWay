@@ -2,7 +2,7 @@
 class ApiConfig {
   static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
   static const String defaultProductionBaseUrl =
-      'https://aestheticway.ae/api/v1/';
+      'https://api.aestheticway.ae/api/v1/';
   static const String siteOrigin = 'https://aestheticway.ae';
   static String? _customBaseUrl;
 
@@ -146,7 +146,7 @@ class ApiConfig {
   /// Production-first Base URL:
   /// 1. Runtime override via [setBaseUrl]
   /// 2. Compile-time --dart-define=API_BASE_URL=...
-  /// 3. Default production endpoint: https://aestheticway.ae/api/v1/
+  /// 3. Default production endpoint: https://api.aestheticway.ae/api/v1/
   static String get baseUrl {
     if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
       return _customBaseUrl!.endsWith('/')

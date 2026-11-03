@@ -129,15 +129,15 @@ void main() {
       );
       expect(
         resolveNetworkImageUrl('media//a.png'),
-        'https://aestheticway.ae/media/a.png',
+        'https://api.aestheticway.ae/media/a.png',
       );
       expect(
         resolveNetworkImageUrl('/media//a.png'),
-        'https://aestheticway.ae/media/a.png',
+        'https://api.aestheticway.ae/media/a.png',
       );
       expect(
         resolveNetworkImageUrl('//media//a.png'),
-        'https://aestheticway.ae/media/a.png',
+        'https://api.aestheticway.ae/media/a.png',
       );
       const signed =
           'http://bucket.r2.dev//image%2Fname.png?X-Amz-Signature=A%2Fb&x=a+b';
