@@ -756,7 +756,10 @@ void main() {
           service.setActiveClinicForTesting(profile.current);
           await render(
             tester,
-            ClinicMediaScreen(repository: Gallery()),
+            ClinicMediaScreen(
+              repository: Gallery(),
+              showcaseVideoUploadsEnabled: true,
+            ),
             ar: ar,
             dark: ar,
           );

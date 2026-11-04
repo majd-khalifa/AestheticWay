@@ -12,6 +12,7 @@ import '../../../../core/data/paged_collection.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/services/media_file_policy.dart';
+import '../../../../core/services/video_upload_policy.dart';
 import '../../../../core/widgets/portal_media_frame.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_image_picker_field.dart';
@@ -26,8 +27,14 @@ import '../../services/clinic_portal_service.dart';
 /// Clinic-owned gallery assets and the actual profile showcase-video field.
 /// No URL inputs, gallery-array PATCH, ad campaign mutation or fabricated poster field.
 class ClinicMediaScreen extends StatefulWidget {
-  const ClinicMediaScreen({super.key, this.repository});
+  const ClinicMediaScreen({
+    super.key,
+    this.repository,
+    this.showcaseVideoUploadsEnabled =
+        VideoUploadPolicy.clinicShowcaseUploadsEnabled,
+  });
   final ClinicMediaRepository? repository;
+  final bool showcaseVideoUploadsEnabled;
   @override
   State<ClinicMediaScreen> createState() => _ClinicMediaScreenState();
 }
@@ -66,6 +73,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
   CancelToken? _videoCancel;
   double? _videoProgress;
   bool _videoUncertain = false;
+  bool _videoRequestSizeRejected = false;
+  bool get _showcaseUploadsAvailable =>
+      widget.showcaseVideoUploadsEnabled && !_videoRequestSizeRejected;
   VideoPlayerController? _player;
   bool get ar => LocaleService().isArabic;
   bool get _roleAllowed =>
@@ -592,6 +602,9 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
 
   Future<void> _saveVideo({bool remove = false}) async {
     if (_locked || _videoUncertain || (!remove && _videoPath == null)) return;
+    // A release-disabled or size-rejected upload cannot be started even by a
+    // previously captured callback. Removal remains a small JSON-only change.
+    if (!remove && !_showcaseUploadsAvailable) return;
     if (!await _loadOwnedProfile(forVideo: true) ||
         (!remove && !_videoAllowed) ||
         !mounted) {
@@ -663,6 +676,12 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
               ? e.diagnostic?.safeText(e.stage.name)
               : null;
           _videoReceipt = e is ShowcaseVideoFailure ? e.receipt : null;
+          if (!remove &&
+              e is ShowcaseVideoFailure &&
+              e.stage == VideoSaveStage.upload &&
+              e.statusCode == 413) {
+            _videoRequestSizeRejected = true;
+          }
           _videoUncertain =
               e is ShowcaseVideoFailure &&
               (e.stage != VideoSaveStage.upload ||
@@ -1099,13 +1118,27 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                       ),
                     Text(
                       vip
-                          ? (ar
-                                ? 'MP4 / MOV / WebM، حتى 25 MB و15 ثانية. صورة الغلاف منفصلة عن ملف الفيديو.'
-                                : 'MP4 / MOV / WebM, up to 25 MB and 15 seconds. The cover image is separate from the video file.')
+                          ? (!_showcaseUploadsAvailable
+                                ? (ar
+                                      ? 'يمكنك اختيار فيديو لمعاينته على هذا الجهاز فقط؛ لن يتم رفعه أو حفظه على الخادم.'
+                                      : 'You can select a video for preview on this device only; it will not be uploaded or saved online.')
+                                : (ar
+                                      ? 'MP4 / MOV / WebM، حتى 25 MiB و15 ثانية محلياً. حد الرفع الفعلي للخادم غير مؤكد. صورة الغلاف منفصلة عن ملف الفيديو.'
+                                      : 'MP4 / MOV / WebM, locally up to 25 MiB and 15 seconds. The effective server upload limit is unverified. The cover image is separate from the video file.'))
                           : (ar
                                 ? 'رفع الفيديو متاح للعيادات ذات أهلية الفيديو فقط.'
                                 : 'Video upload requires the clinic’s video entitlement.'),
                     ),
+                    if (vip && !_showcaseUploadsAvailable)
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          ar
+                              ? 'رفع فيديو العرض واستبداله غير متاحين مؤقتاً. تظل معاينة الفيديو المحفوظ وإزالته متاحتين.'
+                              : 'Uploading and replacing showcase videos is temporarily unavailable. Saved-video preview and removal remain available.',
+                          key: const ValueKey('showcase-video-upload-paused'),
+                        ),
+                      ),
                     if (!_profileLoading &&
                         !vip &&
                         !clinic.hasVideoAd &&
@@ -1169,14 +1202,19 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                           ),
                           if (vip)
                             TextButton.icon(
+                              key: const ValueKey('showcase-video-picker'),
                               onPressed: _locked || _videoUncertain
                                   ? null
                                   : _chooseVideo,
                               icon: const Icon(Icons.video_library_outlined),
                               label: Text(
-                                ar
-                                    ? 'اختيار فيديو من المعرض'
-                                    : 'Select gallery video',
+                                !_showcaseUploadsAvailable
+                                    ? (ar
+                                          ? 'اختيار فيديو للمعاينة المحلية'
+                                          : 'Select video for local preview')
+                                    : (ar
+                                          ? 'اختيار فيديو من المعرض'
+                                          : 'Select gallery video'),
                               ),
                             ),
                           if (_videoPath != null)
@@ -1216,11 +1254,20 @@ class _ClinicMediaScreenState extends State<ClinicMediaScreen>
                         ),
                       if (_videoPath != null)
                         SilverButton(
-                          label: ar
-                              ? 'رفع وحفظ الفيديو'
-                              : 'Upload and save video',
+                          key: const ValueKey('showcase-video-upload'),
+                          label: !_showcaseUploadsAvailable
+                              ? (ar
+                                    ? 'رفع الفيديو غير متاح مؤقتاً'
+                                    : 'Video upload temporarily unavailable')
+                              : (ar
+                                    ? 'رفع وحفظ الفيديو'
+                                    : 'Upload and save video'),
                           isLoading: _busy,
-                          onPressed: _locked || !vip || _videoUncertain
+                          onPressed:
+                              _locked ||
+                                  !vip ||
+                                  _videoUncertain ||
+                                  !_showcaseUploadsAvailable
                               ? null
                               : () => _saveVideo(),
                         ),

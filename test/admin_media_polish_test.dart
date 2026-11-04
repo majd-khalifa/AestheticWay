@@ -1,5 +1,7 @@
 import 'package:aesthetic_way/core/widgets/luxury_image_picker_field.dart';
 import 'package:aesthetic_way/core/network/api_exception.dart';
+import 'package:aesthetic_way/core/services/video_upload_policy.dart';
+import 'package:aesthetic_way/core/widgets/silver_button.dart';
 import 'package:aesthetic_way/features/clinic_portal/services/showcase_video_change.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -376,10 +378,207 @@ void main() {
   );
 
   Future<void> openMedia(WidgetTester tester) async {
-    await f.render(tester, ClinicMediaScreen(repository: Gallery()));
+    await f.render(
+      tester,
+      ClinicMediaScreen(
+        repository: Gallery(),
+        showcaseVideoUploadsEnabled: true,
+      ),
+    );
     await tester.scrollUntilVisible(find.text('Select gallery video'), 200);
     await tester.pumpAndSettle();
   }
+
+  test('release showcase upload gate is disabled by default', () {
+    expect(VideoUploadPolicy.clinicShowcaseUploadsEnabled, isFalse);
+    expect(const ClinicMediaScreen().showcaseVideoUploadsEnabled, isFalse);
+  });
+
+  for (final dark in [false, true]) {
+    for (final ar in [false, true]) {
+      testWidgets(
+        'release gate preserves local preview without sending video dark=$dark ar=$ar',
+        (tester) async {
+          picker.video = File(
+            'test/fixtures/clinic_media/short_showcase.mp4',
+          ).absolute.path;
+          await f.render(
+            tester,
+            ClinicMediaScreen(repository: Gallery()),
+            dark: dark,
+            ar: ar,
+          );
+          final choose = find.byKey(const ValueKey('showcase-video-picker'));
+          await tester.scrollUntilVisible(choose, 250);
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const ValueKey('showcase-video-upload-paused')),
+            findsOneWidget,
+          );
+          expect(find.textContaining(RegExp(r'25 (MB|MiB)')), findsNothing);
+          await tester.tap(choose);
+          await finishNativeWork(tester, () => video.probed.isCompleted);
+          await tester.pumpAndSettle();
+          final upload = find.byKey(const ValueKey('showcase-video-upload'));
+          await tester.ensureVisible(upload);
+          await tester.pumpAndSettle();
+          expect(tester.widget<SilverButton>(upload).onPressed, isNull);
+          expect(
+            find.byKey(const ValueKey('video-local-preview-not-saved')),
+            findsOneWidget,
+          );
+          final preview = find.text(ar ? 'معاينة الفيديو' : 'Preview video');
+          await tester.ensureVisible(preview);
+          await tester.tap(preview);
+          await tester.pumpAndSettle();
+          expect(video.calls.any((call) => call.startsWith('play:')), isTrue);
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.paused,
+          );
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.resumed,
+          );
+          await tester.pumpAndSettle();
+          expect(
+            find.text(ar ? 'إلغاء اختيار الفيديو' : 'Discard selected video'),
+            findsOneWidget,
+          );
+          expect(wire.requests.where((r) => r.method == 'PATCH'), isEmpty);
+          expect(saved, isNull);
+          expect(tester.takeException(), isNull);
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('showcase-video-upload-paused')),
+          );
+          await tester.pumpAndSettle();
+          await f.capture(
+            tester,
+            'video_release_paused_${dark ? 'dark' : 'light'}_${ar ? 'ar' : 'en'}',
+          );
+          await tester.pumpWidget(const SizedBox());
+          await tester.binding.setSurfaceSize(null);
+        },
+      );
+    }
+  }
+
+  for (final replacing in [false, true]) {
+    testWidgets(
+      'QA HTTP413 pauses further writes and retains selection; replacing=$replacing',
+      (tester) async {
+        saved = replacing ? 'https://fixture.invalid/media/existing.mp4' : null;
+        final previous = saved, cover = profile()['cover_image'];
+        privateTier = 'vip';
+        use(
+          (request) => request.method == 'PATCH'
+              ? ResponseBody.fromString(
+                  '<html><h1>413 Request Entity Too Large</h1>private proxy diagnostics</html>',
+                  413,
+                  headers: {
+                    Headers.contentTypeHeader: ['text/html'],
+                  },
+                )
+              : f.body(profile()),
+        );
+        picker.video = File(
+          'test/fixtures/clinic_media/short_showcase.mp4',
+        ).absolute.path;
+        await openMedia(tester);
+        await tester.tap(find.text('Select gallery video'));
+        await finishNativeWork(tester, () => video.probed.isCompleted);
+        await tester.pumpAndSettle();
+        final upload = find.byKey(const ValueKey('showcase-video-upload'));
+        await tester.ensureVisible(upload);
+        await tester.pumpAndSettle();
+        final captured = tester.widget<SilverButton>(upload).onPressed!;
+        await tester.tap(upload);
+        await finishNativeWork(
+          tester,
+          () =>
+              wire.requests.any((r) => r.method == 'PATCH') &&
+              find.text('Processing media…').evaluate().isEmpty,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.widget<SilverButton>(upload).onPressed, isNull);
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('video-operation-error')))
+              .data,
+          contains('HTTP 413'),
+        );
+        expect(find.textContaining('private proxy diagnostics'), findsNothing);
+        expect(find.text('Discard selected video'), findsOneWidget);
+        expect(find.text('Saved video change verified.'), findsNothing);
+        expect(saved, previous);
+        expect(service.activeClinic.coverImageUrl, cover);
+        expect(File(picker.video!).existsSync(), isTrue);
+        captured(); // A callback captured before the rejection cannot bypass it.
+        await tester.pump(const Duration(seconds: 30));
+        await tester.pumpAndSettle();
+        expect(wire.requests.where((r) => r.method == 'PATCH'), hasLength(1));
+        expect(wire.requests.where((r) => r.method == 'DELETE'), isEmpty);
+        await tester.pumpWidget(const SizedBox());
+        await tester.binding.setSurfaceSize(null);
+      },
+    );
+  }
+
+  testWidgets(
+    'release gate still permits saved video playback and JSON removal',
+    (tester) async {
+      privateTier = 'vip';
+      saved = 'https://fixture.invalid/media/existing.mp4';
+      final cover = profile()['cover_image'];
+      await f.render(tester, ClinicMediaScreen(repository: Gallery()));
+      await tester.scrollUntilVisible(find.text('Preview video'), 250);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Preview video'));
+      await tester.pumpAndSettle();
+      expect(video.calls.any((call) => call.startsWith('play:')), isTrue);
+      expect(wire.requests.where((r) => r.method == 'PATCH'), isEmpty);
+      await tester.ensureVisible(find.text('Remove saved video'));
+      await tester.tap(find.text('Remove saved video'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove').last);
+      await tester.pumpAndSettle();
+      final patch = wire.requests.singleWhere((r) => r.method == 'PATCH');
+      expect(patch.data, {'video_ad_file': null});
+      expect(patch.data, isNot(isA<FormData>()));
+      final index = wire.requests.indexOf(patch);
+      expect(
+        wire.requests.skip(index + 1).any((r) => r.method == 'GET'),
+        isTrue,
+      );
+      expect(saved, isNull);
+      expect(service.activeClinic.hasVideoAd, isFalse);
+      expect(service.activeClinic.coverImageUrl, cover);
+      await tester.pumpWidget(const SizedBox());
+      await tester.binding.setSurfaceSize(null);
+    },
+  );
+
+  test(
+    'replacement is one file PATCH then fresh GET, without deleting first',
+    () async {
+      privateTier = 'vip';
+      saved = 'https://fixture.invalid/media/existing.mp4';
+      await service.refreshClinicProfile();
+      final cover = service.activeClinic.coverImageUrl;
+      await service.updateShowcaseVideo(
+        File('test/fixtures/clinic_media/short_showcase.mp4').absolute.path,
+      );
+      final patch = wire.requests.singleWhere((r) => r.method == 'PATCH');
+      expect((patch.data as FormData).files.single.key, 'video_ad_file');
+      expect((patch.data as FormData).fields, isEmpty);
+      expect(wire.requests.where((r) => r.method == 'DELETE'), isEmpty);
+      expect(wire.requests.last.method, 'GET');
+      expect(wire.requests.last.path, ApiConfig.clinicProfile);
+      expect(
+        service.activeClinic.videoUrl,
+        'https://fixture.invalid/media/saved.mp4',
+      );
+      expect(service.activeClinic.coverImageUrl, cover);
+    },
+  );
 
   testWidgets(
     'stale Basic refreshes to genuinely reported VIP and picker cancellation sends no write',
@@ -705,7 +904,13 @@ void main() {
         }
         return f.body(f.page([]));
       });
-      await f.render(tester, ClinicMediaScreen(repository: Gallery()));
+      await f.render(
+        tester,
+        ClinicMediaScreen(
+          repository: Gallery(),
+          showcaseVideoUploadsEnabled: true,
+        ),
+      );
       expect(find.text('Retry profile verification'), findsOneWidget);
       expect(wire.requests.where((r) => r.method == 'PATCH'), isEmpty);
       unavailable = false;
@@ -764,7 +969,7 @@ void main() {
           find.text('Processing media…').evaluate().isEmpty,
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('no larger than 25 MB'), findsOneWidget);
+    expect(find.textContaining('no larger than 25 MiB'), findsOneWidget);
     expect(video.created, 0);
     expect(wire.requests.where((r) => r.method == 'PATCH'), isEmpty);
     await tester.pumpWidget(const SizedBox());

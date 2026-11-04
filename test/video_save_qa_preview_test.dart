@@ -75,7 +75,10 @@ void main() {
         });
         await f.render(
           tester,
-          ClinicMediaScreen(repository: Gallery()),
+          ClinicMediaScreen(
+            repository: Gallery(),
+            showcaseVideoUploadsEnabled: true,
+          ),
           dark: dark,
           ar: ar,
         );
