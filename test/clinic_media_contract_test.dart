@@ -572,7 +572,12 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       Future<void> mount() async {
         await tester.pumpWidget(
-          MaterialApp(home: ClinicMediaScreen(repository: Gallery())),
+          MaterialApp(
+            home: ClinicMediaScreen(
+              repository: Gallery(),
+              showcaseVideoUploadsEnabled: true,
+            ),
+          ),
         );
         await tester.pumpAndSettle();
       }

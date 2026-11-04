@@ -21,10 +21,10 @@ abstract class MediaFilePolicy {
         errorCode: 'LOCAL_MEDIA_SIZE',
         message: LocaleService().isArabic
             ? (video
-                  ? 'اختر فيديو لا يتجاوز حجمه 25 MB.'
+                  ? 'اختر فيديو لا يتجاوز حجمه 25 MiB.'
                   : 'اختر صورة لا يتجاوز حجمها 5 MB.')
             : (video
-                  ? 'Select a video no larger than 25 MB.'
+                  ? 'Select a video no larger than 25 MiB.'
                   : 'Select an image no larger than 5 MB.'),
       );
     }

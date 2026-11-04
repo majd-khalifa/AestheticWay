@@ -421,6 +421,14 @@ void galleryAndRatingContracts() {
           find.textContaining('fresh clinic profile has not confirmed'),
           findsNothing,
         );
+        // The release upload notice makes this page taller. Bring the gallery
+        // confirmation into view before asserting its rendered message.
+        await t.scrollUntilVisible(
+          find.text('Saved gallery records and clinic profile verified.'),
+          -200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await t.pumpAndSettle();
         expect(
           find.text('Saved gallery records and clinic profile verified.'),
           findsOneWidget,

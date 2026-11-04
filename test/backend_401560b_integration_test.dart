@@ -448,7 +448,7 @@ void main() {
               : status == 403
               ? 'VIP'
               : status == 413
-              ? 'upload size'
+              ? 'request size'
               : status == 429
               ? 'cooldown'
               : 'temporarily unavailable',

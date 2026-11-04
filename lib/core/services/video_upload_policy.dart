@@ -5,6 +5,14 @@ import '../network/api_exception.dart';
 ///25MiB at512kbit/s takes≈410s; allow70s transport overhead. This budget does
 /// not establish the deployed reverse proxy or storage deadline.
 abstract class VideoUploadPolicy {
+  /// Release safeguard until the deployed request-size limit is verified.
+  /// Does not grant entitlement or change server permissions. Enable only in
+  /// an explicitly approved QA build, then validate PATCH + fresh private GET.
+  static const clinicShowcaseUploadsEnabled = bool.fromEnvironment(
+    'AW_ENABLE_CLINIC_SHOWCASE_VIDEO_UPLOAD',
+    defaultValue: false,
+  );
+
   static const traceKey = 'aw_video_transfer_trace';
   static const noReplayKey = 'aw_no_video_body_replay';
   static Duration get sendTimeout => Duration(

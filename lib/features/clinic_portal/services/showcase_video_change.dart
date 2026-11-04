@@ -46,8 +46,8 @@ class ShowcaseVideoFailure extends ApiException {
             : 'Refresh the profile to check VIP eligibility and administrator permissions.',
       413 =>
         ar
-            ? 'رفض الخادم حجم الطلب. اختر ملفاً أصغر أو اطلب مراجعة حد رفع الفيديو في الخادم.'
-            : 'The server rejected the upload size. Choose a smaller file or ask platform management to check the upload limit.',
+            ? 'رفض الخادم حجم الطلب. حد حجم الملف المعروض لا يؤكد الحد الفعلي للخادم. تواصل مع دعم المنصة ولا تكرر الرفع.'
+            : 'The server rejected the request size. The displayed file limit does not confirm the server limit. Contact platform support; do not repeatedly retry.',
       429 =>
         ar
             ? 'انتظر انتهاء فترة التهدئة قبل المحاولة مجدداً.'

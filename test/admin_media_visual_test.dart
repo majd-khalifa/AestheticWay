@@ -170,12 +170,18 @@ void main() {
           );
           if (screen == 'media') {
             final choose = find.text(
-              ar ? 'اختيار فيديو من المعرض' : 'Select gallery video',
+              ar
+                  ? 'اختيار فيديو للمعاينة المحلية'
+                  : 'Select video for local preview',
             );
             await tester.scrollUntilVisible(choose, 200);
             await tester.pumpAndSettle();
             await tester.ensureVisible(choose);
             await tester.pumpAndSettle();
+            expect(
+              find.byKey(const ValueKey('showcase-video-upload-paused')),
+              findsOneWidget,
+            );
             await settlePreviewImages(tester);
             await f.capture(
               tester,
