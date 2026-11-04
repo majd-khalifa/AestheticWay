@@ -139,6 +139,13 @@ jobs:
           flutter test test/gallery_ratings_physical_qa_test.dart
           --dart-define=ONBOARDING_REVIEW_CAPTURE_DIR="${{ runner.temp }}/gallery-ratings-c25e901"
           --reporter expanded
+      - name: Analytics V2 privacy, reports and bilingual renders
+        timeout-minutes: 3
+        run: >-
+          flutter test test/analytics_v2_events_test.dart test/analytics_v2_reporting_test.dart
+          test/analytics_v2_visual_test.dart
+          --dart-define=ANALYTICS_V2_CAPTURE_DIR="${{ runner.temp }}/analytics-v2"
+          --reporter expanded
       - name: Full suite
         run: flutter test --reporter expanded
       - name: Final backend integration contracts and renders
@@ -164,6 +171,7 @@ jobs:
           path: |
             visual-flutter-version.json
             visual-manifest.json
+            ${{ runner.temp }}/analytics-v2/**
             test/failures/**
             ${{ runner.temp }}/patient-golden-candidates/**
             ${{ runner.temp }}/clinic-portal-audit/**

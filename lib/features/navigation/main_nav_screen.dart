@@ -1,3 +1,4 @@
+import '../../core/analytics/patient_analytics.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/widgets/lazy_tab_stack.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,8 @@ class MainNavScreen extends StatefulWidget {
   State<MainNavScreen> createState() => _MainNavScreenState();
 }
 
-class _MainNavScreenState extends State<MainNavScreen> {
+class _MainNavScreenState extends State<MainNavScreen>
+    with WidgetsBindingObserver {
   late int _currentIndex;
   DateTime? _lastBackPressTime;
 
@@ -33,6 +35,23 @@ class _MainNavScreenState extends State<MainNavScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) PatientAnalytics.instance.appOpened();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      PatientAnalytics.instance.appOpened();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   void _onTabTapped(int index) {

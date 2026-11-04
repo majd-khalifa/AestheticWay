@@ -1,3 +1,4 @@
+import '../../../../core/analytics/patient_analytics.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import 'package:aesthetic_way/core/data/paged_collection.dart';
 import 'package:aesthetic_way/core/widgets/pagination_footer.dart';
@@ -567,6 +568,10 @@ class _LeadRequestCard extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: () => ContactLauncher.openWhatsApp(
                       phoneNumber: effectiveWhatsapp,
+                      attribution: PatientAttribution(
+                        request.clinicId,
+                        surface: PatientSurface.clinicDetails,
+                      ),
                     ),
                     icon: const Icon(
                       Icons.chat_bubble_outline,
@@ -599,8 +604,13 @@ class _LeadRequestCard extends StatelessWidget {
                 ],
                 if (effectivePhone.isNotEmpty) ...[
                   ElevatedButton.icon(
-                    onPressed: () =>
-                        ContactLauncher.makePhoneCall(effectivePhone),
+                    onPressed: () => ContactLauncher.makePhoneCall(
+                      effectivePhone,
+                      attribution: PatientAttribution(
+                        request.clinicId,
+                        surface: PatientSurface.clinicDetails,
+                      ),
+                    ),
                     icon: Icon(
                       Icons.phone_outlined,
                       size: 13,
@@ -796,6 +806,10 @@ class _LeadRequestCard extends StatelessWidget {
                             child: OutlinedButton.icon(
                               onPressed: () => ContactLauncher.openWhatsApp(
                                 phoneNumber: effectiveWhatsapp,
+                                attribution: PatientAttribution(
+                                  request.clinicId,
+                                  surface: PatientSurface.clinicDetails,
+                                ),
                               ),
                               icon: const Icon(
                                 Icons.chat_bubble_outline,
@@ -828,8 +842,13 @@ class _LeadRequestCard extends StatelessWidget {
                         if (effectivePhone.isNotEmpty)
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () =>
-                                  ContactLauncher.makePhoneCall(effectivePhone),
+                              onPressed: () => ContactLauncher.makePhoneCall(
+                                effectivePhone,
+                                attribution: PatientAttribution(
+                                  request.clinicId,
+                                  surface: PatientSurface.clinicDetails,
+                                ),
+                              ),
                               icon: Icon(
                                 Icons.phone_outlined,
                                 size: 16,

@@ -1,3 +1,4 @@
+import '../../../core/analytics/patient_analytics.dart';
 import 'package:flutter/material.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/utils/maps_launcher.dart';
@@ -245,6 +246,14 @@ class _NearbyClinicsScreenState extends State<NearbyClinicsScreen>
                                         icon: Icons.directions_outlined,
                                         onPressed: (_) async {
                                           final p = row.branchLocation!;
+                                          PatientAnalytics.instance.record(
+                                            PatientEventType.mapsTap,
+                                            attribution: PatientAttribution(
+                                              row.clinic.id,
+                                              branchId: row.branchId,
+                                              surface: PatientSurface.maps,
+                                            ),
+                                          );
                                           if (!await MapsLauncher.openVerifiedLocation(
                                             latitude: p.latitude,
                                             longitude: p.longitude,

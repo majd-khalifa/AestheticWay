@@ -1,3 +1,4 @@
+import '../analytics/patient_analytics.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Direct Contact Launcher (Call & WhatsApp)
@@ -34,9 +35,19 @@ abstract class ContactLauncher {
   }
 
   /// Initiates a direct phone call to clinic, practitioner or platform support
-  static Future<bool> makePhoneCall(String phoneNumber) async {
+  static Future<bool> makePhoneCall(
+    String phoneNumber, {
+    PatientAttribution? attribution,
+    PatientAnalytics? analytics,
+  }) async {
     final cleanPhone = normalizePhoneForDial(phoneNumber);
     if (cleanPhone.isEmpty) return false;
+    if (attribution != null) {
+      (analytics ?? PatientAnalytics.instance).record(
+        PatientEventType.callTap,
+        attribution: attribution,
+      );
+    }
     final uri = Uri(scheme: 'tel', path: cleanPhone);
     try {
       if (await canLaunchUrl(uri)) {
@@ -51,11 +62,19 @@ abstract class ContactLauncher {
   /// Opens direct WhatsApp chat with clinic reception or recipient
   static Future<bool> openWhatsApp({
     required String phoneNumber,
+    PatientAttribution? attribution,
+    PatientAnalytics? analytics,
     String message =
         'مرحباً، أود الاستفسار عن الخدمات والعيادة عبر تطبيق AESTHETIC WAY.',
   }) async {
     final cleanPhone = normalizePhoneForWhatsApp(phoneNumber);
     if (cleanPhone.isEmpty) return false;
+    if (attribution != null) {
+      (analytics ?? PatientAnalytics.instance).record(
+        PatientEventType.whatsappTap,
+        attribution: attribution,
+      );
+    }
     final encodedMessage = Uri.encodeComponent(message);
     final url = 'https://wa.me/$cleanPhone?text=$encodedMessage';
     final uri = Uri.parse(url);
