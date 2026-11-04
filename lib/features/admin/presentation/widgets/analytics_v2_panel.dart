@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../core/auth/session_snapshot.dart';
 import '../../../../core/localization/app_locale.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/luxury_card.dart';
@@ -10,6 +11,7 @@ import '../../models/admin_reporting_period.dart';
 import '../../services/analytics_v2_controller.dart';
 import '../screens/admin_leads_screen.dart';
 import 'admin_components.dart';
+import 'analytics_presentation.dart';
 
 class AnalyticsV2Panel extends StatefulWidget {
   const AnalyticsV2Panel({super.key, this.repository, this.initialQuery});
@@ -23,7 +25,7 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
   late final AnalyticsV2Controller _reports;
   final _search = TextEditingController();
   Timer? _debounce;
-  bool _choosingDates = false;
+  bool _choosingDates = false, _reportOpen = false, _dailyOpen = false;
   @override
   void initState() {
     super.initState();
@@ -46,7 +48,7 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
 
   Future<void> _dates() async {
     if (_choosingDates || _reports.loading) return;
-    _choosingDates = true;
+    setState(() => _choosingDates = true);
     _debounce?.cancel();
     final q = _reports.query;
     final range = await showDateRangePicker(
@@ -62,8 +64,9 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
         end: AdminReportingPeriod.parse(q.to),
       ),
     );
-    _choosingDates = false;
-    if (!mounted || range == null || !_reports.authorized) return;
+    if (!mounted) return;
+    setState(() => _choosingDates = false);
+    if (range == null || !_reports.authorized) return;
     try {
       await _reports.load(
         filters: q.copyWith(
@@ -79,8 +82,8 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
           SnackBar(
             content: Text(
               adminText(
-                'Select an ordered period of at most366 days.',
-                'اختر فترة مرتبة لا تتجاوز366 يوماً.',
+                'Select an ordered period of at most 366 days.',
+                'اختر فترة مرتبة لا تتجاوز 366 يوماً.',
               ),
             ),
           ),
@@ -100,149 +103,257 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
     _ => '—',
   };
 
-  String _label(String key) => switch (key) {
-    'clinic_views' => adminText('Clinic profile views', 'مشاهدات ملف العيادة'),
-    'whatsapp_taps' => adminText('WhatsApp taps', 'نقرات واتساب'),
-    'call_taps' => adminText('Call taps', 'نقرات الاتصال'),
-    'maps_taps' => adminText('Maps taps', 'نقرات الخرائط'),
-    _ => adminText('Saved consultations', 'الاستشارات المحفوظة'),
-  };
-  String _coverage(AnalyticsCoverage state) => switch (state) {
-    AnalyticsCoverage.complete => adminText(
-      'Complete coverage',
-      'تغطية مكتملة',
-    ),
-    AnalyticsCoverage.partial => adminText('Partial coverage', 'تغطية جزئية'),
-    AnalyticsCoverage.unavailable => adminText(
-      'Coverage unavailable',
-      'التغطية غير متاحة',
-    ),
-  };
-  String _value(int? n) => n == null ? '—' : adminNumber(n);
-  String _observation(AnalyticsMetric metric) =>
-      '${_coverage(metric.coverage)} · ${adminText('Observed', 'مرصود')}: ${adminNumber(metric.recorded)} · ${adminText('Validated/saved', 'متحقق/محفوظ')}: ${adminNumber(metric.trusted)}';
-
-  Widget _metrics(AnalyticsV2Metrics metrics) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(
-          adminText(
-            'Canonical total for this clinic',
-            'الإجمالي الموثوق لهذه العيادة',
-          ),
-        ),
-        trailing: Text(
-          _value(metrics.total),
-          key: const ValueKey('analytics-v2-total'),
-        ),
-        subtitle: Text(
-          '${adminText('Observed total', 'الإجمالي المرصود')}: ${adminNumber(metrics.recordedTotal)}',
-        ),
-      ),
-      AdminMetricGrid(
-        children: [
-          for (final key in analyticsMetricKeys)
-            AdminMetricCard(
-              label: _label(key),
-              value: _value(metrics.values[key]!.count),
-              icon: key == 'lead_submissions'
-                  ? Icons.mark_email_read_outlined
-                  : Icons.insights_outlined,
-              caption: _observation(metrics.values[key]!),
-            ),
-        ],
-      ),
-      Text(
-        adminText(
-          'Unique accounts: unavailable',
-          'الحسابات الفريدة: غير متاحة',
-        ),
-        style: TextStyle(color: AppColors.mutedText(context)),
-      ),
-    ],
-  );
-
-  Widget _details(AnalyticsV2Detail detail) {
-    final q = _reports.query, clinic = detail.clinic;
-    return LuxuryCard(
-      key: const ValueKey('analytics-v2-detail'),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AdminSectionTitle(
-            clinic.name(LocaleService().isArabic),
-            subtitle: '${q.from} — ${q.to} · Asia/Dubai',
-          ),
-          _metrics(clinic.metrics),
-          TextButton.icon(
-            icon: const Icon(Icons.mark_email_read_outlined),
-            label: Text(
-              adminText('View requests in this period', 'عرض طلبات هذه الفترة'),
-            ),
-            onPressed: () {
-              if (!_reports.authorized) return;
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => AdminLeadsScreen(
-                    initialClinic: AdminClinicModel.fromJson({
-                      'id': clinic.id,
-                      'name_en': clinic.nameEn,
-                      'name_ar': clinic.nameAr,
-                    }),
-                    dateFrom: q.from,
-                    dateTo: q.to,
+  Future<void> _openReport(AnalyticsV2Clinic clinic) async {
+    if (_reportOpen || !_reports.authorized) return;
+    _reportOpen = true;
+    _dailyOpen = false;
+    final session = SessionSnapshot();
+    unawaited(_reports.select(clinic.id));
+    try {
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        showDragHandle: true,
+        backgroundColor: AppColors.bg(context),
+        constraints: const BoxConstraints(maxWidth: 1100),
+        builder: (sheet) => FractionallySizedBox(
+          heightFactor: .94,
+          child: ListenableBuilder(
+            listenable: Listenable.merge([_reports, LocaleService()]),
+            builder: (context, _) {
+              if (!_reports.authorized || !session.isCurrent) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        adminText(
+                          'This report is no longer available.',
+                          'لم يعد هذا التقرير متاحاً.',
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(sheet),
+                        child: Text(adminText('Close', 'إغلاق')),
+                      ),
+                    ],
                   ),
-                ),
+                );
+              }
+              final detail = _reports.detail;
+              final q = _reports.query;
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 8, 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            clinic.name(LocaleService().isArabic),
+                            style: TextStyle(
+                              color: AppColors.text(context),
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: adminText(
+                            'Close clinic report',
+                            'إغلاق تقرير العيادة',
+                          ),
+                          onPressed: () => Navigator.pop(sheet),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      '${q.from} — ${q.to} · UTC+4',
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.mutedText(context),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: AnalyticsPage(
+                      children: [
+                        if (_reports.detailLoading) ...[
+                          const LinearProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(
+                            adminText(
+                              'Loading clinic report…',
+                              'جارٍ تحميل تقرير العيادة…',
+                            ),
+                            semanticsLabel: adminText(
+                              'Loading clinic report',
+                              'جارٍ تحميل تقرير العيادة',
+                            ),
+                          ),
+                        ],
+                        if (_reports.detailError != null)
+                          AdminNotice(
+                            message: _reports.detailError!,
+                            error: true,
+                            onRetry: () => _reports.select(clinic.id),
+                          ),
+                        if (detail != null) _details(detail, session),
+                      ],
+                    ),
+                  ),
+                ],
               );
             },
           ),
-          AdminSectionTitle(
-            adminText('Daily clinic records', 'سجلات العيادة اليومية'),
-            subtitle: adminText(
-              'Only server-returned days; no unique-user or growth estimates.',
-              'الأيام التي أعادها الخادم فقط؛ بلا تقديرات للمستخدمين أو النمو.',
-            ),
-          ),
-          for (final day in detail.days)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(day.date, textDirection: TextDirection.ltr),
-              subtitle: Text(
-                [
-                  for (final key in analyticsMetricKeys)
-                    '${_label(key)}: ${_value(day.metrics.values[key]!.count)}',
-                ].join(' · '),
-              ),
-            ),
-          Wrap(
-            spacing: 12,
+        ),
+      );
+    } finally {
+      _reportOpen = false;
+    }
+  }
+
+  Widget _details(AnalyticsV2Detail detail, SessionSnapshot session) {
+    final q = _reports.query, clinic = detail.clinic;
+    return Column(
+      key: const ValueKey('analytics-v2-detail'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LuxuryCard(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextButton(
-                onPressed: detail.seriesPage > 1 && !_reports.detailLoading
-                    ? () => _reports.select(
-                        clinic.id,
-                        seriesPage: detail.seriesPage - 1,
-                      )
-                    : null,
-                child: Text(adminText('Previous days', 'الأيام السابقة')),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      adminText('Canonical total', 'الإجمالي المعتمد'),
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    analyticsValue(clinic.metrics.total),
+                    key: const ValueKey('analytics-v2-total'),
+                    style: TextStyle(
+                      color: AppColors.text(context),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: detail.hasMoreDays && !_reports.detailLoading
-                    ? () => _reports.select(
-                        clinic.id,
-                        seriesPage: detail.seriesPage + 1,
-                      )
-                    : null,
-                child: Text(adminText('Next days', 'الأيام التالية')),
+              Text(
+                '${adminText('Observed total', 'الإجمالي المرصود')} ${adminNumber(clinic.metrics.recordedTotal)}',
+                style: TextStyle(
+                  color: AppColors.mutedText(context),
+                  fontSize: 11.5,
+                ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        AnalyticsKpiGrid(
+          children: [
+            for (final key in analyticsMetricKeys)
+              AnalyticsMetricTile(
+                label: analyticsLabel(key),
+                value: analyticsValue(clinic.metrics.values[key]!.count),
+                metric: clinic.metrics.values[key],
+                valueKey: ValueKey('clinic-$key-canonical'),
+                trustedLabel: key == 'lead_submissions'
+                    ? adminText('Saved', 'محفوظ')
+                    : null,
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.mark_email_read_outlined, size: 18),
+          label: Text(
+            adminText('View requests in this period', 'عرض طلبات هذه الفترة'),
+          ),
+          onPressed: () {
+            if (!_reports.authorized || !session.isCurrent) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => AdminLeadsScreen(
+                  initialClinic: AdminClinicModel.fromJson({
+                    'id': clinic.id,
+                    'name_en': clinic.nameEn,
+                    'name_ar': clinic.nameAr,
+                  }),
+                  dateFrom: q.from,
+                  dateTo: q.to,
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        AnalyticsDisclosure(
+          key: ValueKey(
+            'daily-${clinic.id}-${q.from}-${q.to}-${detail.seriesPage}',
+          ),
+          title: adminText('Daily clinic records', 'سجلات العيادة اليومية'),
+          subtitle:
+              '${adminText('Reported days', 'الأيام الواردة')}: ${adminNumber(detail.dayCount)} · ${adminText('Page', 'صفحة')} ${adminNumber(detail.seriesPage)}',
+          initiallyExpanded: _dailyOpen,
+          onExpansionChanged: (value) => _dailyOpen = value,
+          children: [
+            _DailyReport(
+              key: ValueKey('dates-${clinic.id}-${detail.seriesPage}'),
+              detail: detail,
+            ),
+            Wrap(
+              spacing: 12,
+              children: [
+                TextButton(
+                  onPressed: detail.seriesPage > 1 && !_reports.detailLoading
+                      ? () => _reports.select(
+                          clinic.id,
+                          seriesPage: detail.seriesPage - 1,
+                        )
+                      : null,
+                  child: Text(adminText('Previous days', 'الأيام السابقة')),
+                ),
+                TextButton(
+                  onPressed: detail.hasMoreDays && !_reports.detailLoading
+                      ? () => _reports.select(
+                          clinic.id,
+                          seriesPage: detail.seriesPage + 1,
+                        )
+                      : null,
+                  child: Text(adminText('Next days', 'الأيام التالية')),
+                ),
+              ],
+            ),
+          ],
+        ),
+        AnalyticsHelp(),
+        AnalyticsDisclosure(
+          title: adminText('Clinic record details', 'تفاصيل سجل العيادة'),
+          children: [
+            Text('${_status(clinic.status)} · ${_status(clinic.setupStatus)}'),
+            if (clinic.deleted) Text(adminText('Archived', 'مؤرشفة')),
+            SelectableText(clinic.id, textDirection: TextDirection.ltr),
+          ],
+        ),
+      ],
     );
   }
 
@@ -263,85 +374,95 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
       final page = _reports.page, q = _reports.query;
       return RefreshIndicator(
         onRefresh: () => _reports.load(),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            40 + MediaQuery.paddingOf(context).bottom,
-          ),
+        child: AnalyticsPage(
           children: [
-            AdminSectionTitle(
-              adminText('Clinic Analytics V2', 'تحليلات العيادات V2'),
-              subtitle: adminText(
-                'Canonical counts require complete attested coverage.',
-                'الأعداد الموثوقة تتطلب تغطية مكتملة مثبتة.',
-              ),
-            ),
-            Text(
-              '${q.from} — ${q.to} · Asia/Dubai',
-              textDirection: TextDirection.ltr,
-            ),
-            TextButton.icon(
-              onPressed: _reports.loading ? null : _dates,
-              icon: const Icon(Icons.date_range),
-              label: Text(
-                adminText('Reporting dates · UTC+4', 'فترة التقرير · UTC+4'),
-              ),
-            ),
-            AdminNotice(
-              message: adminText(
-                '— means unavailable, not zero. Observed records can include legacy events; validated records alone do not prove complete collection. Calls, WhatsApp and Maps are tap intentions, not completed conversions. Historical records are not assumed; coverage reflects this database.',
-                '— تعني غير متاح وليست صفراً. قد تشمل السجلات المرصودة أحداثاً قديمة، والسجلات المتحققة وحدها لا تثبت اكتمال الجمع. نقرات التواصل والخرائط نوايا وليست تحويلات مكتملة. لا نفترض وجود السجلات التاريخية؛ التغطية تخص هذه القاعدة.',
-              ),
+            AnalyticsPeriod(
+              title: adminText('Clinic Analytics V2', 'تحليلات العيادات V2'),
+              period: '${q.from} — ${q.to}',
+              onChoose: _reports.loading ? null : _dates,
+              busy: _choosingDates,
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _search,
-              maxLength: 120,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                helperText: adminText(
-                  'Arabic, English or UUID',
-                  'عربي أو إنجليزي أو UUID',
-                ),
-                labelText: adminText('Search clinics', 'بحث العيادات'),
-              ),
-              onChanged: (value) {
-                _debounce?.cancel();
-                _debounce = Timer(const Duration(milliseconds: 350), () {
-                  if (mounted) {
-                    _reports.load(
-                      filters: _reports.query.copyWith(
-                        search: value.trim(),
-                        page: 1,
-                      ),
-                    );
-                  }
-                });
-              },
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: q.includeDeleted,
-              title: Text(
-                adminText(
-                  'Include archived clinics',
-                  'تضمين العيادات المؤرشفة',
-                ),
-              ),
-              onChanged: (value) {
-                _debounce?.cancel();
-                _reports.load(
-                  filters: q.copyWith(
-                    includeDeleted: value,
-                    search: _search.text.trim(),
-                    page: 1,
+            LuxuryCard(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _search,
+                    maxLength: 120,
+                    decoration: InputDecoration(
+                      counterText: '',
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: adminText('Search clinics', 'بحث العيادات'),
+                    ),
+                    onChanged: (value) {
+                      _debounce?.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 350), () {
+                        if (mounted) {
+                          _reports.load(
+                            filters: _reports.query.copyWith(
+                              search: value.trim(),
+                              page: 1,
+                            ),
+                          );
+                        }
+                      });
+                    },
                   ),
-                );
-              },
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    title: Text(
+                      adminText('Filters', 'المرشحات'),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: q.includeDeleted
+                        ? Text(
+                            adminText(
+                              'Archived clinics included',
+                              'تشمل العيادات المؤرشفة',
+                            ),
+                          )
+                        : null,
+                    children: [
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: q.includeDeleted,
+                        title: Text(
+                          adminText(
+                            'Include archived clinics',
+                            'تضمين العيادات المؤرشفة',
+                          ),
+                        ),
+                        onChanged: (value) {
+                          _debounce?.cancel();
+                          _reports.load(
+                            filters: q.copyWith(
+                              includeDeleted: value,
+                              search: _search.text.trim(),
+                              page: 1,
+                            ),
+                          );
+                        },
+                      ),
+                      Text(
+                        adminText(
+                          'Search Arabic, English or an exact clinic UUID.',
+                          'ابحث بالعربية أو الإنجليزية أو بمعرّف العيادة الكامل.',
+                        ),
+                        style: TextStyle(
+                          color: AppColors.mutedText(context),
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+            AnalyticsHelp(),
             if (_reports.loading) const LinearProgressIndicator(),
             if (_reports.error != null)
               AdminNotice(
@@ -350,20 +471,14 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
                 onRetry: () => _reports.load(),
               ),
             if (page != null) ...[
-              AdminMetricCard(
+              AnalyticsMetricTile(
                 label: adminText(
                   'Platform app opens',
                   'مرات فتح التطبيق على المنصة',
                 ),
-                value: _value(page.metadata.appOpens.count),
-                icon: Icons.smartphone_outlined,
-                caption: _observation(page.metadata.appOpens),
-              ),
-              Text(
-                adminText(
-                  'No platform clinic total is supplied by this endpoint; page rows are never summed into one.',
-                  'لا توفر هذه الواجهة إجمالي نشاط العيادات على المنصة؛ لا نجمع صفوف الصفحة لإنتاجه.',
-                ),
+                value: analyticsValue(page.metadata.appOpens.count),
+                metric: page.metadata.appOpens,
+                valueKey: const ValueKey('analytics-platform-app-opens'),
               ),
               AdminSectionTitle(
                 adminText('Clinic directory', 'دليل العيادات'),
@@ -371,34 +486,55 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
                     '${adminText('Server results', 'نتائج الخادم')}: ${adminNumber(page.count)} · ${adminText('Page', 'صفحة')} ${adminNumber(q.page)}',
               ),
               if (page.clinics.isEmpty)
-                Text(
-                  adminText(
-                    'No clinic records match these filters.',
-                    'لا توجد سجلات عيادات تطابق المرشحات.',
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    adminText(
+                      'No clinic records match these filters.',
+                      'لا توجد سجلات عيادات تطابق المرشحات.',
+                    ),
                   ),
                 ),
               for (final clinic in page.clinics)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: LuxuryCard(
+                    padding: EdgeInsets.zero,
+                    customBorder: Border.all(
+                      color: _reports.selectedId == clinic.id
+                          ? AppColors.goldText(context)
+                          : AppColors.border(context),
+                      width: .8,
+                    ),
                     child: ListTile(
-                      selected: _reports.selectedId == clinic.id,
-                      title: Text(clinic.name(LocaleService().isArabic)),
-                      subtitle: Text(
-                        '${clinic.id}\n${clinic.deleted ? adminText('Archived', 'مؤرشفة') : _status(clinic.status)} · ${_status(clinic.setupStatus)}',
+                      key: ValueKey('analytics-clinic-${clinic.id}'),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
                       ),
-                      trailing:
-                          _reports.detailLoading &&
-                              _reports.selectedId == clinic.id
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.chevron_right),
-                      onTap: _reports.detailLoading
-                          ? null
-                          : () => _reports.select(clinic.id),
+                      title: Text(
+                        clinic.name(LocaleService().isArabic),
+                        style: TextStyle(
+                          color: AppColors.text(context),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${clinic.deleted ? adminText('Archived', 'مؤرشفة') : _status(clinic.status)} · ${_status(clinic.setupStatus)}',
+                        style: TextStyle(
+                          color: AppColors.mutedText(context),
+                          fontSize: 11.5,
+                        ),
+                      ),
+                      trailing: Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_left
+                            : Icons.chevron_right,
+                        size: 20,
+                      ),
+                      onTap: () => _openReport(clinic),
                     ),
                   ),
                 ),
@@ -424,21 +560,69 @@ class _AnalyticsV2PanelState extends State<AnalyticsV2Panel> {
                 ],
               ),
             ],
-            if (_reports.detailLoading) const LinearProgressIndicator(),
-            if (_reports.detailError != null)
-              AdminNotice(
-                message: _reports.detailError!,
-                error: true,
-                onRetry: () {
-                  if (_reports.selectedId != null) {
-                    _reports.select(_reports.selectedId!);
-                  }
-                },
-              ),
-            if (_reports.detail != null) _details(_reports.detail!),
           ],
         ),
       );
     },
   );
+}
+
+class _DailyReport extends StatefulWidget {
+  const _DailyReport({super.key, required this.detail});
+  final AnalyticsV2Detail detail;
+  @override
+  State<_DailyReport> createState() => _DailyReportState();
+}
+
+class _DailyReportState extends State<_DailyReport> {
+  late String? _date = widget.detail.days.firstOrNull?.date;
+  @override
+  Widget build(BuildContext context) {
+    final days = widget.detail.days;
+    if (days.isEmpty) {
+      return Text(
+        adminText(
+          'No reported dates on this page.',
+          'لا توجد تواريخ واردة في هذه الصفحة.',
+        ),
+      );
+    }
+    final selected = days.firstWhere((day) => day.date == _date);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          key: const ValueKey('analytics-reported-date'),
+          initialValue: _date,
+          isExpanded: true,
+          itemHeight: null,
+          menuMaxHeight: 320,
+          decoration: InputDecoration(
+            labelText: adminText('Reported date', 'التاريخ الوارد'),
+          ),
+          items: [
+            for (final day in days)
+              DropdownMenuItem(
+                value: day.date,
+                child: Text(
+                  '${day.date} · ${adminText('Observed', 'مرصود')} ${adminNumber(day.metrics.recordedTotal)}',
+                  textDirection: TextDirection.ltr,
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+              ),
+          ],
+          onChanged: (value) {
+            if (value != null) setState(() => _date = value);
+          },
+        ),
+        const SizedBox(height: 12),
+        Text(
+          adminText('Canonical counts', 'الأعداد المعتمدة'),
+          style: TextStyle(color: AppColors.mutedText(context), fontSize: 12),
+        ),
+        AnalyticsDailyMetrics(metrics: selected.metrics),
+      ],
+    );
+  }
 }

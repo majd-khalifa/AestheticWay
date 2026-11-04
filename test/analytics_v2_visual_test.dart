@@ -11,7 +11,7 @@ import 'package:aesthetic_way/core/auth/token_storage.dart';
 import 'package:aesthetic_way/core/localization/app_locale.dart';
 import 'package:aesthetic_way/features/admin/data/analytics_v2_repository.dart';
 import 'package:aesthetic_way/features/admin/presentation/widgets/analytics_v2_panel.dart';
-import 'package:aesthetic_way/features/admin/presentation/widgets/admin_components.dart';
+import 'package:aesthetic_way/features/admin/presentation/widgets/analytics_presentation.dart';
 import 'package:aesthetic_way/features/admin/presentation/screens/admin_analytics_screen.dart';
 import 'support/patient_visual_harness.dart';
 import 'analytics_v2_reporting_test.dart'
@@ -84,14 +84,15 @@ void main() {
           await tester.binding.setSurfaceSize(const Size(390, 844));
           final key = GlobalKey(), api = responses();
           await tester.pumpWidget(
-            MaterialApp(
-              theme: patientVisualTheme(dark: dark),
-              locale: Locale(ar ? 'ar' : 'en'),
-              supportedLocales: const [Locale('en'), Locale('ar')],
-              localizationsDelegates: GlobalMaterialLocalizations.delegates,
-              home: RepaintBoundary(
-                key: key,
-                child: Scaffold(
+            RepaintBoundary(
+              key: key,
+              child: MaterialApp(
+                debugShowCheckedModeBanner: false,
+                theme: patientVisualTheme(dark: dark),
+                locale: Locale(ar ? 'ar' : 'en'),
+                supportedLocales: const [Locale('en'), Locale('ar')],
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                home: Scaffold(
                   body: AnalyticsV2Panel(
                     repository: AnalyticsV2Repository(client: api),
                     initialQuery: query(),
@@ -105,8 +106,8 @@ void main() {
             find.text(ar ? 'تحليلات العيادات V2' : 'Clinic Analytics V2'),
             findsOneWidget,
           );
-          final appCard = tester.widget<AdminMetricCard>(
-            find.byType(AdminMetricCard).first,
+          final appCard = tester.widget<AnalyticsMetricTile>(
+            find.byType(AnalyticsMetricTile).first,
           );
           expect(
             appCard.value,
@@ -115,6 +116,14 @@ void main() {
           expect(tester.takeException(), isNull);
           await capture(tester, key, 'v2_${name}_overview');
           for (final (number, expected) in [(1, '5'), (2, '0'), (4, '—')]) {
+            if (number != 1) {
+              await tester.tap(
+                find.byTooltip(
+                  ar ? 'إغلاق تقرير العيادة' : 'Close clinic report',
+                ),
+              );
+              await tester.pumpAndSettle();
+            }
             final scrollable = find.byType(Scrollable).first;
             tester.state<ScrollableState>(scrollable).position.jumpTo(0);
             await tester.pumpAndSettle();
@@ -133,10 +142,16 @@ void main() {
             expect(find.text(label).hitTestable(), findsOneWidget);
             await tester.tap(find.text(label));
             await tester.pumpAndSettle();
+            final reportScrollable = find
+                .descendant(
+                  of: find.byType(BottomSheet),
+                  matching: find.byType(Scrollable),
+                )
+                .first;
             await tester.scrollUntilVisible(
               find.byKey(const ValueKey('analytics-v2-total')),
               400,
-              scrollable: scrollable,
+              scrollable: reportScrollable,
               maxScrolls: 50,
             );
             await tester.pumpAndSettle();
@@ -159,6 +174,29 @@ void main() {
                 ? 'zero'
                 : 'unavailable';
             await capture(tester, key, 'v2_${name}_$state');
+            if (number == 1) {
+              final daily = find.text(
+                ar ? 'سجلات العيادة اليومية' : 'Daily clinic records',
+              );
+              await tester.scrollUntilVisible(
+                daily,
+                400,
+                scrollable: reportScrollable,
+                maxScrolls: 50,
+              );
+              await tester.ensureVisible(daily);
+              await tester.pumpAndSettle();
+              expect(daily.hitTestable(), findsOneWidget);
+              await tester.tap(daily);
+              await tester.pumpAndSettle();
+              expect(
+                find.byKey(const ValueKey('analytics-reported-date')),
+                findsOneWidget,
+              );
+              await tester.ensureVisible(daily);
+              await tester.pumpAndSettle();
+              await capture(tester, key, 'v2_${name}_daily');
+            }
           }
           expect(
             api.calls.where((p) => p == AnalyticsV2Repository.clinicsPath),
@@ -205,6 +243,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(api.parameters.last['search'], 'عيادة اصطناعية 23');
       expect(api.parameters.last['page'], 1);
+      await tester.tap(find.text('Filters'));
+      await tester.pumpAndSettle();
       final toggle = find.byType(SwitchListTile);
       await tester.ensureVisible(toggle);
       await tester.tap(toggle);

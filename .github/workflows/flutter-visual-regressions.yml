@@ -143,7 +143,7 @@ jobs:
         timeout-minutes: 3
         run: >-
           flutter test test/analytics_v2_events_test.dart test/analytics_v2_reporting_test.dart
-          test/analytics_v2_visual_test.dart
+          test/analytics_v2_visual_test.dart test/admin_analytics_polish_test.dart
           --dart-define=ANALYTICS_V2_CAPTURE_DIR="${{ runner.temp }}/analytics-v2"
           --reporter expanded
       - name: Full suite
