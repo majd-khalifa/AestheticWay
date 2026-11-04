@@ -961,7 +961,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
-          home: const AdminAnalyticsScreen(),
+          home: const AdminAnalyticsScreen(initialTab: 1),
         ),
       );
       await tester.pumpAndSettle();
@@ -1711,7 +1711,7 @@ void main() {
               const AdminLeadsScreen(),
               AdminLeadDetailScreen(lead: _lead()),
               const AdminOffersScreen(),
-              const AdminAnalyticsScreen(),
+              const AdminAnalyticsScreen(initialTab: 1),
               const AdminSettingsScreen(),
               AdminCategoriesScreen(
                 repository: CategoryRepository(

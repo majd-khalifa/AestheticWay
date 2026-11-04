@@ -1,3 +1,4 @@
+import '../../../../core/analytics/patient_analytics.dart';
 import '../../../clinics/presentation/screens/clinics_list_screen.dart';
 import '../../../locations/presentation/home_location_panel.dart';
 import '../../../locations/presentation/home_gps_nearby_section.dart';
@@ -187,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _handleContact(ClinicModel clinic) {
-    ContactOptionsSheet.show(context, clinic);
+    ContactOptionsSheet.show(context, clinic, surface: PatientSurface.home);
   }
 
   Future<void> _handleOfferTap(OfferModel offer, AsyncActionScope action) =>

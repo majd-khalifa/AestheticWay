@@ -1,3 +1,5 @@
+import '../../../../core/analytics/patient_clinic_exposure.dart';
+import '../../../../core/analytics/patient_analytics.dart';
 import 'package:aesthetic_way/core/widgets/patient_image.dart';
 import '../../../../core/widgets/viewport_activity.dart';
 import '../../../../core/widgets/silver_button.dart';
@@ -200,7 +202,11 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => PatientDesign(builder: _buildPatient);
+  Widget build(BuildContext context) => PatientClinicExposure(
+    clinicId: _clinic.id,
+    publicDetailVerified: _publicDetailVerified,
+    child: PatientDesign(builder: _buildPatient),
+  );
 
   Widget _buildPatient(BuildContext context) {
     final loc = LocaleService();
@@ -342,6 +348,10 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                 ? 'جارٍ فتح الخرائط'
                                 : 'Opening Maps',
                             onPressed: (action) async {
+                              PatientAnalytics.instance.record(
+                                PatientEventType.mapsTap,
+                                attribution: PatientAttribution(clinic.id),
+                              );
                               final opened = await action.wait(
                                 launchUrl(
                                   clinic.mapsUri!,
@@ -547,6 +557,10 @@ class _ClinicProfileScreenState extends State<ClinicProfileScreen> {
                                 variant: SilverButtonVariant.secondary,
                                 icon: Icons.open_in_new,
                                 onPressed: (action) async {
+                                  PatientAnalytics.instance.record(
+                                    PatientEventType.mapsTap,
+                                    attribution: PatientAttribution(clinic.id),
+                                  );
                                   final opened = await action.wait(
                                     launchUrl(
                                       clinic.mapsUri!,

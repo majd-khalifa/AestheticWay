@@ -211,7 +211,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.darkTheme,
-            home: const AdminAnalyticsScreen(),
+            home: const AdminAnalyticsScreen(initialTab: 1),
           ),
         );
 

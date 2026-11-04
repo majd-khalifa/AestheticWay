@@ -1,0 +1,99 @@
+{
+  "date": "2026-11-04",
+  "frontend_branch": "codex/analytics-v2-patient-integration",
+  "main_base": "bf7534db9fce915b0be01d0bcbd5e245bf1c4258",
+  "backend": {
+    "declared_commit": "76a9566176c630d5ac810d874e081339bc70b9c5",
+    "declared_tree": "4f6402f002434294860e886556cbb84ea496ccda",
+    "archive_sha256": "a426851463e1413d86edde6524d97fbf04407c6d4e591e7be3ce5ee08cc094a5",
+    "source_manifest_sha256": "3b9dd8fb9e4fc111cd6ccb1079b3a41ca2db836f65baa05a4606ad60dedd6780",
+    "source_files": 360,
+    "provenance_files": 5,
+    "excluded_tracked_paths": 69,
+    "all_source_paths_sizes_sha256_git_blob_sha1_match": true,
+    "post_test_source_unchanged": true,
+    "source_test_passed": 102,
+    "source_test_skipped": 4,
+    "source_test_isolation": "In-memory SQLite; disposable local filesystem storage; mock providers; network denied.",
+    "skipped_scope": "One PostgreSQL EXPLAIN/index plan test and three real concurrent ingestion tests.",
+    "identity_limit": "Owner-supplied archive hash and embedded provenance; not an independent Git checkout, complete tree reconstruction or live deployment inspection."
+  },
+  "telemetry": {
+    "flag": "AW_ENABLE_PATIENT_ANALYTICS",
+    "default": false,
+    "enabled_in_release_helpers_or_ci": false,
+    "live_requests_sent": false,
+    "live_ingestion_verified": false
+  },
+  "flutter": {
+    "version": "3.41.5",
+    "dart": "3.11.3",
+    "format": "303 files; zero changes",
+    "analyzer_issues": 0,
+    "full_suite": "1338 passed; zero failures",
+    "focused_v2": "58 passed (events, reporting and actual rendered UI)",
+    "full_suite_command": "flutter test --no-pub --concurrency=2 --reporter expanded",
+    "focused_command": "flutter test --no-pub test/analytics_v2_events_test.dart test/analytics_v2_reporting_test.dart test/analytics_v2_visual_test.dart --dart-define=ANALYTICS_V2_CAPTURE_DIR=<disposable-output> --reporter expanded",
+    "diff_check": "PASS"
+  },
+  "render_evidence": {
+    "host": "Linux Flutter test renderer; synthetic Django-derived fixtures only",
+    "variants": [
+      "English Light",
+      "English Dark",
+      "Arabic Light",
+      "Arabic Dark"
+    ],
+    "states": [
+      "overview",
+      "selected clinic with complete coverage",
+      "complete zero",
+      "unavailable coverage"
+    ],
+    "accessibility": "Additional narrow Arabic RTL at 160% text scale checked by widget test.",
+    "file_sha256": {
+      "v2_dark_ar_clinic.png": "4fd285bc05281c6bd264deb235bd02077da4deee50c93558aa9c56b8052cc305",
+      "v2_dark_ar_overview.png": "c032fbbf5d1af88bc90d7a78104acb4c07f8ccb1693cd7e23bb47c81d96b7708",
+      "v2_dark_ar_unavailable.png": "1b86fd4212a1d3c91a8b19c3f5327c4f08b6aebb7396f14e59dab483c8851d4a",
+      "v2_dark_ar_zero.png": "7cd3a6f11b8d60994c5f5d8c7c906373c0f79e4434d214753fe7c8ad03444141",
+      "v2_dark_en_clinic.png": "65ab44ae7a421a858a5f375dc29f69957af078db53ced429cf1b9c9b14c703b3",
+      "v2_dark_en_overview.png": "618a90b04518b5f8060c6997bc379662ed6e26268e293adaa46289fc57076c44",
+      "v2_dark_en_unavailable.png": "d654d10b80377b144bd20461a6fdb0b3147884a57c241865b696c4c377b67fb9",
+      "v2_dark_en_zero.png": "c53b89a26b35bd366a8f9c363e79311230d1f7373877d5a8518835e155d4a15c",
+      "v2_light_ar_clinic.png": "e78c0e3748e89697f4be35e78bfffb18678f2e709df8968059e1e987e8f6b80c",
+      "v2_light_ar_overview.png": "755f506e77a8b80f677467a9ddc105f33c74bba4f4522ef0c412100658325a2d",
+      "v2_light_ar_unavailable.png": "e20f7e3be3b4604b4ee1714b71de578873e4493e680a499eac0d506a1a1d7800",
+      "v2_light_ar_zero.png": "bc2ef5bbd6be8e70131da4cab51cd4ea43113a9b4ad976aee636da38c3ca0202",
+      "v2_light_en_clinic.png": "0db7c0d7619bdc5b4622409aab293730851efa8b312f354314caebcde0085022",
+      "v2_light_en_overview.png": "b19bb4c22217e9184a145bb17c6f37b83ebde91a4ed78347c6ba79a0f5759033",
+      "v2_light_en_unavailable.png": "486c76ce2f691b04a560d17dc9517044251eb47fec4d3b1ddd8b752882f5ebfa",
+      "v2_light_en_zero.png": "583d3bbba24b9968fbf33d4d5ca4345908f2cb27189cec211cb9fbec39c9032e"
+    }
+  },
+  "native_ci": {
+    "workflow": ".github/workflows/flutter-visual-regressions.yml",
+    "hosts": [
+      "ubuntu-24.04",
+      "windows-2022"
+    ],
+    "final_commit_evidence": "Draft PR Checks tab and PR description after push; no previous-commit CI substituted."
+  },
+  "not_performed": [
+    "Live authenticated Analytics V2 requests",
+    "Production data changes or event submission",
+    "Physical Android Analytics V2 verification",
+    "PostgreSQL concurrency/index-plan acceptance",
+    "Android/iOS release build",
+    "Backend deployment or migrations",
+    "Application publication",
+    "PR merge"
+  ],
+  "scope_review": {
+    "native_or_signing_changes": false,
+    "backend_source_changes": false,
+    "dependency_changes": false,
+    "generated_code_or_build_artifacts_included": false,
+    "secret_pattern_scan": "PASS; synthetic test-only identities and API responses reviewed.",
+    "changed_file_count": 43
+  }
+}

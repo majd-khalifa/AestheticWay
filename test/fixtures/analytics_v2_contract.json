@@ -1,0 +1,2551 @@
+{
+  "source_commit": "76a9566176c630d5ac810d874e081339bc70b9c5",
+  "scope": "Synthetic offline Django API responses; not production",
+  "query": {
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01"
+  },
+  "list": {
+    "count": 23,
+    "next": "http://testserver/api/v1/admin/analytics/clinics/?date_from=2026-02-28&date_to=2026-03-01&page=2",
+    "previous": null,
+    "results": [
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000001",
+        "name_en": "Synthetic clinic 1",
+        "name_ar": "عيادة اصطناعية 1",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 2,
+          "whatsapp_taps": 1,
+          "call_taps": 1,
+          "maps_taps": 1,
+          "lead_submissions": 1
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 1,
+          "whatsapp_taps": 1,
+          "call_taps": 1,
+          "maps_taps": 1,
+          "lead_submissions": 1
+        },
+        "counts": {
+          "clinic_views": 1,
+          "whatsapp_taps": 1,
+          "call_taps": 1,
+          "maps_taps": 1,
+          "lead_submissions": 1
+        },
+        "recorded_total_events": 6,
+        "total_events": 5,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "complete",
+            "reason": null
+          },
+          "whatsapp_taps": {
+            "state": "complete",
+            "reason": null
+          },
+          "call_taps": {
+            "state": "complete",
+            "reason": null
+          },
+          "maps_taps": {
+            "state": "complete",
+            "reason": null
+          },
+          "lead_submissions": {
+            "state": "complete",
+            "reason": null
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000002",
+        "name_en": "Synthetic clinic 2",
+        "name_ar": "عيادة اصطناعية 2",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "recorded_total_events": 0,
+        "total_events": 0,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "complete",
+            "reason": null
+          },
+          "whatsapp_taps": {
+            "state": "complete",
+            "reason": null
+          },
+          "call_taps": {
+            "state": "complete",
+            "reason": null
+          },
+          "maps_taps": {
+            "state": "complete",
+            "reason": null
+          },
+          "lead_submissions": {
+            "state": "complete",
+            "reason": null
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000003",
+        "name_en": "Synthetic clinic 3",
+        "name_ar": "عيادة اصطناعية 3",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "partial",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000004",
+        "name_en": "Synthetic clinic 4",
+        "name_ar": "عيادة اصطناعية 4",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000005",
+        "name_en": "Synthetic clinic 5",
+        "name_ar": "عيادة اصطناعية 5",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000006",
+        "name_en": "Synthetic clinic 6",
+        "name_ar": "عيادة اصطناعية 6",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000007",
+        "name_en": "Synthetic clinic 7",
+        "name_ar": "عيادة اصطناعية 7",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000008",
+        "name_en": "Synthetic clinic 8",
+        "name_ar": "عيادة اصطناعية 8",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000009",
+        "name_en": "Synthetic clinic 9",
+        "name_ar": "عيادة اصطناعية 9",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-00000000000a",
+        "name_en": "Synthetic clinic 10",
+        "name_ar": "عيادة اصطناعية 10",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-00000000000b",
+        "name_en": "Synthetic clinic 11",
+        "name_ar": "عيادة اصطناعية 11",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-00000000000c",
+        "name_en": "Synthetic clinic 12",
+        "name_ar": "عيادة اصطناعية 12",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-00000000000d",
+        "name_en": "Synthetic clinic 13",
+        "name_ar": "عيادة اصطناعية 13",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-00000000000e",
+        "name_en": "Synthetic clinic 14",
+        "name_ar": "عيادة اصطناعية 14",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-00000000000f",
+        "name_en": "Synthetic clinic 15",
+        "name_ar": "عيادة اصطناعية 15",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000010",
+        "name_en": "Synthetic clinic 16",
+        "name_ar": "عيادة اصطناعية 16",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000011",
+        "name_en": "Synthetic clinic 17",
+        "name_ar": "عيادة اصطناعية 17",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000012",
+        "name_en": "Synthetic clinic 18",
+        "name_ar": "عيادة اصطناعية 18",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000013",
+        "name_en": "Synthetic clinic 19",
+        "name_ar": "عيادة اصطناعية 19",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000014",
+        "name_en": "Synthetic clinic 20",
+        "name_ar": "عيادة اصطناعية 20",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      }
+    ],
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:37.928258+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    }
+  },
+  "page2": {
+    "count": 23,
+    "next": null,
+    "previous": "http://testserver/api/v1/admin/analytics/clinics/?date_from=2026-02-28&date_to=2026-03-01",
+    "results": [
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000015",
+        "name_en": "Synthetic clinic 21",
+        "name_ar": "عيادة اصطناعية 21",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "vip",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000016",
+        "name_en": "Synthetic clinic 22",
+        "name_ar": "عيادة اصطناعية 22",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      },
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000017",
+        "name_en": "Synthetic clinic 23",
+        "name_ar": "عيادة اصطناعية 23",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      }
+    ],
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:37.958143+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    }
+  },
+  "search_ar": {
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "clinic_id": "00000000-0000-0000-0000-000000000017",
+        "name_en": "Synthetic clinic 23",
+        "name_ar": "عيادة اصطناعية 23",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "featured",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      }
+    ],
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:37.981994+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    }
+  },
+  "detail": {
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:38.023783+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "result": {
+      "clinic_id": "00000000-0000-0000-0000-000000000001",
+      "name_en": "Synthetic clinic 1",
+      "name_ar": "عيادة اصطناعية 1",
+      "status": "active",
+      "setup_status": "approved",
+      "subscription_tier": "basic",
+      "is_deleted": false,
+      "recorded_counts": {
+        "clinic_views": 2,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "trusted_recorded_counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "recorded_total_events": 6,
+      "total_events": 5,
+      "unique_authenticated_accounts": null,
+      "coverage": {
+        "clinic_views": {
+          "state": "complete",
+          "reason": null
+        },
+        "whatsapp_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "call_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "maps_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "lead_submissions": {
+          "state": "complete",
+          "reason": null
+        }
+      }
+    },
+    "daily_series": {
+      "count": 2,
+      "page": 1,
+      "page_size": 31,
+      "results": [
+        {
+          "date": "2026-02-28",
+          "recorded_counts": {
+            "clinic_views": 2,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 1,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "counts": {
+            "clinic_views": 1,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "recorded_total_events": 6,
+          "total_events": 5,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        },
+        {
+          "date": "2026-03-01",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "recorded_total_events": 0,
+          "total_events": 0,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        }
+      ]
+    },
+    "comparison": null
+  },
+  "detail_zero": {
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:38.075254+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "result": {
+      "clinic_id": "00000000-0000-0000-0000-000000000002",
+      "name_en": "Synthetic clinic 2",
+      "name_ar": "عيادة اصطناعية 2",
+      "status": "active",
+      "setup_status": "approved",
+      "subscription_tier": "featured",
+      "is_deleted": false,
+      "recorded_counts": {
+        "clinic_views": 0,
+        "whatsapp_taps": 0,
+        "call_taps": 0,
+        "maps_taps": 0,
+        "lead_submissions": 0
+      },
+      "trusted_recorded_counts": {
+        "clinic_views": 0,
+        "whatsapp_taps": 0,
+        "call_taps": 0,
+        "maps_taps": 0,
+        "lead_submissions": 0
+      },
+      "counts": {
+        "clinic_views": 0,
+        "whatsapp_taps": 0,
+        "call_taps": 0,
+        "maps_taps": 0,
+        "lead_submissions": 0
+      },
+      "recorded_total_events": 0,
+      "total_events": 0,
+      "unique_authenticated_accounts": null,
+      "coverage": {
+        "clinic_views": {
+          "state": "complete",
+          "reason": null
+        },
+        "whatsapp_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "call_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "maps_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "lead_submissions": {
+          "state": "complete",
+          "reason": null
+        }
+      }
+    },
+    "daily_series": {
+      "count": 2,
+      "page": 1,
+      "page_size": 31,
+      "results": [
+        {
+          "date": "2026-02-28",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "recorded_total_events": 0,
+          "total_events": 0,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        },
+        {
+          "date": "2026-03-01",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "recorded_total_events": 0,
+          "total_events": 0,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        }
+      ]
+    },
+    "comparison": null
+  },
+  "detail_unavailable": {
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:38.105139+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "result": {
+      "clinic_id": "00000000-0000-0000-0000-000000000004",
+      "name_en": "Synthetic clinic 4",
+      "name_ar": "عيادة اصطناعية 4",
+      "status": "active",
+      "setup_status": "approved",
+      "subscription_tier": "basic",
+      "is_deleted": false,
+      "recorded_counts": {
+        "clinic_views": 0,
+        "whatsapp_taps": 0,
+        "call_taps": 0,
+        "maps_taps": 0,
+        "lead_submissions": 0
+      },
+      "trusted_recorded_counts": {
+        "clinic_views": 0,
+        "whatsapp_taps": 0,
+        "call_taps": 0,
+        "maps_taps": 0,
+        "lead_submissions": 0
+      },
+      "counts": {
+        "clinic_views": null,
+        "whatsapp_taps": null,
+        "call_taps": null,
+        "maps_taps": null,
+        "lead_submissions": null
+      },
+      "recorded_total_events": 0,
+      "total_events": null,
+      "unique_authenticated_accounts": null,
+      "coverage": {
+        "clinic_views": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        },
+        "whatsapp_taps": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        },
+        "call_taps": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        },
+        "maps_taps": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        },
+        "lead_submissions": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "daily_series": {
+      "count": 2,
+      "page": 1,
+      "page_size": 31,
+      "results": [
+        {
+          "date": "2026-02-28",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": null,
+            "whatsapp_taps": null,
+            "call_taps": null,
+            "maps_taps": null,
+            "lead_submissions": null
+          },
+          "recorded_total_events": 0,
+          "total_events": null,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "whatsapp_taps": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "call_taps": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "maps_taps": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "lead_submissions": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            }
+          }
+        },
+        {
+          "date": "2026-03-01",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": null,
+            "whatsapp_taps": null,
+            "call_taps": null,
+            "maps_taps": null,
+            "lead_submissions": null
+          },
+          "recorded_total_events": 0,
+          "total_events": null,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "whatsapp_taps": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "call_taps": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "maps_taps": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            },
+            "lead_submissions": {
+              "state": "unavailable",
+              "reason": "Collection or retained database coverage is not attested for the full window."
+            }
+          }
+        }
+      ]
+    },
+    "comparison": null
+  },
+  "series_page1": {
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:38.481116+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "result": {
+      "clinic_id": "00000000-0000-0000-0000-000000000001",
+      "name_en": "Synthetic clinic 1",
+      "name_ar": "عيادة اصطناعية 1",
+      "status": "active",
+      "setup_status": "approved",
+      "subscription_tier": "basic",
+      "is_deleted": false,
+      "recorded_counts": {
+        "clinic_views": 2,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "trusted_recorded_counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "recorded_total_events": 6,
+      "total_events": 5,
+      "unique_authenticated_accounts": null,
+      "coverage": {
+        "clinic_views": {
+          "state": "complete",
+          "reason": null
+        },
+        "whatsapp_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "call_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "maps_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "lead_submissions": {
+          "state": "complete",
+          "reason": null
+        }
+      }
+    },
+    "daily_series": {
+      "count": 2,
+      "page": 1,
+      "page_size": 1,
+      "results": [
+        {
+          "date": "2026-02-28",
+          "recorded_counts": {
+            "clinic_views": 2,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 1,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "counts": {
+            "clinic_views": 1,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "recorded_total_events": 6,
+          "total_events": 5,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        }
+      ]
+    },
+    "comparison": null
+  },
+  "series_page2": {
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:38.518906+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "result": {
+      "clinic_id": "00000000-0000-0000-0000-000000000001",
+      "name_en": "Synthetic clinic 1",
+      "name_ar": "عيادة اصطناعية 1",
+      "status": "active",
+      "setup_status": "approved",
+      "subscription_tier": "basic",
+      "is_deleted": false,
+      "recorded_counts": {
+        "clinic_views": 2,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "trusted_recorded_counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "recorded_total_events": 6,
+      "total_events": 5,
+      "unique_authenticated_accounts": null,
+      "coverage": {
+        "clinic_views": {
+          "state": "complete",
+          "reason": null
+        },
+        "whatsapp_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "call_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "maps_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "lead_submissions": {
+          "state": "complete",
+          "reason": null
+        }
+      }
+    },
+    "daily_series": {
+      "count": 2,
+      "page": 2,
+      "page_size": 1,
+      "results": [
+        {
+          "date": "2026-03-01",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "recorded_total_events": 0,
+          "total_events": 0,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        }
+      ]
+    },
+    "comparison": null
+  },
+  "comparison": {
+    "schema_version": 2,
+    "timezone": "Asia/Dubai",
+    "date_from": "2026-02-28",
+    "date_to": "2026-03-01",
+    "start_utc": "2026-02-27T20:00:00+00:00",
+    "end_utc_exclusive": "2026-03-01T20:00:00+00:00",
+    "generated_at": "2026-11-04T11:53:38.552046+00:00",
+    "definitions": {
+      "lead_submissions": "Saved consultation Leads; raw lead events are never added.",
+      "trusted_recorded_counts": "Validated v2 records, plus saved consultation Leads present in this database; observed counts do not establish complete collection.",
+      "counts": "Null unless the complete requested interval is operator-attested.",
+      "unique_authenticated_accounts": "Unavailable; no unique-person estimate is made.",
+      "legacy_reports": "Existing unversioned dashboards remain raw recorded summaries."
+    },
+    "platform": {
+      "app_opens": {
+        "recorded_count": 1,
+        "trusted_recorded_count": 1,
+        "count": null,
+        "coverage": {
+          "state": "unavailable",
+          "reason": "Collection or retained database coverage is not attested for the full window."
+        }
+      }
+    },
+    "result": {
+      "clinic_id": "00000000-0000-0000-0000-000000000001",
+      "name_en": "Synthetic clinic 1",
+      "name_ar": "عيادة اصطناعية 1",
+      "status": "active",
+      "setup_status": "approved",
+      "subscription_tier": "basic",
+      "is_deleted": false,
+      "recorded_counts": {
+        "clinic_views": 2,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "trusted_recorded_counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "counts": {
+        "clinic_views": 1,
+        "whatsapp_taps": 1,
+        "call_taps": 1,
+        "maps_taps": 1,
+        "lead_submissions": 1
+      },
+      "recorded_total_events": 6,
+      "total_events": 5,
+      "unique_authenticated_accounts": null,
+      "coverage": {
+        "clinic_views": {
+          "state": "complete",
+          "reason": null
+        },
+        "whatsapp_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "call_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "maps_taps": {
+          "state": "complete",
+          "reason": null
+        },
+        "lead_submissions": {
+          "state": "complete",
+          "reason": null
+        }
+      }
+    },
+    "daily_series": {
+      "count": 2,
+      "page": 1,
+      "page_size": 31,
+      "results": [
+        {
+          "date": "2026-02-28",
+          "recorded_counts": {
+            "clinic_views": 2,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 1,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "counts": {
+            "clinic_views": 1,
+            "whatsapp_taps": 1,
+            "call_taps": 1,
+            "maps_taps": 1,
+            "lead_submissions": 1
+          },
+          "recorded_total_events": 6,
+          "total_events": 5,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        },
+        {
+          "date": "2026-03-01",
+          "recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "trusted_recorded_counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "counts": {
+            "clinic_views": 0,
+            "whatsapp_taps": 0,
+            "call_taps": 0,
+            "maps_taps": 0,
+            "lead_submissions": 0
+          },
+          "recorded_total_events": 0,
+          "total_events": 0,
+          "unique_authenticated_accounts": null,
+          "coverage": {
+            "clinic_views": {
+              "state": "complete",
+              "reason": null
+            },
+            "whatsapp_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "call_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "maps_taps": {
+              "state": "complete",
+              "reason": null
+            },
+            "lead_submissions": {
+              "state": "complete",
+              "reason": null
+            }
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "start_utc": "2026-02-25T20:00:00+00:00",
+      "end_utc_exclusive": "2026-02-27T20:00:00+00:00",
+      "result": {
+        "clinic_id": "00000000-0000-0000-0000-000000000001",
+        "name_en": "Synthetic clinic 1",
+        "name_ar": "عيادة اصطناعية 1",
+        "status": "active",
+        "setup_status": "approved",
+        "subscription_tier": "basic",
+        "is_deleted": false,
+        "recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "trusted_recorded_counts": {
+          "clinic_views": 0,
+          "whatsapp_taps": 0,
+          "call_taps": 0,
+          "maps_taps": 0,
+          "lead_submissions": 0
+        },
+        "counts": {
+          "clinic_views": null,
+          "whatsapp_taps": null,
+          "call_taps": null,
+          "maps_taps": null,
+          "lead_submissions": null
+        },
+        "recorded_total_events": 0,
+        "total_events": null,
+        "unique_authenticated_accounts": null,
+        "coverage": {
+          "clinic_views": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "whatsapp_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "call_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "maps_taps": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          },
+          "lead_submissions": {
+            "state": "unavailable",
+            "reason": "Collection or retained database coverage is not attested for the full window."
+          }
+        }
+      }
+    }
+  },
+  "ingestion": {
+    "request": {
+      "event_id": "11111111-1111-4111-8111-111111111111",
+      "event_type": "clinic_view",
+      "clinic": "00000000-0000-0000-0000-000000000001",
+      "metadata": {
+        "source": "patient_app",
+        "surface": "clinic_profile",
+        "action": "view"
+      }
+    },
+    "created": {
+      "event_id": "11111111-1111-4111-8111-111111111111",
+      "event_type": "clinic_view",
+      "anonymous_id": null,
+      "clinic": "00000000-0000-0000-0000-000000000001",
+      "branch": null,
+      "object_type": null,
+      "object_id": null,
+      "metadata": {
+        "source": "patient_app",
+        "surface": "clinic_profile",
+        "action": "view"
+      },
+      "status": "created",
+      "ingestion_version": 2
+    },
+    "duplicate": {
+      "status": "duplicate",
+      "event_id": "11111111-1111-4111-8111-111111111111",
+      "ingestion_version": 2
+    },
+    "conflict": {
+      "error": {
+        "code": "CONFLICT",
+        "message": "Event with this event_id already exists with a different payload."
+      }
+    }
+  }
+}

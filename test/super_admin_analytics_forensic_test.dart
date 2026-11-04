@@ -336,7 +336,7 @@ void main() {
               localizationsDelegates: GlobalMaterialLocalizations.delegates,
               home: RepaintBoundary(
                 key: boundary,
-                child: const AdminAnalyticsScreen(),
+                child: const AdminAnalyticsScreen(initialTab: 1),
               ),
             ),
           );
@@ -350,8 +350,8 @@ void main() {
           expect(
             find.textContaining(
               arabic
-                  ? 'جمع بيانات النشاط غير مكتمل'
-                  : 'Activity collection is incomplete',
+                  ? 'السجلات القديمة لا تثبت اكتمال تغطية الجمع'
+                  : 'Legacy records do not attest collection coverage',
             ),
             findsOneWidget,
           );
@@ -429,7 +429,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: patientVisualTheme(dark: false),
-          home: const AdminAnalyticsScreen(),
+          home: const AdminAnalyticsScreen(initialTab: 1),
         ),
       );
       await tester.pumpAndSettle();
@@ -525,7 +525,9 @@ void main() {
         phone: '+971500000011',
         role: 'patient',
       );
-      await tester.pumpWidget(const MaterialApp(home: AdminAnalyticsScreen()));
+      await tester.pumpWidget(
+        const MaterialApp(home: AdminAnalyticsScreen(initialTab: 1)),
+      );
       await tester.pumpAndSettle();
       expect(repo.analyticsCalls, 0);
       expect(find.text('Super Admin access is required.'), findsOneWidget);

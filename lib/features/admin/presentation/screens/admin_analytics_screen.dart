@@ -1,3 +1,4 @@
+import '../../../../core/widgets/lazy_tab_stack.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/auth/session_snapshot.dart';
 import '../../../../core/localization/app_locale.dart';
@@ -13,9 +14,11 @@ import 'admin_leads_screen.dart';
 import '../../models/admin_analytics_model.dart';
 import '../../services/admin_portal_service.dart';
 import '../widgets/admin_components.dart';
+import '../widgets/analytics_v2_panel.dart';
 
 class AdminAnalyticsScreen extends StatefulWidget {
-  const AdminAnalyticsScreen({super.key});
+  const AdminAnalyticsScreen({super.key, this.initialTab = 0});
+  final int initialTab;
   @override
   State<AdminAnalyticsScreen> createState() => _AdminAnalyticsScreenState();
 }
@@ -26,11 +29,13 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
   AdminClinicModel? _clinic;
   SessionSnapshot? _clinicSession;
   bool _choosingClinic = false;
+  late bool _legacy;
   @override
   void initState() {
     super.initState();
+    _legacy = widget.initialTab == 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _load();
+      if (mounted && _legacy) _load();
     });
   }
 
@@ -174,8 +179,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
             ),
             AdminNotice(
               message: adminText(
-                'Period-specific views, contact taps and unique users are unavailable for an individual clinic in the current reporting API. The all-time count above is not date-filtered.',
-                'لا توفر واجهة التقارير الحالية المشاهدات ونقرات التواصل والمستخدمين الفريدين لعيادة واحدة خلال الفترة. العدد أعلاه يشمل كامل المدة ولا يتأثر بمرشح التاريخ.',
+                'Period-specific views, contact taps and unique users are unavailable for an individual clinic in the legacy reporting API. Use the Clinic Analytics V2 tab for verified per-clinic reports. The all-time count above is not date-filtered.',
+                'لا توفر واجهة التقارير القديمة المشاهدات ونقرات التواصل والمستخدمين الفريدين لعيادة واحدة خلال الفترة. العدد أعلاه يشمل كامل المدة ولا يتأثر بمرشح التاريخ.',
               ),
             ),
             Wrap(
@@ -219,6 +224,51 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([_service, LocaleService()]),
+    builder: (context, _) {
+      if (!_service.canManage) return _legacyBuild(context);
+      return Scaffold(
+        backgroundColor: AppColors.bg(context),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: SegmentedButton<bool>(
+                segments: [
+                  ButtonSegment(
+                    value: false,
+                    label: Text(
+                      adminText('Clinic Analytics V2', 'تحليلات العيادات V2'),
+                    ),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    label: Text(adminText('Legacy records', 'السجلات القديمة')),
+                  ),
+                ],
+                selected: {_legacy},
+                onSelectionChanged: (selection) {
+                  setState(() => _legacy = selection.single);
+                  if (_legacy) _load();
+                },
+              ),
+            ),
+            Expanded(
+              child: LazyTabStack(
+                index: _legacy ? 1 : 0,
+                builders: [
+                  (_) => const AnalyticsV2Panel(),
+                  (_) => _legacyBuild(context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  Widget _legacyBuild(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([_service, LocaleService()]),
     builder: (context, _) {
       final a = _service.analytics, referrals = _service.referralAnalytics;
@@ -296,8 +346,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
               ),
               AdminNotice(
                 message: adminText(
-                  'Activity collection is incomplete. Recorded zero is not proof of no activity. Contact and Maps counters describe handoff attempts.',
-                  'جمع بيانات النشاط غير مكتمل. الصفر المسجل لا يثبت انعدام النشاط. نقرات التواصل والخرائط محاولات انتقال فقط.',
+                  'Legacy records do not attest collection coverage. Recorded zero is not proof of no activity. Contact and Maps counters describe handoff attempts.',
+                  'السجلات القديمة لا تثبت اكتمال تغطية الجمع. الصفر المسجل لا يثبت انعدام النشاط. نقرات التواصل والخرائط محاولات انتقال فقط.',
                 ),
               ),
               if (_service.analyticsError != null)

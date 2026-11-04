@@ -1,3 +1,4 @@
+import '../../../../core/analytics/patient_analytics.dart';
 import '../../../../core/utils/clinic_location.dart';
 import 'package:flutter/material.dart';
 import 'package:aesthetic_way/core/theme/app_colors.dart';
@@ -10,15 +11,24 @@ import 'package:aesthetic_way/features/clinics/models/clinic_model.dart';
 /// Contact Options Sheet (Bottom Modal) adapting to Dark & Light Themes
 class ContactOptionsSheet extends StatelessWidget {
   final ClinicModel clinic;
+  final PatientSurface surface;
 
-  const ContactOptionsSheet({super.key, required this.clinic});
+  const ContactOptionsSheet({
+    super.key,
+    required this.clinic,
+    this.surface = PatientSurface.clinicProfile,
+  });
 
-  static Future<void> show(BuildContext context, ClinicModel clinic) {
+  static Future<void> show(
+    BuildContext context,
+    ClinicModel clinic, {
+    PatientSurface surface = PatientSurface.clinicProfile,
+  }) {
     return showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => ContactOptionsSheet(clinic: clinic),
+      builder: (ctx) => ContactOptionsSheet(clinic: clinic, surface: surface),
     );
   }
 
@@ -89,7 +99,13 @@ class ContactOptionsSheet extends StatelessWidget {
                       : AppColors.lightTextPrimary,
                   onTap: () {
                     Navigator.pop(context);
-                    ContactLauncher.makePhoneCall(clinic.effectivePhone);
+                    ContactLauncher.makePhoneCall(
+                      clinic.effectivePhone,
+                      attribution: PatientAttribution(
+                        clinic.id,
+                        surface: surface,
+                      ),
+                    );
                   },
                 ),
               const SizedBox(height: 10),
@@ -106,7 +122,13 @@ class ContactOptionsSheet extends StatelessWidget {
                   iconColor: const Color(0xFF10B981),
                   onTap: () {
                     Navigator.pop(context);
-                    ContactLauncher.openWhatsApp(phoneNumber: clinic.whatsapp);
+                    ContactLauncher.openWhatsApp(
+                      phoneNumber: clinic.whatsapp,
+                      attribution: PatientAttribution(
+                        clinic.id,
+                        surface: surface,
+                      ),
+                    );
                   },
                 ),
               const SizedBox(height: 10),
@@ -127,6 +149,13 @@ class ContactOptionsSheet extends StatelessWidget {
                       : AppColors.lightTextPrimary,
                   onTap: () {
                     Navigator.pop(context);
+                    PatientAnalytics.instance.record(
+                      PatientEventType.mapsTap,
+                      attribution: PatientAttribution(
+                        clinic.id,
+                        surface: surface,
+                      ),
+                    );
                     MapsLauncher.openVerifiedLocation(
                       latitude: clinic.latitude,
                       longitude: clinic.longitude,

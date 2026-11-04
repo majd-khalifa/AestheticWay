@@ -1,3 +1,4 @@
+import '../../../../core/analytics/patient_analytics.dart';
 import '../../../locations/presentation/uae_location_picker.dart';
 import 'package:aesthetic_way/core/theme/patient_design.dart';
 import '../widgets/patient_clinic_card.dart';
@@ -533,8 +534,11 @@ class _ClinicsListScreenState extends State<ClinicsListScreen> {
                           page: ClinicProfileScreen(clinic: clinic),
                         ),
                       ),
-                      onContact: () =>
-                          ContactOptionsSheet.show(context, clinic),
+                      onContact: () => ContactOptionsSheet.show(
+                        context,
+                        clinic,
+                        surface: PatientSurface.clinicList,
+                      ),
                       onRequestAction: (action) async {
                         final auth = await action.wait(
                           GuestAuthGuard.requireAuth(
