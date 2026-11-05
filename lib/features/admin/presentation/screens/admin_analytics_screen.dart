@@ -15,6 +15,7 @@ import '../../models/admin_analytics_model.dart';
 import '../../services/admin_portal_service.dart';
 import '../widgets/admin_components.dart';
 import '../widgets/analytics_v2_panel.dart';
+import '../widgets/analytics_presentation.dart';
 
 class AdminAnalyticsScreen extends StatefulWidget {
   const AdminAnalyticsScreen({super.key, this.initialTab = 0});
@@ -113,23 +114,19 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
     }
   }
 
-  AdminMetricCard _metric(
+  AnalyticsMetricTile _metric(
     AdminAnalyticsModel a,
     String key,
     String label,
-    IconData icon,
-  ) => AdminMetricCard(
+    IconData _,
+  ) => AnalyticsMetricTile(
     label: label,
     value: a.recordedCount(key) == null
         ? '—'
         : adminNumber(a.recordedCount(key)!),
-    icon: icon,
     caption: key == 'lead_submissions'
         ? adminText('Saved Lead records', 'سجلات طلبات محفوظة')
-        : adminText(
-            'Recorded events · coverage unverified',
-            'أحداث مسجلة · التغطية غير متحققة',
-          ),
+        : adminText('Recorded · unverified', 'مسجل · غير متحقق'),
   );
 
   Widget _clinicRecords() {
@@ -141,8 +138,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
         AdminSectionTitle(
           adminText('Inspect any clinic', 'فحص أي عيادة'),
           subtitle: adminText(
-            'Search non-archived clinic records, independently of the top ten.',
-            'ابحث في سجلات العيادات غير المؤرشفة، بعيداً عن قائمة أبرز عشر عيادات.',
+            'Operational records · non-archived clinics',
+            'السجلات التشغيلية · العيادات غير المؤرشفة',
           ),
         ),
         OutlinedButton.icon(
@@ -179,8 +176,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
             ),
             AdminNotice(
               message: adminText(
-                'Period-specific views, contact taps and unique users are unavailable for an individual clinic in the legacy reporting API. Use the Clinic Analytics V2 tab for verified per-clinic reports. The all-time count above is not date-filtered.',
-                'لا توفر واجهة التقارير القديمة المشاهدات ونقرات التواصل والمستخدمين الفريدين لعيادة واحدة خلال الفترة. العدد أعلاه يشمل كامل المدة ولا يتأثر بمرشح التاريخ.',
+                'Period-specific views and contact taps are in V2. This all-time count is not date-filtered.',
+                'مشاهدات الفترة ونقرات التواصل في V2. العدد أعلاه يشمل كامل المدة ولا يتأثر بمرشح التاريخ.',
               ),
             ),
             Wrap(
@@ -234,12 +231,22 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: SegmentedButton<bool>(
+                style: ButtonStyle(
+                  minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
+                  padding: const WidgetStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                  ),
+                  textStyle: WidgetStatePropertyAll(
+                    Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 segments: [
                   ButtonSegment(
                     value: false,
-                    label: Text(
-                      adminText('Clinic Analytics V2', 'تحليلات العيادات V2'),
-                    ),
+                    label: Text(adminText('V2 reports', 'تقارير V2')),
                   ),
                   ButtonSegment(
                     value: true,
@@ -288,68 +295,46 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
         backgroundColor: AppColors.bg(context),
         body: RefreshIndicator(
           onRefresh: () => _load(refresh: true),
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              16,
-              12,
-              16,
-              40 + MediaQuery.paddingOf(context).bottom,
-            ),
+          child: AnalyticsPage(
             children: [
-              AdminSectionTitle(
-                adminText('Platform activity records', 'سجلات نشاط المنصة'),
-                subtitle: adminText(
-                  'Stored events and saved consultations, not unique people.',
-                  'الأحداث المحفوظة وطلبات الاستشارة، وليست أعداد أشخاص فريدين.',
+              AnalyticsPeriod(
+                title: adminText(
+                  'Platform activity records',
+                  'سجلات نشاط المنصة',
                 ),
+                period: '${a.dateFrom ?? '—'} — ${a.dateTo ?? '—'}',
+                onChoose: _service.analyticsLoading ? null : _chooseDates,
+                busy: _service.analyticsLoading,
               ),
-              if (a.dateFrom != null && a.dateTo != null)
-                Text(
-                  '${a.dateFrom} — ${a.dateTo}',
-                  textDirection: TextDirection.ltr,
+              if (_from != null || _to != null)
+                TextButton(
+                  onPressed: _service.analyticsLoading
+                      ? null
+                      : () {
+                          setState(() {
+                            _from = null;
+                            _to = null;
+                          });
+                          _load(refresh: true);
+                        },
+                  child: Text(adminText('Default period', 'الفترة الافتراضية')),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  adminText(
+                    'Legacy records do not attest collection coverage.',
+                    'السجلات القديمة لا تثبت اكتمال تغطية الجمع.',
+                  ),
                   style: TextStyle(
                     color: AppColors.mutedText(context),
                     fontSize: 12,
+                    height: 1.5,
                   ),
                 ),
+              ),
+              AnalyticsHelp(),
               if (_service.analyticsLoading) const LinearProgressIndicator(),
-              Wrap(
-                spacing: 8,
-                children: [
-                  TextButton.icon(
-                    onPressed: _service.analyticsLoading ? null : _chooseDates,
-                    icon: const Icon(Icons.date_range),
-                    label: Text(
-                      adminText(
-                        'Reporting dates · UTC+4',
-                        'فترة التقرير · UTC+4',
-                      ),
-                    ),
-                  ),
-                  if (_from != null || _to != null)
-                    TextButton(
-                      onPressed: _service.analyticsLoading
-                          ? null
-                          : () {
-                              setState(() {
-                                _from = null;
-                                _to = null;
-                              });
-                              _load(refresh: true);
-                            },
-                      child: Text(
-                        adminText('Default period', 'الفترة الافتراضية'),
-                      ),
-                    ),
-                ],
-              ),
-              AdminNotice(
-                message: adminText(
-                  'Legacy records do not attest collection coverage. Recorded zero is not proof of no activity. Contact and Maps counters describe handoff attempts.',
-                  'السجلات القديمة لا تثبت اكتمال تغطية الجمع. الصفر المسجل لا يثبت انعدام النشاط. نقرات التواصل والخرائط محاولات انتقال فقط.',
-                ),
-              ),
               if (_service.analyticsError != null)
                 AdminNotice(
                   message: _service.analyticsError!,
@@ -364,7 +349,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                   !_service.analyticsLoading &&
                   _service.analyticsError == null) ...[
                 const SizedBox(height: 12),
-                AdminMetricGrid(
+                AnalyticsKpiGrid(
                   children: [
                     _metric(
                       a,
@@ -410,95 +395,106 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                     ),
                   ],
                 ),
-                AdminSectionTitle(
-                  adminText(
+              ],
+              _clinicRecords(),
+              if (_service.analyticsLoaded &&
+                  !_service.analyticsLoading &&
+                  _service.analyticsError == null) ...[
+                const SizedBox(height: 12),
+                AnalyticsDisclosure(
+                  title: adminText(
                     'Recorded daily event totals',
                     'إجمالي الأحداث اليومية المسجلة',
                   ),
                   subtitle: adminText(
-                    'Only recorded dates returned by the server; missing days are not inferred as zero.',
-                    'تعرض الأيام التي أرجعها الخادم فقط، ولا تُفترض بقية الأيام صفراً.',
+                    'Server-returned dates only',
+                    'التواريخ التي أعادها الخادم فقط',
                   ),
-                ),
-                if (a.dailyTrends.isEmpty)
-                  Text(
-                    adminText(
-                      'Daily series unavailable or empty.',
-                      'السلسلة اليومية غير متاحة أو فارغة.',
+                  children: [
+                    if (a.dailyTrends.isEmpty)
+                      Text(
+                        adminText(
+                          'Daily series unavailable or empty.',
+                          'السلسلة اليومية غير متاحة أو فارغة.',
+                        ),
+                      ),
+                    BoundedCatalogPreview<AdminDailyEventCount>(
+                      items: () => a.dailyTrends,
+                      listenable: _service,
+                      itemBuilder: (context, day) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(day.date, textDirection: TextDirection.ltr),
+                        trailing: Text(
+                          day.count == null ? '—' : adminNumber(day.count!),
+                        ),
+                      ),
                     ),
-                  ),
-                BoundedCatalogPreview<AdminDailyEventCount>(
-                  items: () => a.dailyTrends,
-                  listenable: _service,
-                  itemBuilder: (context, day) => ListTile(
-                    title: Text(day.date, textDirection: TextDirection.ltr),
-                    trailing: Text(
-                      day.count == null ? '—' : adminNumber(day.count!),
-                    ),
-                  ),
+                  ],
                 ),
-                AdminSectionTitle(
-                  adminText(
+                const SizedBox(height: 12),
+                AnalyticsDisclosure(
+                  title: adminText(
                     'Top clinics by tracked events',
                     'أبرز العيادات حسب الأحداث المسجلة',
                   ),
                   subtitle: adminText(
-                    'Up to 10 clinics returned for this reporting period.',
-                    'حتى 10 عيادات حسب بيانات الفترة المحددة.',
+                    'Up to 10 clinics for this period',
+                    'حتى 10 عيادات لهذه الفترة',
                   ),
-                ),
-                if (_service.analyticsTable.isEmpty)
-                  Text(
-                    adminText(
-                      'No clinic events in this period.',
-                      'لا توجد أحداث للعيادات خلال هذه الفترة.',
-                    ),
-                    style: TextStyle(color: AppColors.mutedText(context)),
-                  ),
-                BoundedCatalogPreview<AdminClinicEngagementEntry>(
-                  items: () => _service.analyticsTable,
-                  listenable: _service,
-                  itemBuilder: (context, item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: LuxuryCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            LocaleService().isArabic
-                                ? item.clinicNameAr
-                                : item.clinicNameEn,
-                            style: TextStyle(
-                              color: AppColors.text(context),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              height: 1.5,
-                            ),
-                          ),
-                          if (item.hasTier)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: TierBadge(
-                                tier: item.tier,
-                                showBasic: true,
+                  children: [
+                    if (_service.analyticsTable.isEmpty)
+                      Text(
+                        adminText(
+                          'No clinic events in this period.',
+                          'لا توجد أحداث للعيادات خلال هذه الفترة.',
+                        ),
+                        style: TextStyle(color: AppColors.mutedText(context)),
+                      ),
+                    BoundedCatalogPreview<AdminClinicEngagementEntry>(
+                      items: () => _service.analyticsTable,
+                      listenable: _service,
+                      itemBuilder: (context, item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: LuxuryCard(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                LocaleService().isArabic
+                                    ? item.clinicNameAr
+                                    : item.clinicNameEn,
+                                style: TextStyle(
+                                  color: AppColors.text(context),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.5,
+                                ),
                               ),
-                            ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${item.hasEventCount ? adminNumber(item.eventsCount) : '—'} ${LocaleService().tr('admin_events_count')}',
-                            style: TextStyle(
-                              color: AppColors.goldText(context),
-                              fontSize: 13,
-                            ),
+                              if (item.hasTier)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: TierBadge(
+                                    tier: item.tier,
+                                    showBasic: true,
+                                  ),
+                                ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${item.hasEventCount ? adminNumber(item.eventsCount) : '—'} ${LocaleService().tr('admin_events_count')}',
+                                style: TextStyle(
+                                  color: AppColors.goldText(context),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
-              _clinicRecords(),
               AdminSectionTitle(
                 LocaleService().tr('referral_title'),
                 subtitle: adminText(
@@ -514,17 +510,15 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                   onRetry: () => _service.loadReferralAnalytics(refresh: true),
                 ),
               if (referrals != null)
-                AdminMetricGrid(
+                AnalyticsKpiGrid(
                   children: [
-                    AdminMetricCard(
+                    AnalyticsMetricTile(
                       label: adminText('Successful Invites', 'الدعوات الناجحة'),
                       value: adminNumber(referrals.successfulInvites),
-                      icon: Icons.person_add_alt_outlined,
                     ),
-                    AdminMetricCard(
+                    AnalyticsMetricTile(
                       label: adminText('Points Awarded', 'النقاط الممنوحة'),
                       value: adminNumber(referrals.pointsAwarded),
-                      icon: Icons.auto_awesome_outlined,
                     ),
                   ],
                 ),
