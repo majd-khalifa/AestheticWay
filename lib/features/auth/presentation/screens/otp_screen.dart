@@ -226,9 +226,11 @@ class _OtpScreenState extends State<OtpScreen> {
       _startCountdown();
       showAppSnackBar(
         context,
-        loc.isArabic
-            ? 'تم إرسال كود جديد إلى هاتفك'
-            : 'A new code has been sent',
+        loc.tr(
+          widget.purpose == OtpPurpose.passwordReset
+              ? 'otp_reset_requested'
+              : 'otp_email_resend',
+        ),
         type: AppSnackBarType.info,
       );
     } on ApiException catch (e) {
@@ -310,27 +312,19 @@ class _OtpScreenState extends State<OtpScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Subtitle & Target Phone
+                  // The phone stays an API identifier, never an email destination.
                   Center(
                     child: Text(
-                      loc.tr('otp_sub'),
+                      loc.tr(
+                        widget.purpose == OtpPurpose.passwordReset
+                            ? 'otp_reset_sub'
+                            : 'otp_sub',
+                      ),
                       style: AppTypography.bodyMedium.copyWith(
                         color: AppColors.mutedText(context),
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      widget.targetContact,
-                      style: AppTypography.cardTitle.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.goldText(context),
-                        letterSpacing: 1.1,
-                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -348,107 +342,65 @@ class _OtpScreenState extends State<OtpScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(6, (index) {
-                              return SizedBox(
-                                width: 44,
-                                height: 56,
-                                child: TextFormField(
-                                  controller: _controllers[index],
-                                  focusNode: _focusNodes[index],
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  maxLength: 1,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800,
-                                    color: isDark
-                                        ? AppColors.silverPrimary
-                                        : AppColors.lightTextPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    counterText: '',
-                                    filled: true,
-                                    fillColor: isDark
-                                        ? AppColors.backgroundDeep
-                                        : AppColors.lightBackground,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 10,
+                              return Flexible(
+                                child: SizedBox(
+                                  width: 44,
+                                  height: 56,
+                                  child: TextFormField(
+                                    controller: _controllers[index],
+                                    focusNode: _focusNodes[index],
+                                    keyboardType: TextInputType.number,
+                                    textAlign: TextAlign.center,
+                                    maxLength: 1,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark
+                                          ? AppColors.silverPrimary
+                                          : AppColors.lightTextPrimary,
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(
-                                        color: AppColors.border(context),
-                                        width: 1.0,
+                                    decoration: InputDecoration(
+                                      counterText: '',
+                                      filled: true,
+                                      fillColor: isDark
+                                          ? AppColors.backgroundDeep
+                                          : AppColors.lightBackground,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            vertical: 10,
+                                          ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppColors.border(context),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: const BorderSide(
+                                          color: AppColors.accentChampagne,
+                                          width: 1.6,
+                                        ),
                                       ),
                                     ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: const BorderSide(
-                                        color: AppColors.accentChampagne,
-                                        width: 1.6,
-                                      ),
-                                    ),
+                                    onChanged: (val) {
+                                      if (val.isNotEmpty && index < 5) {
+                                        _focusNodes[index + 1].requestFocus();
+                                      } else if (val.isEmpty && index > 0) {
+                                        _focusNodes[index - 1].requestFocus();
+                                      }
+                                      // Auto-trigger verify when last box is filled
+                                      if (val.isNotEmpty &&
+                                          index == 5 &&
+                                          _otpCode.length == 6) {
+                                        _verifyOtp();
+                                      }
+                                    },
                                   ),
-                                  onChanged: (val) {
-                                    if (val.isNotEmpty && index < 5) {
-                                      _focusNodes[index + 1].requestFocus();
-                                    } else if (val.isEmpty && index > 0) {
-                                      _focusNodes[index - 1].requestFocus();
-                                    }
-                                    // Auto-trigger verify when last box is filled
-                                    if (val.isNotEmpty &&
-                                        index == 5 &&
-                                        _otpCode.length == 6) {
-                                      _verifyOtp();
-                                    }
-                                  },
                                 ),
                               );
                             }),
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-
-                        // Developer Helper Notice
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentChampagne.withValues(
-                              alpha: 0.12,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: AppColors.accentChampagne.withValues(
-                                alpha: 0.3,
-                              ),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.terminal_rounded,
-                                size: 16,
-                                color: AppColors.accentChampagne,
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  loc.isArabic
-                                      ? 'تلميح: كود التحقق مطبوع في Terminal السيرفر (SMS_PROVIDER=console)'
-                                      : 'Dev Hint: OTP code is printed in the Django server terminal',
-                                  style: AppTypography.caption.copyWith(
-                                    color: AppColors.goldText(context),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ],

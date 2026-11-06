@@ -44,9 +44,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final normalizedPhone = AuthRepository.normalizePhone(input);
 
     try {
-      final response = await AuthRepository().forgotPassword(
-        phone: normalizedPhone,
-      );
+      await AuthRepository().forgotPassword(phone: normalizedPhone);
 
       if (!mounted) return;
       setState(() {
@@ -55,10 +53,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       showAppSnackBar(
         context,
-        response['message']?.toString() ??
-            (loc.isArabic
-                ? 'تم إرسال كود التحقق إلى هاتفك'
-                : 'Verification code sent to your phone'),
+        loc.tr('otp_reset_requested'),
         type: AppSnackBarType.info,
       );
 
@@ -132,9 +127,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     // Header Info
                     Center(
                       child: Text(
-                        loc.isArabic
-                            ? 'أدخل رقم هاتفك المسجل وسنرسل لك رمز تحقق (OTP) عبر رسالة نصية أو واتساب لإعادة تعيين كلمة المرور.'
-                            : 'Enter your registered phone number to receive a verification code (OTP) via SMS or WhatsApp to reset your password.',
+                        loc.tr('forgot_sub'),
                         style: AppTypography.bodyMedium.copyWith(
                           color: AppColors.mutedText(context),
                           fontSize: 13,

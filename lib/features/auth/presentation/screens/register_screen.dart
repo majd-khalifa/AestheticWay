@@ -74,7 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _passwordController.text;
 
     try {
-      final response = await (widget.repository ?? AuthRepository()).register(
+      await (widget.repository ?? AuthRepository()).register(
         fullName: fullName,
         phone: phone,
         password: password,
@@ -88,11 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       showAppSnackBar(
         context,
-        response.message.isNotEmpty
-            ? response.message
-            : (loc.isArabic
-                  ? 'تم إنشاء الحساب، يرجى تأكيد رمز التحقق'
-                  : 'Account created, please verify OTP'),
+        loc.tr('registration_code_requested'),
         type: AppSnackBarType.success,
       );
 

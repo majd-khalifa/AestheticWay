@@ -173,12 +173,38 @@ class LocaleService extends ChangeNotifier {
 
     'otp_title': {'ar': 'رمز التحقق (OTP)', 'en': 'Verification Code'},
     'otp_sub': {
-      'ar': 'أرسلنا رمز التحقق المكون من 4 أرقام إلى',
-      'en': 'We sent a 4-digit verification code to',
+      'ar':
+          'تحقق من بريدك الإلكتروني المسجل للحصول على رمز التحقق المكون من 6 أرقام. راجع البريد الوارد والبريد غير المرغوب فيه.',
+      'en':
+          'Check your registered email for the 6-digit verification code. Look in your inbox and spam folder.',
+    },
+    'otp_reset_sub': {
+      'ar':
+          'إذا وُجد حساب مطابق، فتحقق من بريده الإلكتروني المسجل للحصول على رمز الاستعادة المكون من 6 أرقام. راجع البريد الوارد والبريد غير المرغوب فيه.',
+      'en':
+          'If a matching account exists, check its registered email for the 6-digit recovery code. Look in your inbox and spam folder.',
+    },
+    'otp_email_resend': {
+      'ar':
+          'قُبل طلب رمز جديد إلى بريدك الإلكتروني المسجل. راجع البريد الوارد والبريد غير المرغوب فيه؛ لم يتم تأكيد وصول الرسالة.',
+      'en':
+          'A new code was requested for your registered email. Check your inbox and spam folder; delivery is not confirmed.',
+    },
+    'otp_reset_requested': {
+      'ar':
+          'إذا وُجد حساب مطابق، فتحقق من بريده الإلكتروني المسجل للحصول على رمز الاستعادة. لم يتم تأكيد وصول الرسالة.',
+      'en':
+          'If a matching account exists, check its registered email for the recovery code. Delivery is not confirmed.',
+    },
+    'registration_code_requested': {
+      'ar':
+          'تم إنشاء الحساب. تحقق من بريدك الإلكتروني المسجل للحصول على رمز التحقق.',
+      'en':
+          'Account created. Check your registered email for the verification code.',
     },
     'otp_box_hint': {
-      'ar': 'أدخل الرمز المكون من 4 خانات',
-      'en': 'Enter the 4-digit code',
+      'ar': 'أدخل الرمز المكون من 6 خانات',
+      'en': 'Enter the 6-digit code',
     },
     'resend_code': {'ar': 'إعادة إرسال الرمز', 'en': 'Resend Code'},
     'resend_in': {'ar': 'إعادة الإرسال خلال', 'en': 'Resend in'},
@@ -186,15 +212,12 @@ class LocaleService extends ChangeNotifier {
       'ar': 'تأكيد الرمز والمتابعة',
       'en': 'Verify & Continue',
     },
-    'otp_demo_note': {
-      'ar': 'للتجربة السريعة: رمز التحقق هو 1234',
-      'en': 'Demo note: Test OTP code is 1234',
-    },
-
     'forgot_title': {'ar': 'استعادة كلمة المرور', 'en': 'Forgot Password'},
     'forgot_sub': {
-      'ar': 'أدخل رقم هاتفك أو بريدك المسجل لإرسال رمز التحقق والاستعادة',
-      'en': 'Enter your registered phone or email to receive a recovery code',
+      'ar':
+          'أدخل رقم هاتفك المسجل. إذا وُجد حساب مطابق، فسيُرسل رمز الاستعادة إلى بريده الإلكتروني المسجل، وليس إلى الهاتف.',
+      'en':
+          'Enter your registered phone number. If a matching account exists, its recovery code is sent to the registered email, not the phone.',
     },
     'send_reset_code': {
       'ar': 'إرسال رمز الاستعادة',
