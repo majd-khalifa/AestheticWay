@@ -1,2 +1,3 @@
 "NSCameraUsageDescription" = "Take a photo you choose to upload to your clinic profile or catalog.";
 "NSPhotoLibraryUsageDescription" = "Select photos or videos you choose to upload to your clinic profile or catalog.";
+"NSLocationWhenInUseUsageDescription" = "With your permission, use your location while the app is open to find nearby clinics. Depending on your iOS settings, approximate or precise coordinates are sent to Aesthetic Way. You can select an emirate and city instead.";

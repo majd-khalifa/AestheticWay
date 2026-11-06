@@ -395,32 +395,35 @@ void main() {
       },
     );
 
-    testWidgets('OtpScreen renders 6 digit boxes, countdown, and dev hint', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'OtpScreen renders six digits and email delivery instructions',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final loc = LocaleService();
-      loc.setLanguage(AppLanguage.arabic);
+        final loc = LocaleService();
+        loc.setLanguage(AppLanguage.arabic);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: OtpScreen(
-            purpose: OtpPurpose.registration,
-            targetContact: '+971 50 123 4567',
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: OtpScreen(
+              purpose: OtpPurpose.registration,
+              targetContact: '+971 50 123 4567',
+            ),
           ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 300));
+        );
+        await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('رمز التحقق (OTP)'), findsOneWidget);
-      expect(find.text('+971 50 123 4567'), findsOneWidget);
-      expect(find.text('تأكيد الرمز والمتابعة'), findsOneWidget);
-      expect(find.byType(TextField), findsNWidgets(6));
-      expect(find.textContaining('Terminal'), findsOneWidget);
-    });
+        expect(find.text('رمز التحقق (OTP)'), findsOneWidget);
+        expect(find.text('+971 50 123 4567'), findsNothing);
+        expect(find.text(loc.tr('otp_sub')), findsOneWidget);
+        expect(find.text('تأكيد الرمز والمتابعة'), findsOneWidget);
+        expect(find.byType(TextField), findsNWidgets(6));
+        expect(find.textContaining('Terminal'), findsNothing);
+        expect(find.textContaining('SMS_PROVIDER'), findsNothing);
+      },
+    );
 
     testWidgets('ForgotPasswordScreen and ResetPasswordScreen render cleanly', (
       WidgetTester tester,
